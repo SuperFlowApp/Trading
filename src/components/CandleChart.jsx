@@ -37,7 +37,7 @@ const CandleChart = ({ selectedPair }) => {
     async function fetchCandles() {
       try {
         const res = await fetch( 
-          `https://app-flax-xi.vercel.app/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
+          `https://trading-eta-ten.vercel.app/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
         );
         const data = await res.json();
 
