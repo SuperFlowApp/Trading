@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   React.useEffect(() => {
     if (!token) return;
     // Try to fetch balance or a protected endpoint to check token validity
-    fetch("http://localhost:3001/api/balance", {
+    fetch("https://fastify-serverless-function-rimj.onrender.com/api/balance", {
       method: "GET",
       headers: {
         accept: "application/json",
@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
   // Login function: fetch token from server
   const login = async (username, password) => {
     const res = await fetch(
-      `http://localhost:3001/api/token?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
+      `https://fastify-serverless-function-rimj.onrender.com/api/token?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
       { method: "POST" }
     );
     const data = await res.json();
@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
       // Fetch and print balance after login
       try {
         const balanceRes = await fetch(
-          "http://localhost:3001/api/balance",
+          "https://fastify-serverless-function-rimj.onrender.com/api/balance",
           {
             method: "GET",
             headers: {
@@ -69,7 +69,7 @@ export function AuthProvider({ children }) {
   const signup = async (username, password) => {
     try {
       const res = await fetch(
-        `http://localhost:3001/api/create_user?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
+        `https://fastify-serverless-function-rimj.onrender.com/api/create_user?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
         { method: "POST" }
       );
       let data;

@@ -21,7 +21,7 @@ function LeverageButton() {
 
 
     try {
-      const response = await fetch('http://localhost:3001/api/leverage', {
+      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/leverage', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -139,7 +139,7 @@ function LimitOrderForm({ selectedPair }) {
     };
 
     try {
-      const response = await fetch('http://localhost:3001/api/order', {
+      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
         method: 'POST',
         headers: {
           accept: 'application/json',
@@ -176,7 +176,7 @@ function LimitOrderForm({ selectedPair }) {
 
     const fetchBalance = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/balance', {
+        const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/balance', {
           method: 'GET',
           headers: {
             accept: 'application/json',

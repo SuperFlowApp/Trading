@@ -43,7 +43,7 @@ const Positions = () => {
 
     setLoading(true);
     setError("");
-    fetch("http://localhost:3001/api/positions?limit=20", {
+    fetch("https://fastify-serverless-function-rimj.onrender.com/api/positions?limit=20", {
       method: "GET",
       headers: {
         accept: "application/json",

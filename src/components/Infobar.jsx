@@ -12,7 +12,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
   useEffect(() => {
     async function fetchPairs() {
       try {
-        const res = await fetch('https://trading-eta-ten.vercel.app/api/markets'); // Updated URL
+        const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets'); // Updated URL
         const data = await res.json();
         const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
         setMarkets(filtered);
@@ -22,7 +22,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
         await Promise.all(
           filtered.map(async (mkt) => {
             try {
-              const tRes = await fetch(`http://localhost:3001/api/ticker?symbol=${mkt.symbol}`); // Updated URL
+              const tRes = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${mkt.symbol}`); // Updated URL
               if (!tRes.ok) return;
               const tData = await tRes.json();
               tickersObj[mkt.symbol] = tData;
@@ -48,7 +48,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
     if (!selectedPair) return;
     async function fetchTicker() {
       try {
-        const res = await fetch(`http://localhost:3001/api/ticker?symbol=${selectedPair}`);
+        const res = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${selectedPair}`);
         const data = await res.json();
         setTicker(data);
       } catch (err) {

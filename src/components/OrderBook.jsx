@@ -21,7 +21,7 @@ const useGroupedOrderBook = (symbol = 'BTCUSDT', limit = 10, groupSize = 1) => {
   useEffect(() => {
     const fetchOrderbook = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/orderbooks?symbol=${symbol}&limit=${limit}`);
+        const res = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol}&limit=${limit}`);
         const data = await res.json();
 
         const parsedBids = data.bids.map((entry) => ({

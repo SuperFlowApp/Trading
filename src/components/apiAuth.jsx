@@ -34,7 +34,7 @@ export function createSignature({ nonce, method, endpoint, secret }) {
 
 export async function loginUserApi(username, password) {
   const res = await fetch(
-    `http://localhost:3001/api/token?username=${username}&password=${password}`,
+    `https://fastify-serverless-function-rimj.onrender.com/api/token?username=${username}&password=${password}`,
     { method: "POST" }
   );
   return await res.json();
@@ -42,7 +42,7 @@ export async function loginUserApi(username, password) {
 
 export async function signupUserApi(username, password) {
   const res = await fetch(
-    `http://localhost:3001/api/create_user?username=${username}&password=${password}`,
+    `https://fastify-serverless-function-rimj.onrender.com/api/create_user?username=${username}&password=${password}`,
     { method: "POST" }
   );
   const text = await res.text();
@@ -60,7 +60,7 @@ export async function changePasswordApi({ accessToken, apiKey, oldPassword, newP
   const payload = nonce + method + endpoint;
   const signature = CryptoJS.HmacSHA256(payload, oldPassword).toString(CryptoJS.enc.Hex);
 
-  const res = await fetch("http://localhost:3001/api/change_password", {
+  const res = await fetch("https://fastify-serverless-function-rimj.onrender.com/api/change_password", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -83,7 +83,7 @@ export async function changePasswordApi({ accessToken, apiKey, oldPassword, newP
 }
 
 export async function fetchApiKeyApi({ token, nonce, signature }) {
-  const res = await fetch(`http://localhost:3001/api/create_api_key?token=${token}`, {
+  const res = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/create_api_key?token=${token}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -96,7 +96,7 @@ export async function fetchApiKeyApi({ token, nonce, signature }) {
 }
 
 export async function fetchAccountInfoApi({ apiKey, nonce, signature }) {
-  const res = await fetch("http://localhost:3001/api/account-information", {
+  const res = await fetch("https://fastify-serverless-function-rimj.onrender.com/api/account-information", {
     method: "GET",
     headers: {
       "API-KEY": apiKey,
@@ -109,7 +109,7 @@ export async function fetchAccountInfoApi({ apiKey, nonce, signature }) {
 }
 
 export async function fetchBalanceApi({ apiKey, nonce, signature }) {
-  const res = await fetch("http://localhost:3001/api/balance", {
+  const res = await fetch("https://fastify-serverless-function-rimj.onrender.com/api/balance", {
     method: "GET",
     headers: {
       "API-KEY": apiKey,

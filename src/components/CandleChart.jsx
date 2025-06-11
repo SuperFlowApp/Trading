@@ -37,7 +37,7 @@ const CandleChart = ({ selectedPair }) => {
     async function fetchCandles() {
       try {
         const res = await fetch( 
-          `https://trading-eta-ten.vercel.app/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
+          `https://fastify-serverless-function-rimj.onrender.com/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
         );
         const data = await res.json();
 
