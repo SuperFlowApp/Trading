@@ -31,7 +31,7 @@ function LeverageButton() {
         body: JSON.stringify(requestBody),
       })
       const data = await response.json()
-      console.log("Leverage API response:", data)
+      //console.log("Leverage API response:", data)
     } catch (err) {
       console.error('Failed to set leverage:', err)
     }
@@ -138,13 +138,15 @@ function LimitOrderForm({ selectedPair }) {
       },
     };
 
+    console.log('Order Request Body:', JSON.stringify(requestBody, null, 2));
+
     try {
       const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
         method: 'POST',
         headers: {
           accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, // Pass the token to the proxy server
+          Authorization: `Bearer ${token}`, // JWT token
         },
         body: JSON.stringify(requestBody),
       });
