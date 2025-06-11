@@ -12,7 +12,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
   useEffect(() => {
     async function fetchPairs() {
       try {
-        const res = await fetch('https://trading-i4btymglu-user22807s-projects.vercel.app/api/markets'); // Updated URL
+        const res = await fetch('https://trading-eta-ten.vercel.app/api/markets'); // Updated URL
         const data = await res.json();
         const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
         setMarkets(filtered);
