@@ -113,6 +113,7 @@ function LimitOrderForm({ selectedPair }) {
   const [market, setMarket] = useState('limit');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(''); // New state for success message
 
   // Function to place an order
   const placeOrder = async () => {
@@ -123,6 +124,7 @@ function LimitOrderForm({ selectedPair }) {
 
     setLoading(true);
     setError('');
+    setSuccess(''); // Clear previous success message
 
     const requestBody = {
       symbol: selectedPair,
@@ -157,6 +159,9 @@ function LimitOrderForm({ selectedPair }) {
 
       const data = await response.json();
       console.log('Order placed successfully:', data);
+
+      // Set success message
+      setSuccess(`Order placed successfully! Order ID: ${data.orderId}`);
     } catch (err) {
       console.error('Error placing order:', err);
       setError('Failed to place order.');
@@ -330,6 +335,7 @@ function LimitOrderForm({ selectedPair }) {
             : 'Place sell order'}
       </button>
       {error && <div className="text-red-400 text-xs mt-2">{error}</div>}
+      {success && <div className="text-green-400 text-xs mt-2">{success}</div>} {/* Success message */}
     </div>
   );
 }
