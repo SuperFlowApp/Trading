@@ -7,11 +7,9 @@ import CandleChart from './components/CandleChart.jsx';
 import OrderBook from './components/OrderBook.jsx';
 import LimitOrderForm from './components/PlaceOrderForm.jsx';
 import Infobar from './components/Infobar.jsx';
-import TradesModal from './components/Trades.jsx';
 
 import PositionsPanel from './components/Positions.jsx';
-
-import Stream from './components/stream.jsx';
+import TradesModal from './components/Trades.jsx';
 
 function App() {
   const [selectedPair, setSelectedPair] = useState('BTCUSDT');
@@ -23,43 +21,47 @@ function App() {
         <Navbar />
       </div>
       <div
-        className="fixed top-0 left-0 w-screen h-screen pointer-events-none opacity-5 z-10"
+        className="fixed top-0 left-0 w-screen h-screen pointer-events-none opacity-5 z-10 "
         style={{ backgroundImage: `url(${noiseImage})`, backgroundRepeat: 'repeat' }}
       />
       <div className="flex flex-col h-auto overflow-y-auto">
 
         <div className="relative w-screen h-auto overflow-visible">
 
-          <main className="flex flex-1 p-2 gap-2">
+          <div className="flex flex-1 p-2 gap-2">
 
             {/* CandleChart/Infobar */}
             <div className="flex flex-col h-full gap-2 bg-transparent basis-[75%] min-w-0 ">
               <div className="overflow-visible">
                 <Infobar selectedPair={selectedPair} setSelectedPair={setSelectedPair} />
               </div>
-              <div className="flex">
-                <div className="flex-1 bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden">
-                  <CandleChart selectedPair={selectedPair} />
-                  <PositionsPanel />
+              <div className="flex gap-2">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="flex-1  gap-2 bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden">
+                    <CandleChart selectedPair={selectedPair} />
+                  </div>
+                  <div className="mt-2 flex-1 bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden">
+                    <PositionsPanel />
+                  </div>
                 </div>
-                <div className="flex flex-col bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[20%]">
+                <div className="flex flex-col gap-2 bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[30%]">
                   <OrderBook selectedPair={selectedPair} />
                   <TradesModal />
                 </div>
               </div>
+
             </div>
+
             {/* PositionsPanel*/}
             <div className="flex flex-col bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[25%]">
               <LimitOrderForm selectedPair={selectedPair} />
             </div>
-          </main>
+          </div>
           <section className="bg-[#0D2221] text-white p-4">
           </section>
           <footer className=""></footer>
         </div>
-        {/* Pass selectedPair to Stream   
-        <Stream />
-      */}
+
       </div>
     </AuthProvider>
   );
