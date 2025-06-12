@@ -7,6 +7,7 @@ import CandleChart from './components/CandleChart.jsx';
 import OrderBook from './components/OrderBook.jsx';
 import LimitOrderForm from './components/PlaceOrderForm.jsx';
 import Infobar from './components/Infobar.jsx';
+import TradesModal from './components/Trades.jsx';
 
 import PositionsPanel from './components/Positions.jsx';
 
@@ -50,12 +51,11 @@ function App() {
             {/* PositionsPanel*/}
             <div className="flex flex-col bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[25%]">
               <LimitOrderForm selectedPair={selectedPair} />
+              <TradesModal/>
             </div>
           </main>
           <section className="bg-[#0D2221] text-white p-4">
             <PositionsPanel />
-          </section>
-          <section className="bg-[#0D2221] text-white p-4">
           </section>
           <footer className=""></footer>
         </div>
