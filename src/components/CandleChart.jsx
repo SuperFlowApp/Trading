@@ -33,10 +33,9 @@ const CandleChart = ({ selectedPair }) => {
   useEffect(() => {
     let destroyed = false;
 
-
     async function fetchCandles() {
       try {
-        const res = await fetch( 
+        const res = await fetch(
           `https://fastify-serverless-function-rimj.onrender.com/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
         );
         const data = await res.json();
@@ -103,7 +102,7 @@ const CandleChart = ({ selectedPair }) => {
       },
 
     },
-    colors: ['#2D9DA8', '#ff000090'],
+    colors: ['#2D9DA8', '#F5CB9D'],
     stroke: { width: [1, 2], curve: 'smooth' },
     xaxis: {
       type: 'datetime',
@@ -147,11 +146,11 @@ const CandleChart = ({ selectedPair }) => {
           value={timeframe}
           onChange={(e) => setTimeframe(e.target.value)}
           style={{
-            backgroundColor: '#111',
+            backgroundColor: '#002122',
             color: '#ccc',
             padding: '6px 12px',
             borderRadius: '4px',
-            border: '1px solid #2D9DA8',
+            border: '1px solid #2D9DA860',
             fontSize: '12px',
             outline: 'none',
           }}
