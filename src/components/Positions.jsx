@@ -24,9 +24,9 @@ function PositionsPanel() {
       </div>
 
       {/* Tab Content */}
-      <div className="mt-4">
+      <div className="">
         {activeTab === 'positions' && 
-        <section className="bg-[#0D2221] text-white p-4">
+        <section className=" text-white p-4">
           <Positions />
         </section>}
         {activeTab === 'orders' && <div>Open orders will be listed here.</div>}
