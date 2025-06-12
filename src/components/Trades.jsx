@@ -33,11 +33,11 @@ const Trades = () => {
                     {trades.map((trade) => (
                         <li
                             key={trade.id}
-                            className={`flex justify-between items-center py-2 px-4 ${trade.side === 'BUY' ? 'bg-[#2B8A93]/10' : 'bg-[#F5CB9D]/10'
+                            className={`flex justify-between items-center py-2 px-4 ${trade.side === 'BUY' ? 'bg-[#00B7C9]/30' : 'bg-[#F5CB9D]/30'
                                 }`}
                         >
                             <span
-                                className={`font-medium ${trade.side === 'BUY' ? 'text-[#2B8A93]' : 'text-[#F5CB9D]'
+                                className={`font-medium ${trade.side === 'BUY' ? 'text-[#00B7C9]' : 'text-[#F5CB9D]'
                                     }`}
                             >
                                 {trade.side}
