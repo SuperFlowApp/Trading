@@ -108,14 +108,26 @@ function LimitOrderForm({ selectedPair }) {
   const [balanceFree, setBalanceFree] = useState("--");
   const [price, setPrice] = useState('');
   const [amount, setAmount] = useState('');
-  const [unit, setUnit] = useState('USD');
   const [side, setSide] = useState('buy');
   const [market, setMarket] = useState('limit');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(''); // New state for success message
+  const [success, setSuccess] = useState('');
 
-  // Function to place an order
+  // Clear all fields and reset states when logged out
+  useEffect(() => {
+    if (!token) {
+      setBalanceTotal("--");
+      setBalanceFree("--");
+      setPrice('');
+      setAmount('');
+      setSide('buy'); // Reset to default "buy"
+      setMarket('limit'); // Reset to default "limit"
+      setError('');
+      setSuccess('');
+    }
+  }, [token]);
+
   const placeOrder = async () => {
     if (!token || !selectedPair || !price || !amount) {
       setError('Please fill all fields.');
@@ -124,7 +136,7 @@ function LimitOrderForm({ selectedPair }) {
 
     setLoading(true);
     setError('');
-    setSuccess(''); // Clear previous success message
+    setSuccess('');
 
     const requestBody = {
       symbol: selectedPair,
@@ -140,15 +152,13 @@ function LimitOrderForm({ selectedPair }) {
       },
     };
 
-    console.log('Order Request Body:', JSON.stringify(requestBody, null, 2));
-
     try {
       const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
         method: 'POST',
         headers: {
           accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, // JWT token
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -158,25 +168,13 @@ function LimitOrderForm({ selectedPair }) {
       }
 
       const data = await response.json();
-      console.log('Order placed successfully:', data);
-
-      // Set success message
       setSuccess(`Order placed successfully! Order ID: ${data.orderId}`);
     } catch (err) {
-      console.error('Error placing order:', err);
       setError('Failed to place order.');
     } finally {
       setLoading(false);
     }
   };
-
-  // Fetch balance periodically
-  useEffect(() => {
-    if (!token) {
-      setBalanceTotal("--");
-      setBalanceFree("--");
-    }
-  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -208,8 +206,8 @@ function LimitOrderForm({ selectedPair }) {
 
     fetchBalance();
 
-    const interval = setInterval(fetchBalance, 10000); // Fetch balance every 10 seconds
-    return () => clearInterval(interval); // Cleanup interval on unmount
+    const interval = setInterval(fetchBalance, 10000);
+    return () => clearInterval(interval);
   }, [token]);
 
   return (
@@ -229,18 +227,9 @@ function LimitOrderForm({ selectedPair }) {
               : 'hover:border border-[#00B7C9] text-white'
               } flex items-center justify-center gap-2`}
             onClick={() => setSide('buy')}
+            disabled={!token} // Disable if not signed in
+            style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
           >
-            <img
-              src="/assets/Buy.svg"
-              alt=""
-              className="w-4 h-4"
-              style={{
-                filter: side === 'buy'
-                  ? 'brightness(0) saturate(100%) invert(1)'
-                  : 'none',
-                transition: 'filter 0.2s'
-              }}
-            />
             Buy
           </button>
           <button
@@ -249,18 +238,9 @@ function LimitOrderForm({ selectedPair }) {
               : 'hover:border border-[#F5CB9D] text-white'
               } flex items-center justify-center gap-2`}
             onClick={() => setSide('sell')}
+            disabled={!token} // Disable if not signed in
+            style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
           >
-            <img
-              src="/assets/Sell.svg"
-              alt=""
-              className="w-4 h-4"
-              style={{
-                filter: side === 'sell'
-                  ? 'brightness(0) saturate(100%) invert(1)'
-                  : 'none',
-                transition: 'filter 0.2s'
-              }}
-            />
             Sell
           </button>
         </div>
@@ -276,6 +256,8 @@ function LimitOrderForm({ selectedPair }) {
           className={`w-full py-1 rounded-md ${market === 'market' ? 'bg-[#1E4D4E]' : ''
             }`}
           onClick={() => setMarket('market')}
+          disabled={!token}
+          style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
         >
           Market (Ape)
         </button>
@@ -283,6 +265,8 @@ function LimitOrderForm({ selectedPair }) {
           className={`w-full py-1 rounded-md ${market === 'limit' ? 'bg-[#1E4D4E]' : ''
             }`}
           onClick={() => setMarket('limit')}
+          disabled={!token}
+          style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
         >
           Limit (Pro)
         </button>
@@ -290,34 +274,29 @@ function LimitOrderForm({ selectedPair }) {
 
       {/* Form Fields */}
       <div className="flex flex-col gap-3 mt-3 text-sm">
-        <div className="flex justify-between items-center">
-          <label className="text-white">Limit Price</label>
-
-        </div>
-
+        <label className="text-white">Limit Price</label>
         <input
           type="number"
           placeholder="$0.0"
           className="bg-[#1E4D4E] text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          disabled={!token} // Disable if not signed in
+          style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
         />
 
         <label className="text-white">Amount</label>
-        <div className="relative w-full">
-          <input
-            type="number"
-            placeholder="0.0"
-            className="bg-[#1E4D4E] w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </div>
-
-
-        <AmountSlider />
-        <TpSlToggle />
+        <input
+          type="number"
+          placeholder="0.0"
+          className="bg-[#1E4D4E] w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          disabled={!token} // Disable if not signed in
+          style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
+        />
       </div>
+
       {/* Place Order Button */}
       <button
         className={`w-full mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${side === 'buy'
@@ -325,7 +304,8 @@ function LimitOrderForm({ selectedPair }) {
           : 'bg-[#F5CB9D] text-black hover:bg-[#e6b87d]'
           }`}
         type="button"
-        disabled={loading}
+        disabled={!token || loading} // Disable if not signed in or loading
+        style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
         onClick={placeOrder}
       >
         {loading
@@ -335,7 +315,7 @@ function LimitOrderForm({ selectedPair }) {
             : 'Place sell order'}
       </button>
       {error && <div className="text-red-400 text-xs mt-2">{error}</div>}
-      {success && <div className="text-green-400 text-xs mt-2">{success}</div>} {/* Success message */}
+      {success && <div className="text-green-400 text-xs mt-2">{success}</div>}
     </div>
   );
 }
