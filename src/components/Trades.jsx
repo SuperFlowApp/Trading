@@ -24,7 +24,7 @@ const Trades = () => {
   }, []);
 
   return (
-    <div className="bg-[#1E4D4E] w-full p-4 rounded-lg shadow-lg text-white">
+    <div className="border border-[#2B8A93] w-full p-4 rounded-lg shadow-lg text-white mt-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Trades History</h2>
       </div>
@@ -33,14 +33,12 @@ const Trades = () => {
           {trades.map((trade) => (
             <li
               key={trade.id}
-              className={`flex justify-between items-center py-2 px-4 ${
-                trade.side === 'BUY' ? 'bg-green-500/10' : 'bg-red-500/10'
-              }`}
+              className={`flex justify-between items-center py-2 px-4 ${trade.side === 'BUY' ? 'bg-[#2B8A93]-500/10' : 'bg-red-500/10'
+                }`}
             >
               <span
-                className={`font-medium ${
-                  trade.side === 'BUY' ? 'text-green-400' : 'text-red-400'
-                }`}
+                className={`font-medium ${trade.side === 'BUY' ? 'text-[#2B8A93]-400' : 'text-red-400'
+                  }`}
               >
                 {trade.side}
               </span>

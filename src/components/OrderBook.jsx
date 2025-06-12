@@ -51,11 +51,6 @@ const useGroupedOrderBook = (symbol = 'BTCUSDT', limit = 10, groupSize = 1) => {
   return { asks: asks.reverse(), bids };
 };
 
-const ProgressBar = ({ progress }) => (
-  <div className="absolute top-0 left-0 w-full h-full">
-    <div className="h-full bg-[#2D9DA8] opacity-10" style={{ width: `${progress}%` }} />
-  </div>
-);
 
 const Row = ({ size, price, total, progress, color }) => {
   const [isGrowing, setIsGrowing] = useState(false);
@@ -67,14 +62,34 @@ const Row = ({ size, price, total, progress, color }) => {
   }, [size]);
 
   const textColor = color === 'green' ? 'text-[#2D9DA8]' : 'text-[#F5CB9D]';
-  const rowClasses = `relative flex justify-between items-center w-full py-1 px-2 text-xs font-medium ${isGrowing ? 'bg-white/5' : ''}`;
+  const rowClasses = ` relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium ${isGrowing ? 'bg-white/5' : ''}`;
 
   return (
     <li className={rowClasses}>
-      <div className={`text-left w-1/3 ${textColor}`}>{price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-      <div className="text-left w-1/3">{size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</div>
-      <div className="text-left w-1/3">{total.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</div>
-      <ProgressBar progress={progress} />
+      {/* Price Section */}
+      <div className={`font-bold text-[15px] text-left w-1/3 ${textColor} `}>
+        {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      </div>
+
+      {/* Size Section */}
+      <div className="text-[15px] text-left w-1/3">
+        {size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+      </div>
+
+      {/* Total Section with Progress Bar */}
+      <div className="text-[15px] relative text-left w-1/3 p-[4px]" >
+        <div className="relative z-10">
+          {total.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+        </div>
+        <div
+          className="absolute top-0 left-0 h-full "
+          style={{
+            width: `${progress}%`,
+            background: color === 'red' ? '#F5CB9D' : '#2D9DA8', // Different colors for Ask and Bid
+            opacity: 0.3,
+          }}
+        />
+      </div>
     </li>
   );
 };
@@ -119,12 +134,13 @@ const OrderBook = ({ selectedPair }) => {
         </select>
       </div>
 
-      <div className="flex justify-between text-[#7DADB1] px-2 py-1 font-semibold text-xs">
+      <div className="font-normal text-[15px] flex justify-between text-[#C9C9C9] px-2 py-1 font-semibold text-xs">
         <div className="text-left w-1/3">Price (USD)</div>
         <div className="text-left w-1/3">Size (BTC)</div>
         <div className="text-left w-1/3">Total (BTC)</div>
       </div>
 
+      {/* Ask Section */}
       <ul className="flex flex-col w-full">
         {addTotals(asks).map((row, i) => (
           <Row {...row} progress={row.progress} color="red" key={`ask-${i}`} />
@@ -132,21 +148,22 @@ const OrderBook = ({ selectedPair }) => {
       </ul>
 
       {/* Market Midpoint Section */}
-      <div className="flex justify-between items-center py-2 px-2 text-sm font-semibold">
+      <div className="font-bold text-[18px] flex justify-between border border-[#2D9DA8]/50 rounded-lg items-center py-1 px-2 my-2 text-sm font-semibold">
         <div className="text-[#2D9DA8] text-md">Market Midpoint</div>
         <div className="flex flex-col items-end">
-          <span className="text-[#7DADB1] text-xs font-medium">Combined View</span>
-          <span className="text-sm font-medium">
+          <span className="text-[#fff]">
             {marketMidpoint ? marketMidpoint.toFixed(2) : '—'}
           </span>
         </div>
       </div>
 
-      <div className="flex justify-between text-[#7DADB1] px-2 py-1 font-semibold text-xs">
+      {/* Bid Section
+      <div className="font-normal text-[15px] flex justify-between text-[#C9C9C9] px-2 py-1 font-semibold text-xs">
         <div className="text-left w-1/3">Price (USD)</div>
         <div className="text-left w-1/3">Size (BTC)</div>
         <div className="text-left w-1/3">Total (BTC)</div>
       </div>
+       */}
 
       <ul className="flex flex-col w-full">
         {addTotals(bids).map((row, i) => (

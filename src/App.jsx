@@ -43,6 +43,7 @@ function App() {
                 </div>
                 <div className="flex flex-col bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[20%]">
                   <OrderBook selectedPair={selectedPair} />
+                  <TradesModal />
                 </div>
               </div>
 
@@ -51,7 +52,6 @@ function App() {
             {/* PositionsPanel*/}
             <div className="flex flex-col bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[25%]">
               <LimitOrderForm selectedPair={selectedPair} />
-              <TradesModal/>
             </div>
           </main>
           <section className="bg-[#0D2221] text-white p-4">
