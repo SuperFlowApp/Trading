@@ -71,9 +71,9 @@ const Row = ({ size, price, total, progress, color }) => {
 
   return (
     <li className={rowClasses}>
-      <div className="text-right w-1/3">{total.toFixed(4)}</div>
-      <div className={`text-right w-1/3 ${textColor}`}>{price.toFixed(2)}</div>
-      <div className="text-right w-1/3">{size.toFixed(4)}</div>
+      <div className={`text-left w-1/3 ${textColor}`}>{price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+      <div className="text-left w-1/3">{size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</div>
+      <div className="text-left w-1/3">{total.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</div>
       <ProgressBar progress={progress} />
     </li>
   );
@@ -94,6 +94,16 @@ const OrderBook = ({ selectedPair }) => {
     });
   };
 
+  // Calculate Market Midpoint
+  const calculateMarketMidpoint = () => {
+    if (bids.length === 0 || asks.length === 0) return null;
+    const highestBid = bids[0].price; // Highest bid price
+    const lowestAsk = asks[0].price; // Lowest ask price
+    return (highestBid + lowestAsk) / 2; // Average of the two
+  };
+
+  const marketMidpoint = calculateMarketMidpoint();
+
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
       <div className="flex justify-between items-center py-2 px-2 text-sm font-semibold">
@@ -110,9 +120,9 @@ const OrderBook = ({ selectedPair }) => {
       </div>
 
       <div className="flex justify-between text-[#7DADB1] px-2 py-1 font-semibold text-xs">
-        <div className="text-right w-1/3">Total (BTC)</div>
-        <div className="text-right w-1/3">Price (USD)</div>
-        <div className="text-right w-1/3">Size (BTC)</div>
+        <div className="text-left w-1/3">Price (USD)</div>
+        <div className="text-left w-1/3">Size (BTC)</div>
+        <div className="text-left w-1/3">Total (BTC)</div>
       </div>
 
       <ul className="flex flex-col w-full">
@@ -121,18 +131,21 @@ const OrderBook = ({ selectedPair }) => {
         ))}
       </ul>
 
+      {/* Market Midpoint Section */}
       <div className="flex justify-between items-center py-2 px-2 text-sm font-semibold">
         <div className="text-[#2D9DA8] text-md">Market Midpoint</div>
         <div className="flex flex-col items-end">
           <span className="text-[#7DADB1] text-xs font-medium">Combined View</span>
-          <span className="text-sm font-medium">—</span>
+          <span className="text-sm font-medium">
+            {marketMidpoint ? marketMidpoint.toFixed(2) : '—'}
+          </span>
         </div>
       </div>
 
       <div className="flex justify-between text-[#7DADB1] px-2 py-1 font-semibold text-xs">
-        <div className="text-right w-1/3">Total (BTC)</div>
-        <div className="text-right w-1/3">Price (USD)</div>
-        <div className="text-right w-1/3">Size (BTC)</div>
+        <div className="text-left w-1/3">Price (USD)</div>
+        <div className="text-left w-1/3">Size (BTC)</div>
+        <div className="text-left w-1/3">Total (BTC)</div>
       </div>
 
       <ul className="flex flex-col w-full">
