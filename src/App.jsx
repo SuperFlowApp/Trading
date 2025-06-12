@@ -40,22 +40,20 @@ function App() {
               <div className="flex">
                 <div className="flex-1 bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden">
                   <CandleChart selectedPair={selectedPair} />
+                  <PositionsPanel />
                 </div>
                 <div className="flex flex-col bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[20%]">
                   <OrderBook selectedPair={selectedPair} />
                   <TradesModal />
                 </div>
               </div>
-
             </div>
-
             {/* PositionsPanel*/}
             <div className="flex flex-col bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[25%]">
               <LimitOrderForm selectedPair={selectedPair} />
             </div>
           </main>
           <section className="bg-[#0D2221] text-white p-4">
-            <PositionsPanel />
           </section>
           <footer className=""></footer>
         </div>
