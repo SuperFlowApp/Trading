@@ -37,27 +37,31 @@ function App() {
               </div>
               <div className="flex gap-2">
                 <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="flex-1  gap-2 bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden">
+                  <div className="bg-[#002122] rounded-md p-3 ">
                     <CandleChart selectedPair={selectedPair} />
                   </div>
-                  <div className="mt-2 flex-1 bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden">
+                  <div className="mt-2 bg-[#002122] rounded-md p-3 ">
                     <PositionsPanel />
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[30%]">
-                  <OrderBook selectedPair={selectedPair} />
-                  <TradesModal />
+                <div className="flex flex-col gap-2 rounded-md min-w-0 overflow-hidden basis-[30%]">
+                  <div className=" bg-[#002122] rounded-md p-2 ">
+                    <OrderBook selectedPair={selectedPair} />
+                  </div>
+                  <div className="bg-[#002122] rounded-md p-2 ">
+                    <TradesModal />
+                  </div>
                 </div>
               </div>
 
             </div>
 
             {/* PositionsPanel*/}
-            <div className="flex flex-col bg-[#0D2221] rounded-md p-3 min-w-0 overflow-hidden basis-[25%]">
+            <div className="flex flex-col bg-[#002122] rounded-md p-3 min-w-0 overflow-hidden basis-[25%]">
               <LimitOrderForm selectedPair={selectedPair} />
             </div>
           </div>
-          <section className="bg-[#0D2221] text-white p-4">
+          <section className="bg-[#002122] text-white p-4">
           </section>
           <footer className=""></footer>
         </div>
