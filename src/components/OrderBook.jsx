@@ -157,14 +157,6 @@ const OrderBook = ({ selectedPair }) => {
         </div>
       </div>
 
-      {/* Bid Section
-      <div className="font-normal text-[15px] flex justify-between text-[#C9C9C9] px-2 py-1 font-semibold text-xs">
-        <div className="text-left w-1/3">Price (USD)</div>
-        <div className="text-left w-1/3">Size (BTC)</div>
-        <div className="text-left w-1/3">Total (BTC)</div>
-      </div>
-       */}
-
       <ul className="flex flex-col w-full">
         {addTotals(bids).map((row, i) => (
           <Row {...row} progress={row.progress} color="green" key={`bid-${i}`} />
