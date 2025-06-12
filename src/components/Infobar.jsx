@@ -78,7 +78,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
 
   return (
     <div className="w-full flex justify-between items-center px-4 py-2 rounded-md text-[#7DADB1] text-sm font-medium flex-wrap gap-4 whitespace-nowrap overflow-visible bg-[#002122]">
-      <div className="flex gap-10 items-start">
+      <div className="flex gap-10 items-start items-center">
         {/* Custom Dropdown */}
         <div className="relative border border-[#1E4D4E] flex items-center gap-3 px-3 py-2 rounded-[10px]" ref={dropdownRef}>
           <div className="flex flex-col text-white">

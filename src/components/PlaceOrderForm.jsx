@@ -259,7 +259,7 @@ function LimitOrderForm({ selectedPair }) {
           disabled={!token}
           style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
         >
-          Market (Ape)
+          Market
         </button>
         <button
           className={`w-full py-1 rounded-md ${market === 'limit' ? 'bg-[#1E4D4E]' : ''
@@ -268,7 +268,7 @@ function LimitOrderForm({ selectedPair }) {
           disabled={!token}
           style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
         >
-          Limit (Pro)
+          Limit
         </button>
       </div>
 
