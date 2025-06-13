@@ -212,6 +212,30 @@ function LimitOrderForm({ selectedPair }) {
 
   return (
     <div className="w-full text-white flex flex-col gap-4">
+      {/* Market/Limit Tabs */}
+      <div className="flex justify-between items-center text-sm font-semibold">
+        <button
+          className={`w-full py-2 font-semibold text-sm transition-colors ${
+            market === 'market' ? 'bg-[#1E4D4E]/50 text-[#fff] border-b-2 border-[#00B7C9]' : 'bg-[#000]/0 text-[#a9a9a9] border-b-2 border-[#00B7C9]/30 hover:bg-[#1E4D4E]/40'
+          }`}
+          onClick={() => setMarket('market')}
+          disabled={!token}
+          style={!token ? { opacity: 0.5 } : {}}
+        >
+          Market
+        </button>
+        <button
+          className={`w-full py-2 font-semibold text-sm transition-colors ${
+            market === 'limit' ? 'bg-[#1E4D4E]/40 text-[#fff] border-b-2 border-[#00B7C9]' : 'bg-[#000]/0 text-[#a9a9a9] border-b-2 border-[#00B7C9]/30 hover:bg-[#1E4D4E]/40'
+          }`}
+          onClick={() => setMarket('limit')}
+          disabled={!token}
+          style={!token ? { opacity: 0.5 } : {}}
+        >
+          Limit
+        </button>
+      </div>
+
       {/* Balance Row */}
       <div className="flex font-semibold gap-[20px] text-[16px] px-1">
         <span className="text-[#7DADB1]">Total Balance: <span className="text-[#fff]">{balanceTotal} USDT</span></span>
@@ -222,10 +246,11 @@ function LimitOrderForm({ selectedPair }) {
       <div className="flex gap-4 items-center">
         <div className="flex w-full gap-2 bg-[#1E4D4E] p-1 rounded-lg">
           <button
-            className={`w-full py-1 rounded-md font-bold ${side === 'buy'
-              ? 'bg-[#00B7C9] border border-[#00000000]'
-              : 'hover:border border-[#00B7C9] text-white'
-              } flex items-center justify-center gap-2`}
+            className={`w-full py-1 rounded-md font-bold ${
+              side === 'buy'
+                ? 'bg-[#00B7C9] border border-[#00000000]'
+                : 'hover:border border-[#00B7C9] text-white'
+            } flex items-center justify-center gap-2`}
             onClick={() => setSide('buy')}
             disabled={!token} // Disable if not signed in
             style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
@@ -233,10 +258,11 @@ function LimitOrderForm({ selectedPair }) {
             Buy
           </button>
           <button
-            className={`w-full py-1 rounded-md font-bold  ${side === 'sell'
-              ? 'bg-[#F5CB9D] border border-[#00000000]'
-              : 'hover:border border-[#F5CB9D] text-white'
-              } flex items-center justify-center gap-2`}
+            className={`w-full py-1 rounded-md font-bold  ${
+              side === 'sell'
+                ? 'bg-[#F5CB9D] border border-[#00000000]'
+                : 'hover:border border-[#F5CB9D] text-white'
+            } flex items-center justify-center gap-2`}
             onClick={() => setSide('sell')}
             disabled={!token} // Disable if not signed in
             style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
@@ -248,28 +274,6 @@ function LimitOrderForm({ selectedPair }) {
         <div className="w-[48px] h-[38px] flex items-center justify-center bg-[#1E4D4E] rounded-lg hover:border hover:border-[#F5CB9D] hover:bg-[#276c6d]">
           <LeverageButton />
         </div>
-      </div>
-
-      {/* Market / Limit Selector */}
-      <div className="flex w-full bg-transparent border border-[#1E4D4E] p-1 rounded-lg gap-1 mt-4">
-        <button
-          className={`w-full py-1 rounded-md ${market === 'market' ? 'bg-[#1E4D4E]' : ''
-            }`}
-          onClick={() => setMarket('market')}
-          disabled={!token}
-          style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
-        >
-          Market
-        </button>
-        <button
-          className={`w-full py-1 rounded-md ${market === 'limit' ? 'bg-[#1E4D4E]' : ''
-            }`}
-          onClick={() => setMarket('limit')}
-          disabled={!token}
-          style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
-        >
-          Limit
-        </button>
       </div>
 
       {/* Form Fields */}
@@ -299,10 +303,11 @@ function LimitOrderForm({ selectedPair }) {
 
       {/* Place Order Button */}
       <button
-        className={`w-full mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${side === 'buy'
-          ? 'bg-[#2D9DA8] text-black hover:bg-[#23848b]'
-          : 'bg-[#F5CB9D] text-black hover:bg-[#e6b87d]'
-          }`}
+        className={`w-full mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${
+          side === 'buy'
+            ? 'bg-[#2D9DA8] text-black hover:bg-[#23848b]'
+            : 'bg-[#F5CB9D] text-black hover:bg-[#e6b87d]'
+        }`}
         type="button"
         disabled={!token || loading} // Disable if not signed in or loading
         style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}

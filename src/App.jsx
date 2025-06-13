@@ -49,21 +49,19 @@ function App() {
                   {/* Tab Selector */}
                   <div className="flex bg-[#001F1F] rounded-t-md relative">
                     <button
-                      className={`flex-1 p-2 text-center ${
-                        activeTab === 'OrderBook'
+                      className={`flex-1 p-2 text-center ${activeTab === 'OrderBook'
                           ? 'bg-[#00B7C9]/10 text-white font-bold border-b-2 border-[#00B7C9]'
-                          : 'bg-[#001F1F] text-gray-400'
-                      }`}
+                          : 'bg-[#001F1F] text-gray-400 border-b-2 border-[#00B7C9]/30'
+                        }`}
                       onClick={() => setActiveTab('OrderBook')}
                     >
                       Order Book
                     </button>
                     <button
-                      className={`flex-1 p-2 text-center ${
-                        activeTab === 'Trades'
+                      className={`flex-1 p-2 text-center ${activeTab === 'Trades'
                           ? 'bg-[#00B7C9]/10 0 text-white font-bold border-b-2 border-[#00B7C9]'
-                          : 'bg-[#001F1F] text-gray-400'
-                      }`}
+                          : 'bg-[#001F1F] text-gray-400 border-b-2 border-[#00B7C9]/30'
+                        }`}
                       onClick={() => setActiveTab('Trades')}
                     >
                       Trades
@@ -79,7 +77,7 @@ function App() {
             </div>
 
             {/* PositionsPanel*/}
-            <div className="flex flex-col bg-[#002122] rounded-md p-3 min-w-0 overflow-hidden basis-[25%]">
+            <div className="flex flex-col bg-[#002122] rounded-md min-w-0 overflow-hidden basis-[25%]">
               <LimitOrderForm selectedPair={selectedPair} />
             </div>
           </div>

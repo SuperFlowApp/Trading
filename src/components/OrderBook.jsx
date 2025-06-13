@@ -65,13 +65,12 @@ const Row = ({ size, price, total, progress, color }) => {
   }, [size]);
 
   const textColor = color === 'green' ? 'text-[#2D9DA8]' : 'text-[#F5CB9D]';
-  const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors ${
-    isFadingOut
+  const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors ${isFadingOut
       ? 'bg-transparent duration-500' // Smooth fade-out
       : color === 'red'
-      ? 'bg-[#F5CB9D]/70 duration-0' // Immediate fade-in for asks
-      : 'bg-[#2D9DA8]/70 duration-0' // Immediate fade-in for bids
-  }`;
+        ? 'bg-[#F5CB9D]/70 duration-0' // Immediate fade-in for asks
+        : 'bg-[#2D9DA8]/70 duration-0' // Immediate fade-in for bids
+    }`;
 
   return (
     <li className="relative w-full mb-1">
@@ -111,7 +110,7 @@ const OrderBook = ({ selectedPair }) => {
   const addTotals = (rows, reverse = false) => {
     let total = 0;
     let maxSize = Math.max(...rows.map((r) => r.size));
-    
+
     // Reverse the rows if the reverse flag is true
     const sortedRows = reverse ? [...rows].sort((a, b) => b.price - a.price) : rows;
 
@@ -130,7 +129,19 @@ const OrderBook = ({ selectedPair }) => {
     return (highestBid + lowestAsk) / 2; // Average of the two
   };
 
+  // Calculate Spread
+  const calculateSpread = () => {
+    if (bids.length === 0 || asks.length === 0) return { value: null, percentage: null };
+    const highestBid = bids[0].price; // Highest bid price
+    const lowestAsk = asks[0].price; // Lowest ask price
+    const spreadValue = lowestAsk - highestBid; // Absolute spread
+    const midpoint = (highestBid + lowestAsk) / 2; // Midpoint for percentage calculation
+    const spreadPercentage = (spreadValue / midpoint) * 100; // Spread as a percentage
+    return { value: spreadValue, percentage: spreadPercentage };
+  };
+
   const marketMidpoint = calculateMarketMidpoint();
+  const { value: spreadValue, percentage: spreadPercentage } = calculateSpread();
 
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
@@ -153,24 +164,25 @@ const OrderBook = ({ selectedPair }) => {
         <div className="text-left w-1/3">Total (BTC)</div>
       </div>
 
-      {/* Ask Section (Yellow, but with asks data) */}
+      {/* Ask Section */}
       <ul className="flex flex-col w-full">
         {addTotals(asks, true).map((row, i) => (
           <Row {...row} progress={row.progress} color="red" key={`ask-${i}`} />
         ))}
       </ul>
 
-      {/* Market Midpoint Section */}
+      {/* Spread Section */}
       <div className="font-bold text-[18px] flex justify-between border border-[#2D9DA8]/50 rounded-lg items-center py-1 px-2 my-2 text-sm font-semibold">
-        <div className="text-[#2D9DA8] text-md">Market Midpoint</div>
-        <div className="flex flex-col items-end">
-          <span className="text-[#fff]">
-            {marketMidpoint ? marketMidpoint.toFixed(2) : '—'}
-          </span>
-        </div>
+        <div className="text-[#2D9DA8] text-md">Spread</div>
+        <span className="text-[#fff]">
+          {spreadValue !== null ? spreadValue.toFixed(4) : '—'}
+        </span>
+        <span className="text-[#C9C9C9] text-xs">
+          {spreadPercentage !== null ? `${spreadPercentage.toFixed(2)}%` : '—'}
+        </span>
       </div>
 
-      {/* Bid Section (Greenish blue, but with bids data) */}
+      {/* Bid Section */}
       <ul className="flex flex-col w-full">
         {addTotals(bids, true).map((row, i) => (
           <Row {...row} progress={row.progress} color="green" key={`bid-${i}`} />
