@@ -13,9 +13,7 @@ const useGroupedOrderBook = (symbol = 'BTCUSDT', limit = 10, groupSize = 1) => {
       const bucket = bucketPrice(price);
       grouped[bucket] = (grouped[bucket] || 0) + size;
     });
-    return Object.entries(grouped)
-      .map(([price, size]) => ({ price: +price, size }))
-      .sort((a, b) => b.price - a.price);
+    return Object.entries(grouped).map(([price, size]) => ({ price: +price, size }));
   };
 
   useEffect(() => {
@@ -48,47 +46,58 @@ const useGroupedOrderBook = (symbol = 'BTCUSDT', limit = 10, groupSize = 1) => {
     return () => clearInterval(interval);
   }, [symbol, limit, groupSize]);
 
-  return { asks: asks.reverse(), bids };
+  return { asks, bids };
 };
 
 
 const Row = ({ size, price, total, progress, color }) => {
-  const [isGrowing, setIsGrowing] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(true); // Start with fade-out (transparent background)
   const preData = useRef(size);
 
   useEffect(() => {
-    setIsGrowing(size > preData.current);
-    preData.current = size;
+    // Check if the size has changed
+    if (size !== preData.current) {
+      setIsFadingOut(false); // Reset fade-out to trigger immediate background
+      const fadeOutTimeout = setTimeout(() => setIsFadingOut(true), 100); // Start fade-out after 100ms
+      preData.current = size; // Update the previous size
+      return () => clearTimeout(fadeOutTimeout);
+    }
   }, [size]);
 
   const textColor = color === 'green' ? 'text-[#2D9DA8]' : 'text-[#F5CB9D]';
-  const rowClasses = ` relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium ${isGrowing ? 'bg-white/5' : ''}`;
+  const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors ${
+    isFadingOut
+      ? 'bg-transparent duration-500' // Smooth fade-out
+      : color === 'red'
+      ? 'bg-[#F5CB9D]/70 duration-0' // Immediate fade-in for asks
+      : 'bg-[#2D9DA8]/70 duration-0' // Immediate fade-in for bids
+  }`;
 
   return (
-    <li className={rowClasses}>
-      {/* Price Section */}
-      <div className={`font-bold text-[15px] text-left w-1/3 ${textColor} `}>
-        {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-      </div>
-
-      {/* Size Section */}
-      <div className="text-[15px] text-left w-1/3">
-        {size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
-      </div>
-
-      {/* Total Section with Progress Bar */}
-      <div className="text-[15px] relative text-left w-1/3 p-[4px]" >
-        <div className="relative z-10">
+    <li className="relative w-full mb-1">
+      {/* Progress Bar Background */}
+      <div
+        className="absolute top-0 left-0 h-full"
+        style={{
+          width: `${progress}%`,
+          background: color === 'red' ? '#F5CB9D' : '#2D9DA8',
+          opacity: 0.3,
+        }}
+      />
+      {/* Row Content */}
+      <div className={rowClasses}>
+        {/* Price Section */}
+        <div className={`font-bold text-[15px] text-left w-1/3 ${textColor}`}>
+          {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </div>
+        {/* Size Section */}
+        <div className="text-[15px] text-left w-1/3">
+          {size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+        </div>
+        {/* Total Section */}
+        <div className="text-[15px] text-left w-1/3">
           {total.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
         </div>
-        <div
-          className="absolute top-0 left-0 h-full "
-          style={{
-            width: `${progress}%`,
-            background: color === 'red' ? '#F5CB9D' : '#2D9DA8', // Different colors for Ask and Bid
-            opacity: 0.3,
-          }}
-        />
       </div>
     </li>
   );
@@ -99,10 +108,14 @@ const OrderBook = ({ selectedPair }) => {
   const [groupSize] = useState(1);
   const { asks, bids } = useGroupedOrderBook(selectedPair, limit, groupSize);
 
-  const addTotals = (rows) => {
+  const addTotals = (rows, reverse = false) => {
     let total = 0;
     let maxSize = Math.max(...rows.map((r) => r.size));
-    return rows.map((r) => {
+    
+    // Reverse the rows if the reverse flag is true
+    const sortedRows = reverse ? [...rows].sort((a, b) => b.price - a.price) : rows;
+
+    return sortedRows.map((r) => {
       total += r.size;
       const progress = (r.size / maxSize) * 100;
       return { ...r, total, progress };
@@ -140,9 +153,9 @@ const OrderBook = ({ selectedPair }) => {
         <div className="text-left w-1/3">Total (BTC)</div>
       </div>
 
-      {/* Ask Section */}
+      {/* Ask Section (Yellow, but with asks data) */}
       <ul className="flex flex-col w-full">
-        {addTotals(asks).map((row, i) => (
+        {addTotals(asks, true).map((row, i) => (
           <Row {...row} progress={row.progress} color="red" key={`ask-${i}`} />
         ))}
       </ul>
@@ -157,8 +170,9 @@ const OrderBook = ({ selectedPair }) => {
         </div>
       </div>
 
+      {/* Bid Section (Greenish blue, but with bids data) */}
       <ul className="flex flex-col w-full">
-        {addTotals(bids).map((row, i) => (
+        {addTotals(bids, true).map((row, i) => (
           <Row {...row} progress={row.progress} color="green" key={`bid-${i}`} />
         ))}
       </ul>
