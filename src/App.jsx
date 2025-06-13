@@ -14,6 +14,7 @@ import TradesModal from './components/Trades.jsx';
 function App() {
   const [selectedPair, setSelectedPair] = useState('BTCUSDT');
   const [modalOpen, setModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('OrderBook'); // State for tab selection
 
   return (
     <AuthProvider>
@@ -44,12 +45,33 @@ function App() {
                     <PositionsPanel />
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 rounded-md min-w-0 overflow-hidden basis-[30%]">
-                  <div className=" bg-[#002122] rounded-md p-2 ">
-                    <OrderBook selectedPair={selectedPair} />
+                <div className="flex flex-col rounded-md min-w-0 overflow-hidden basis-[30%]">
+                  {/* Tab Selector */}
+                  <div className="flex bg-[#001F1F] rounded-t-md relative">
+                    <button
+                      className={`flex-1 p-2 text-center ${
+                        activeTab === 'OrderBook'
+                          ? 'bg-[#00B7C9]/10 text-white font-bold border-b-2 border-[#00B7C9]'
+                          : 'bg-[#001F1F] text-gray-400'
+                      }`}
+                      onClick={() => setActiveTab('OrderBook')}
+                    >
+                      Order Book
+                    </button>
+                    <button
+                      className={`flex-1 p-2 text-center ${
+                        activeTab === 'Trades'
+                          ? 'bg-[#00B7C9]/10 0 text-white font-bold border-b-2 border-[#00B7C9]'
+                          : 'bg-[#001F1F] text-gray-400'
+                      }`}
+                      onClick={() => setActiveTab('Trades')}
+                    >
+                      Trades
+                    </button>
                   </div>
-                  <div className="bg-[#002122] rounded-md p-2 ">
-                    <TradesModal />
+                  <div className="bg-[#002122] rounded-b-md p-2">
+                    {activeTab === 'OrderBook' && <OrderBook selectedPair={selectedPair} />}
+                    {activeTab === 'Trades' && <TradesModal />}
                   </div>
                 </div>
               </div>
