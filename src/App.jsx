@@ -33,25 +33,25 @@ function App() {
 
             {/* CandleChart/Infobar */}
             <div className="flex flex-col h-full gap-2 bg-transparent basis-[75%] min-w-0 ">
-              <div className="overflow-visible">
-                <Infobar selectedPair={selectedPair} setSelectedPair={setSelectedPair} />
-              </div>
+
               <div className="flex gap-2">
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="bg-[#002122] rounded-md p-3 ">
+
+                <div className="bg-[#002122] rounded-md flex-1 min-w-0 overflow-hidden">
+                  <div className="overflow-visible">
+                    <Infobar selectedPair={selectedPair} setSelectedPair={setSelectedPair} />
+                  </div>
+                  <div className=" p-3 ">
                     <CandleChart selectedPair={selectedPair} />
                   </div>
-                  <div className="mt-2 bg-[#002122] rounded-md p-3 ">
-                    <PositionsPanel />
-                  </div>
                 </div>
-                <div className="flex flex-col rounded-md min-w-0 overflow-hidden basis-[25%]">
+
+                <div className=" flex flex-col bg-[#001F1F] rounded-md min-w-0 overflow-hidden basis-[30%]">
                   {/* Tab Selector */}
-                  <div className="flex bg-[#001F1F] rounded-t-md relative">
+                  <div className="flex relative">
                     <button
                       className={`flex-1 p-2 text-center ${activeTab === 'OrderBook'
-                          ? 'bg-[#00B7C9]/10 text-white font-bold border-b-2 border-[#00B7C9]'
-                          : 'bg-[#001F1F] text-gray-400 border-b-2 border-[#00B7C9]/30'
+                        ? 'bg-[#00B7C9]/10 text-white font-bold border-b-2 border-[#00B7C9]'
+                        : 'bg-[#001F1F] text-gray-400 border-b-2 border-[#00B7C9]/30'
                         }`}
                       onClick={() => setActiveTab('OrderBook')}
                     >
@@ -59,8 +59,8 @@ function App() {
                     </button>
                     <button
                       className={`flex-1 p-2 text-center ${activeTab === 'Trades'
-                          ? 'bg-[#00B7C9]/10 0 text-white font-bold border-b-2 border-[#00B7C9]'
-                          : 'bg-[#001F1F] text-gray-400 border-b-2 border-[#00B7C9]/30'
+                        ? 'bg-[#00B7C9]/10 0 text-white font-bold border-b-2 border-[#00B7C9]'
+                        : 'bg-[#001F1F] text-gray-400 border-b-2 border-[#00B7C9]/30'
                         }`}
                       onClick={() => setActiveTab('Trades')}
                     >
@@ -81,7 +81,11 @@ function App() {
               <LimitOrderForm selectedPair={selectedPair} />
             </div>
           </div>
-
+          <section className="bg-[#002122] text-white p-4">
+            <div className="mt-2 bg-[#002122] rounded-md p-3 ">
+              <PositionsPanel />
+            </div>
+          </section>
           <footer className=""></footer>
         </div>
 
