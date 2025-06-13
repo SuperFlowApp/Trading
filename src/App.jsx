@@ -81,8 +81,7 @@ function App() {
               <LimitOrderForm selectedPair={selectedPair} />
             </div>
           </div>
-          <section className="bg-[#002122] text-white p-4">
-          </section>
+
           <footer className=""></footer>
         </div>
 
