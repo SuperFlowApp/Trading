@@ -45,7 +45,7 @@ function App() {
                     <PositionsPanel />
                   </div>
                 </div>
-                <div className="flex flex-col rounded-md min-w-0 overflow-hidden basis-[30%]">
+                <div className="flex flex-col rounded-md min-w-0 overflow-hidden basis-[25%]">
                   {/* Tab Selector */}
                   <div className="flex bg-[#001F1F] rounded-t-md relative">
                     <button

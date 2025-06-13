@@ -26,7 +26,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
               if (!tRes.ok) return;
               const tData = await tRes.json();
               tickersObj[mkt.symbol] = tData;
-            } catch {}
+            } catch { }
           })
         );
         setTickers(tickersObj);
@@ -145,8 +145,13 @@ function Infobar({ selectedPair, setSelectedPair }) {
 
         {/* Ticker Details */}
         <div className="flex  text-[14px] items-center gap-8 text-[#8AABB2]">
-          <span className="text-white text-sm self-center">${ticker.last}</span>
+          <div className="flex flex-col">
+            <span>Price:</span>
+            <span className="text-white ">{ticker.last}</span>
+          </div>
+          
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
+
           <div className="flex flex-col ">
             <span>24h Change:</span>
             <span className="text-white "
@@ -176,13 +181,6 @@ function Infobar({ selectedPair, setSelectedPair }) {
             <span>Bid / Ask:</span>
             <span className="text-white">
               {ticker.bid} / {ticker.ask}
-            </span>
-          </div>
-          <div className="w-[1.5px] h-5 bg-white/10 self-center" />
-          <div className="flex flex-col">
-            <span>Mark / Index:</span>
-            <span className="text-white">
-              {ticker.markPrice} / {ticker.indexPrice}
             </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
