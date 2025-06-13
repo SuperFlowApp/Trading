@@ -237,13 +237,13 @@ function LimitOrderForm({ selectedPair }) {
       </div>
 
       {/* Balance Row */}
-      <div className="flex font-semibold gap-[20px] text-[16px] px-1">
+      <div className="px-2 flex font-semibold gap-[20px] text-[16px] px-1">
         <span className="text-[#7DADB1]">Total Balance: <span className="text-[#fff]">{balanceTotal} USDT</span></span>
         <span className="text-[#7DADB1]">Free Balance: <span className="text-[#fff]">{balanceFree} USDT</span></span>
       </div>
 
       {/* Side + Leverage */}
-      <div className="flex gap-4 items-center">
+      <div className="px-2 flex gap-4 items-center">
         <div className="flex w-full gap-2 bg-[#1E4D4E] p-1 rounded-lg">
           <button
             className={`w-full py-1 rounded-md font-bold ${
@@ -277,7 +277,7 @@ function LimitOrderForm({ selectedPair }) {
       </div>
 
       {/* Form Fields */}
-      <div className="flex flex-col gap-3 mt-3 text-sm">
+      <div className="px-2 flex flex-col gap-3 mt-3 text-sm">
         <label className="text-white">Limit Price</label>
         <input
           type="number"
@@ -303,7 +303,7 @@ function LimitOrderForm({ selectedPair }) {
 
       {/* Place Order Button */}
       <button
-        className={`w-full mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${
+        className={`mx-2  mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${
           side === 'buy'
             ? 'bg-[#2D9DA8] text-black hover:bg-[#23848b]'
             : 'bg-[#F5CB9D] text-black hover:bg-[#e6b87d]'
