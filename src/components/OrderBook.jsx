@@ -50,30 +50,45 @@ const useGroupedOrderBook = (symbol = 'BTCUSDT', limit = 10, groupSize = 1) => {
 };
 
 
-const Row = ({ size, price, total, progress, color }) => {
-  const [isFadingOut, setIsFadingOut] = useState(true); // Start with fade-out (transparent background)
-  const preData = useRef(size);
+const Row = ({ size, price, total, progress, color, onSelect }) => {
+  const [isBlinking, setIsBlinking] = useState(false); // State to control the fill blink effect
+  const [isSelected, setIsSelected] = useState(false); // State to control the border on click
+  const previousSize = useRef(size); // Track the previous size for comparison
 
   useEffect(() => {
-    // Check if the size has changed
-    if (size !== preData.current) {
-      setIsFadingOut(false); // Reset fade-out to trigger immediate background
-      const fadeOutTimeout = setTimeout(() => setIsFadingOut(true), 100); // Start fade-out after 100ms
-      preData.current = size; // Update the previous size
-      return () => clearTimeout(fadeOutTimeout);
+    // Trigger fill blink when the size changes
+    if (size !== previousSize.current) {
+      setIsBlinking(true); // Start the fill blink
+      const timeout = setTimeout(() => setIsBlinking(false), 200); // Reset after 200ms
+      previousSize.current = size; // Update the previous size
+      return () => clearTimeout(timeout); // Cleanup timeout
     }
   }, [size]);
 
+  const handleSelect = () => {
+    setIsSelected(true); // Add border on click
+    setTimeout(() => setIsSelected(false), 200); // Remove border after 200ms
+    onSelect(price); // Pass the selected price to the parent
+  };
+
   const textColor = color === 'green' ? 'text-[#2D9DA8]' : 'text-[#F5CB9D]';
-  const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors ${isFadingOut
-      ? 'bg-transparent duration-500' // Smooth fade-out
-      : color === 'red'
-        ? 'bg-[#F5CB9D]/70 duration-0' // Immediate fade-in for asks
-        : 'bg-[#2D9DA8]/70 duration-0' // Immediate fade-in for bids
-    }`;
+  const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors cursor-pointer ${
+    isBlinking
+      ? color === 'red'
+        ? 'bg-[#F5CB9D]/70' // Fill blink for asks
+        : 'bg-[#2D9DA8]/70' // Fill blink for bids
+      : 'bg-transparent' // Default background
+  } ${
+    isSelected
+      ? 'border border-[#FFF]' // 1px border on click
+      : 'border border-transparent' // No border by default
+  }`;
 
   return (
-    <li className="relative w-full mb-1">
+    <li
+      className="relative w-full mb-1"
+      onClick={handleSelect} // Trigger the select action
+    >
       {/* Progress Bar Background */}
       <div
         className="absolute top-0 left-0 h-full"
@@ -102,10 +117,14 @@ const Row = ({ size, price, total, progress, color }) => {
   );
 };
 
-const OrderBook = ({ selectedPair }) => {
+const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
   const [limit, setLimit] = useState(10);
   const [groupSize] = useState(1);
   const { asks, bids } = useGroupedOrderBook(selectedPair, limit, groupSize);
+
+  const [spreadValue, setSpreadValue] = useState(null);
+  const [spreadPercentage, setSpreadPercentage] = useState(null);
+  const [priceMidpoint, setPriceMidpoint] = useState(null);
 
   const addTotals = (rows, reverse = false) => {
     let total = 0;
@@ -121,15 +140,6 @@ const OrderBook = ({ selectedPair }) => {
     });
   };
 
-  // Calculate Market Midpoint
-  const calculateMarketMidpoint = () => {
-    if (bids.length === 0 || asks.length === 0) return null;
-    const highestBid = bids[0].price; // Highest bid price
-    const lowestAsk = asks[0].price; // Lowest ask price
-    return (highestBid + lowestAsk) / 2; // Average of the two
-  };
-
-  // Calculate Spread
   const calculateSpread = () => {
     if (bids.length === 0 || asks.length === 0) return { value: null, percentage: null };
     const highestBid = bids[0].price; // Highest bid price
@@ -140,8 +150,42 @@ const OrderBook = ({ selectedPair }) => {
     return { value: spreadValue, percentage: spreadPercentage };
   };
 
-  const marketMidpoint = calculateMarketMidpoint();
-  const { value: spreadValue, percentage: spreadPercentage } = calculateSpread();
+  const calculatePriceMidpoint = () => {
+    if (bids.length === 0 || asks.length === 0) return null;
+
+    const averageBids = bids.reduce((sum, bid) => sum + bid.price, 0) / bids.length;
+    const averageAsks = asks.reduce((sum, ask) => sum + ask.price, 0) / asks.length;
+
+    return (averageBids + averageAsks) / 2;
+  };
+
+  // Update spread and priceMidpoint whenever asks or bids change
+  useEffect(() => {
+    if (bids.length > 0 && asks.length > 0) {
+      const { value, percentage } = calculateSpread();
+      setSpreadValue(value);
+      setSpreadPercentage(percentage);
+
+      const newPriceMidpoint = calculatePriceMidpoint();
+      setPriceMidpoint(newPriceMidpoint);
+
+      // Notify the parent component of the updated priceMidpoint
+      if (onPriceMidpointChange) {
+        onPriceMidpointChange(newPriceMidpoint);
+      }
+    } else {
+      // Reset spread and midpoint values if data is unavailable
+      setSpreadValue(null);
+      setSpreadPercentage(null);
+      setPriceMidpoint(null);
+    }
+  }, [bids, asks, onPriceMidpointChange]); // Ensure bids and asks are dependencies
+
+  const handleRowSelect = (price) => {
+    if (onRowSelect) {
+      onRowSelect(price); // Pass the selected value to the parent
+    }
+  };
 
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
@@ -153,7 +197,9 @@ const OrderBook = ({ selectedPair }) => {
           className="bg-[#1E4D4E] text-white border border-[#2D9DA8] px-2 py-1 rounded text-xs"
         >
           {[10, 20, 50, 100, 500, 1000].map((l) => (
-            <option key={l} value={l}> {l} </option>
+            <option key={l} value={l}>
+              {l}
+            </option>
           ))}
         </select>
       </div>
@@ -167,25 +213,43 @@ const OrderBook = ({ selectedPair }) => {
       {/* Ask Section */}
       <ul className="flex flex-col w-full">
         {addTotals(asks, true).map((row, i) => (
-          <Row {...row} progress={row.progress} color="red" key={`ask-${i}`} />
+          <Row
+            {...row}
+            progress={row.progress}
+            color="red"
+            key={`ask-${i}`}
+            onSelect={handleRowSelect}
+          />
         ))}
       </ul>
 
       {/* Spread Section */}
-      <div className="font-bold text-[18px] flex justify-between border border-[#2D9DA8]/50 rounded-lg items-center py-1 px-2 my-2 text-sm font-semibold">
+      <div className="font-bold text-[18px] flex justify-between border border-[#2D9DA8]/50 rounded-lg items-center py-1 px-2 mt-4 mb-5 text-sm font-semibold">
         <div className="text-[#2D9DA8] text-md">Spread</div>
-        <span className="text-[#fff]">
-          {spreadValue !== null ? spreadValue.toFixed(4) : '—'}
-        </span>
+        <span className="text-[#fff]">{spreadValue !== null ? spreadValue.toFixed(4) : '—'}</span>
         <span className="text-[#C9C9C9] text-xs">
           {spreadPercentage !== null ? `${spreadPercentage.toFixed(2)}%` : '—'}
         </span>
       </div>
 
+      {/* Price Midpoint Section 
+      <div className="font-bold text-[18px] flex justify-between border border-[#2D9DA8]/50 rounded-lg items-center py-1 px-2 mb-5 text-sm font-semibold">
+        <div className="text-[#2D9DA8] text-md">Price Midpoint</div>
+        <span className="text-[#fff]">
+          {priceMidpoint !== null ? priceMidpoint.toFixed(4) : '—'}
+        </span>
+      </div>
+      */}
       {/* Bid Section */}
       <ul className="flex flex-col w-full">
         {addTotals(bids, true).map((row, i) => (
-          <Row {...row} progress={row.progress} color="green" key={`bid-${i}`} />
+          <Row
+            {...row}
+            progress={row.progress}
+            color="green"
+            key={`bid-${i}`}
+            onSelect={handleRowSelect}
+          />
         ))}
       </ul>
     </div>

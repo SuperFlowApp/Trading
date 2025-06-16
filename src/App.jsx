@@ -7,6 +7,7 @@ import CandleChart from './components/CandleChart.jsx';
 import OrderBook from './components/OrderBook.jsx';
 import LimitOrderForm from './components/PlaceOrderForm.jsx';
 import Infobar from './components/Infobar.jsx';
+import {baseQuotePairs } from './components/Infobar.jsx';
 
 import PositionsPanel from './components/Positions.jsx';
 import TradesModal from './components/Trades.jsx';
@@ -15,6 +16,8 @@ function App() {
   const [selectedPair, setSelectedPair] = useState('BTCUSDT');
   const [modalOpen, setModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('OrderBook'); // State for tab selection
+  const [priceMidpoint, setPriceMidpoint] = useState(null); // State to store priceMidpoint
+  const [selectedPrice, setSelectedPrice] = useState(null); // State to store selected price
 
   return (
     <AuthProvider>
@@ -68,7 +71,11 @@ function App() {
                     </button>
                   </div>
                   <div className="bg-[#002122] rounded-b-md p-2">
-                    {activeTab === 'OrderBook' && <OrderBook selectedPair={selectedPair} />}
+                    {activeTab === 'OrderBook' && <OrderBook
+                      selectedPair={selectedPair}
+                      onPriceMidpointChange={setPriceMidpoint}
+                      onRowSelect={setSelectedPrice} // Pass callback to update selectedPrice
+                    />}
                     {activeTab === 'Trades' && <TradesModal />}
                   </div>
                 </div>
@@ -78,7 +85,11 @@ function App() {
 
             {/* PositionsPanel*/}
             <div className="flex flex-col bg-[#002122] rounded-md min-w-0 overflow-hidden basis-[25%]">
-              <LimitOrderForm selectedPair={selectedPair} />
+              <LimitOrderForm
+                selectedPair={selectedPair}
+                priceMidpoint={priceMidpoint}
+                selectedPrice={selectedPrice} // Pass selected price as a prop
+              />
             </div>
           </div>
           <section className="bg-[#002122] text-white p-4">

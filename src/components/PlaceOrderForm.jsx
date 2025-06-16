@@ -101,12 +101,12 @@ function TpSlToggle() {
   );
 }
 
-function LimitOrderForm({ selectedPair }) {
+function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   const { token } = useAuth();
 
   const [balanceTotal, setBalanceTotal] = useState("--");
   const [balanceFree, setBalanceFree] = useState("--");
-  const [price, setPrice] = useState('');
+  const [price, setPrice] = useState(priceMidpoint || ''); // Initialize with priceMidpoint
   const [amount, setAmount] = useState('');
   const [side, setSide] = useState('buy');
   const [market, setMarket] = useState('limit');
@@ -114,12 +114,19 @@ function LimitOrderForm({ selectedPair }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Update price when selectedPrice changes
+  useEffect(() => {
+    if (selectedPrice) {
+      setPrice(selectedPrice); // Set the price to the selected value
+    }
+  }, [selectedPrice]);
+
   // Clear all fields and reset states when logged out
   useEffect(() => {
     if (!token) {
       setBalanceTotal("--");
       setBalanceFree("--");
-      setPrice('');
+      setPrice(''); // Reset price
       setAmount('');
       setSide('buy'); // Reset to default "buy"
       setMarket('limit'); // Reset to default "limit"
@@ -127,6 +134,7 @@ function LimitOrderForm({ selectedPair }) {
       setSuccess('');
     }
   }, [token]);
+
 
   const placeOrder = async () => {
     if (!token || !selectedPair || !price || !amount) {
@@ -237,9 +245,13 @@ function LimitOrderForm({ selectedPair }) {
       </div>
 
       {/* Balance Row */}
-      <div className="px-2 flex font-semibold gap-[20px] text-[16px] px-1">
-        <span className="text-[#7DADB1]">Total Balance: <span className="text-[#fff]">{balanceTotal} USDT</span></span>
-        <span className="text-[#7DADB1]">Free Balance: <span className="text-[#fff]">{balanceFree} USDT</span></span>
+      <div className="px-8 flex justify-between  font-semibold gap-[20px] text-[16px] px-1">
+        <span className="text-[#7DADB1]">
+          Total Balance: <span className="text-[#fff]"><br/>{balanceTotal !== "--" ? parseFloat(balanceTotal).toFixed(3) : "--"} USDT</span>
+        </span>
+        <span className="text-[#7DADB1]">
+          Free Balance: <span className="text-[#fff]"><br/>{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(3) : "--"} USDT</span>
+        </span>
       </div>
 
       {/* Side + Leverage */}
@@ -279,15 +291,26 @@ function LimitOrderForm({ selectedPair }) {
       {/* Form Fields */}
       <div className="px-2 flex flex-col gap-3 mt-3 text-sm">
         <label className="text-white">Limit Price</label>
-        <input
-          type="number"
-          placeholder="$0.0"
-          className="bg-[#1E4D4E] text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          disabled={!token} // Disable if not signed in
-          style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
-        />
+        <div className="relative">
+          <input
+            type="number"
+            placeholder="$0.0"
+            className="bg-[#1E4D4E] text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none w-full pr-12" // Add padding for the "Mid" label
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            disabled={!token} // Disable if not signed in
+            style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
+          />
+          {/* "Mid" Label */}
+          <button
+            type="button"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#2D9DA8] text-black px-2 py-1 rounded text-xs font-semibold hover:bg-[#23848b]"
+            onClick={() => setPrice(priceMidpoint?.toFixed(4) || '')} // Set price to priceMidpoint
+            disabled={!priceMidpoint} // Disable if priceMidpoint is null
+          >
+            Mid
+          </button>
+        </div>
 
         <label className="text-white">Amount</label>
         <input

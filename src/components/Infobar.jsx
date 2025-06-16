@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 
+// Exported list of base and quote pairs
+export let baseQuotePairs = [];
+
 function Infobar({ selectedPair, setSelectedPair }) {
   const [ticker, setTicker] = useState({});
   const [markets, setMarkets] = useState([]);
@@ -16,6 +19,9 @@ function Infobar({ selectedPair, setSelectedPair }) {
         const data = await res.json();
         const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
         setMarkets(filtered);
+
+        // Update baseQuotePairs for export
+        baseQuotePairs = filtered.map(mkt => ({ base: mkt.base, quote: mkt.quote }));
 
         // Fetch tickers for all pairs
         const tickersObj = {};
