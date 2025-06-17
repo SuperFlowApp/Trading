@@ -25,19 +25,17 @@ const Trades = () => {
 
     return (
         <div className="w-full rounded-lg shadow-lg text-white">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-[#2D9DA8] text-lg">Trades History</h2>
-            </div>
-            <div className="overflow-y-auto max-h-96">
+
+            <div className="overflow-y-auto max-h-96"> 
                 <ul className="">
                     {trades.map((trade) => (
                         <li
                             key={trade.id}
-                            className={`mt-1 rounded-md flex justify-between items-center py-2 px-4 ${trade.side === 'BUY' ? 'bg-[#00B7C9]/20' : 'bg-[#F5CB9D]/20'
+                            className={`mt-1 rounded-md flex justify-between items-center py-2 px-4 ${trade.side === 'BUY' ? 'bg-primary2/20' : 'bg-primary1/20'
                                 }`}
                         >
                             <span
-                                className={`font-medium ${trade.side === 'BUY' ? 'text-[#00B7C9]' : 'text-[#F5CB9D]'
+                                className={`font-medium ${trade.side === 'BUY' ? 'text-primary2' : 'text-primary1'
                                     }`}
                             >
                                 {trade.side}
