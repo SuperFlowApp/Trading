@@ -27,15 +27,15 @@ const getTimeframeMs = (tf) => {
 const CandleChart = ({ selectedPair }) => {
   const [timeframe, setTimeframe] = useState('1m');
   const [candles, setCandles] = useState([]);
-  const [showCandle, setShowCandle] = useState(true);
-  const [showLine, setShowLine] = useState(true);
+  const [showCandle, setShowCandle] = useState(true); // Default to candlestick chart
+  const [showLine, setShowLine] = useState(false);    // Disable line chart by default
 
   useEffect(() => {
     let destroyed = false;
 
     async function fetchCandles() {
       try {
-        const res = await fetch( 
+        const res = await fetch(
           `https://fastify-serverless-function-rimj.onrender.com/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
         );
         const data = await res.json();
@@ -77,9 +77,9 @@ const CandleChart = ({ selectedPair }) => {
 
   const rootChartType =
     showCandle && !showLine ? 'candlestick' :
-    !showCandle && showLine ? 'line' :
-    !showCandle && !showLine && timeframe === 'bar' ? 'bar' :
-    'area';
+      !showCandle && showLine ? 'line' :
+        !showCandle && !showLine && timeframe === 'bar' ? 'bar' :
+          'area';
   const tooltipShared = showCandle && !showLine ? false : true;
 
   const options = {
@@ -187,18 +187,19 @@ const CandleChart = ({ selectedPair }) => {
             cursor: 'pointer',
           }}
         >
-          <option value="true-true" style={{ color: '#fff' }}>
-            Candlestick & Line
-          </option>
           <option value="true-false" style={{ color: '#fff' }}>
             Candlestick Only
           </option>
           <option value="false-true" style={{ color: '#fff' }}>
             Line Only
           </option>
+          <option value="true-true" style={{ color: '#fff' }}>
+            Candlestick & Line
+          </option>
           <option value="false-false" style={{ color: '#fff' }}>
             Area Chart
           </option>
+          
         </select>
       </div>
 
