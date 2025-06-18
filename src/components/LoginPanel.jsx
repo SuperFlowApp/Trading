@@ -147,7 +147,7 @@ function AuthPanel({ onLoginSuccess }) {
 
   // --- UI ---
   return (
-    <div className="bg-[#0D2221] text-white p-6 rounded-lg w-full max-w-md mx-auto space-y-4 border border-[#7DADB1]">
+    <div className="bg-backgroundlight text-white p-6 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2">
       {/* Username viewer bar */}
       <div className="mb-4 flex items-center justify-between px-4 py-2 rounded">
         <span className="text-sm font-bold text-white">
@@ -162,10 +162,9 @@ function AuthPanel({ onLoginSuccess }) {
             // --- Login Form ---
             <>
               <div>
-                <label className="block text-xs mb-1">Username</label>
                 <input
-                  className={`w-full px-4 py-2 rounded bg-[#1E4D4E] text-white border transition-colors ${usernameTouched && !validateUsername(username)
-                    ? "border-red-500"
+                  className={`w-full px-4 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${usernameTouched && !validateUsername(username)
+                    ? "border-warningcolor"
                     : "border-transparent"
                     }`}
                   placeholder="Username"
@@ -181,10 +180,9 @@ function AuthPanel({ onLoginSuccess }) {
                 />
               </div>
               <div>
-                <label className="block text-xs mb-1">Password</label>
                 <input
-                  className={`w-full px-4 py-2 rounded bg-[#1E4D4E] text-white border transition-colors ${passwordTouched && !validatePassword(password)
-                    ? "border-red-500"
+                  className={`w-full px-4 py-2 rounded bg-backgrounddark text-white  border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${passwordTouched && !validatePassword(password)
+                    ? "border-warningcolor"
                     : "border-transparent"
                     }`}
                   placeholder="Password"
@@ -201,20 +199,20 @@ function AuthPanel({ onLoginSuccess }) {
                 />
               </div>
               {loginError && (
-                <div className="bg-red-600 text-white text-xs rounded px-2 py-1 mt-2">
+                <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
                   {loginError}
                 </div>
               )}
               <div className="flex items-center gap-3 mt-2">
                 <button
                   onClick={handleLogin}
-                  className="bg-[#F5CB9D] text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
+                  className="bg-primary2 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
                   type="button"
                 >
                   Log in
                 </button>
                 <span
-                  className="text-[#2D9DA8] text-sm cursor-pointer hover:underline"
+                  className="text-primary2 text-sm cursor-pointer hover:underline"
                   onClick={() => {
                     setIsSignup(true);
                     setSignupError("");
@@ -232,12 +230,12 @@ function AuthPanel({ onLoginSuccess }) {
             </>
           ) : (
             // --- Signup Form ---
-            <div className="p-4 bg-[#18393A] rounded space-y-2">
+            <div className="p-4 rounded space-y-2">
               <div>
                 <label className="block text-xs mb-1">Username</label>
                 <input
-                  className={`w-full px-3 py-2 rounded bg-[#1E4D4E] text-white border transition-colors ${usernameTouched && !validateUsername(username)
-                    ? "border-red-500"
+                  className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${usernameTouched && !validateUsername(username)
+                    ? "border-warningcolor"
                     : "border-transparent"
                     }`}
                   placeholder="Username"
@@ -252,7 +250,7 @@ function AuthPanel({ onLoginSuccess }) {
                   required
                 />
                 {usernameTouched && !validateUsername(username) && (
-                  <div className="bg-red-600 text-white text-xs rounded px-2 py-1 mt-1">
+                  <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
                     Username must be at least 4 letters.
                   </div>
                 )}
@@ -260,8 +258,8 @@ function AuthPanel({ onLoginSuccess }) {
               <div>
                 <label className="block text-xs mb-1">Password</label>
                 <input
-                  className={`w-full px-3 py-2 rounded bg-[#1E4D4E] text-white border transition-colors ${passwordTouched && !validatePassword(password)
-                    ? "border-red-500"
+                  className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${passwordTouched && !validatePassword(password)
+                    ? "border-warningcolor"
                     : "border-transparent"
                     }`}
                   placeholder="Password"
@@ -277,7 +275,7 @@ function AuthPanel({ onLoginSuccess }) {
                   required
                 />
                 {passwordTouched && !validatePassword(password) && (
-                  <div className="bg-red-600 text-white text-xs rounded px-2 py-1 mt-1">
+                  <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
                     Password must have 1 uppercase letter, 1 number and 1 special character.
                   </div>
                 )}
@@ -285,8 +283,8 @@ function AuthPanel({ onLoginSuccess }) {
               <div>
                 <label className="block text-xs mb-1">Repeat Password</label>
                 <input
-                  className={`w-full px-3 py-2 rounded bg-[#1E4D4E] text-white border transition-colors ${repeatPasswordTouched && password !== repeatPassword
-                    ? "border-red-500"
+                  className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${repeatPasswordTouched && password !== repeatPassword
+                    ? "border-warningcolor"
                     : "border-transparent"
                     }`}
                   placeholder="Repeat Password"
@@ -302,26 +300,26 @@ function AuthPanel({ onLoginSuccess }) {
                   required
                 />
                 {repeatPasswordTouched && password !== repeatPassword && (
-                  <div className="bg-red-600 text-white text-xs rounded px-2 py-1 mt-1">
+                  <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
                     Passwords do not match.
                   </div>
                 )}
               </div>
               {signupError && (
-                <div className="bg-red-600 text-white text-xs rounded px-2 py-1 mt-2">
+                <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
                   {signupError}
                 </div>
               )}
               <div className="flex items-center gap-3 mt-2">
                 <button
                   onClick={createUser}
-                  className="bg-[#2D9DA8] px-4 py-2 rounded font-medium hover:bg-opacity-80"
+                  className="bg-primary2 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
                   type="button"
                 >
                   Sign up
                 </button>
                 <span
-                  className="text-[#F5CB9D] text-sm cursor-pointer hover:underline"
+                  className="text-primary2 text-sm cursor-pointer hover:underline"
                   onClick={() => {
                     setIsSignup(false);
                     setLoginError("");
@@ -348,7 +346,7 @@ function AuthPanel({ onLoginSuccess }) {
           <div className="mt-4 flex gap-2">
             <button
               onClick={logoutUser}
-              className="bg-red-400 px-4 py-2 rounded font-medium hover:bg-opacity-80"
+              className="bg-warningcolor px-4 py-2 rounded font-medium hover:bg-opacity-80"
               type="button"
             >
               Logout
