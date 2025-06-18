@@ -6,7 +6,7 @@
   line-height: 120%;
   font-weight: 400;
   color-scheme: light dark;
-  background-color: #021719;
+  background-color: theme('colors.backgroundlight'); /* Use Tailwind's theme function */
   letter-spacing:.06em;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -53,4 +53,19 @@
   opacity: 0.7;
   background-color: rgba(45, 157, 168, 0.1) !important;
   border-radius: 4px;
+}
+
+
+
+
+
+/* Hide the spinner for input[type="number"] */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* For Firefox */
 }

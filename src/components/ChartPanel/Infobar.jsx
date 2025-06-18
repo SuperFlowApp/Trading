@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-// Exported list of base and quote pairs
-export let baseQuotePairs = [];
+let selectedPairDetails = [{ base: null, quote: null }];
 
 function Infobar({ selectedPair, setSelectedPair }) {
   const [ticker, setTicker] = useState({});
@@ -19,9 +18,6 @@ function Infobar({ selectedPair, setSelectedPair }) {
         const data = await res.json();
         const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
         setMarkets(filtered);
-
-        // Update baseQuotePairs for export
-        baseQuotePairs = filtered.map(mkt => ({ base: mkt.base, quote: mkt.quote }));
 
         // Fetch tickers for all pairs
         const tickersObj = {};
@@ -81,28 +77,30 @@ function Infobar({ selectedPair, setSelectedPair }) {
   }, [dropdownOpen]);
 
   const selectedMarket = markets.find(m => m.symbol === selectedPair);
+  // Update selected pair details for export
+  selectedPairDetails = selectedMarket
 
   return (
-    <div className="w-full flex justify-between items-center px-4 py-2 rounded-md text-[#7DADB1] text-sm font-medium flex-wrap gap-4 whitespace-nowrap overflow-visible bg-[#002122]">
-      <div className="flex gap-10 items-start items-center">
+    <div className="">
+      <div className="flex gap-10 items-start items-center p-2">
         {/* Custom Dropdown */}
-        <div className="relative border border-[#1E4D4E] flex items-center gap-3 px-3 py-2 rounded-[10px]" ref={dropdownRef}>
+        <div className="relative bg-backgrounddark border border-secondary2 flex items-center gap-3 px-2 py-1 rounded-[10px] cursor-pointer"  onClick={() => setDropdownOpen(v => !v)} ref={dropdownRef}>
           <div className="flex flex-col text-white">
             <div className="font-bold text-base">
               {selectedMarket ? `${selectedMarket.base} / ${selectedMarket.quote}` : selectedPair}
             </div>
-            <div className="flex items-center gap-2 text-xs text-[#7DADB1]">
+            <div className="flex items-center gap-2 text-xs text-primary2">
               <span>{selectedMarket?.symbol || '...'}</span>
             </div>
           </div>
-          <div className="flex items-center justify-center w-6 h-6 rounded cursor-pointer" onClick={() => setDropdownOpen(v => !v)}>
+          <div className="flex items-center justify-center w-6 h-6 rounded">
             <img src="/assets/arrow.svg" alt="icon" className="w-2.5 h-[5px]" />
           </div>
           {dropdownOpen && (
-            <div className="absolute z-50 left-0 top-full mt-2 bg-[#00191A] border border-[#1E4D4E] rounded-lg shadow-lg w-[600px] max-h-[350px] overflow-auto">
-              <table className="min-w-full text-xs text-left text-[#7DADB1]">
+            <div className="absolute z-50 left-0 top-full mt-2 bg-backgrounddark border border-secondary2 rounded-lg shadow-lg w-[600px] max-h-[350px] overflow-auto">
+              <table className="min-w-full text-xs text-left">
                 <thead>
-                  <tr className="bg-[#003133] text-white">
+                  <tr className="bg-backgroundlight text-white">
                     <th className="px-2 py-1">Pair</th>
                     <th className="px-2 py-1">Last Price</th>
                     <th className="px-2 py-1">24h Change</th>
@@ -116,28 +114,28 @@ function Infobar({ selectedPair, setSelectedPair }) {
                     return (
                       <tr
                         key={mkt.id}
-                        className={`cursor-pointer hover:bg-[#01484B] ${selectedPair === mkt.symbol ? 'bg-[#013133]' : ''}`}
+                        className={`cursor-pointer border border-transparent hover:border-primary2 ${selectedPair === mkt.symbol ? 'bg-primary2/30' : ''}`}
                         onClick={() => {
                           setSelectedPair(mkt.symbol);
                           setDropdownOpen(false);
                         }}
                       >
                         <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>
-                        <td className="px-2 py-1 text-[#2D9DA8]">{t.last ?? "-"}</td>
-                        <td className={`px-2 py-1 ${t.change > 0 ? "text-[#00B7C9]" : t.change < 0 ? "text-[#F5CB9D]" : "text-[#7DADB1]"}`}>
+                        <td className="px-2 py-1">{t.last ?? "-"}</td>
+                        <td className={`px-2 py-1 ${t.change > 0 ? " text-primary2" : t.change < 0 ? "text-primary1" : "text-warningcolor"}`}>
                           {t.change !== undefined ? `${t.change} (${t.percentage}%)` : "-"}
                         </td>
-                        <td className="px-2 py-1 text-[#7DADB1]">{t.baseVolume ?? "-"}</td>
-                        <td className="px-2 py-1 text-[#7DADB1]">
+                        <td className="px-2 py-1">{t.baseVolume ?? "-"}</td>
+                        <td className="px-2 py-1">
                           {mkt.limits?.quantity
                             ? (
                               <span>
-                                <span className="text-[#2D9DA8]">{mkt.limits.quantity.min}</span>
-                                <span className="mx-1 text-[#7DADB1]">-</span>
-                                <span className="text-[#2D9DA8]">{mkt.limits.quantity.max}</span>
+                                <span className="">{mkt.limits.quantity.min}</span>
+                                <span className="mx-1 ">-</span>
+                                <span className="">{mkt.limits.quantity.max}</span>
                               </span>
                             )
-                            : <span className="text-[#7DADB1]">-</span>
+                            : <span className="">-</span>
                           }
                         </td>
                       </tr>
@@ -150,12 +148,12 @@ function Infobar({ selectedPair, setSelectedPair }) {
         </div>
 
         {/* Ticker Details */}
-        <div className="flex  text-[14px] items-center gap-8 text-[#8AABB2]">
+        <div className="flex  text-[14px] items-center gap-8 text-secondary1">
           <div className="flex flex-col">
             <span>Price:</span>
             <span className="text-white ">{ticker.last}</span>
           </div>
-          
+
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
 
           <div className="flex flex-col ">
@@ -197,7 +195,15 @@ function Infobar({ selectedPair, setSelectedPair }) {
         </div>
       </div>
     </div>
+
   );
+
+}
+
+// Function to get selected pair details
+export function getSelectedPairDetails() {
+  return selectedPairDetails;
+
 }
 
 export default Infobar;

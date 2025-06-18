@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from './AuthContext.jsx';
+import { useAuth } from '../context/Authentication.jsx';
 
+import { getSelectedPairDetails } from './ChartPanel/Infobar.jsx';
 
 const leverageSteps = [5, 10, 15, 20]
-const marketStates = ['X5', 'X10', 'X15', 'X20']
+const pairDetails = getSelectedPairDetails();
+console.log(pairDetails); // Debugging output
 
 function LeverageButton() {
   const [index, setIndex] = useState(0)
   const { token } = useAuth()
-  const symbol = "BTCUSDT" // or make this dynamic
+  const symbol = "BTCUSDT"
 
   const handleClick = async () => {
     const newIndex = (index + 1) % leverageSteps.length
@@ -113,6 +115,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails[0]); // Default to the first value
 
   // Update price when selectedPrice changes
   useEffect(() => {
@@ -223,9 +226,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       {/* Market/Limit Tabs */}
       <div className="flex justify-between items-center text-sm font-semibold">
         <button
-          className={`w-full py-2 font-semibold text-sm transition-colors ${
-            market === 'market' ? 'bg-[#1E4D4E]/50 text-[#fff] border-b-2 border-[#00B7C9]' : 'bg-[#000]/0 text-[#a9a9a9] border-b-2 border-[#00B7C9]/30 hover:bg-[#1E4D4E]/40'
-          }`}
+          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'market' ? 'text-[#fff] border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
+            }`}
           onClick={() => setMarket('market')}
           disabled={!token}
           style={!token ? { opacity: 0.5 } : {}}
@@ -233,9 +235,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           Market
         </button>
         <button
-          className={`w-full py-2 font-semibold text-sm transition-colors ${
-            market === 'limit' ? 'bg-[#1E4D4E]/40 text-[#fff] border-b-2 border-[#00B7C9]' : 'bg-[#000]/0 text-[#a9a9a9] border-b-2 border-[#00B7C9]/30 hover:bg-[#1E4D4E]/40'
-          }`}
+          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'limit' ? 'text-[#fff] border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
+            }`}
           onClick={() => setMarket('limit')}
           disabled={!token}
           style={!token ? { opacity: 0.5 } : {}}
@@ -246,23 +247,22 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
       {/* Balance Row */}
       <div className="px-8 flex justify-between  font-semibold gap-[20px] text-[16px] px-1">
-        <span className="text-[#7DADB1]">
-          Total Balance: <span className="text-[#fff]"><br/>{balanceTotal !== "--" ? parseFloat(balanceTotal).toFixed(3) : "--"} USDT</span>
+        <span className="text-secondary1">
+          Total Balance: <span className="text-[#fff]"><br />{balanceTotal !== "--" ? parseFloat(balanceTotal).toFixed(3) : "--"} USDT</span>
         </span>
-        <span className="text-[#7DADB1]">
-          Free Balance: <span className="text-[#fff]"><br/>{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(3) : "--"} USDT</span>
+        <span className="text-secondary1">
+          Free Balance: <span className="text-[#fff]"><br />{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(3) : "--"} USDT</span>
         </span>
       </div>
 
       {/* Side + Leverage */}
       <div className="px-2 flex gap-4 items-center">
-        <div className="flex w-full gap-2 bg-[#1E4D4E] p-1 rounded-lg">
+        <div className="flex w-full gap-2 bg-backgrounddark border border-secondary2 p-1 rounded-lg">
           <button
-            className={`w-full py-1 rounded-md font-bold ${
-              side === 'buy'
-                ? 'bg-[#00B7C9] border border-[#00000000]'
-                : 'hover:border border-[#00B7C9] text-white'
-            } flex items-center justify-center gap-2`}
+            className={`w-full py-1 rounded-md font-bold ${side === 'buy'
+              ? 'bg-primary2 text-black border border-transparent'
+              : 'hover:border border-primary2 text-white'
+              } flex items-center justify-center gap-2`}
             onClick={() => setSide('buy')}
             disabled={!token} // Disable if not signed in
             style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
@@ -270,11 +270,10 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
             Buy
           </button>
           <button
-            className={`w-full py-1 rounded-md font-bold  ${
-              side === 'sell'
-                ? 'bg-[#F5CB9D] border border-[#00000000]'
-                : 'hover:border border-[#F5CB9D] text-white'
-            } flex items-center justify-center gap-2`}
+            className={`w-full py-1 rounded-md font-bold  ${side === 'sell'
+              ? 'bg-primary1 text-black border border-transparent'
+              : 'hover:border border-primary1 text-white'
+              } flex items-center justify-center gap-2`}
             onClick={() => setSide('sell')}
             disabled={!token} // Disable if not signed in
             style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
@@ -283,7 +282,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           </button>
         </div>
 
-        <div className="w-[48px] h-[38px] flex items-center justify-center bg-[#1E4D4E] rounded-lg hover:border hover:border-[#F5CB9D] hover:bg-[#276c6d]">
+        <div className="w-[48px] h-[38px] flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer">
           <LeverageButton />
         </div>
       </div>
@@ -291,32 +290,45 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       {/* Form Fields */}
       <div className="px-2 flex flex-col gap-3 mt-3 text-sm">
         <label className="text-white">Limit Price</label>
-        <div className="relative">
-          <input
-            type="number"
-            placeholder="$0.0"
-            className="bg-[#1E4D4E] text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none w-full pr-12" // Add padding for the "Mid" label
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            disabled={!token} // Disable if not signed in
-            style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
-          />
-          {/* "Mid" Label */}
-          <button
-            type="button"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#2D9DA8] text-black px-2 py-1 rounded text-xs font-semibold hover:bg-[#23848b]"
-            onClick={() => setPrice(priceMidpoint?.toFixed(4) || '')} // Set price to priceMidpoint
-            disabled={!priceMidpoint} // Disable if priceMidpoint is null
+        <div className="flex flex-row gap-2 w-full justify-between items-center">
+          <div className="w-full relative">
+            <input
+              type="number"
+              placeholder="$0.0"
+              className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 "
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              disabled={!token} // Disable if not signed in
+              style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
+            />
+            {/* "Mid" Button */}
+            <button
+              type="button"
+              className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
+              onClick={() => setPrice(priceMidpoint?.toFixed(4) || '')} // Set price to priceMidpoint
+              disabled={!priceMidpoint} // Disable if priceMidpoint is null
+            >
+              Mid
+            </button>
+
+
+          </div>
+          {/* Dropdown for selecting currency */}
+          <select
+            className="self-end w-20 bg-backgrounddark text-secondary1 hover:text-white border border-secondary2  hover:border-secondary1 px-2 h-full rounded text-sm font-semibold hover:bg-backgrounddark cursor-pointer"
+            value={selectedDropdownValue}
+            onChange={(e) => setSelectedDropdownValue(e.target.value)}
           >
-            Mid
-          </button>
+            <option value={pairDetails.base}>{pairDetails.base}</option>
+            <option value={pairDetails.quote}>{pairDetails.quote}</option>
+          </select>
         </div>
 
         <label className="text-white">Amount</label>
         <input
           type="number"
           placeholder="0.0"
-          className="bg-[#1E4D4E] w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none"
+          className="bg-backgrounddark border border-secondary2 hover:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           disabled={!token} // Disable if not signed in
@@ -326,11 +338,10 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
       {/* Place Order Button */}
       <button
-        className={`mx-2  mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${
-          side === 'buy'
-            ? 'bg-[#2D9DA8] text-black hover:bg-[#23848b]'
-            : 'bg-[#F5CB9D] text-black hover:bg-[#e6b87d]'
-        }`}
+        className={`mx-2 mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${side === 'buy'
+          ? 'bg-primary2 text-black hover:bg-primary2/80'
+          : 'bg-primary1 text-black hover:bg-primary1/80'
+          }`}
         type="button"
         disabled={!token || loading} // Disable if not signed in or loading
         style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
