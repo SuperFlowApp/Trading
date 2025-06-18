@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-let selectedPairDetails = [{ base: null, quote: null }];
-
 function Infobar({ selectedPair, setSelectedPair }) {
   const [ticker, setTicker] = useState({});
   const [markets, setMarkets] = useState([]);
@@ -35,7 +33,9 @@ function Infobar({ selectedPair, setSelectedPair }) {
 
         // Auto-set first pair if none selected
         if (!selectedPair && filtered.length > 0) {
-          setSelectedPair(filtered[0].symbol);
+          const firstPair = filtered[0].symbol;
+          setSelectedPair(firstPair);
+          localStorage.setItem('selectedPair', firstPair); // Persist selected pair
         }
       } catch (err) {
         console.error('Failed to fetch trading pairs:', err);
@@ -53,6 +53,12 @@ function Infobar({ selectedPair, setSelectedPair }) {
         const res = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${selectedPair}`);
         const data = await res.json();
         setTicker(data);
+
+        // Persist selected pair details
+        const selectedMarket = markets.find(m => m.symbol === selectedPair);
+        if (selectedMarket) {
+          localStorage.setItem('selectedPairDetails', JSON.stringify(selectedMarket));
+        }
       } catch (err) {
         console.error('Failed to fetch ticker:', err);
       }
@@ -61,7 +67,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
     fetchTicker();
     const interval = setInterval(fetchTicker, 5000);
     return () => clearInterval(interval);
-  }, [selectedPair]);
+  }, [selectedPair, markets]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -76,15 +82,21 @@ function Infobar({ selectedPair, setSelectedPair }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen]);
 
+  // Load selected pair from localStorage on component mount
+  useEffect(() => {
+    const storedPair = localStorage.getItem('selectedPair');
+    if (storedPair) {
+      setSelectedPair(storedPair);
+    }
+  }, [setSelectedPair]);
+
   const selectedMarket = markets.find(m => m.symbol === selectedPair);
-  // Update selected pair details for export
-  selectedPairDetails = selectedMarket
 
   return (
     <div className="">
       <div className="flex gap-10 items-start items-center p-2">
         {/* Custom Dropdown */}
-        <div className="relative bg-backgrounddark border border-secondary2 flex items-center gap-3 px-2 py-1 rounded-[10px] cursor-pointer"  onClick={() => setDropdownOpen(v => !v)} ref={dropdownRef}>
+        <div className="relative bg-backgrounddark border border-secondary2 flex items-center gap-3 px-2 py-1 rounded-[10px] cursor-pointer" onClick={() => setDropdownOpen(v => !v)} ref={dropdownRef}>
           <div className="flex flex-col text-white">
             <div className="font-bold text-base">
               {selectedMarket ? `${selectedMarket.base} / ${selectedMarket.quote}` : selectedPair}
@@ -118,6 +130,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
                         onClick={() => {
                           setSelectedPair(mkt.symbol);
                           setDropdownOpen(false);
+                          localStorage.setItem('selectedPair', mkt.symbol); // Persist selected pair
                         }}
                       >
                         <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>
@@ -202,8 +215,8 @@ function Infobar({ selectedPair, setSelectedPair }) {
 
 // Function to get selected pair details
 export function getSelectedPairDetails() {
-  return selectedPairDetails;
-
+  const storedDetails = localStorage.getItem('selectedPairDetails');
+  return storedDetails ? JSON.parse(storedDetails) : { base: null, quote: null };
 }
 
 export default Infobar;
