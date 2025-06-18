@@ -89,8 +89,17 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   }, [token]);
 
   const placeOrder = async () => {
-    if (!token || !selectedPair || !price || !amount) {
+    if (!token || !selectedPair || !amount) {
       setError('Please fill all fields.');
+      return;
+    }
+
+    // Automatically set price to priceMidpoint if in "market" tab
+    const finalPrice = market === 'market' ? priceMidpoint?.toFixed(1) : price;
+    console.log(finalPrice)
+
+    if (!finalPrice) {
+      setError('Price is required.');
       return;
     }
 
@@ -104,7 +113,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       side: side.toUpperCase(),
       positionSide: 'BOTH',
       quantity: parseFloat(amount),
-      price: parseFloat(price),
+      price: parseFloat(finalPrice),
       timeInForce: 'GTC',
       orderRespType: 'ACK',
       params: {
@@ -231,7 +240,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   // Update the amount field whenever sliderValue changes
   useEffect(() => {
     const calculatedAmount = (sliderValue / 100) * balanceFree;
-    setAmount(calculatedAmount.toFixed(2)); // Set the calculated value to the amount field
+    setAmount(calculatedAmount.toFixed(1)); // Set the calculated value to the amount field
   }, [sliderValue, balanceFree]);
 
   return (
@@ -302,7 +311,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       {/* Balance Row */}
       <div className="px-2 font-semibold text-[12px]">
         <span className="flex items-center justify-between w-full text-secondary1">
-          Free Balance: <span className="text-white">{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(3) : "--"} USDT</span>
+          Free Balance: <span className="text-white">{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(1) : "--"} USDT</span>
         </span>
       </div>
 
@@ -328,7 +337,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
                 <button
                   type="button"
                   className=" absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
-                  onClick={() => setPrice(priceMidpoint?.toFixed(4) || '')} // Set price to priceMidpoint
+                  onClick={() => setPrice(priceMidpoint?.toFixed(1) || '')} // Set price to priceMidpoint
                   disabled={!priceMidpoint} // Disable if priceMidpoint is null
                 >
                   Mid
