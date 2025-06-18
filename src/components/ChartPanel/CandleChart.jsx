@@ -144,7 +144,7 @@ const CandleChart = ({ selectedPair }) => {
   const timeframes = ['1m', '5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '3d', '1w', '1M'];
 
   return (
-    <div id="chart" className="chart-style relative pt-[6px]">
+    <div id="chart" className=" chart-style relative pt-[6px]">
       <div style={{ marginBottom: '8px', display: 'flex', gap: '10px' }}>
         {/* Timeframe Selector */}
         <select
@@ -208,7 +208,7 @@ const CandleChart = ({ selectedPair }) => {
         options={options}
         series={series}
         type={rootChartType}
-        height={350}
+        height={450}
       />
     </div>
   );
