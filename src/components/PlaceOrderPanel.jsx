@@ -5,7 +5,6 @@ import { getSelectedPairDetails } from './ChartPanel/Infobar.jsx';
 
 const leverageSteps = [5, 10, 15, 20]
 const pairDetails = getSelectedPairDetails();
-console.log(pairDetails); // Debugging output
 
 function LeverageButton() {
   const [index, setIndex] = useState(0)
@@ -33,7 +32,6 @@ function LeverageButton() {
         body: JSON.stringify(requestBody),
       })
       const data = await response.json()
-      //console.log("Leverage API response:", data)
     } catch (err) {
       console.error('Failed to set leverage:', err)
     }
@@ -96,7 +94,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
     // Automatically set price to priceMidpoint if in "market" tab
     const finalPrice = market === 'market' ? priceMidpoint?.toFixed(1) : price;
-    console.log(finalPrice)
 
     if (!finalPrice) {
       setError('Price is required.');
@@ -245,7 +242,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
   return (
     <div className="w-full text-white flex flex-col gap-4">
-      {/* Market/Limit Tabs */}
+      {/* Head Tabs */}
       <div className="flex justify-between items-center text-sm font-semibold">
         <button
           className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'market' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
@@ -315,9 +312,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
         </span>
       </div>
 
-      {/* Form Fields */}
-
-
+      {/* Conditionally render the Price field */}
       <div className="px-2 flex flex-col gap-3 mt-3 text-sm">
         {market !== 'market' && (
           <>
@@ -363,15 +358,21 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
                 disabled={!token} // Disable if not signed in
                 style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
               />
-              {/* Dropdown for selecting currency */}
-              <select
-                className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer"
-                value={selectedDropdownValue}
-                onChange={(e) => setSelectedDropdownValue(e.target.value)}
-              >
-                <option value={pairDetails.base}>{pairDetails.base}</option>
-                <option value={pairDetails.quote}>{pairDetails.quote}</option>
-              </select>
+              {/* Selecting currency */}
+              <div className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer">
+                <button
+                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.base ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary1 hover:text-white'}`}
+                  onClick={() => setSelectedDropdownValue(pairDetails.base)}
+                >
+                  {pairDetails.base}
+                </button>
+                <button
+                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.quote ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary1 hover:text-white'}`}
+                  onClick={() => setSelectedDropdownValue(pairDetails.quote)}
+                >
+                  {pairDetails.quote}
+                </button>
+              </div>
             </div>
 
           </>
