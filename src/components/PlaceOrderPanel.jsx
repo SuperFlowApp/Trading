@@ -49,78 +49,27 @@ function LeverageButton() {
 
 
 
-function AmountSlider() {
-  const [sliderValue, setSliderValue] = useState(0);
-
-  return (
-    <div className="flex items-center gap-3 mt-3">
-      <input
-        type="range"
-        min="0"
-        max="100"
-        step="1"
-        value={sliderValue}
-        onChange={(e) => setSliderValue(e.target.value)}
-        className="w-full h-2 bg-[#1E4D4E] rounded-lg appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:h-4
-                   [&::-webkit-slider-thumb]:w-4
-                   [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-[#2D9DA8]
-                   [&::-webkit-slider-thumb]:shadow
-                   [&::-webkit-slider-thumb]:transition
-                   [&::-webkit-slider-thumb]:duration-200
-                   [&::-moz-range-thumb]:bg-[#2D9DA8]
-                   [&::-moz-range-thumb]:rounded-full"
-      />
-      <div className="min-w-[40px] text-right text-sm text-gray-400">
-        {sliderValue}%
-      </div>
-    </div>
-  );
-}
-
-function TpSlToggle() {
-  const [enabled, setEnabled] = useState(false);
-
-  return (
-    <div className="flex items-center gap-2.5 mt-3">
-      {/* Switch */}
-      <label className="relative inline-flex items-center w-[34px] h-[18px]">
-        <input
-          type="checkbox"
-          checked={enabled}
-          onChange={() => setEnabled(!enabled)}
-          className="sr-only peer"
-        />
-        <div className="w-full h-full bg-[#1E4D4E] rounded-full peer-checked:bg-[#2D9DA8] transition-colors duration-300" />
-        <div className="absolute left-[3px] bottom-[3px] w-[12px] h-[12px] bg-[#87CFD4] rounded-full transition-transform duration-300 peer-checked:translate-x-[16px]" />
-      </label>
-
-      {/* Label */}
-      <span className="text-sm text-[#87CFD4]">TP / SL</span>
-    </div>
-  );
-}
-
 function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   const { token } = useAuth();
 
   const [balanceTotal, setBalanceTotal] = useState("--");
   const [balanceFree, setBalanceFree] = useState("--");
-  const [price, setPrice] = useState(priceMidpoint || ''); // Initialize with priceMidpoint
+  const [price, setPrice] = useState(priceMidpoint || '');
   const [amount, setAmount] = useState('');
   const [side, setSide] = useState('buy');
   const [market, setMarket] = useState('limit');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails[0]); // Default to the first value
+  const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails[0]);
+  const [sliderValue, setSliderValue] = useState(0); // State for slider value
+
+  const calcAvailableSlider = sliderValue * balanceFree; // Calculate globally available value
 
   // Update price when selectedPrice changes
   useEffect(() => {
     if (selectedPrice) {
-      setPrice(selectedPrice); // Set the price to the selected value
+      setPrice(selectedPrice);
     }
   }, [selectedPrice]);
 
@@ -129,15 +78,15 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     if (!token) {
       setBalanceTotal("--");
       setBalanceFree("--");
-      setPrice(''); // Reset price
+      setPrice('');
       setAmount('');
-      setSide('buy'); // Reset to default "buy"
-      setMarket('limit'); // Reset to default "limit"
+      setSide('buy');
+      setMarket('limit');
       setError('');
       setSuccess('');
+      setSliderValue(0); // Reset slider to default value
     }
   }, [token]);
-
 
   const placeOrder = async () => {
     if (!token || !selectedPair || !price || !amount) {
@@ -221,12 +170,76 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     return () => clearInterval(interval);
   }, [token]);
 
+
+  function AmountSlider({ sliderValue, setSliderValue }) {
+    return (
+      <div className="flex items-center gap-3 mt-3">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value={sliderValue}
+          onChange={(e) => setSliderValue(e.target.value)}
+          className="w-full h-2 bg-secondary2/60 rounded-lg appearance-none cursor-pointer
+                   bg-secondary2/60
+                   [&::-webkit-slider-thumb]:appearance-none
+                   [&::-webkit-slider-thumb]:h-4
+                   [&::-webkit-slider-thumb]:w-4
+                   [&::-webkit-slider-thumb]:rounded-full
+                   [&::-webkit-slider-thumb]:bg-white
+                   [&::-webkit-slider-thumb]:shadow
+                   [&::-webkit-slider-thumb]:transition
+                   [&::-webkit-slider-thumb]:duration-200
+                   [&::-moz-range-thumb]:bg-white
+                   [&::-moz-range-thumb]:rounded-full"
+          style={{
+            background: `linear-gradient(to right, #565A93 0%, #565A93 ${sliderValue}%, #565A9350 ${sliderValue}%, #565A9350 100%)`
+          }}
+        />
+        <div className="min-w-[40px] text-right text-sm text-gray-400">
+          {sliderValue}%
+        </div>
+      </div>
+    );
+  }
+
+  function TpSlToggle() {
+    const [enabled, setEnabled] = useState(false);
+
+    return (
+      <div className="flex items-center gap-2.5 mt-3">
+        {/* Switch */}
+        <label className="relative inline-flex items-center w-[34px] h-[18px]">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={() => setEnabled(!enabled)}
+            className="sr-only peer"
+          />
+          <div className="w-full h-full bg-[#1E4D4E] rounded-full peer-checked:bg-[#2D9DA8] transition-colors duration-300" />
+          <div className="absolute left-[3px] bottom-[3px] w-[12px] h-[12px] bg-[#87CFD4] rounded-full transition-transform duration-300 peer-checked:translate-x-[16px]" />
+        </label>
+
+        {/* Label */}
+        <span className="text-sm text-[#87CFD4]">TP / SL</span>
+      </div>
+    );
+  }
+
+
+  // Update the amount field whenever sliderValue changes
+  useEffect(() => {
+    const calculatedAmount = (sliderValue / 100) * balanceFree;
+    setAmount(calculatedAmount.toFixed(2)); // Set the calculated value to the amount field
+  }, [sliderValue, balanceFree]);
+
   return (
     <div className="w-full text-white flex flex-col gap-4">
       {/* Market/Limit Tabs */}
       <div className="flex justify-between items-center text-sm font-semibold">
         <button
-          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'market' ? 'text-[#fff] border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
+          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'market' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
             }`}
           onClick={() => setMarket('market')}
           disabled={!token}
@@ -235,7 +248,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           Market
         </button>
         <button
-          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'limit' ? 'text-[#fff] border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
+          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'limit' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
             }`}
           onClick={() => setMarket('limit')}
           disabled={!token}
@@ -243,17 +256,17 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
         >
           Limit
         </button>
+        <button
+          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'pro' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
+            }`}
+          onClick={() => setMarket('pro')}
+          disabled={!token}
+          style={!token ? { opacity: 0.5 } : {}}
+        >
+          Pro
+        </button>
       </div>
 
-      {/* Balance Row */}
-      <div className="px-8 flex justify-between  font-semibold gap-[20px] text-[16px] px-1">
-        <span className="text-secondary1">
-          Total Balance: <span className="text-[#fff]"><br />{balanceTotal !== "--" ? parseFloat(balanceTotal).toFixed(3) : "--"} USDT</span>
-        </span>
-        <span className="text-secondary1">
-          Free Balance: <span className="text-[#fff]"><br />{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(3) : "--"} USDT</span>
-        </span>
-      </div>
 
       {/* Side + Leverage */}
       <div className="px-2 flex gap-4 items-center">
@@ -286,56 +299,78 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           <LeverageButton />
         </div>
       </div>
-
-      {/* Form Fields */}
-      <div className="px-2 flex flex-col gap-3 mt-3 text-sm">
-        <label className="text-white">Limit Price</label>
-        <div className="flex flex-row gap-2 w-full justify-between items-center">
-          <div className="w-full relative">
-            <input
-              type="number"
-              placeholder="$0.0"
-              className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 "
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              disabled={!token} // Disable if not signed in
-              style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
-            />
-            {/* "Mid" Button */}
-            <button
-              type="button"
-              className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
-              onClick={() => setPrice(priceMidpoint?.toFixed(4) || '')} // Set price to priceMidpoint
-              disabled={!priceMidpoint} // Disable if priceMidpoint is null
-            >
-              Mid
-            </button>
-
-
-          </div>
-          {/* Dropdown for selecting currency */}
-          <select
-            className="self-end w-20 bg-backgrounddark text-secondary1 hover:text-white border border-secondary2  hover:border-secondary1 px-2 h-full rounded text-sm font-semibold hover:bg-backgrounddark cursor-pointer"
-            value={selectedDropdownValue}
-            onChange={(e) => setSelectedDropdownValue(e.target.value)}
-          >
-            <option value={pairDetails.base}>{pairDetails.base}</option>
-            <option value={pairDetails.quote}>{pairDetails.quote}</option>
-          </select>
-        </div>
-
-        <label className="text-white">Amount</label>
-        <input
-          type="number"
-          placeholder="0.0"
-          className="bg-backgrounddark border border-secondary2 hover:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          disabled={!token} // Disable if not signed in
-          style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
-        />
+      {/* Balance Row */}
+      <div className="px-2 font-semibold text-[12px]">
+        <span className="flex items-center justify-between w-full text-secondary1">
+          Free Balance: <span className="text-white">{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(3) : "--"} USDT</span>
+        </span>
       </div>
 
+      {/* Form Fields */}
+
+
+      <div className="px-2 flex flex-col gap-3 mt-3 text-sm">
+        {market !== 'market' && (
+          <>
+            <label className="text-white">Price</label>
+            <div className="gap-2 w-full justify-between items-center">
+              <div className="w-full relative">
+                <input
+                  type="number"
+                  placeholder="$0.0"
+                  className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 "
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  disabled={!token} // Disable if not signed in
+                  style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
+                />
+                {/* "Mid" Button */}
+                <button
+                  type="button"
+                  className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
+                  onClick={() => setPrice(priceMidpoint?.toFixed(4) || '')} // Set price to priceMidpoint
+                  disabled={!priceMidpoint} // Disable if priceMidpoint is null
+                >
+                  Mid
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+
+        {/* Conditionally render the Amount field */}
+        {market !== '' && (
+          <>
+            <label className="text-white">Size</label>
+            <div className="w-full relative">
+
+              <input
+                type="number"
+                placeholder="0.0"
+                className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={!token} // Disable if not signed in
+                style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
+              />
+              {/* Dropdown for selecting currency */}
+              <select
+                className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
+                value={selectedDropdownValue}
+                onChange={(e) => setSelectedDropdownValue(e.target.value)}
+              >
+                <option value={pairDetails.base}>{pairDetails.base}</option>
+                <option value={pairDetails.quote}>{pairDetails.quote}</option>
+              </select>
+            </div>
+
+          </>
+        )}
+      </div>
+      <div className='px-4'>
+        <AmountSlider sliderValue={sliderValue} setSliderValue={setSliderValue} />
+      </div>
       {/* Place Order Button */}
       <button
         className={`mx-2 mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${side === 'buy'
