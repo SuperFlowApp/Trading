@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/Authentication";
+import { useAuth } from "./AuthContext";
 
 // Example: Replace with your actual data fetching logic
 const positions = [
@@ -31,7 +31,7 @@ function formatNumber(num, decimals = 2) {
   return Number(num).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
-const pnlColor = (pnl) => pnl >= 0 ? 'text-primary2' : 'text-warningcolor';
+const pnlColor = (pnl) => pnl >= 0 ? 'text-[#00B7C9]' : 'text-[#F5CB9D]';
 
 const Positions = () => {
   const { token } = useAuth();
@@ -67,7 +67,7 @@ const Positions = () => {
 
       <div className="overflow-x-auto ">
         <div className="min-w-[900px]">
-          <div className="grid grid-cols-8 gap-2  text-xs font-semibold text-secondary1">
+          <div className="grid grid-cols-8 gap-2  text-xs font-semibold text-[#8AABB2] px-4 py-2">
             <div>Pair</div>
             <div>Size</div>
             <div>Open Price</div>
@@ -80,9 +80,8 @@ const Positions = () => {
           {positions.map((pos, idx) => (
             <div
               key={pos.symbol + pos.positionSide}
-              className={`rounded-md grid grid-cols-8 gap-2 items-center px-3 py-1 mt-2 text-sm ${
-                idx % 2 ? 'bg-secondary1/10' : 'bg-secondary1/20'
-              }`}
+              className={`rounded-md grid grid-cols-8 gap-2 items-center px-3 py-3 mt-2 text-sm ${idx % 2 ? 'bg-[#1E4D4E]' : 'bg-[#1E4D4E]'
+                }`}
             >
               <div className="font-semibold">{pos.symbol} <span className="ml-1 text-xs text-gray-400">{pos.positionSide}</span></div>
               <div>{formatNumber(pos.positionAmt)}</div>
@@ -93,12 +92,12 @@ const Positions = () => {
                 {formatNumber(pos.unrealizedPnl)}
               </div>
               <div>
-                <button className="bg-backgrounddark  border border-transparent hover:border-secondary1 text-secondary1 hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
-                <button className="bg-backgrounddark  border border-transparent hover:border-secondary1 text-secondary1 hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
+                <button className="bg-[#00000050] hover:bg-[#ffffff10] text-[#fff] px-2 py-1 rounded text-xs mr-1">Set TP</button>
+                <button className="bg-[#00000050] hover:bg-[#ffffff10] text-[#fff] px-2 py-1 rounded text-xs">Set SL</button>
               </div>
               <div className="flex gap-1">
-                <button className=" border border-primary2 hover:border-secondary1 text-white px-2 py-1 rounded text-xs">Edit</button>
-                <button className="bg-warningcolor  border border-transparent hover:border-secondary1 text-white   px-2 py-1 rounded text-xs">Close</button>
+                <button className="bg-[#00B7C9] hover:bg-[#30D7E9] text-[#000] px-2 py-1 rounded text-xs">Edit</button>
+                <button className="bg-[#F5CB9D] hover:bg-[#FFEBAD] text-[#000]   px-2 py-1 rounded text-xs">Close</button>
               </div>
             </div>
           ))}

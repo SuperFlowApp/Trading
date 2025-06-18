@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { changePasswordApi } from "./apiAuth";
 
 function ManageAccountModal({ accessToken, apiKeyData, onClose }) {
   const [oldPassword, setOldPassword] = useState("");
@@ -28,7 +29,19 @@ function ManageAccountModal({ accessToken, apiKeyData, onClose }) {
     }
     if (!valid) return;
 
-    
+    try {
+      const data = await changePasswordApi({
+        accessToken,
+        apiKey: apiKeyData?.apiKey,
+        oldPassword,
+        newPassword,
+      });
+      setResponseData({ msg: data.msg || "Password changed", detail: data });
+      setOldPassword("");
+      setNewPassword("");
+    } catch (err) {
+      setResponseData({ msg: "Error changing password", detail: err.message });
+    }
   };
 
   return (

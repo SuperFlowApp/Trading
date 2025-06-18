@@ -35,7 +35,7 @@ const CandleChart = ({ selectedPair }) => {
 
     async function fetchCandles() {
       try {
-        const res = await fetch( 
+        const res = await fetch(
           `https://fastify-serverless-function-rimj.onrender.com/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
         );
         const data = await res.json();
@@ -71,15 +71,12 @@ const CandleChart = ({ selectedPair }) => {
   const series = [
     ...(showCandle ? [{ name: 'candles', type: 'candlestick', data: candles }] : []),
     ...(showLine ? [{ name: 'line', type: 'line', data: lineSeries }] : []),
-    ...(!showCandle && !showLine && timeframe === 'bar' ? [{ name: 'bar', type: 'bar', data: candles }] : []),
-    ...(!showCandle && !showLine && timeframe !== 'bar' ? [{ name: 'area', type: 'area', data: lineSeries }] : []),
   ];
 
   const rootChartType =
     showCandle && !showLine ? 'candlestick' :
-    !showCandle && showLine ? 'line' :
-    !showCandle && !showLine && timeframe === 'bar' ? 'bar' :
-    'area';
+      !showCandle && showLine ? 'line' :
+        'line';
   const tooltipShared = showCandle && !showLine ? false : true;
 
   const options = {
@@ -103,8 +100,9 @@ const CandleChart = ({ selectedPair }) => {
         },
         autoSelected: 'zoom',
       },
+
     },
-    colors: ['#2D9DA8', '#F59DEF'],
+    colors: ['#2D9DA8', '#F5CB9D'],
     stroke: { width: [1, 2], curve: 'smooth' },
     xaxis: {
       type: 'datetime',
@@ -130,15 +128,13 @@ const CandleChart = ({ selectedPair }) => {
         },
       },
     },
+
     plotOptions: {
       candlestick: {
-        colors: { upward: '#2D9DA8', downward: '#F59DEF' },
+        colors: { upward: '#2D9DA8', downward: '#F5CB9D' },
       },
     },
     grid: { borderColor: '#2c2c2c', strokeDashArray: 3 },
-    legend: {
-      show: false, // Disable the legend
-    },
   };
 
   const timeframes = ['1m', '5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '3d', '1w', '1M'];
@@ -146,19 +142,17 @@ const CandleChart = ({ selectedPair }) => {
   return (
     <div id="chart" className="chart-style relative pt-[6px]">
       <div style={{ marginBottom: '8px', display: 'flex', gap: '10px' }}>
-        {/* Timeframe Selector */}
         <select
           value={timeframe}
           onChange={(e) => setTimeframe(e.target.value)}
           style={{
-            backgroundColor: '#02001B',
-            color: '#8AABB2',
+            backgroundColor: '#002122',
+            color: '#ccc',
             padding: '6px 12px',
             borderRadius: '4px',
-            border: '1px solid #565A93',
+            border: '1px solid #2D9DA860',
             fontSize: '12px',
             outline: 'none',
-            cursor: 'pointer',
           }}
         >
           {timeframes.map((tf) => (
@@ -168,38 +162,26 @@ const CandleChart = ({ selectedPair }) => {
           ))}
         </select>
 
-        {/* Chart Type Selector */}
-        <select
-          value={`${showCandle}-${showLine}`}
-          onChange={(e) => {
-            const [candle, line] = e.target.value.split('-').map((v) => v === 'true');
-            setShowCandle(candle);
-            setShowLine(line);
-          }}
-          style={{
-            backgroundColor: '#02001B',
-            color: '#8AABB2',
-            padding: '6px 12px',
-            borderRadius: '4px',
-            border: '1px solid #565A93',
-            fontSize: '12px',
-            outline: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <option value="true-true" style={{ color: '#fff' }}>
-            Candlestick & Line
-          </option>
-          <option value="true-false" style={{ color: '#fff' }}>
-            Candlestick Only
-          </option>
-          <option value="false-true" style={{ color: '#fff' }}>
-            Line Only
-          </option>
-          <option value="false-false" style={{ color: '#fff' }}>
-            Area Chart
-          </option>
-        </select>
+        {/* Chart type toggles */}
+        <label className="hidden-label" style={{ color: '#ccc', fontSize: '12px' }}>
+          <input
+            type="checkbox"
+            checked={showCandle}
+            onChange={() => setShowCandle(!showCandle)}
+            style={{ marginRight: '4px' }}
+          />
+          Candlestick
+        </label>
+
+        <label className="hidden-label" style={{ color: '#ccc', fontSize: '12px' }}>
+          <input
+            type="checkbox"
+            checked={showLine}
+            onChange={() => setShowLine(!showLine)}
+            style={{ marginRight: '4px' }}
+          />
+          Line
+        </label>
       </div>
 
       <Chart
@@ -209,6 +191,7 @@ const CandleChart = ({ selectedPair }) => {
         type={rootChartType}
         height={350}
       />
+
     </div>
   );
 };

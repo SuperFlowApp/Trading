@@ -1,34 +1,30 @@
 import { useState } from 'react';
-import Positions from './PositionsOpen.jsx';
+import Positions from './PositionsList.jsx';
 
 function PositionsPanel() {
   const [activeTab, setActiveTab] = useState('positions');
 
   const tabClass = (name) =>
-    `border-b-2  mb-[-2px] px-4 py-2 rounded-t-md transition-all ${activeTab === name ? 'border-primary2/100' : 'text-secondary1 border-primary2/0 hover:border-primary2/30'
+    `px-4 py-2 rounded-t-md transition-all ${activeTab === name ? 'bg-[#1b3c3f]' : 'bg-[#0D2221] opacity-60 hover:opacity-100'
     }`;
 
   return (
     <div className="flex flex-col w-full">
       {/* Tab Headers */}
-      <div className="flex border-b-2 border-primary2/50">
-        <button onClick={() => setActiveTab('positions')}
-         className={`${tabClass('positions')} w-[160px]`}>
+      <div className="flex space-x-2 border-b border-[#2D9DA8] pb-1">
+        <button onClick={() => setActiveTab('positions')} className={tabClass('positions')}>
           Positions
         </button>
-        <button onClick={() => setActiveTab('orders')}
-         className={`${tabClass('orders')} w-[160px]`} >
+        <button onClick={() => setActiveTab('orders')} className={tabClass('orders')}>
           Open Orders
         </button>
-        <button
-          onClick={() => setActiveTab('history')}
-          className={`${tabClass('history')} w-[160px]`}>
+        <button onClick={() => setActiveTab('history')} className={tabClass('history')}>
           Order History
         </button>
       </div>
 
       {/* Tab Content */}
-      <div className="p-4">
+      <div className="">
         {activeTab === 'positions' && 
         <section className=" text-white p-4">
           <Positions />

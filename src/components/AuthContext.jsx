@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
           }
         );
         const balanceData = await balanceRes.json();
-        //console.log("User Balance:", balanceData);
+        console.log("User Balance:", balanceData);
       } catch (err) {
         console.error("Failed to fetch balance:", err);
       }

@@ -71,12 +71,12 @@ const Row = ({ size, price, total, progress, color, onSelect }) => {
     onSelect(price); // Pass the selected price to the parent
   };
 
-  const textColor = color === 'green' ? 'text-primary2' : 'text-primary1';
+  const textColor = color === 'green' ? 'text-[#2D9DA8]' : 'text-[#F5CB9D]';
   const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors cursor-pointer ${
     isBlinking
       ? color === 'red'
-        ? 'bg-primary1/70' // Fill blink for asks
-        : 'bg-primary2/70' // Fill blink for bids
+        ? 'bg-[#F5CB9D]/70' // Fill blink for asks
+        : 'bg-[#2D9DA8]/70' // Fill blink for bids
       : 'bg-transparent' // Default background
   } ${
     isSelected
@@ -94,7 +94,7 @@ const Row = ({ size, price, total, progress, color, onSelect }) => {
         className="absolute top-0 left-0 h-full"
         style={{
           width: `${progress}%`,
-          background: color === 'red' ? '#F59DEF80' : '#00B7C980',
+          background: color === 'red' ? '#F5CB9D' : '#2D9DA8',
           opacity: 0.3,
         }}
       />
@@ -133,10 +133,7 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
     // Reverse the rows if the reverse flag is true
     const sortedRows = reverse ? [...rows].sort((a, b) => b.price - a.price) : rows;
 
-    // Limit the rows to 10 items
-    const limitedRows = sortedRows.slice(0, 10);
-
-    return limitedRows.map((r) => {
+    return sortedRows.map((r) => {
       total += r.size;
       const progress = (r.size / maxSize) * 100;
       return { ...r, total, progress };
@@ -192,12 +189,12 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
 
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
-      <div className="flex justify-between items-center text-sm font-semibold">
-        <div className=" text-lg"></div>
+      <div className="flex justify-between items-center py-2 px-2 text-sm font-semibold">
+        <div className="text-[#2D9DA8] text-lg">Order Book</div>
         <select
           value={limit}
           onChange={(e) => setLimit(+e.target.value)}
-          className="bg-backgroundlight text-white text-xs"
+          className="bg-[#1E4D4E] text-white border border-[#2D9DA8] px-2 py-1 rounded text-xs"
         >
           {[10, 20, 50, 100, 500, 1000].map((l) => (
             <option key={l} value={l}>
@@ -207,7 +204,7 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
         </select>
       </div>
 
-      <div className="font-normal flex justify-between text-secondary1 px-2 pb-3 font-semibold text-xs">
+      <div className="font-normal text-[15px] flex justify-between text-[#C9C9C9] px-2 py-1 font-semibold text-xs">
         <div className="text-left w-1/3">Price (USD)</div>
         <div className="text-left w-1/3">Size (BTC)</div>
         <div className="text-left w-1/3">Total (BTC)</div>
@@ -227,14 +224,22 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
       </ul>
 
       {/* Spread Section */}
-      <div className="font-bold text-[18px] flex justify-between border border-secondary1/50 rounded-lg items-center py-1 px-2 mt-2 mb-3 text-sm font-semibold">
-        <div className="text-md">Spread</div>
-        <span className="">{spreadValue !== null ? spreadValue.toFixed(4) : '—'}</span>
-        <span className="text-xs">
+      <div className="font-bold text-[18px] flex justify-between border border-[#2D9DA8]/50 rounded-lg items-center py-1 px-2 mt-4 mb-5 text-sm font-semibold">
+        <div className="text-[#2D9DA8] text-md">Spread</div>
+        <span className="text-[#fff]">{spreadValue !== null ? spreadValue.toFixed(4) : '—'}</span>
+        <span className="text-[#C9C9C9] text-xs">
           {spreadPercentage !== null ? `${spreadPercentage.toFixed(2)}%` : '—'}
         </span>
       </div>
 
+      {/* Price Midpoint Section 
+      <div className="font-bold text-[18px] flex justify-between border border-[#2D9DA8]/50 rounded-lg items-center py-1 px-2 mb-5 text-sm font-semibold">
+        <div className="text-[#2D9DA8] text-md">Price Midpoint</div>
+        <span className="text-[#fff]">
+          {priceMidpoint !== null ? priceMidpoint.toFixed(4) : '—'}
+        </span>
+      </div>
+      */}
       {/* Bid Section */}
       <ul className="flex flex-col w-full">
         {addTotals(bids, true).map((row, i) => (

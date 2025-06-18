@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/Authentication"; // <-- use AuthContext
+import { useAuth } from "./AuthContext"; // <-- use AuthContext
 
 // Credential validation helpers
 const validateUsername = (username) => username.length >= 4;
