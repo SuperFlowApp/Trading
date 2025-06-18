@@ -327,7 +327,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
                 {/* "Mid" Button */}
                 <button
                   type="button"
-                  className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
+                  className=" absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
                   onClick={() => setPrice(priceMidpoint?.toFixed(4) || '')} // Set price to priceMidpoint
                   disabled={!priceMidpoint} // Disable if priceMidpoint is null
                 >
