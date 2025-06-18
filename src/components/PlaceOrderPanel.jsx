@@ -257,13 +257,13 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           Limit
         </button>
         <button
-          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'pro' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
+          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'scale' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
             }`}
-          onClick={() => setMarket('pro')}
+          onClick={() => setMarket('scale')}
           disabled={!token}
           style={!token ? { opacity: 0.5 } : {}}
         >
-          Pro
+          Scale
         </button>
       </div>
 
@@ -295,7 +295,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           </button>
         </div>
 
-        <div className="w-[48px] h-[38px] flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer">
+        <div className="w-[48px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer">
           <LeverageButton />
         </div>
       </div>
@@ -356,7 +356,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
               />
               {/* Dropdown for selecting currency */}
               <select
-                className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
+                className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer"
                 value={selectedDropdownValue}
                 onChange={(e) => setSelectedDropdownValue(e.target.value)}
               >
