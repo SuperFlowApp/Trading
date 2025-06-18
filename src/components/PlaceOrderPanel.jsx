@@ -59,7 +59,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails[0]);
+  const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails.base); // Initialize with the first currency
   const [sliderValue, setSliderValue] = useState(0); // State for slider value
 
   const calcAvailableSlider = sliderValue * balanceFree; // Calculate globally available value
@@ -83,6 +83,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       setError('');
       setSuccess('');
       setSliderValue(0); // Reset slider to default value
+      setSelectedDropdownValue(pairDetails.base); // Reset to the first currency
     }
   }, [token]);
 
