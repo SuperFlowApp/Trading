@@ -498,9 +498,9 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
             : 'Place sell order'}
       </button>
 
-      <div className='px-4'>
-        {error && <div className="text-red-400 text-xs mt-2">{error}</div>}
-        {success && <div className="text-green-400 text-xs mt-2">{success}</div>}
+      <div className='px-4' style={{ minHeight: '16px' }}>
+        {error && <div className="text-red-400 text-xs">{error}</div>}
+        {success && <div className="text-green-400 text-xs">{success}</div>}
       </div>
 
       {/* Account Information */}
