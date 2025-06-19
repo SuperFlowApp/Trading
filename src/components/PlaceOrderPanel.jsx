@@ -260,113 +260,47 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     fetchAccountInfo();
   }, [token]);
 
-  function AmountSlider({ sliderValue, setSliderValue }) {
-    const [tempValue, setTempValue] = useState(sliderValue);
+  // --- AmountSlider ---
+  const [tempSliderValue, setTempSliderValue] = useState(sliderValue);
 
-    // Sync tempValue with prop when sliderValue changes externally
-    useEffect(() => {
-      setTempValue(sliderValue);
-    }, [sliderValue]);
+  // Sync tempSliderValue with prop when sliderValue changes externally
+  useEffect(() => {
+    setTempSliderValue(sliderValue);
+  }, [sliderValue]);
 
-    // Debounce: update sliderValue 1s after user stops typing
-    useEffect(() => {
-      const handler = setTimeout(() => {
-        let value = Number(tempValue);
-        if (isNaN(value)) value = 0;
-        if (value < 0) value = 0;
-        if (value > 100) value = 100;
-        setSliderValue(value);
-      }, 1000);
-      return () => clearTimeout(handler);
-    }, [tempValue, setSliderValue]);
-
-    // Immediate update on slider release
-    const handleSliderChange = (e) => {
-      setTempValue(e.target.value);
-    };
-
-    const handleSliderCommit = (e) => {
-      let value = Number(e.target.value);
+  // Debounce: update sliderValue 1s after user stops typing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      let value = Number(tempSliderValue);
       if (isNaN(value)) value = 0;
       if (value < 0) value = 0;
       if (value > 100) value = 100;
       setSliderValue(value);
-    };
+    }, 1000);
+    return () => clearTimeout(handler);
+  }, [tempSliderValue, setSliderValue]);
 
-    const handleInputChange = (e) => {
-      let value = e.target.value.replace(/[^0-9.]/g, '');
-      if (value === '') value = '';
-      else value = Math.max(0, Math.min(100, Number(value)));
-      setTempValue(value);
-      // Do NOT call setSliderValue here!
-    };
+  // Immediate update on slider release
+  const handleSliderChange = (e) => {
+    setTempSliderValue(e.target.value);
+  };
 
-    return (
-      <div className="flex items-center gap-3 mt-3">
-        <input
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          value={tempValue || 0}
-          onChange={handleSliderChange}
-          onMouseUp={handleSliderCommit}
-          onTouchEnd={handleSliderCommit}
-          className="w-full h-2 bg-secondary2/60 rounded-lg appearance-none cursor-pointer
-                   bg-secondary2/60
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:h-4
-                   [&::-webkit-slider-thumb]:w-4
-                   [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-white
-                   [&::-webkit-slider-thumb]:shadow
-                   [&::-webkit-slider-thumb]:transition
-                   [&::-webkit-slider-thumb]:duration-200
-                   [&::-moz-range-thumb]:bg-white
-                   [&::-moz-range-thumb]:rounded-full"
-          style={{
-            background: `linear-gradient(to right, #565A93 0%, #565A93 ${tempValue}%, #565A9350 ${tempValue}%, #565A9350 100%)`
-          }}
-        />
-        <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
-          <input
-            type="number"
-            min="0"
-            max="100"
-            step="1"
-            value={tempValue}
-            onChange={handleInputChange}
-            className="w-12 bg-backgrounddark border border-secondary2 rounded px-1 py-0.5 text-white text-sm text-right"
-          />
-          <span>%</span>
-        </div>
-      </div>
-    );
-  }
+  const handleSliderCommit = (e) => {
+    let value = Number(e.target.value);
+    if (isNaN(value)) value = 0;
+    if (value < 0) value = 0;
+    if (value > 100) value = 100;
+    setSliderValue(value);
+  };
 
-  function TpSlToggle() {
-    const [enabled, setEnabled] = useState(false);
-
-    return (
-      <div className="flex items-center gap-2.5 mt-3">
-        {/* Switch */}
-        <label className="relative inline-flex items-center w-[34px] h-[18px]">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={() => setEnabled(!enabled)}
-            className="sr-only peer"
-          />
-          <div className="w-full h-full bg-[#1E4D4E] rounded-full peer-checked:bg-[#2D9DA8] transition-colors duration-300" />
-          <div className="absolute left-[3px] bottom-[3px] w-[12px] h-[12px] bg-[#87CFD4] rounded-full transition-transform duration-300 peer-checked:translate-x-[16px]" />
-        </label>
-
-        {/* Label */}
-        <span className="text-sm text-[#87CFD4]">TP / SL</span>
-      </div>
-    );
-  }
-
+  const handleInputChange = (e) => {
+    let value = e.target.value.replace(/[^0-9.]/g, '');
+    if (value === '') value = '';
+    else value = Math.max(0, Math.min(100, Number(value)));
+    setTempSliderValue(value);
+    // Do NOT call setSliderValue here!
+  };
+  // --- End AmountSlider logic ---
 
   // Update the amount field whenever sliderValue changes
   useEffect(() => {
@@ -486,7 +420,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           <>
             <label className="text-white">Size</label>
             <div className="w-full relative">
-
               <input
                 type="number"
                 placeholder="0.0"
@@ -514,9 +447,49 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           </>
         )}
       </div>
-      <div className='px-4'>
-        <AmountSlider sliderValue={sliderValue} setSliderValue={setSliderValue} />
+
+      {/* --- AmountSlider UI moved here --- */}
+      <div className="flex items-center gap-3 mt-3 px-4">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value={tempSliderValue || 0}
+          onChange={handleSliderChange}
+          onMouseUp={handleSliderCommit}
+          onTouchEnd={handleSliderCommit}
+          className="w-full h-2 bg-secondary2/60 rounded-lg appearance-none cursor-pointer
+                   bg-secondary2/60
+                   [&::-webkit-slider-thumb]:appearance-none
+                   [&::-webkit-slider-thumb]:h-4
+                   [&::-webkit-slider-thumb]:w-4
+                   [&::-webkit-slider-thumb]:rounded-full
+                   [&::-webkit-slider-thumb]:bg-white
+                   [&::-webkit-slider-thumb]:shadow
+                   [&::-webkit-slider-thumb]:transition
+                   [&::-webkit-slider-thumb]:duration-200
+                   [&::-moz-range-thumb]:bg-white
+                   [&::-moz-range-thumb]:rounded-full"
+          style={{
+            background: `linear-gradient(to right, #565A93 0%, #565A93 ${tempSliderValue}%, #565A9350 ${tempSliderValue}%, #565A9350 100%)`
+          }}
+        />
+        <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            value={tempSliderValue}
+            onChange={handleInputChange}
+            className="w-12 bg-backgrounddark border border-secondary2 rounded px-1 py-0.5 text-white text-sm text-right"
+          />
+          <span>%</span>
+        </div>
       </div>
+      {/* --- End AmountSlider UI --- */}
+
       {/* Place Order Button */}
       <button
         className={`mx-2 mt-4 py-2 rounded-md font-semibold text-lg transition-colors border-2 border-transparent ${side === 'buy'
