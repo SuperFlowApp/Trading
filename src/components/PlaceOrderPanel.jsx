@@ -63,6 +63,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails.base); // Initialize with the first currency
   const [sliderValue, setSliderValue] = useState(0); // State for slider value
   const [blinkClass, setBlinkClass] = useState(""); // <-- Add this state
+  const [accountInfo, setAccountInfo] = useState(null);
+  const [accountInfoError, setAccountInfoError] = useState('');
 
   const calcAvailableSlider = sliderValue * balanceFree; // Calculate globally available value
 
@@ -89,10 +91,46 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     }
   }, [token]);
 
+  // Fetch account information function
+  const fetchAccountInfo = async () => {
+    if (!token) {
+      setAccountInfo(null);
+      setAccountInfoError('');
+      return;
+    }
+    try {
+      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch account information');
+      }
+      const data = await response.json();
+      setAccountInfo(data);
+      setAccountInfoError('');
+    } catch (err) {
+      setAccountInfo(null);
+      setAccountInfoError('Failed to fetch account information.');
+    }
+  };
+
+  // Fetch on mount and every 5 seconds
+  useEffect(() => {
+    fetchAccountInfo();
+    if (!token) return;
+    const interval = setInterval(fetchAccountInfo, 5000);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
   const placeOrder = async () => {
     if (!token || !selectedPair || !amount) {
       setError('Please fill all fields.');
-      setBlinkClass("blink-error"); // Blink on error
+      setBlinkClass("blink-error");
       setTimeout(() => setBlinkClass(""), 400);
       return;
     }
@@ -142,11 +180,15 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       setSuccess(`Order placed! Order ID: ${data.orderId}`);
       setAmount('');
       setSliderValue(0);
-      setBlinkClass("blink-success"); // Blink on success
+      setBlinkClass("blink-success");
       setTimeout(() => setBlinkClass(""), 400);
+
+      // Fetch updated account info after placing order
+      fetchAccountInfo();
+
     } catch (err) {
       setError('Failed to place order.');
-      setBlinkClass("blink-error"); // Blink on error
+      setBlinkClass("blink-error");
       setTimeout(() => setBlinkClass(""), 400);
     } finally {
       setLoading(false);
@@ -187,6 +229,36 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     return () => clearInterval(interval);
   }, [token]);
 
+
+  // Fetch account information
+  useEffect(() => {
+    if (!token) {
+      setAccountInfo(null);
+      setAccountInfoError('');
+      return;
+    }
+    const fetchAccountInfo = async () => {
+      try {
+        const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
+          method: 'GET',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch account information');
+        }
+        const data = await response.json();
+        setAccountInfo(data);
+        setAccountInfoError('');
+      } catch (err) {
+        setAccountInfo(null);
+        setAccountInfoError('Failed to fetch account information.');
+      }
+    };
+    fetchAccountInfo();
+  }, [token]);
 
   function AmountSlider({ sliderValue, setSliderValue }) {
     return (
@@ -430,7 +502,47 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
         {error && <div className="text-red-400 text-xs mt-2">{error}</div>}
         {success && <div className="text-green-400 text-xs mt-2">{success}</div>}
       </div>
-      
+
+      {/* Account Information */}
+      <div className="px-4 mt-4">
+        {accountInfoError && (
+          <div className="text-red-400 text-xs">{accountInfoError}</div>
+        )}
+        {accountInfo && (
+          <div className="bg-backgrounddark rounded p-3 text-xs flex flex-col gap-2">
+            <div className="flex justify-between">
+              <span className="text-secondary1">Account Equity</span>
+              <span className="text-white font-semibold">
+                ${parseFloat(accountInfo.availableBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-secondary1">Balance</span>
+              <span className="text-white font-semibold">
+                ${parseFloat(accountInfo.crossBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-secondary1">Unrealized PNL</span>
+              <span className="text-white font-semibold">
+                ${parseFloat(accountInfo.UnrealizedPnl || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-secondary1">Maintenance Margin</span>
+              <span className="text-white font-semibold">
+                ${parseFloat(accountInfo.positions?.[0]?.maintenanceMargin || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-secondary1">Cross Account Leverage</span>
+              <span className="text-white font-semibold">
+                {(accountInfo.positions?.[0]?.leverage || 0)}x
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
