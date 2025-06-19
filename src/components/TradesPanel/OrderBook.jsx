@@ -1,54 +1,46 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const useGroupedOrderBook = (symbol = 'BTCUSDT', limit = 10, groupSize = 1) => {
+// Remove useGroupedOrderBook and replace with SSE logic
+const useSSEOrderBook = () => {
   const [asks, setAsks] = useState([]);
   const [bids, setBids] = useState([]);
-  const book = useRef({ asks: {}, bids: {} });
-
-  const bucketPrice = (price) => Math.floor(price / groupSize) * groupSize;
-
-  const groupSide = (sideData) => {
-    const grouped = {};
-    sideData.forEach(({ price, size }) => {
-      const bucket = bucketPrice(price);
-      grouped[bucket] = (grouped[bucket] || 0) + size;
-    });
-    return Object.entries(grouped).map(([price, size]) => ({ price: +price, size }));
-  };
 
   useEffect(() => {
-    const fetchOrderbook = async () => {
+    const eventSource = new EventSource('https://websocketserver-am3y.onrender.com/stream/orderbook');
+
+    eventSource.onmessage = (event) => {
       try {
-        const res = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol}&limit=${limit}`);
-        const data = await res.json();
-
-        const parsedBids = data.bids.map((entry) => ({
-          price: parseFloat(entry[0]),
-          size: parseFloat(entry[1]),
-        }));
-        const parsedAsks = data.asks.map((entry) => ({
-          price: parseFloat(entry[0]),
-          size: parseFloat(entry[1]),
-        }));
-
-        book.current.bids = Object.fromEntries(parsedBids.map(({ price, size }) => [price, size]));
-        book.current.asks = Object.fromEntries(parsedAsks.map(({ price, size }) => [price, size]));
-
-        setBids(groupSide(parsedBids));
-        setAsks(groupSide(parsedAsks));
-      } catch (err) {
-        console.error('Failed to fetch orderbook:', err);
+        const data = JSON.parse(event.data);
+        // data.b = bids, data.a = asks (array of [price, quantity])
+        setBids(
+          data.b.map(([price, size]) => ({
+            price: parseFloat(price),
+            size: parseFloat(size),
+          }))
+        );
+        setAsks(
+          data.a.map(([price, size]) => ({
+            price: parseFloat(price),
+            size: parseFloat(size),
+          }))
+        );
+      } catch (error) {
+        console.error('Error parsing SSE data:', error);
       }
     };
 
-    fetchOrderbook();
-    const interval = setInterval(fetchOrderbook, 1000);
-    return () => clearInterval(interval);
-  }, [symbol, limit, groupSize]);
+    eventSource.onerror = () => {
+      console.error('Error with SSE connection.');
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
 
   return { asks, bids };
 };
-
 
 const Row = ({ size, price, total, progress, color, onSelect }) => {
   const [isBlinking, setIsBlinking] = useState(false); // State to control the fill blink effect
@@ -118,9 +110,8 @@ const Row = ({ size, price, total, progress, color, onSelect }) => {
 };
 
 const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
-  const [limit, setLimit] = useState(10);
-  const [groupSize] = useState(1);
-  const { asks, bids } = useGroupedOrderBook(selectedPair, limit, groupSize);
+  // Remove limit/groupSize, not needed for SSE
+  const { asks, bids } = useSSEOrderBook();
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
@@ -128,12 +119,9 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
 
   const addTotals = (rows, reverse = false) => {
     let total = 0;
-    let maxSize = Math.max(...rows.map((r) => r.size));
+    let maxSize = Math.max(...rows.map((r) => r.size), 1);
 
-    // Reverse the rows if the reverse flag is true
     const sortedRows = reverse ? [...rows].sort((a, b) => b.price - a.price) : rows;
-
-    // Limit the rows to 10 items
     const limitedRows = sortedRows.slice(0, 10);
 
     return limitedRows.map((r) => {
@@ -145,24 +133,21 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
 
   const calculateSpread = () => {
     if (bids.length === 0 || asks.length === 0) return { value: null, percentage: null };
-    const highestBid = bids[0].price; // Highest bid price
-    const lowestAsk = asks[0].price; // Lowest ask price
-    const spreadValue = lowestAsk - highestBid; // Absolute spread
-    const midpoint = (highestBid + lowestAsk) / 2; // Midpoint for percentage calculation
-    const spreadPercentage = (spreadValue / midpoint) * 100; // Spread as a percentage
+    const highestBid = bids[0].price;
+    const lowestAsk = asks[0].price;
+    const spreadValue = lowestAsk - highestBid;
+    const midpoint = (highestBid + lowestAsk) / 2;
+    const spreadPercentage = (spreadValue / midpoint) * 100;
     return { value: spreadValue, percentage: spreadPercentage };
   };
 
   const calculatePriceMidpoint = () => {
     if (bids.length === 0 || asks.length === 0) return null;
-
     const averageBids = bids.reduce((sum, bid) => sum + bid.price, 0) / bids.length;
     const averageAsks = asks.reduce((sum, ask) => sum + ask.price, 0) / asks.length;
-
     return (averageBids + averageAsks) / 2;
   };
 
-  // Update spread and priceMidpoint whenever asks or bids change
   useEffect(() => {
     if (bids.length > 0 && asks.length > 0) {
       const { value, percentage } = calculateSpread();
@@ -172,21 +157,19 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
       const newPriceMidpoint = calculatePriceMidpoint();
       setPriceMidpoint(newPriceMidpoint);
 
-      // Notify the parent component of the updated priceMidpoint
       if (onPriceMidpointChange) {
         onPriceMidpointChange(newPriceMidpoint);
       }
     } else {
-      // Reset spread and midpoint values if data is unavailable
       setSpreadValue(null);
       setSpreadPercentage(null);
       setPriceMidpoint(null);
     }
-  }, [bids, asks, onPriceMidpointChange]); // Ensure bids and asks are dependencies
+  }, [bids, asks, onPriceMidpointChange]);
 
   const handleRowSelect = (price) => {
     if (onRowSelect) {
-      onRowSelect(price); // Pass the selected value to the parent
+      onRowSelect(price);
     }
   };
 
@@ -194,17 +177,7 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
       <div className="flex justify-between items-center text-sm font-semibold">
         <div className=" text-lg"></div>
-        <select
-          value={limit}
-          onChange={(e) => setLimit(+e.target.value)}
-          className="bg-backgroundlight text-white text-xs"
-        >
-          {[10, 20, 50, 100, 500, 1000].map((l) => (
-            <option key={l} value={l}>
-              {l}
-            </option>
-          ))}
-        </select>
+        {/* Limit selector removed */}
       </div>
 
       <div className="font-normal flex justify-between text-secondary1 px-2 pb-3 font-semibold text-xs">

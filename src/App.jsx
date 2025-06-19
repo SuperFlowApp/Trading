@@ -8,6 +8,8 @@ import Infobar from './components/ChartPanel/Infobar.jsx';
 import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
 import TradesModal from './components/TradesPanel/AllTradesList.jsx';
 
+
+
 function App() {
   const [selectedPair, setSelectedPair] = useState('BTCUSDT');
   const [activeTab, setActiveTab] = useState('OrderBook'); // State for tab selection
