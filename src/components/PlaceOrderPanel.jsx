@@ -443,29 +443,47 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
       {/* --- AmountSlider UI moved here --- */}
       <div className="flex items-center gap-3 mt-3 px-4">
-        <input
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          value={sliderValue || 0}
-          onChange={handleSliderChange}
-          className="w-full h-2 bg-secondary2/60 rounded-lg appearance-none cursor-pointer
-                   bg-secondary2/60
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:h-4
-                   [&::-webkit-slider-thumb]:w-4
-                   [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-white
-                   [&::-webkit-slider-thumb]:shadow
-                   [&::-webkit-slider-thumb]:transition
-                   [&::-webkit-slider-thumb]:duration-200
-                   [&::-moz-range-thumb]:bg-white
-                   [&::-moz-range-thumb]:rounded-full"
-          style={{
-            background: `linear-gradient(to right, #565A93 0%, #565A93 ${sliderValue}%, #565A9350 ${sliderValue}%, #565A9350 100%)`
-          }}
-        />
+        {/* Slider markers */}
+        <div className="relative w-full">
+          {/* Circles at 25%, 50%, 75%, 100% */}
+          <div className="absolute left-0 top-[8px] w-full h-0 pointer-events-none">
+            {[25, 50, 75].map((percent) => (
+              <span
+                key={percent}
+                className="absolute -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  left: `${percent}%`,
+                  top: '50%',
+                }}
+              >
+                <span className="w-[12px] h-[12px] rounded-full bg-secondary2/50 block " />
+              </span>
+            ))}
+          </div>
+          {/* The slider itself */}
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value={sliderValue || 0}
+            onChange={handleSliderChange}
+            className="w-full h-[12px] rounded-lg appearance-none cursor-pointer z-10 relative
+             [&::-webkit-slider-thumb]:appearance-none
+             [&::-webkit-slider-thumb]:h-[16px]
+             [&::-webkit-slider-thumb]:w-[16px]
+             [&::-webkit-slider-thumb]:rounded-full
+             [&::-webkit-slider-thumb]:bg-white
+             [&::-webkit-slider-thumb]:shadow
+             [&::-webkit-slider-thumb]:transition
+             [&::-webkit-slider-thumb]:duration-200
+             [&::-moz-range-thumb]:bg-white
+             [&::-moz-range-thumb]:rounded-full"
+            style={{
+              background: `linear-gradient(to right, #565A93 0%, #565A93 ${sliderValue}%, #565A9350 ${sliderValue}%, #565A9350 100%)`
+            }}
+          />
+        </div>
         <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
           <input
             type="number"
