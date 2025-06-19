@@ -277,6 +277,24 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     setSliderValue(value);
   };
 
+  // Update on amount (Size) input change
+  const handleAmountChange = (e) => {
+    let value = e.target.value.replace(/[^0-9.]/g, '');
+    setAmount(value);
+
+    // Calculate sliderValue as percentage of balanceFree
+    const numericValue = parseFloat(value);
+    const numericBalance = parseFloat(balanceFree);
+    if (!isNaN(numericValue) && numericBalance > 0) {
+      let percent = (numericValue / numericBalance) * 100;
+      if (percent < 0) percent = 0;
+      if (percent > 100) percent = 100;
+      setSliderValue(percent);
+    } else {
+      setSliderValue(0);
+    }
+  };
+
   // Update the amount field whenever sliderValue changes
   useEffect(() => {
     if (sliderValue > 0) {
@@ -400,7 +418,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
                 placeholder="0.0"
                 className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={handleAmountChange}
               />
               {/* Selecting currency */}
               <div className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer">
