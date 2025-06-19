@@ -135,7 +135,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       }
 
       const data = await response.json();
-      setSuccess(`Order placed successfully! Order ID: ${data.orderId}`);
+      setSuccess(`Order placed! Order ID: ${data.orderId}`);
       setAmount(''); // <-- Reset amount immediately after success
       setSliderValue(0); // <-- Optionally reset slider as well
     } catch (err) {
@@ -401,8 +401,12 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
             ? 'Place buy order'
             : 'Place sell order'}
       </button>
-      {error && <div className="text-red-400 text-xs mt-2">{error}</div>}
-      {success && <div className="text-green-400 text-xs mt-2">{success}</div>}
+
+      <div className='px-4'>
+        {error && <div className="text-red-400 text-xs mt-2">{error}</div>}
+        {success && <div className="text-green-400 text-xs mt-2">{success}</div>}
+      </div>
+      
     </div>
   );
 }
