@@ -508,40 +508,48 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
         {accountInfoError && (
           <div className="text-red-400 text-xs">{accountInfoError}</div>
         )}
-        {accountInfo && (
-          <div className="bg-backgrounddark rounded p-3 text-xs flex flex-col gap-2">
-            <div className="flex justify-between">
-              <span className="text-secondary1">Account Equity</span>
-              <span className="text-white font-semibold">
-                ${parseFloat(accountInfo.availableBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-secondary1">Balance</span>
-              <span className="text-white font-semibold">
-                ${parseFloat(accountInfo.crossBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-secondary1">Unrealized PNL</span>
-              <span className="text-white font-semibold">
-                ${parseFloat(accountInfo.UnrealizedPnl || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-secondary1">Maintenance Margin</span>
-              <span className="text-white font-semibold">
-                ${parseFloat(accountInfo.positions?.[0]?.maintenanceMargin || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-secondary1">Cross Account Leverage</span>
-              <span className="text-white font-semibold">
-                {(accountInfo.positions?.[0]?.leverage || 0)}x
-              </span>
-            </div>
+        <div className="bg-backgrounddark rounded p-3 text-xs flex flex-col gap-2">
+          <div className="flex justify-between">
+            <span className="text-secondary1">Account Equity</span>
+            <span className="text-white font-semibold">
+              {token && accountInfo
+                ? `$${parseFloat(accountInfo.availableBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : "--"}
+            </span>
           </div>
-        )}
+          <div className="flex justify-between">
+            <span className="text-secondary1">Balance</span>
+            <span className="text-white font-semibold">
+              {token && accountInfo
+                ? `$${parseFloat(accountInfo.crossBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : "--"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-secondary1">Unrealized PNL</span>
+            <span className="text-white font-semibold">
+              {token && accountInfo
+                ? `$${parseFloat(accountInfo.UnrealizedPnl || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : "--"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-secondary1">Maintenance Margin</span>
+            <span className="text-white font-semibold">
+              {token && accountInfo
+                ? `$${parseFloat(accountInfo.positions?.[0]?.maintenanceMargin || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : "--"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-secondary1">Cross Account Leverage</span>
+            <span className="text-white font-semibold">
+              {token && accountInfo
+                ? `${accountInfo.positions?.[0]?.leverage || 0}x`
+                : "--"}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
