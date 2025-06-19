@@ -136,6 +136,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
       const data = await response.json();
       setSuccess(`Order placed successfully! Order ID: ${data.orderId}`);
+      setAmount(''); // <-- Reset amount immediately after success
+      setSliderValue(0); // <-- Optionally reset slider as well
     } catch (err) {
       setError('Failed to place order.');
     } finally {
