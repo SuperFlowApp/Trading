@@ -239,8 +239,12 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
   // Update the amount field whenever sliderValue changes
   useEffect(() => {
-    const calculatedAmount = (sliderValue / 100) * balanceFree;
-    setAmount(calculatedAmount.toFixed(1)); // Set the calculated value to the amount field
+    if (sliderValue > 0) {
+      const calculatedAmount = (sliderValue / 100) * balanceFree;
+      setAmount(calculatedAmount.toFixed(1));
+    } else {
+      setAmount('');
+    }
   }, [sliderValue, balanceFree]);
 
   return (
