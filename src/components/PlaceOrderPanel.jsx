@@ -49,6 +49,7 @@ function LeverageButton() {
 
 function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   const { token } = useAuth();
+  const pairDetails = getSelectedPairDetails() || { base: 'BTC', quote: 'USDT' }; // fallback
 
   const [balanceTotal, setBalanceTotal] = useState("--");
   const [balanceFree, setBalanceFree] = useState("--");
