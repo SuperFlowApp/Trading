@@ -261,6 +261,46 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   }, [token]);
 
   function AmountSlider({ sliderValue, setSliderValue }) {
+    const [tempValue, setTempValue] = useState(sliderValue);
+
+    // Sync tempValue with prop when sliderValue changes externally
+    useEffect(() => {
+      setTempValue(sliderValue);
+    }, [sliderValue]);
+
+    // Debounce: update sliderValue 1s after user stops typing
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        let value = Number(tempValue);
+        if (isNaN(value)) value = 0;
+        if (value < 0) value = 0;
+        if (value > 100) value = 100;
+        setSliderValue(value);
+      }, 1000);
+      return () => clearTimeout(handler);
+    }, [tempValue, setSliderValue]);
+
+    // Immediate update on slider release
+    const handleSliderChange = (e) => {
+      setTempValue(e.target.value);
+    };
+
+    const handleSliderCommit = (e) => {
+      let value = Number(e.target.value);
+      if (isNaN(value)) value = 0;
+      if (value < 0) value = 0;
+      if (value > 100) value = 100;
+      setSliderValue(value);
+    };
+
+    const handleInputChange = (e) => {
+      let value = e.target.value.replace(/[^0-9.]/g, '');
+      if (value === '') value = '';
+      else value = Math.max(0, Math.min(100, Number(value)));
+      setTempValue(value);
+      // Do NOT call setSliderValue here!
+    };
+
     return (
       <div className="flex items-center gap-3 mt-3">
         <input
@@ -268,8 +308,10 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           min="0"
           max="100"
           step="1"
-          value={sliderValue}
-          onChange={(e) => setSliderValue(e.target.value)}
+          value={tempValue || 0}
+          onChange={handleSliderChange}
+          onMouseUp={handleSliderCommit}
+          onTouchEnd={handleSliderCommit}
           className="w-full h-2 bg-secondary2/60 rounded-lg appearance-none cursor-pointer
                    bg-secondary2/60
                    [&::-webkit-slider-thumb]:appearance-none
@@ -283,11 +325,20 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
                    [&::-moz-range-thumb]:bg-white
                    [&::-moz-range-thumb]:rounded-full"
           style={{
-            background: `linear-gradient(to right, #565A93 0%, #565A93 ${sliderValue}%, #565A9350 ${sliderValue}%, #565A9350 100%)`
+            background: `linear-gradient(to right, #565A93 0%, #565A93 ${tempValue}%, #565A9350 ${tempValue}%, #565A9350 100%)`
           }}
         />
-        <div className="min-w-[40px] text-right text-sm text-gray-400">
-          {sliderValue}%
+        <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            value={tempValue}
+            onChange={handleInputChange}
+            className="w-12 bg-backgrounddark border border-secondary2 rounded px-1 py-0.5 text-white text-sm text-right"
+          />
+          <span>%</span>
         </div>
       </div>
     );
