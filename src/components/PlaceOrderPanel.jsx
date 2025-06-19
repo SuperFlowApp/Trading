@@ -124,7 +124,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     if (!token) return;
     const interval = setInterval(fetchAccountInfo, 5000);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const placeOrder = async () => {
@@ -398,8 +398,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'market' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
             }`}
           onClick={() => setMarket('market')}
-          disabled={!token}
-          style={!token ? { opacity: 0.5 } : {}}
         >
           Market
         </button>
@@ -407,8 +405,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'limit' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
             }`}
           onClick={() => setMarket('limit')}
-          disabled={!token}
-          style={!token ? { opacity: 0.5 } : {}}
         >
           Limit
         </button>
@@ -416,8 +412,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'scale' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
             }`}
           onClick={() => setMarket('scale')}
-          disabled={!token}
-          style={!token ? { opacity: 0.5 } : {}}
         >
           Scale
         </button>
@@ -433,8 +427,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
               : 'hover:border border-primary2 text-white'
               } flex items-center justify-center gap-2`}
             onClick={() => setSide('buy')}
-            disabled={!token} // Disable if not signed in
-            style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
           >
             Buy
           </button>
@@ -444,8 +436,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
               : 'hover:border border-primary1 text-white'
               } flex items-center justify-center gap-2`}
             onClick={() => setSide('sell')}
-            disabled={!token} // Disable if not signed in
-            style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
           >
             Sell
           </button>
@@ -475,8 +465,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
                   className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 "
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  disabled={!token} // Disable if not signed in
-                  style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
                 />
                 {/* "Mid" Button */}
                 <button
@@ -505,8 +493,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
                 className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                disabled={!token} // Disable if not signed in
-                style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
               />
               {/* Selecting currency */}
               <div className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer">
@@ -538,15 +524,15 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
           : 'bg-primary1 text-black hover:bg-primary1/80'
           } ${blinkClass}`} // <-- Add blinkClass here
         type="button"
-        disabled={!token || loading} // Disable if not signed in or loading
-        style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
         onClick={placeOrder}
       >
-        {loading
-          ? "Placing..."
-          : side === 'buy'
-            ? 'Place buy order'
-            : 'Place sell order'}
+        {!token
+          ? "Connect"
+          : loading
+            ? "Placing..."
+            : side === 'buy'
+              ? 'Place buy order'
+              : 'Place sell order'}
       </button>
 
       <div className='px-4' style={{ minHeight: '16px' }}>
