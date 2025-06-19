@@ -69,3 +69,26 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield; /* For Firefox */
 }
+
+
+
+
+
+/* Add to your global CSS file */
+.blink-success {
+  animation: blink-success 0.4s;
+  border: 2px solid var(--color-secondary2, theme('colors.secondary1')) !important;
+}
+@keyframes blink-success {
+  0% { border-color: var(--color-secondary2, theme('colors.secondary1')); }
+  100% { border-color: transparent; }
+}
+
+.blink-error {
+  animation: blink-error 0.4s;
+  border: 2px solid var(--color-warningcolor, theme('colors.warningcolor')) !important;
+}
+@keyframes blink-error {
+  0% { border-color: var(--color-warningcolor, theme('colors.warningcolor')); }
+  100% { border-color: transparent; }
+}

@@ -61,6 +61,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   const [success, setSuccess] = useState('');
   const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails.base); // Initialize with the first currency
   const [sliderValue, setSliderValue] = useState(0); // State for slider value
+  const [blinkClass, setBlinkClass] = useState(""); // <-- Add this state
 
   const calcAvailableSlider = sliderValue * balanceFree; // Calculate globally available value
 
@@ -90,6 +91,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   const placeOrder = async () => {
     if (!token || !selectedPair || !amount) {
       setError('Please fill all fields.');
+      setBlinkClass("blink-error"); // Blink on error
+      setTimeout(() => setBlinkClass(""), 400);
       return;
     }
 
@@ -136,10 +139,14 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
       const data = await response.json();
       setSuccess(`Order placed! Order ID: ${data.orderId}`);
-      setAmount(''); // <-- Reset amount immediately after success
-      setSliderValue(0); // <-- Optionally reset slider as well
+      setAmount('');
+      setSliderValue(0);
+      setBlinkClass("blink-success"); // Blink on success
+      setTimeout(() => setBlinkClass(""), 400);
     } catch (err) {
       setError('Failed to place order.');
+      setBlinkClass("blink-error"); // Blink on error
+      setTimeout(() => setBlinkClass(""), 400);
     } finally {
       setLoading(false);
     }
@@ -246,6 +253,18 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       setAmount('');
     }
   }, [sliderValue, balanceFree]);
+
+  // Auto-hide error and success messages after 3 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 3000);
+      return () => clearTimeout(timer);
+    }
+    if (success) {
+      const timer = setTimeout(() => setSuccess(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, success]);
 
   return (
     <div className="w-full text-white flex flex-col gap-4">
@@ -390,10 +409,10 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       </div>
       {/* Place Order Button */}
       <button
-        className={`mx-2 mt-4 py-2 rounded-md font-semibold text-lg transition-colors ${side === 'buy'
+        className={`mx-2 mt-4 py-2 rounded-md font-semibold text-lg transition-colors border-2 border-transparent ${side === 'buy'
           ? 'bg-primary2 text-black hover:bg-primary2/80'
           : 'bg-primary1 text-black hover:bg-primary1/80'
-          }`}
+          } ${blinkClass}`} // <-- Add blinkClass here
         type="button"
         disabled={!token || loading} // Disable if not signed in or loading
         style={!token ? { border: '1px solid #87CFD4', opacity: 0.5 } : {}}
