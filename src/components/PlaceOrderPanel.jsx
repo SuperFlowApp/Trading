@@ -230,35 +230,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
   }, [token]);
 
 
-  // Fetch account information
-  useEffect(() => {
-    if (!token) {
-      setAccountInfo(null);
-      setAccountInfoError('');
-      return;
-    }
-    const fetchAccountInfo = async () => {
-      try {
-        const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
-          method: 'GET',
-          headers: {
-            accept: 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to fetch account information');
-        }
-        const data = await response.json();
-        setAccountInfo(data);
-        setAccountInfoError('');
-      } catch (err) {
-        setAccountInfo(null);
-        setAccountInfoError('Failed to fetch account information.');
-      }
-    };
-    fetchAccountInfo();
-  }, [token]);
 
   // Update on slider change
   const handleSliderChange = (e) => {
