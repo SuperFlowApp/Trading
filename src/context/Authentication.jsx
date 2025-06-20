@@ -4,10 +4,14 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("accessToken") || "");
+  const [loading, setLoading] = useState(true); // <-- Add loading state
 
   // Validate token on mount
   React.useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false); // No token, done loading
+      return;
+    }
     // Try to fetch balance or a protected endpoint to check token validity
     fetch("https://fastify-serverless-function-rimj.onrender.com/api/balance", {
       method: "GET",
@@ -24,7 +28,8 @@ export function AuthProvider({ children }) {
         setToken("");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("username"); // <-- Also clear username
-      });
+      })
+      .finally(() => setLoading(false)); // <-- Set loading to false after check
   }, [token]);
 
   // Login function: fetch token from server
@@ -102,7 +107,7 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, signup }}>
+    <AuthContext.Provider value={{ token, login, logout, signup}}>
       {children}
     </AuthContext.Provider>
   );
