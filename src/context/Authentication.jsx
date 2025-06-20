@@ -70,29 +70,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Signup function: create user on server
-  const signup = async (username, password) => {
-    try {
-      const res = await fetch(
-        `https://fastify-serverless-function-rimj.onrender.com/api/create_user?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-        { method: "POST" }
-      );
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        data = { error: await res.text() };
-      }
-      if (res.ok && !data.error) {
-        return { success: true, data };
-      } else {
-        return { success: false, error: data.error || "Signup failed", data };
-      }
-    } catch (err) {
-      return { success: false, error: err?.message || "Signup error" };
-    }
-  };
-
   const logout = () => {
     setToken("");
     localStorage.removeItem("accessToken");
@@ -107,7 +84,7 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, signup}}>
+    <AuthContext.Provider value={{ token, login, logout}}>
       {children}
     </AuthContext.Provider>
   );

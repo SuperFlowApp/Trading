@@ -24,7 +24,7 @@ function AuthPanel({ onLoginSuccess }) {
   const [signupError, setSignupError] = useState("");
 
   // Use AuthContext
-  const { token, login, logout, signup } = useAuth();
+  const { token, login, logout } = useAuth();
 
   const inactivityTimeout = useRef(null);
 
@@ -144,7 +144,28 @@ function AuthPanel({ onLoginSuccess }) {
     setPassword("");
     localStorage.removeItem("username"); // Remove username on logout
   };
-
+  // Signup function: create user on server
+  const signup = async (username, password) => {
+    try {
+      const res = await fetch(
+        `https://fastify-serverless-function-rimj.onrender.com/api/create_user?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
+        { method: "POST" }
+      );
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: await res.text() };
+      }
+      if (res.ok && !data.error) {
+        return { success: true, data };
+      } else {
+        return { success: false, error: data.error || "Signup failed", data };
+      }
+    } catch (err) {
+      return { success: false, error: err?.message || "Signup error" };
+    }
+  };
   // --- UI ---
   return (
     <div className="bg-backgroundlight text-white p-6 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2">
