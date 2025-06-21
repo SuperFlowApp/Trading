@@ -117,6 +117,12 @@ function App() {
                     </div>
                   </div>
                 </div>
+                <section className="text-white p-2">
+                  <div className="bg-backgroundlight rounded-md">
+                    <PositionsPanel />
+                  </div>
+                </section>
+
               </div>
               {/* PositionsPanel */}
               <div className="flex flex-col basis-[25%] gap-2">
@@ -133,15 +139,9 @@ function App() {
                   />
                 </div>
               </div>
-
-
-
             </div>
-            <section className="text-white p-2">
-              <div className="bg-backgroundlight rounded-md">
-                <PositionsPanel />
-              </div>
-            </section>
+
+
             <footer className=""></footer>
           </div>
         </div>
