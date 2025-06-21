@@ -7,6 +7,7 @@ import LimitOrderForm from './components/PlaceOrderPanel.jsx';
 import Infobar from './components/ChartPanel/Infobar.jsx';
 import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
 import TradesModal from './components/TradesPanel/AllTradesList.jsx';
+import AccountInfoPanel from './components/PositionsPanel/AccountInfoPanel.jsx';
 
 
 
@@ -83,21 +84,19 @@ function App() {
                     {/* Tab Selector */}
                     <div className="flex relative">
                       <button
-                        className={`flex-1 p-2 text-center ${
-                          activeTab === 'OrderBook'
-                            ? 'bg-backgroundlight/10 text-white font-bold border-b-2 border-primary2'
-                            : 'bg-backgroundlight text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
-                        }`}
+                        className={`flex-1 p-2 text-center ${activeTab === 'OrderBook'
+                          ? 'bg-backgroundlight/10 text-white font-bold border-b-2 border-primary2'
+                          : 'bg-backgroundlight text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
+                          }`}
                         onClick={() => setActiveTab('OrderBook')}
                       >
                         Order Book
                       </button>
                       <button
-                        className={`flex-1 p-2 text-center ${
-                          activeTab === 'Trades'
-                            ? 'bg-bg-backgroundlight/10 text-white font-bold border-b-2 border-primary2'
-                            : 'bg-bg-backgroundlight text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
-                        }`}
+                        className={`flex-1 p-2 text-center ${activeTab === 'Trades'
+                          ? 'bg-bg-backgroundlight/10 text-white font-bold border-b-2 border-primary2'
+                          : 'bg-bg-backgroundlight text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
+                          }`}
                         onClick={() => setActiveTab('Trades')}
                       >
                         Trades
@@ -120,13 +119,23 @@ function App() {
                 </div>
               </div>
               {/* PositionsPanel */}
-              <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden basis-[25%]">
-                <LimitOrderForm
-                  selectedPair={selectedPair}
-                  priceMidpoint={priceMidpoint}
-                  selectedPrice={selectedPrice} // Pass selected price as a prop
-                />
+              <div className="flex flex-col basis-[25%] gap-2">
+                <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden">
+                  <LimitOrderForm
+                    selectedPair={selectedPair}
+                    priceMidpoint={priceMidpoint}
+                    selectedPrice={selectedPrice} // Pass selected price as a prop
+                  />
+                </div>
+                {/* Account Information */}
+                <div className="flex flex-col bg-backgroundlight rounded-md  p-3 min-w-0 overflow-hidden">
+                  <AccountInfoPanel
+                  />
+                </div>
               </div>
+
+
+
             </div>
             <section className="text-white p-2">
               <div className="bg-backgroundlight rounded-md">

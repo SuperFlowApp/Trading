@@ -1,0 +1,110 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/Authentication.jsx'; // <-- Import your context hook
+
+function AccountInfoPanel() {
+    const { token } = useAuth(); // <-- Get token from context
+    const [accountInfo, setAccountInfo] = useState(null);
+    const [accountInfoError, setAccountInfoError] = useState('');
+
+    // Fetch account information function
+    const fetchAccountInfo = async () => {
+        if (!token) {
+            setAccountInfo(null);
+            setAccountInfoError('');
+            return;
+        }
+        try {
+            const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
+                method: 'GET',
+                headers: {
+                    accept: 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch account information');
+            }
+            const data = await response.json();
+            setAccountInfo(data);
+            setAccountInfoError('');
+        } catch (err) {
+            setAccountInfo(null);
+            setAccountInfoError('Failed to fetch account information.');
+        }
+    };
+
+    // Fetch on mount and every 5 seconds
+    useEffect(() => {
+        fetchAccountInfo();
+        if (!token) return;
+        const interval = setInterval(fetchAccountInfo, 5000);
+        return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]);
+
+    return (
+        <div className="">
+            {accountInfoError && (
+                <div className="text-red-400 text-xs">{accountInfoError}</div>
+            )}
+            <div className="text-xs flex flex-col gap-2">
+                <div className="flex justify-between">
+                    <span className="text-secondary1">Account Equity</span>
+                    <span className="text-white font-semibold">
+                        {token && accountInfo
+                            ? `$${parseFloat(accountInfo.availableBalance || 0).toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                            )}`
+                            : "--"}
+                    </span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-secondary1">Balance</span>
+                    <span className="text-white font-semibold">
+                        {token && accountInfo
+                            ? `$${parseFloat(accountInfo.crossBalance || 0).toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                            )}`
+                            : "--"}
+                    </span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-secondary1">Unrealized PNL</span>
+                    <span className="text-white font-semibold">
+                        {token && accountInfo
+                            ? `$${parseFloat(accountInfo.UnrealizedPnl || 0).toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                            )}`
+                            : "--"}
+                    </span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-secondary1">Maintenance Margin</span>
+                    <span className="text-white font-semibold">
+                        {token && accountInfo
+                            ? `$${parseFloat(
+                                accountInfo.positions?.[0]?.maintenanceMargin || 0
+                            ).toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            })}`
+                            : "--"}
+                    </span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-secondary1">Cross Account Leverage</span>
+                    <span className="text-white font-semibold">
+                        {token && accountInfo
+                            ? `${accountInfo.positions?.[0]?.leverage || 0}x`
+                            : "--"}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default AccountInfoPanel;

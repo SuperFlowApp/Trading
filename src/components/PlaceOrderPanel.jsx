@@ -91,42 +91,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     }
   }, [token]);
 
-  // Fetch account information function
-  const fetchAccountInfo = async () => {
-    if (!token) {
-      setAccountInfo(null);
-      setAccountInfoError('');
-      return;
-    }
-    try {
-      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch account information');
-      }
-      const data = await response.json();
-      setAccountInfo(data);
-      setAccountInfoError('');
-    } catch (err) {
-      setAccountInfo(null);
-      setAccountInfoError('Failed to fetch account information.');
-    }
-  };
-
-  // Fetch on mount and every 5 seconds
-  useEffect(() => {
-    fetchAccountInfo();
-    if (!token) return;
-    const interval = setInterval(fetchAccountInfo, 5000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
   const placeOrder = async () => {
     if (!token || !selectedPair || !amount) {
       setError('Please fill all fields.');
@@ -493,54 +457,20 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
         {success && <div className="text-green-400 text-xs">{success}</div>}
       </div>
 
-      {/* Account Information */}
+      {/* Order Information */}
       <div className="px-4 mt-4">
-        {accountInfoError && (
-          <div className="text-red-400 text-xs">{accountInfoError}</div>
-        )}
-        <div className="bg-backgrounddark rounded p-3 text-xs flex flex-col gap-2">
-          <div className="flex justify-between">
-            <span className="text-secondary1">Account Equity</span>
-            <span className="text-white font-semibold">
-              {token && accountInfo
-                ? `$${parseFloat(accountInfo.availableBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : "--"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-secondary1">Balance</span>
-            <span className="text-white font-semibold">
-              {token && accountInfo
-                ? `$${parseFloat(accountInfo.crossBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : "--"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-secondary1">Unrealized PNL</span>
-            <span className="text-white font-semibold">
-              {token && accountInfo
-                ? `$${parseFloat(accountInfo.UnrealizedPnl || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : "--"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-secondary1">Maintenance Margin</span>
-            <span className="text-white font-semibold">
-              {token && accountInfo
-                ? `$${parseFloat(accountInfo.positions?.[0]?.maintenanceMargin || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : "--"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-secondary1">Cross Account Leverage</span>
-            <span className="text-white font-semibold">
-              {token && accountInfo
-                ? `${accountInfo.positions?.[0]?.leverage || 0}x`
-                : "--"}
-            </span>
-          </div>
+        <div className="border-t border-secondary2 p-3 text-xs flex flex-col gap-2">          <span className="w-full flex justify-between text-white font-semibold">
+          Order Value
+          <span>
+            {amount && price
+              ? `$${(parseFloat(amount) * parseFloat(price)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : "--"}
+          </span>
+        </span>
+          <span className="w-full flex justify-between text-white font-semibold"> Fees  <span>0.0700% / 0.0400%</span></span>
         </div>
       </div>
+
     </div>
   );
 }
