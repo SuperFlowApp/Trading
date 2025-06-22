@@ -182,7 +182,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
     fetchBalance();
 
-    const interval = setInterval(fetchBalance, 10000);
+    const interval = setInterval(fetchBalance, 3000);
     return () => clearInterval(interval);
   }, [token]);
 
