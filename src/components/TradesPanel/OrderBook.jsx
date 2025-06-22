@@ -188,7 +188,7 @@ const OrderBook = ({ selectedPair, onPriceMidpointChange, onRowSelect }) => {
 
       {/* Ask Section */}
       <ul className="flex flex-col w-full">
-        {addTotals(asks, true).map((row, i) => (
+        {addTotals(asks, false).map((row, i) => (
           <Row
             {...row}
             progress={row.progress}
