@@ -147,13 +147,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       setBlinkClass("blink-success");
       setTimeout(() => setBlinkClass(""), 400);
 
-      // Fetch updated account info after placing order
-      fetchAccountInfo();
-
-    } catch (err) {
-      setError('Failed to place order.');
-      setBlinkClass("blink-error");
-      setTimeout(() => setBlinkClass(""), 400);
     } finally {
       setLoading(false);
     }
