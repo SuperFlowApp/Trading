@@ -188,6 +188,18 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
 
 
+  // Set price to priceMidpoint when switching to Limit or Scale, unless user typed manually
+  useEffect(() => {
+    if ((market === 'limit' || market === 'scale') && !price) {
+      if (priceMidpoint) setPrice(priceMidpoint.toFixed(1));
+    }
+    if (market === 'market') {
+      setPrice('');
+    }
+  }, [market, priceMidpoint]);
+
+
+
   // Update on slider change
   const handleSliderChange = (e) => {
     let value = Number(e.target.value);
