@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/Authentication.jsx'; // <-- Import your context hook
+import { useAuth, useAuthFetch } from '../../context/Authentication.jsx'; // <-- Import useAuthFetch
 
 function AccountInfoPanel() {
-    const { token } = useAuth(); // <-- Get token from context
+    const { token, logout } = useAuth(); // <-- Get logout from context
+    const authFetch = useAuthFetch();    // <-- Use authFetch for authenticated requests
     const [accountInfo, setAccountInfo] = useState(null);
     const [accountInfoError, setAccountInfoError] = useState('');
 
@@ -14,13 +15,18 @@ function AccountInfoPanel() {
             return;
         }
         try {
-            const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
+            const response = await authFetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
                 method: 'GET',
                 headers: {
                     accept: 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
             });
+            if (response.status === 401) {
+                logout();
+                setAccountInfo(null);
+                setAccountInfoError('Session expired. Please log in again.');
+                return;
+            }
             if (!response.ok) {
                 throw new Error('Failed to fetch account information');
             }

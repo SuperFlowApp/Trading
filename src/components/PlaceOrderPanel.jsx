@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/Authentication.jsx';
+import { useAuth, useAuthFetch } from '../context/Authentication.jsx';
 
 import { getSelectedPairDetails } from './ChartPanel/Infobar.jsx';
 
@@ -48,7 +48,8 @@ function LeverageButton() {
 
 
 function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
-  const { token } = useAuth();
+  const { token, logout } = useAuth(); // <-- Add logout
+  const authFetch = useAuthFetch();
   const pairDetails = getSelectedPairDetails() || { base: 'BTC', quote: 'USDT' }; // fallback
 
   const [balanceTotal, setBalanceTotal] = useState("--");
@@ -152,6 +153,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     }
   };
 
+  // Example for fetchBalance:
   useEffect(() => {
     if (!token) return;
 
@@ -164,6 +166,12 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        if (response.status === 401) {
+          logout(); // <-- Log out on unauthorized
+          setError('Session expired. Please log in again.');
+          return;
+        }
 
         if (!response.ok) {
           throw new Error('Failed to fetch balance');
@@ -184,7 +192,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
 
     const interval = setInterval(fetchBalance, 3000);
     return () => clearInterval(interval);
-  }, [token]);
+  }, [token, logout]);
 
 
 
@@ -256,6 +264,30 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
       return () => clearTimeout(timer);
     }
   }, [error, success]);
+
+  // Fetch account information
+  useEffect(() => {
+    if (!token) return;
+    const fetchAccountInfo = async () => {
+      try {
+        const response = await authFetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
+          method: 'GET',
+          headers: { accept: 'application/json' },
+        });
+        if (response.status === 401) {
+          logout();
+          setError('Session expired. Please log in again.');
+          return;
+        }
+        if (!response.ok) throw new Error('Failed to fetch account info');
+        const data = await response.json();
+        setAccountInfo(data);
+      } catch (err) {
+        setAccountInfoError('Error fetching account info');
+      }
+    };
+    fetchAccountInfo();
+  }, [token, logout, authFetch]);
 
   return (
     <div className="w-full text-white flex flex-col gap-4">

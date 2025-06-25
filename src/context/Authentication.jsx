@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   React.useEffect(() => {
     if (!token) {
       setLoading(false); // No token, done loading
+      console.log("Unauthorized");
       return;
     }
     // Try to fetch balance or a protected endpoint to check token validity
@@ -22,14 +23,14 @@ export function AuthProvider({ children }) {
     })
       .then((res) => {
         if (!res.ok) throw new Error("Invalid token or server down");
-        return res.json();
+        // No need to parse JSON if you don't use it
+        console.log("Authorized");
       })
       .catch(() => {
-        setToken("");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("username"); // <-- Also clear username
+        logout();
+        console.log("Unauthorized");
       })
-      .finally(() => setLoading(false)); // <-- Set loading to false after check
+      .finally(() => setLoading(false));
   }, [token]);
 
   // Login function: fetch token from server
@@ -76,11 +77,31 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("username");
   };
 
-  // Print the token in the console as long as we are logged in
+  // Validate token on mount
   React.useEffect(() => {
-    if (token) {
-      console.log("Access Token:", token);
+    if (!token) {
+      setLoading(false); // No token, done loading
+      console.log("Unauthorized");
+      return;
     }
+    // Try to fetch balance or a protected endpoint to check token validity
+    fetch("https://fastify-serverless-function-rimj.onrender.com/api/balance", {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Invalid token or server down");
+        // No need to parse JSON if you don't use it
+        console.log("Authorized");
+      })
+      .catch(() => {
+        logout();
+        console.log("Unauthorized");
+      })
+      .finally(() => setLoading(false));
   }, [token]);
 
   return (

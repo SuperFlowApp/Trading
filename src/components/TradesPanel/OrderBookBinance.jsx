@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
-import ReconnectingWebSocket from 'reconnecting-websocket';
+
+
 
 // Utility to merge order book updates into local state
 const mergeOrderBook = (prev, updates, isBid) => {
@@ -17,29 +18,21 @@ const mergeOrderBook = (prev, updates, isBid) => {
   const sorted = Array.from(map.entries())
     .map(([price, size]) => ({ price, size }))
     .sort((a, b) => (isBid ? b.price - a.price : a.price - b.price));
-  return sorted.slice(0, 10); // keep top 50 for performance
+  return sorted.slice(0, 50); // keep top 50 for performance
 };
 
 // Custom hook for Binance order book
 const useBinanceOrderBook = (symbol = 'btcusdt') => {
   const [bids, setBids] = useState([]);
   const [asks, setAsks] = useState([]);
-  const [wsFps, setWsFps] = useState(0); // Add FPS state
   const wsRef = useRef(null);
-  const updatesRef = useRef(0);
 
   useEffect(() => {
     let active = true;
     let snapshotDone = false;
     let localBids = [];
     let localAsks = [];
-
-    // FPS counter
-    updatesRef.current = 0;
-    let fpsInterval = setInterval(() => {
-      setWsFps(updatesRef.current);
-      updatesRef.current = 0;
-    }, 1000);
+    let lastUpdate = Date.now();
 
     // Step 1: Get snapshot
     fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol.toUpperCase()}&limit=1000`)
@@ -53,8 +46,8 @@ const useBinanceOrderBook = (symbol = 'btcusdt') => {
         snapshotDone = true;
       });
 
-    // Step 2: Connect WebSocket using ReconnectingWebSocket
-    const ws = new ReconnectingWebSocket(`wss://stream.binance.com:9443/ws/${symbol}@depth@100ms`);
+    // Step 2: Connect WebSocket
+    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol}@depth@100ms`);
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
@@ -62,9 +55,14 @@ const useBinanceOrderBook = (symbol = 'btcusdt') => {
       const data = JSON.parse(event.data);
       localBids = mergeOrderBook(localBids, data.b, true);
       localAsks = mergeOrderBook(localAsks, data.a, false);
-      setBids(localBids.slice(0, 50));
-      setAsks(localAsks.slice(0, 50));
-      updatesRef.current += 1; // Count update
+
+      // Throttle UI updates to every 100ms
+      const now = Date.now();
+      if (now - lastUpdate > 100) {
+        setBids(localBids.slice(0, 50));
+        setAsks(localAsks.slice(0, 50));
+        lastUpdate = now;
+      }
     };
 
     ws.onerror = () => ws.close();
@@ -72,11 +70,10 @@ const useBinanceOrderBook = (symbol = 'btcusdt') => {
     return () => {
       active = false;
       ws.close();
-      clearInterval(fpsInterval);
     };
   }, [symbol]);
 
-  return { bids, asks, wsFps };
+  return { bids, asks };
 };
 
 // Memoized Row for per-row update
@@ -87,7 +84,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew }) => {
   useEffect(() => {
     if (isNew) {
       setIsBlinking(true);
-      const timeout = setTimeout(() => setIsBlinking(false), 200);
+      const timeout = setTimeout(() => setIsBlinking(false), 100);
       return () => clearTimeout(timeout);
     }
   }, [isNew]);
@@ -99,12 +96,13 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew }) => {
   };
 
   const textColor = color === 'green' ? 'text-primary2' : 'text-primary1';
-  const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors cursor-pointer ${isBlinking
+  const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors cursor-pointer ${
+    isBlinking
       ? color === 'red'
-        ? 'bg-primary1/40'
-        : 'bg-primary2/40'
+        ? 'bg-primary1/50'
+        : 'bg-primary2/50'
       : 'bg-transparent'
-    } ${isSelected ? 'border border-[#FFF]' : 'border border-transparent'}`;
+  } ${isSelected ? 'border border-[#FFF]' : 'border border-transparent'}`;
 
   return (
     <li className="relative w-full mb-1" onClick={handleSelect}>
@@ -132,7 +130,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew }) => {
 });
 
 const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelect }) => {
-  const { asks, bids, wsFps } = useBinanceOrderBook(selectedPair.toLowerCase());
+  const { asks, bids } = useBinanceOrderBook(selectedPair.toLowerCase());
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
@@ -206,7 +204,9 @@ const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelec
 
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
-
+      <div className="flex justify-between items-center text-sm font-semibold">
+        <div className=" text-lg"></div>
+      </div>
 
       <div className="font-normal flex justify-between text-secondary1 px-2 pb-3 font-semibold text-xs">
         <div className="text-left w-1/3">Price (USD)</div>
@@ -230,7 +230,7 @@ const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelec
       {/* Spread Section */}
       <div className="font-bold text-[18px] flex justify-between border border-secondary1/50 rounded-lg items-center py-1 px-2 mt-2 mb-3 text-sm font-semibold">
         <div className="text-md">Spread</div>
-        <span className="">{spreadValue !== null ? spreadValue.toFixed(5) : '—'}</span>
+        <span className="">{spreadValue !== null ? `${spreadValue.toFixed(5)}$` : '—'}</span>
         <span className="text-xs">
           {spreadPercentage !== null ? `${spreadPercentage.toFixed(5)}%` : '—'}
         </span>
@@ -248,12 +248,6 @@ const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelec
           />
         ))}
       </ul>
-
-      
-      <div className="flex justify-between items-center text-sm font-semibold">
-        <div className=" text-lg"></div>
-        <div className="text-white text-[10px]">Updates/sec: {wsFps}</div>
-      </div>
     </div>
   );
 };
