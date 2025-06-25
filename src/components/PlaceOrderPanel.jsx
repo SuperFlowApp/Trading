@@ -296,6 +296,12 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     }
   }, [selectedDropdownValue, onCurrencyChange]);
 
+  // Reset to the first currency when selectedPair changes
+  useEffect(() => {
+    const details = getSelectedPairDetails() || { base: 'BTC' };
+    setSelectedDropdownValue(details.base);
+  }, [selectedPair]);
+
   return (
     <div className="w-full text-white flex flex-col gap-4">
       {/* Head Tabs */}

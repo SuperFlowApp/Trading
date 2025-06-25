@@ -147,7 +147,14 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
   );
 });
 
-const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelect, selectedCurrency = 'BTC' }) => {
+const OrderBook = ({
+  selectedPair = 'btcusdt',
+  onPriceMidpointChange,
+  onRowSelect,
+  selectedCurrency = 'BTC',
+  baseAsset = 'BTC',
+  quoteAsset = 'USDT'
+}) => {
   const { asks, bids, wsFps } = useBinanceOrderBook(selectedPair.toLowerCase());
 
   const [spreadValue, setSpreadValue] = useState(null);
@@ -233,17 +240,8 @@ const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelec
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
       <div className="font-normal flex justify-between text-secondary1 px-2 pb-3 font-semibold text-xs">
         <div className="text-left w-1/4">Price</div>
-        {selectedCurrency === 'BTC' ? (
-          <>
-            <div className="text-left w-1/4">Size (BTC)</div>
-            <div className="text-left w-1/4">Total (BTC)</div>
-          </>
-        ) : (
-          <>
-            <div className="text-left w-1/4">Size (USDT)</div>
-            <div className="text-left w-1/4">Total (USDT)</div>
-          </>
-        )}
+        <div className="text-left w-1/4">Size ({selectedCurrency})</div>
+        <div className="text-left w-1/4">Total ({selectedCurrency})</div>
       </div>
 
       {/* Ask Section */}
