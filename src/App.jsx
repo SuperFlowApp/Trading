@@ -17,6 +17,7 @@ function App() {
   const [priceMidpoint, setPriceMidpoint] = useState(null); // State to store priceMidpoint
   const [selectedPrice, setSelectedPrice] = useState(null); // State to store selected price
   const [isMobile, setIsMobile] = useState(false); // State to detect mobile size
+  const [selectedCurrency, setSelectedCurrency] = useState('BTC'); // Add this
 
   useEffect(() => {
     const handleResize = () => {
@@ -109,6 +110,7 @@ function App() {
                           selectedPair={selectedPair}
                           onPriceMidpointChange={setPriceMidpoint}
                           onRowSelect={setSelectedPrice}
+                          selectedCurrency={selectedCurrency} // Pass currency to OrderBook
                         />
                       </div>
                       <div className={activeTab === 'Trades' ? 'block' : 'hidden'}>
@@ -130,7 +132,8 @@ function App() {
                   <LimitOrderForm
                     selectedPair={selectedPair}
                     priceMidpoint={priceMidpoint}
-                    selectedPrice={selectedPrice} // Pass selected price as a prop
+                    selectedPrice={selectedPrice}
+                    onCurrencyChange={setSelectedCurrency} // Listen for currency changes
                   />
                 </div>
                 {/* Account Information */}

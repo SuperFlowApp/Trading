@@ -47,7 +47,7 @@ function LeverageButton() {
 
 
 
-function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
+function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrencyChange }) {
   const { token, logout } = useAuth(); // <-- Add logout
   const authFetch = useAuthFetch();
   const pairDetails = getSelectedPairDetails() || { base: 'BTC', quote: 'USDT' }; // fallback
@@ -288,6 +288,13 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice }) {
     };
     fetchAccountInfo();
   }, [token, logout, authFetch]);
+
+  // Notify parent when currency changes
+  useEffect(() => {
+    if (onCurrencyChange) {
+      onCurrencyChange(selectedDropdownValue);
+    }
+  }, [selectedDropdownValue, onCurrencyChange]);
 
   return (
     <div className="w-full text-white flex flex-col gap-4">

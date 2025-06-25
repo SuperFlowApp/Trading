@@ -80,7 +80,7 @@ const useBinanceOrderBook = (symbol = 'btcusdt') => {
 };
 
 // Memoized Row for per-row update
-const Row = memo(({ size, price, total, progress, color, onSelect, isNew }) => {
+const Row = memo(({ size, price, total, progress, color, onSelect, isNew, selectedCurrency }) => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -100,10 +100,10 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew }) => {
 
   const textColor = color === 'green' ? 'text-primary2' : 'text-primary1';
   const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors cursor-pointer ${isBlinking
-      ? color === 'red'
-        ? 'bg-primary1/40'
-        : 'bg-primary2/40'
-      : 'bg-transparent'
+    ? color === 'red'
+      ? 'bg-primary1/40'
+      : 'bg-primary2/40'
+    : 'bg-transparent'
     } ${isSelected ? 'border border-[#FFF]' : 'border border-transparent'}`;
 
   return (
@@ -117,21 +117,37 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew }) => {
         }}
       />
       <div className={rowClasses}>
-        <div className={`font-bold text-[15px] text-left w-1/3 ${textColor}`}>
+        {/* Price */ }
+        <div className={`font-bold text-[15px] text-left w-1/4 ${textColor}`}>
           {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
-        <div className="text-[15px] text-left w-1/3">
-          {size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
-        </div>
-        <div className="text-[15px] text-left w-1/3">
-          {total.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
-        </div>
+        {/* Size */ }
+        {selectedCurrency === 'BTC' ? (
+          <div className="text-[15px] text-left w-1/4">
+            {size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+          </div>
+        ) : (
+          <div className="text-[15px] text-left w-1/4">
+            {(price * size).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+        )}
+        {/* Total */ }
+        {selectedCurrency === 'BTC' ? (
+          <div className="text-[15px] text-left w-1/4">
+            {total.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+          </div>
+        ) : (
+          <div className="text-[15px] text-left w-1/4">
+            {(price * total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+        )}
+        {/* Hide the other columns */}
       </div>
     </li>
   );
 });
 
-const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelect }) => {
+const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelect, selectedCurrency = 'BTC' }) => {
   const { asks, bids, wsFps } = useBinanceOrderBook(selectedPair.toLowerCase());
 
   const [spreadValue, setSpreadValue] = useState(null);
@@ -142,17 +158,26 @@ const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelec
   const prevAskPrices = useRef(new Set());
   const prevBidPrices = useRef(new Set());
 
-  // Helper to mark new prices
+  // Helper to mark new prices and calculate cumulative totals
   const addTotals = (rows, reverse = false, prevPricesSet = new Set()) => {
-    let total = 0;
-    let maxSize = Math.max(...rows.map((r) => r.size), 1);
-    const sortedRows = reverse ? [...rows].sort((a, b) => b.price - a.price) : rows;
+    let cumulative = 0;
+    // Sort rows: bids descending, asks ascending
+    const sortedRows = reverse ? [...rows].sort((a, b) => b.price - a.price) : [...rows].sort((a, b) => a.price - b.price);
+    // Only show top 10
     const limitedRows = sortedRows.slice(0, 10);
+    // Find max size for progress bar
+    const maxSize = Math.max(...limitedRows.map((r) => r.size), 1);
+
     return limitedRows.map((r) => {
-      total += r.size;
+      cumulative += r.size;
       const progress = (r.size / maxSize) * 100;
       const isNew = !prevPricesSet.has(r.price);
-      return { ...r, total, progress, isNew };
+      return {
+        ...r,
+        total: cumulative,
+        progress,
+        isNew,
+      };
     });
   };
 
@@ -206,12 +231,19 @@ const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelec
 
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
-
-
       <div className="font-normal flex justify-between text-secondary1 px-2 pb-3 font-semibold text-xs">
-        <div className="text-left w-1/3">Price (USD)</div>
-        <div className="text-left w-1/3">Size (BTC)</div>
-        <div className="text-left w-1/3">Total (BTC)</div>
+        <div className="text-left w-1/4">Price</div>
+        {selectedCurrency === 'BTC' ? (
+          <>
+            <div className="text-left w-1/4">Size (BTC)</div>
+            <div className="text-left w-1/4">Total (BTC)</div>
+          </>
+        ) : (
+          <>
+            <div className="text-left w-1/4">Size (USDT)</div>
+            <div className="text-left w-1/4">Total (USDT)</div>
+          </>
+        )}
       </div>
 
       {/* Ask Section */}
@@ -223,6 +255,7 @@ const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelec
             color="red"
             key={`ask-${row.price}`}
             onSelect={handleRowSelect}
+            selectedCurrency={selectedCurrency}
           />
         ))}
       </ul>
@@ -245,11 +278,11 @@ const OrderBook = ({ selectedPair = 'btcusdt', onPriceMidpointChange, onRowSelec
             color="green"
             key={`bid-${row.price}`}
             onSelect={handleRowSelect}
+            selectedCurrency={selectedCurrency}
           />
         ))}
       </ul>
 
-      
       <div className="flex justify-between items-center text-sm font-semibold">
         <div className=" text-lg"></div>
         <div className="text-white text-[10px]">Updates/sec: {wsFps}</div>
