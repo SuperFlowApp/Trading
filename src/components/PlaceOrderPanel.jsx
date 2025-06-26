@@ -151,17 +151,35 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
         body: JSON.stringify(requestBody),
       });
 
+      // Try to parse the error response before checking if response is ok
+      let errorData;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        errorData = await response.json();
+      } else {
+        errorData = await response.text();
+      }
+      
       if (!response.ok) {
-        throw new Error('Failed to place order');
+        // Use error message from response if available
+        const errorMessage = errorData && typeof errorData === 'object' && errorData.message 
+          ? errorData.message 
+          : typeof errorData === 'string' ? errorData : 'Failed to place order';
+          
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const data = typeof errorData === 'object' ? errorData : { orderId: 'unknown' };
       setSuccess(`Order placed! Order ID: ${data.orderId}`);
       setAmount('');
       setSliderValue(0);
       setBlinkClass("blink-success");
       setTimeout(() => setBlinkClass(""), 400);
-
+    } catch (err) {
+      console.error('Order error:', err);
+      setError(err.message || 'Failed to place order');
+      setBlinkClass("blink-error");
+      setTimeout(() => setBlinkClass(""), 400);
     } finally {
       setLoading(false);
     }
