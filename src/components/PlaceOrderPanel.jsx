@@ -100,7 +100,14 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
   }, [token]);
 
   const placeOrder = async () => {
-    if (!token || !selectedPair || !amount) {
+    if (!token) {
+      // Just blink when not logged in, no error message
+      setBlinkClass("blink-error");
+      setTimeout(() => setBlinkClass(""), 400);
+      return;
+    }
+
+    if (!selectedPair || !amount) {
       setError('Please fill all fields.');
       setBlinkClass("blink-error");
       setTimeout(() => setBlinkClass(""), 400);
