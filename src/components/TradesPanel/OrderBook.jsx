@@ -146,21 +146,21 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
         {/* Size */ }
         {selectedCurrency === 'BTC' ? (
           <div className="text-[15px] text-left w-1/4">
-            {size.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+            {size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
           </div>
         ) : (
           <div className="text-[15px] text-left w-1/4">
-            {(price * size).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {(price * size).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
           </div>
         )}
         {/* Total */ }
         {selectedCurrency === 'BTC' ? (
           <div className="text-[15px] text-left w-1/4">
-            {total.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+            {total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
           </div>
         ) : (
           <div className="text-[15px] text-left w-1/4">
-            {(price * total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {(price * total).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
           </div>
         )}
         {/* Hide the other columns */}
