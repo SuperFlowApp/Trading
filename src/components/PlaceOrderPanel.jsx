@@ -217,9 +217,10 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     }
   };
 
-  // Update the amount field whenever sliderValue changes
+  // Update the amount field whenever sliderValue changes or balance changes
   useEffect(() => {
-    if (inputSource === 'slider' && sliderValue > 0) {
+    // Always update when slider has a value, regardless of input source
+    if (sliderValue > 0) {
       // Calculate based on selected currency
       if (selectedDropdownValue === pairDetails.base) {
         // Convert balanceFree (in quote currency) to base currency
@@ -237,9 +238,12 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     } else if (inputSource === 'slider' && sliderValue === 0) {
       setAmount('');
     }
-    // Reset input source after processing
-    setInputSource(null);
-  }, [sliderValue, balanceFree, inputSource, selectedDropdownValue, price, priceMidpoint]);
+    
+    // Only reset input source if we're coming from a slider interaction
+    if (inputSource === 'slider') {
+      setInputSource(null);
+    }
+  }, [sliderValue, balanceFree, selectedDropdownValue, price, priceMidpoint, inputSource]);
 
   // Auto-hide error and success messages after 3 seconds
   useEffect(() => {
