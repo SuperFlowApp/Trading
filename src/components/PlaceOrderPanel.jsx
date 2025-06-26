@@ -151,6 +151,16 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
         body: JSON.stringify(requestBody),
       });
 
+      // Check for auth errors
+      if (response.status === 401) {
+        const data = await response.json().catch(() => ({}));
+        if (data.detail === "Could not validate credentials") {
+          logout();
+          setError("Session expired. Please log in again.");
+          return;
+        }
+      }
+
       if (!response.ok) {
         throw new Error('Failed to place order');
       }

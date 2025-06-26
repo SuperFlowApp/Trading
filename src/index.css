@@ -75,20 +75,32 @@ input[type="number"] {
 
 
 /* Add to your global CSS file */
-.blink-success {
-  animation: blink-success 0.4s;
-  border: 2px solid var(--color-secondary2, theme('colors.secondary1')) !important;
-}
-@keyframes blink-success {
-  0% { border-color: var(--color-secondary2, theme('colors.secondary1')); }
-  100% { border-color: transparent; }
+.blink-error {
+  animation: blinkError 0.4s ease-in-out;
 }
 
-.blink-error {
-  animation: blink-error 0.4s;
-  border: 2px solid var(--color-warningcolor, theme('colors.warningcolor')) !important;
+.blink-success {
+  animation: blinkSuccess 0.4s ease-in-out;
 }
-@keyframes blink-error {
-  0% { border-color: var(--color-warningcolor, theme('colors.warningcolor')); }
-  100% { border-color: transparent; }
+
+@keyframes blinkError {
+  0%, 100% {
+    border-color: transparent;
+    color: black;
+  }
+  50% {
+    border-color: #ef4444; /* red-500 */
+    color: #ef4444; /* red-500 */
+  }
+}
+
+@keyframes blinkSuccess {
+  0%, 100% {
+    border-color: transparent;
+    color: black;
+  }
+  50% {
+    border-color: #22c55e; /* green-500 */
+    color: #22c55e; /* green-500 */
+  }
 }
