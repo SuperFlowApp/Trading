@@ -204,7 +204,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     setAmount(value);
     setInputSource('input');
 
-    // Calculate sliderValue as percentage of balanceFree
+    // Still calculate the slider position, but don't set input source to 'slider'
     const numericValue = parseFloat(value);
     const numericBalance = parseFloat(balanceFree);
     if (!isNaN(numericValue) && numericBalance > 0) {
@@ -219,8 +219,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
 
   // Update the amount field whenever sliderValue changes or balance changes
   useEffect(() => {
-    // Always update when slider has a value, regardless of input source
-    if (sliderValue > 0) {
+    // Only update amount from slider when inputSource is 'slider'
+    if (inputSource === 'slider' && sliderValue >= 0) {
       // Calculate based on selected currency
       if (selectedDropdownValue === pairDetails.base) {
         // Convert balanceFree (in quote currency) to base currency
@@ -235,12 +235,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
         const calculatedAmount = (sliderValue / 100) * parseFloat(balanceFree);
         setAmount(calculatedAmount.toFixed(2)); // Fewer decimals for quote currency like USDT
       }
-    } else if (inputSource === 'slider' && sliderValue === 0) {
-      setAmount('');
-    }
-    
-    // Only reset input source if we're coming from a slider interaction
-    if (inputSource === 'slider') {
+      
+      // Reset input source after processing
       setInputSource(null);
     }
   }, [sliderValue, balanceFree, selectedDropdownValue, price, priceMidpoint, inputSource]);
