@@ -245,6 +245,27 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     setSelectedDropdownValue(details.base);
   }, [selectedPair]);
 
+  // Add this useEffect to handle currency switching and maintain equivalent values
+  useEffect(() => {
+    if (!amount || !price) return;
+    
+    const currentAmount = parseFloat(amount);
+    const currentPrice = parseFloat(price);
+    
+    if (isNaN(currentAmount) || isNaN(currentPrice)) return;
+    
+    // When switching from base to quote, convert amount to quote value
+    if (selectedDropdownValue === pairDetails.quote) {
+      const quoteValue = currentAmount * currentPrice;
+      setAmount(quoteValue.toFixed(2));
+    }
+    // When switching from quote to base, convert amount back to base value
+    else if (selectedDropdownValue === pairDetails.base) {
+      const baseValue = currentAmount / currentPrice;
+      setAmount(baseValue.toFixed(6));
+    }
+  }, [selectedDropdownValue]); // Only trigger when currency selection changes
+
   return (
     <div className="w-full text-white flex flex-col gap-4">
       {/* Head Tabs */}
@@ -352,13 +373,21 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
               <div className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer">
                 <button
                   className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.base ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary1 hover:text-white'}`}
-                  onClick={() => setSelectedDropdownValue(pairDetails.base)}
+                  onClick={() => {
+                    if (selectedDropdownValue !== pairDetails.base) {
+                      setSelectedDropdownValue(pairDetails.base);
+                    }
+                  }}
                 >
                   {pairDetails.base}
                 </button>
                 <button
                   className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.quote ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary1 hover:text-white'}`}
-                  onClick={() => setSelectedDropdownValue(pairDetails.quote)}
+                  onClick={() => {
+                    if (selectedDropdownValue !== pairDetails.quote) {
+                      setSelectedDropdownValue(pairDetails.quote);
+                    }
+                  }}
                 >
                   {pairDetails.quote}
                 </button>
@@ -452,15 +481,31 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
 
       {/* Order Information */}
       <div className="px-4 mt-4">
-        <div className="border-t border-secondary2 p-3 text-xs flex flex-col gap-2">          <span className="w-full flex justify-between text-white font-semibold">
-          Order Value
-          <span>
-            {amount && price
-              ? `$${(parseFloat(amount) * parseFloat(price)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-              : "--"}
+        <div className="border-t border-secondary2 p-3 text-xs flex flex-col gap-2">
+          <span className="w-full flex justify-between text-white font-semibold">
+            Order Value
+            <span>
+              {amount && price
+                ? `$${(() => {
+                    const numAmount = parseFloat(amount);
+                    const numPrice = parseFloat(price);
+                    
+                    // If we're in quote currency mode (USDT), the amount IS the order value
+                    if (selectedDropdownValue === pairDetails.quote) {
+                      return numAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    }
+                    // If we're in base currency mode (BTC), multiply by price to get order value
+                    else {
+                      return (numAmount * numPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    }
+                  })()}`
+                : "--"}
+            </span>
           </span>
-        </span>
-          <span className="w-full flex justify-between text-white font-semibold"> Fees  <span>0.0700% / 0.0400%</span></span>
+          <span className="w-full flex justify-between text-white font-semibold">
+            Fees  
+            <span>0.0700% / 0.0400%</span>
+          </span>
         </div>
       </div>
 

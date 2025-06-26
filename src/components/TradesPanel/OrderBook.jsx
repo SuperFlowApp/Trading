@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
-import ReconnectingWebSocket from 'reconnecting-websocket';
 
 // Utility to merge order book updates into local state
 const mergeOrderBook = (prev, updates, isBid) => {
@@ -17,20 +16,19 @@ const mergeOrderBook = (prev, updates, isBid) => {
   const sorted = Array.from(map.entries())
     .map(([price, size]) => ({ price, size }))
     .sort((a, b) => (isBid ? b.price - a.price : a.price - b.price));
-  return sorted.slice(0, 10); // keep top 50 for performance
+  return sorted.slice(0, 50); // keep top 50 for performance
 };
 
-// Custom hook for Binance order book
-const useBinanceOrderBook = (symbol = 'btcusdt') => {
+// Custom hook for localhost SSE order book
+const useLocalhostOrderBook = (symbol = 'btcusdt') => {
   const [bids, setBids] = useState([]);
   const [asks, setAsks] = useState([]);
-  const [wsFps, setWsFps] = useState(0); // Add FPS state
-  const wsRef = useRef(null);
+  const [wsFps, setWsFps] = useState(0);
+  const eventSourceRef = useRef(null);
   const updatesRef = useRef(0);
 
   useEffect(() => {
     let active = true;
-    let snapshotDone = false;
     let localBids = [];
     let localAsks = [];
 
@@ -41,37 +39,61 @@ const useBinanceOrderBook = (symbol = 'btcusdt') => {
       updatesRef.current = 0;
     }, 1000);
 
-    // Step 1: Get snapshot
-    fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol.toUpperCase()}&limit=1000`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!active) return;
-        localBids = data.bids.map(([price, size]) => ({ price: parseFloat(price), size: parseFloat(size) }));
-        localAsks = data.asks.map(([price, size]) => ({ price: parseFloat(price), size: parseFloat(size) }));
-        setBids(localBids.slice(0, 50));
-        setAsks(localAsks.slice(0, 50));
-        snapshotDone = true;
-      });
+    // Connect to SSE endpoint
+    const eventSource = new EventSource('https://websocketserver-am3y.onrender.com/stream/orderbook');
+    eventSourceRef.current = eventSource;
 
-    // Step 2: Connect WebSocket using ReconnectingWebSocket
-    const ws = new ReconnectingWebSocket(`wss://stream.binance.com:9443/ws/${symbol}@depth@100ms`);
-    wsRef.current = ws;
+    eventSource.onmessage = (event) => {
+      if (!active) return;
 
-    ws.onmessage = (event) => {
-      if (!snapshotDone) return;
-      const data = JSON.parse(event.data);
-      localBids = mergeOrderBook(localBids, data.b, true);
-      localAsks = mergeOrderBook(localAsks, data.a, false);
-      setBids(localBids.slice(0, 50));
-      setAsks(localAsks.slice(0, 50));
-      updatesRef.current += 1; // Count update
+      try {
+        const data = JSON.parse(event.data);
+
+        // Check if this is orderbook data
+        if (data.e === 'ORDERBOOK' && data.s === symbol.toUpperCase()) {
+          // Convert bids and asks arrays to the expected format
+          const newBids = data.b.map(([price, size]) => ({
+            price: parseFloat(price),
+            size: parseFloat(size)
+          }));
+          const newAsks = data.a.map(([price, size]) => ({
+            price: parseFloat(price),
+            size: parseFloat(size)
+          }));
+
+          // Sort and limit the data
+          localBids = newBids
+            .sort((a, b) => b.price - a.price) // bids descending
+            .slice(0, 50);
+          localAsks = newAsks
+            .sort((a, b) => a.price - b.price) // asks ascending  
+            .slice(0, 50);
+
+          setBids(localBids);
+          setAsks(localAsks);
+          updatesRef.current += 1; // Count update
+        }
+      } catch (error) {
+        console.error('Error parsing SSE data:', error);
+      }
     };
 
-    ws.onerror = () => ws.close();
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+      if (eventSource.readyState === EventSource.CLOSED) {
+        console.log('SSE connection closed');
+      }
+    };
+
+    eventSource.onopen = () => {
+      console.log('SSE connection opened');
+    };
 
     return () => {
       active = false;
-      ws.close();
+      if (eventSource) {
+        eventSource.close();
+      }
       clearInterval(fpsInterval);
     };
   }, [symbol]);
@@ -155,7 +177,7 @@ const OrderBook = ({
   baseAsset = 'BTC',
   quoteAsset = 'USDT'
 }) => {
-  const { asks, bids, wsFps } = useBinanceOrderBook(selectedPair.toLowerCase());
+  const { asks, bids, wsFps } = useLocalhostOrderBook(selectedPair.toLowerCase());
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
