@@ -119,7 +119,7 @@ function App() {
                     </div>
                   </div>
                 </div>
-                <section className="text-white p-2">
+                <section className="text-white">
                   <div className="bg-backgroundlight rounded-md">
                     <PositionsPanel />
                   </div>

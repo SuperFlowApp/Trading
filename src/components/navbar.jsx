@@ -46,8 +46,10 @@ function Navbar() {
       <nav className="pl-[20px] pr-[30px] w-full flex items-center justify-between px-4 py-2 bg-backgrounddark/50 text-white ">
         {/* Left Side */}
         <div className="flex items-center gap-6">
-          <img src="/assets/Logo.svg" alt="Logo" className="h-8 w-auto" />
-
+          <div className="flex items-end gap-2">
+            <img src="/assets/Logo.svg" alt="Logo" className="h-8 w-auto" />
+            <img src="/assets/Bysymmio.svg" alt="Logo" className="h-5 w-auto" />
+          </div>
           <ul className="flex gap-6 text-sm font-small">
             <li className="flex items-center gap-2 cursor-pointer hover:text-[#FFFFFF]">
               <img src="/assets/trading-view-candles.svg" alt="Trade Icon" className="w-4 h-4" />

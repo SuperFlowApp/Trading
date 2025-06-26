@@ -94,19 +94,16 @@ function Infobar({ selectedPair, setSelectedPair }) {
 
   return (
     <div className="">
-      <div className="flex gap-10 items-start items-center p-2">
+      <div className="flex gap-8 items-start items-center p-8">
         {/* Custom Dropdown */}
-        <div className="relative bg-backgrounddark border border-secondary2 flex items-center gap-3 px-2 py-1 rounded-[10px] cursor-pointer" onClick={() => setDropdownOpen(v => !v)} ref={dropdownRef}>
+        <div className="relative flex items-center gap-3 py-1 cursor-pointer" onClick={() => setDropdownOpen(v => !v)} ref={dropdownRef}>
           <div className="flex flex-col text-white">
-            <div className="font-bold text-base">
-              {selectedMarket ? `${selectedMarket.base} / ${selectedMarket.quote}` : selectedPair}
-            </div>
-            <div className="flex items-center gap-2 text-xs text-primary2">
-              <span>{selectedMarket?.symbol || '...'}</span>
+            <div className="font-normal text-base text-[22px]">
+              {selectedMarket ? `${selectedMarket.base} - ${selectedMarket.quote}` : selectedPair}
             </div>
           </div>
           <div className="flex items-center justify-center w-6 h-6 rounded">
-            <img src="/assets/arrow.svg" alt="icon" className="w-2.5 h-[5px]" />
+            <img src="/assets/arrow.svg" alt="icon" className="w-3.5 h-[10px]" />
           </div>
           {dropdownOpen && (
             <div className="absolute z-50 left-0 top-full mt-2 bg-backgrounddark border border-secondary2 rounded-lg shadow-lg w-[600px] max-h-[350px] overflow-auto">
