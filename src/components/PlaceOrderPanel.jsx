@@ -220,14 +220,26 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
   // Update the amount field whenever sliderValue changes
   useEffect(() => {
     if (inputSource === 'slider' && sliderValue > 0) {
-      const calculatedAmount = (sliderValue / 100) * balanceFree;
-      setAmount(calculatedAmount.toFixed(1));
+      // Calculate based on selected currency
+      if (selectedDropdownValue === pairDetails.base) {
+        // Convert balanceFree (in quote currency) to base currency
+        const currentPrice = parseFloat(price) || priceMidpoint;
+        if (currentPrice && !isNaN(currentPrice) && !isNaN(parseFloat(balanceFree))) {
+          const baseEquivalent = parseFloat(balanceFree) / currentPrice;
+          const calculatedAmount = (sliderValue / 100) * baseEquivalent;
+          setAmount(calculatedAmount.toFixed(6)); // More decimals for base currency like BTC
+        }
+      } else {
+        // For quote currency, use balanceFree directly
+        const calculatedAmount = (sliderValue / 100) * parseFloat(balanceFree);
+        setAmount(calculatedAmount.toFixed(2)); // Fewer decimals for quote currency like USDT
+      }
     } else if (inputSource === 'slider' && sliderValue === 0) {
       setAmount('');
     }
     // Reset input source after processing
     setInputSource(null);
-  }, [sliderValue, balanceFree, inputSource]);
+  }, [sliderValue, balanceFree, inputSource, selectedDropdownValue, price, priceMidpoint]);
 
   // Auto-hide error and success messages after 3 seconds
   useEffect(() => {
