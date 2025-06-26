@@ -254,12 +254,13 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
 
   // Add this useEffect to handle currency switching and maintain equivalent values
   useEffect(() => {
-    if (!amount || !price) return;
+    if (!amount) return;
     
     const currentAmount = parseFloat(amount);
-    const currentPrice = parseFloat(price);
+    // Use price if available (Limit/Scale mode), otherwise use priceMidpoint (Market mode)
+    const currentPrice = parseFloat(price) || priceMidpoint;
     
-    if (isNaN(currentAmount) || isNaN(currentPrice)) return;
+    if (isNaN(currentAmount) || !currentPrice || isNaN(currentPrice)) return;
     
     // When switching from base to quote, convert amount to quote value
     if (selectedDropdownValue === pairDetails.quote) {
