@@ -74,8 +74,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
   const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails.base); // Initialize with the first currency
   const [sliderValue, setSliderValue] = useState(0); // State for slider value
   const [blinkClass, setBlinkClass] = useState(""); // <-- Add this state
-
-  const calcAvailableSlider = sliderValue * balanceFree; // Calculate globally available value
+  // Add this state to track input source
+  const [inputSource, setInputSource] = useState(null);
 
   // Update price when selectedPrice changes
   useEffect(() => {
@@ -151,16 +151,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
         body: JSON.stringify(requestBody),
       });
 
-      // Check for auth errors
-      if (response.status === 401) {
-        const data = await response.json().catch(() => ({}));
-        if (data.detail === "Could not validate credentials") {
-          logout();
-          setError("Session expired. Please log in again.");
-          return;
-        }
-      }
-
       if (!response.ok) {
         throw new Error('Failed to place order');
       }
@@ -196,6 +186,7 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     if (value < 0) value = 0;
     if (value > 100) value = 100;
     setSliderValue(value);
+    setInputSource('slider');
   };
 
   // Update on input change
@@ -204,12 +195,14 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     if (value === '') value = '';
     else value = Math.max(0, Math.min(100, Number(value)));
     setSliderValue(value);
+    setInputSource('slider');
   };
 
   // Update on amount (Size) input change
   const handleAmountChange = (e) => {
     let value = e.target.value.replace(/[^0-9.]/g, '');
     setAmount(value);
+    setInputSource('input');
 
     // Calculate sliderValue as percentage of balanceFree
     const numericValue = parseFloat(value);
@@ -226,13 +219,15 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
 
   // Update the amount field whenever sliderValue changes
   useEffect(() => {
-    if (sliderValue > 0) {
+    if (inputSource === 'slider' && sliderValue > 0) {
       const calculatedAmount = (sliderValue / 100) * balanceFree;
       setAmount(calculatedAmount.toFixed(1));
-    } else {
+    } else if (inputSource === 'slider' && sliderValue === 0) {
       setAmount('');
     }
-  }, [sliderValue, balanceFree]);
+    // Reset input source after processing
+    setInputSource(null);
+  }, [sliderValue, balanceFree, inputSource]);
 
   // Auto-hide error and success messages after 3 seconds
   useEffect(() => {
