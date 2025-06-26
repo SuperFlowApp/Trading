@@ -493,10 +493,11 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
           <span className="w-full flex justify-between text-white font-semibold">
             Order Value
             <span>
-              {amount && price
+              {amount && (price || priceMidpoint)
                 ? `$${(() => {
                     const numAmount = parseFloat(amount);
-                    const numPrice = parseFloat(price);
+                    // Use price if available (Limit/Scale mode), otherwise use priceMidpoint (Market mode)
+                    const numPrice = parseFloat(price) || priceMidpoint;
                     
                     // If we're in quote currency mode (USDT), the amount IS the order value
                     if (selectedDropdownValue === pairDetails.quote) {
