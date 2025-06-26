@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
+import LoadingSpinner from '../LoadingSpinner';
 import './chart-styles.css';
 
 const getTimeframeMs = (tf) => {
@@ -29,12 +30,14 @@ const CandleChart = ({ selectedPair }) => {
   const [candles, setCandles] = useState([]);
   const [showCandle, setShowCandle] = useState(true); // Default to candlestick chart
   const [showLine, setShowLine] = useState(false);    // Disable line chart by default
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let destroyed = false;
 
     async function fetchCandles() {
       try {
+        setLoading(true);
         const res = await fetch(
           `https://fastify-serverless-function-rimj.onrender.com/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
         );
@@ -50,9 +53,13 @@ const CandleChart = ({ selectedPair }) => {
           ],
         }));
 
-        if (!destroyed) setCandles(formatted);
+        if (!destroyed) {
+          setCandles(formatted);
+          setLoading(false);
+        }
       } catch (err) {
         console.error('Failed to fetch candles:', err);
+        if (!destroyed) setLoading(false);
       }
     }
 
@@ -150,6 +157,7 @@ const CandleChart = ({ selectedPair }) => {
         <select
           value={timeframe}
           onChange={(e) => setTimeframe(e.target.value)}
+          disabled={loading}
           style={{
             backgroundColor: '#02001B',
             color: '#8AABB2',
@@ -158,7 +166,8 @@ const CandleChart = ({ selectedPair }) => {
             border: '1px solid #565A93',
             fontSize: '12px',
             outline: 'none',
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1,
           }}
         >
           {timeframes.map((tf) => (
@@ -176,6 +185,7 @@ const CandleChart = ({ selectedPair }) => {
             setShowCandle(candle);
             setShowLine(line);
           }}
+          disabled={loading}
           style={{
             backgroundColor: '#02001B',
             color: '#8AABB2',
@@ -184,7 +194,8 @@ const CandleChart = ({ selectedPair }) => {
             border: '1px solid #565A93',
             fontSize: '12px',
             outline: 'none',
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1,
           }}
         >
           <option value="true-false" style={{ color: '#fff' }}>
@@ -203,13 +214,22 @@ const CandleChart = ({ selectedPair }) => {
         </select>
       </div>
 
-      <Chart
-        key={`${showCandle}-${showLine}-${timeframe}`} // force re-init on toggle
-        options={options}
-        series={series}
-        type={rootChartType}
-        height={450}
-      />
+      {loading ? (
+        <LoadingSpinner 
+          size="medium"
+          message="Loading chart data..."
+          height="450px"
+          variant="chart"
+        />
+      ) : (
+        <Chart
+          key={`${showCandle}-${showLine}-${timeframe}`} // force re-init on toggle
+          options={options}
+          series={series}
+          type={rootChartType}
+          height={450}
+        />
+      )}
     </div>
   );
 };

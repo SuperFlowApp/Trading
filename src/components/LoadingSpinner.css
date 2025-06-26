@@ -1,0 +1,67 @@
+/* Loading Spinner Styles */
+@keyframes loading-spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+.loading-spinner-container {
+  user-select: none;
+}
+
+.loading-spinner {
+  transition: all 0.3s ease;
+}
+
+.loading-spinner:hover {
+  transform: scale(1.05);
+}
+
+.loading-message {
+  user-select: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Responsive sizing */
+@media (max-width: 768px) {
+  .loading-spinner-container .loading-message {
+    font-size: 12px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+    border: 3px solid #565A93;
+    border-top: 3px solid #2D9DA8;
+  }
+  
+  .loading-spinner::after {
+    content: '⟳';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #2D9DA8;
+    font-size: 16px;
+  }
+}
+
+/* Modal specific styles */
+.loading-spinner-modal {
+  padding: 20px;
+  border-radius: 8px;
+  background-color: rgba(2, 0, 27, 0.9);
+  border: 1px solid #565A93;
+}
+
+/* Chart specific styles */
+.loading-spinner-chart {
+  border-radius: 8px;
+  background-color: rgba(2, 0, 27, 0.8);
+  border: 1px solid #565A93;
+}

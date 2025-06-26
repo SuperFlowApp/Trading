@@ -12,6 +12,8 @@ function LeverageButton() {
   const symbol = "BTCUSDT"
 
   const handleClick = async () => {
+    if (!token) return; // Don't proceed without token
+    
     const newIndex = (index + 1) % leverageSteps.length
     setIndex(newIndex)
 
@@ -19,7 +21,6 @@ function LeverageButton() {
       symbol,
       leverage: leverageSteps[newIndex],
     }
-
 
     try {
       const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/leverage', {
@@ -31,9 +32,17 @@ function LeverageButton() {
         },
         body: JSON.stringify(requestBody),
       })
+      
+      if (!response.ok) {
+        throw new Error('Failed to set leverage');
+      }
+      
       const data = await response.json()
+      console.log('Leverage set successfully:', data);
     } catch (err) {
       console.error('Failed to set leverage:', err)
+      // Revert the index change if the API call failed
+      setIndex((prevIndex) => (prevIndex - 1 + leverageSteps.length) % leverageSteps.length)
     }
   }
 
@@ -48,12 +57,13 @@ function LeverageButton() {
 
 
 function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrencyChange }) {
-  const { token, logout } = useAuth(); // <-- Add logout
+  const { token, logout, accountInfo, availableBalance } = useAuth(); // <-- Add availableBalance
   const authFetch = useAuthFetch();
   const pairDetails = getSelectedPairDetails() || { base: 'BTC', quote: 'USDT' }; // fallback
 
   const [balanceTotal, setBalanceTotal] = useState("--");
-  const [balanceFree, setBalanceFree] = useState("--");
+  // Use availableBalance from context instead of local state
+  const balanceFree = availableBalance ? parseFloat(availableBalance).toFixed(2) : "--";
   const [price, setPrice] = useState(priceMidpoint || '');
   const [amount, setAmount] = useState('');
   const [side, setSide] = useState('buy');
@@ -64,8 +74,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
   const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails.base); // Initialize with the first currency
   const [sliderValue, setSliderValue] = useState(0); // State for slider value
   const [blinkClass, setBlinkClass] = useState(""); // <-- Add this state
-  const [accountInfo, setAccountInfo] = useState(null);
-  const [accountInfoError, setAccountInfoError] = useState('');
 
   const calcAvailableSlider = sliderValue * balanceFree; // Calculate globally available value
 
@@ -80,7 +88,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
   useEffect(() => {
     if (!token) {
       setBalanceTotal("--");
-      setBalanceFree("--");
       setPrice('');
       setAmount('');
       setSide('buy');
@@ -153,49 +160,6 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     }
   };
 
-  // Example for fetchBalance:
-  useEffect(() => {
-    if (!token) return;
-
-    const fetchBalance = async () => {
-      try {
-        const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/balance', {
-          method: 'GET',
-          headers: {
-            accept: 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.status === 401) {
-          logout(); // <-- Log out on unauthorized
-          setError('Session expired. Please log in again.');
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch balance');
-        }
-
-        const data = await response.json();
-        const usdtBalance = data.balances?.USDT || {};
-        setBalanceTotal(usdtBalance.total || "--");
-        setBalanceFree(usdtBalance.free || "--");
-      } catch (err) {
-        console.error('Error fetching balance:', err);
-        setBalanceTotal("--");
-        setBalanceFree("--");
-      }
-    };
-
-    fetchBalance();
-
-    const interval = setInterval(fetchBalance, 3000);
-    return () => clearInterval(interval);
-  }, [token, logout]);
-
-
-
   // Set price to priceMidpoint when switching to Limit or Scale, unless user typed manually
   useEffect(() => {
     if ((market === 'limit' || market === 'scale') && !price) {
@@ -265,29 +229,8 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     }
   }, [error, success]);
 
-  // Fetch account information
-  useEffect(() => {
-    if (!token) return;
-    const fetchAccountInfo = async () => {
-      try {
-        const response = await authFetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
-          method: 'GET',
-          headers: { accept: 'application/json' },
-        });
-        if (response.status === 401) {
-          logout();
-          setError('Session expired. Please log in again.');
-          return;
-        }
-        if (!response.ok) throw new Error('Failed to fetch account info');
-        const data = await response.json();
-        setAccountInfo(data);
-      } catch (err) {
-        setAccountInfoError('Error fetching account info');
-      }
-    };
-    fetchAccountInfo();
-  }, [token, logout, authFetch]);
+  // Account information is already handled by the auth context
+  // No need to fetch it again here since we get accountInfo from useAuth()
 
   // Notify parent when currency changes
   useEffect(() => {

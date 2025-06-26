@@ -5,33 +5,43 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("accessToken") || "");
   const [loading, setLoading] = useState(true); // <-- Add loading state
+  const [accountInfo, setAccountInfo] = useState(null);
+  const [availableBalance, setAvailableBalance] = useState(null);
 
-  // Validate token on mount
-  React.useEffect(() => {
+  // Fetch account information function
+  const fetchAccountInfo = async () => {
     if (!token) {
-      setLoading(false); // No token, done loading
-      console.log("Unauthorized");
+      setAccountInfo(null);
+      setAvailableBalance(null);
       return;
     }
-    // Try to fetch balance or a protected endpoint to check token validity
-    fetch("https://fastify-serverless-function-rimj.onrender.com/api/balance", {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Invalid token or server down");
-        // No need to parse JSON if you don't use it
-        console.log("Authorized");
-      })
-      .catch(() => {
+    try {
+      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information-direct', {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 401) {
         logout();
-        console.log("Unauthorized");
-      })
-      .finally(() => setLoading(false));
-  }, [token]);
+        setAccountInfo(null);
+        setAvailableBalance(null);
+        return;
+      }
+      if (!response.ok) {
+        throw new Error('Failed to fetch account information');
+      }
+      const data = await response.json();
+      setAccountInfo(data);
+      // Extract availableBalance specifically
+      setAvailableBalance(data.availableBalance || null);
+    } catch (err) {
+      console.error('Failed to fetch account information:', err);
+      setAccountInfo(null);
+      setAvailableBalance(null);
+    }
+  };
 
   // Login function: fetch token from server
   const login = async (username, password) => {
@@ -73,6 +83,8 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setToken("");
+    setAccountInfo(null);
+    setAvailableBalance(null);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("username");
   };
@@ -104,8 +116,26 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, [token]);
 
+  // Fetch account info when token is available
+  React.useEffect(() => {
+    if (token) {
+      fetchAccountInfo();
+      // Set up interval to fetch account info every 5 seconds
+      const interval = setInterval(fetchAccountInfo, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [token]);
+
   return (
-    <AuthContext.Provider value={{ token, login, logout}}>
+    <AuthContext.Provider value={{ 
+      token, 
+      login, 
+      logout, 
+      accountInfo, 
+      availableBalance, 
+      fetchAccountInfo,
+      loading
+    }}>
       {children}
     </AuthContext.Provider>
   );
