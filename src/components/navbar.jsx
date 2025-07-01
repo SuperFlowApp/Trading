@@ -82,7 +82,7 @@ function Navbar() {
               className="px-4 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-secondary2/80 transition"
               onClick={() => setShowLogin(true)}
             >
-              Login
+              Connect
             </button>
           ) : (
             <div

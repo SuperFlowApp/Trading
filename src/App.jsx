@@ -2,6 +2,7 @@ import { AuthProvider } from './context/Authentication.jsx';
 import { useState, useEffect } from 'react';
 import Navbar from './components/navbar.jsx';
 import CandleChart from './components/ChartPanel/CandleChart.jsx';
+//  import TradingViewChart from './components/ChartPanel/TradingViewChart.jsx';
 import OrderBook from './components/TradesPanel/OrderBook.jsx';
 import LimitOrderForm from './components/PlaceOrderPanel.jsx';
 import Infobar from './components/ChartPanel/Infobar.jsx';
@@ -66,8 +67,8 @@ function App() {
         <div className="flex flex-col h-auto overflow-y-auto">
           <div className="relative w-screen h-auto overflow-visible">
             <div className="flex flex-1 p-2 gap-2">
-              {/* CandleChart/Infobar */}
-              <div className="flex flex-col h-full gap-2 bg-transparent basis-[75%] min-w-0 ">
+              {/* TradingViewChart/Infobar */}
+              <div className="flex flex-col h-full gap-2 bg-transparent basis-[80%] min-w-0 ">
                 <div className="flex gap-2">
                   <div className="bg-backgroundlight rounded-md flex-1 min-w-0 overflow-hidden">
                     <div className="overflow-visible">
@@ -77,11 +78,17 @@ function App() {
                         setSelectedPair={setSelectedPair}
                       />
                     </div>
+
                     <div className="p-2">
                       <CandleChart selectedPair={selectedPair} />
                     </div>
+                    {/*
+                    <div className="p-2 h-[500px]">
+                      <TradingViewChart selectedPair={selectedPair} />
+                    </div>
+                    */}
                   </div>
-                  <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden basis-[30%]">
+                  <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden basis-[25%]">
                     {/* Tab Selector */}
                     <div className="flex relative">
                       <button
@@ -127,7 +134,7 @@ function App() {
 
               </div>
               {/* PositionsPanel */}
-              <div className="flex flex-col basis-[25%] gap-2">
+              <div className="flex flex-col basis-[20%] gap-2">
                 <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden">
                   <LimitOrderForm
                     selectedPair={selectedPair}
