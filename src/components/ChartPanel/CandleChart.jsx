@@ -25,138 +25,167 @@ const getTimeframeMs = (tf) => {
   return map[tf] || 60_000;
 };
 
+const timeframes = [
+  '1m', '5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '3d', '1w', '1M'
+];
+
+const chartTypes = [
+  { label: 'Candlestick', value: 'candlestick' },
+  { label: 'Line Chart', value: 'line' },
+  { label: 'Area Chart', value: 'area' },
+  { label: 'Column Chart', value: 'bar' },
+  { label: 'Range Area Chart', value: 'rangeArea' }
+];
+
 const CandleChart = ({ selectedPair }) => {
   const [timeframe, setTimeframe] = useState('1m');
+  const [chartType, setChartType] = useState('candlestick');
   const [candles, setCandles] = useState([]);
-  const [showCandle, setShowCandle] = useState(true); // Default to candlestick chart
-  const [showLine, setShowLine] = useState(false);    // Disable line chart by default
+  const [volume, setVolume] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let destroyed = false;
 
-    async function fetchCandles() {
+    async function fetchData() {
+      setLoading(true);
       try {
-        setLoading(true);
         const res = await fetch(
           `https://fastify-serverless-function-rimj.onrender.com/api/ohlcv?symbol=${selectedPair}&timeframe=${timeframe}&limit=100`
         );
         const data = await res.json();
 
-        const formatted = data.map((candle) => ({
-          x: candle.timestamp,
+        const candleData = data.map(d => ({
+          x: d.timestamp,
           y: [
-            parseFloat(candle.open),
-            parseFloat(candle.high),
-            parseFloat(candle.low),
-            parseFloat(candle.close),
-          ],
+            parseFloat(d.open),
+            parseFloat(d.high),
+            parseFloat(d.low),
+            parseFloat(d.close)
+          ]
+        }));
+
+        const volumeData = data.map(d => ({
+          x: d.timestamp,
+          y: parseFloat(d.volume)
         }));
 
         if (!destroyed) {
-          setCandles(formatted);
+          setCandles(candleData);
+          setVolume(volumeData);
           setLoading(false);
         }
       } catch (err) {
-        console.error('Failed to fetch candles:', err);
         if (!destroyed) setLoading(false);
+        console.error('Failed to fetch chart data:', err);
       }
     }
 
-    fetchCandles();
+    fetchData();
+    return () => { destroyed = true; };
+  }, [selectedPair, timeframe]);
 
-    return () => {
-      destroyed = true;
-    };
-  }, [timeframe, selectedPair]);
-
-  const lineSeries = candles.map((c) => ({
-    x: c.x,
-    y: c.y[3],
-  }));
-
-  const series = [
-    ...(showCandle ? [{ name: 'candles', type: 'candlestick', data: candles }] : []),
-    ...(showLine ? [{ name: 'line', type: 'line', data: lineSeries }] : []),
-    ...(!showCandle && !showLine && timeframe === 'bar' ? [{ name: 'bar', type: 'bar', data: candles }] : []),
-    ...(!showCandle && !showLine && timeframe !== 'bar' ? [{ name: 'area', type: 'area', data: lineSeries }] : []),
-  ];
-
-  const rootChartType =
-    showCandle && !showLine ? 'candlestick' :
-      !showCandle && showLine ? 'line' :
-        !showCandle && !showLine && timeframe === 'bar' ? 'bar' :
-          'area';
-  const tooltipShared = showCandle && !showLine ? false : true;
-
-  const options = {
-    chart: {
-      height: 350,
-      type: rootChartType,
-      background: 'transparent',
-      animations: { enabled: false },
-      toolbar: {
-        show: true,
-        tools: {
-          download: true,
-          selection: true,
-          zoom: true,
-          zoomin: true,
-          zoomout: true,
-          pan: true,
-          reset: true,
-          // Hide built-in chart type toggle
-          customIcons: []
-        },
-        autoSelected: 'zoom',
-      },
-    },
-    colors: ['#2D9DA8', '#F59DEF'],
-    stroke: { width: [1, 2], curve: 'smooth' },
-    xaxis: {
-      type: 'datetime',
-      labels: { datetimeUTC: false, style: { colors: '#aaa' } },
-      axisBorder: { color: '#333' },
-      axisTicks: { color: '#333' },
-    },
-    yaxis: {
-      tooltip: { enabled: true },
-      labels: {
-        formatter: (val) => val.toFixed(2),
-        style: { colors: '#aaa' },
-      },
-    },
-    tooltip: {
-      shared: tooltipShared,
-      theme: 'dark',
-      x: { format: 'dd MMM HH:mm' },
-      y: {
-        formatter: (val) => {
-          if (typeof val === 'number') return `$${val.toFixed(2)}`;
-          return '';
-        },
-      },
-    },
-    plotOptions: {
-      candlestick: {
-        colors: { upward: '#2D9DA8', downward: '#F59DEF' },
-      },
-    },
-    grid: { borderColor: '#2c2c2c', strokeDashArray: 3 },
-    legend: {
-      show: false, // Disable the legend
-    },
+  const commonXaxis = {
+    type: 'datetime',
+    labels: { style: { colors: '#aaa' } },
+    axisBorder: { color: '#333' },
+    axisTicks: { color: '#333' }
   };
 
-  const timeframes = ['1m', '5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '3d', '1w', '1M'];
+  // Prepare data for different chart types
+  const getMainChartSeries = () => {
+    if (chartType === 'candlestick') {
+      return [{ name: 'Candles', data: candles }];
+    }
+    if (chartType === 'line') {
+      return [{
+        name: 'Close',
+        data: candles.map(c => ({ x: c.x, y: c.y[3] }))
+      }];
+    }
+    if (chartType === 'area') {
+      return [{
+        name: 'Close',
+        data: candles.map(c => ({ x: c.x, y: c.y[3] }))
+      }];
+    }
+    if (chartType === 'bar' || chartType === 'column') {
+      return [{
+        name: 'Close',
+        data: candles.map(c => ({ x: c.x, y: c.y[3] }))
+      }];
+    }
+    if (chartType === 'rangeArea') {
+      return [{
+        name: 'Range',
+        data: candles.map(c => ({ x: c.x, y: [c.y[2], c.y[1]] })) // [low, high]
+      }];
+    }
+    return [];
+  };
+
+  // Chart options based on type
+  const getMainChartOptions = () => {
+    let base = {
+      chart: {
+        type: chartType === 'column' ? 'bar' : chartType,
+        height: 350,
+        id: 'main',
+        background: 'transparent',
+        toolbar: {
+          autoSelected: 'zoom',
+          tools: { pan: true, zoom: true, zoomin: true, zoomout: true, reset: true },
+          show: true,
+        }
+      },
+      xaxis: commonXaxis,
+      yaxis: {
+        tooltip: { enabled: true },
+        labels: { style: { colors: '#aaa' } }
+      },
+      grid: { borderColor: '#2c2c2c', strokeDashArray: 3 },
+      tooltip: {
+        theme: 'dark',
+        x: { format: 'dd MMM HH:mm' },
+        y: {
+          formatter: (val) => typeof val === 'number' ? `$${val.toFixed(2)}` : ''
+        }
+      },
+      legend: { show: false }
+    };
+
+    if (chartType === 'candlestick') {
+      base.plotOptions = {
+        candlestick: {
+          colors: { upward: '#2D9DA8', downward: '#F59DEF' }
+        }
+      };
+    }
+    if (chartType === 'area') {
+      base.colors = ['#2D9DA8'];
+      base.fill = { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.2 } };
+    }
+    if (chartType === 'line') {
+      base.colors = ['#2D9DA8'];
+    }
+    if (chartType === 'bar' || chartType === 'column') {
+      base.colors = ['#2D9DA8'];
+      base.plotOptions = { bar: { columnWidth: '60%' } };
+    }
+    if (chartType === 'rangeArea') {
+      base.colors = ['#F59DEF'];
+      base.fill = { type: 'solid', opacity: 0.3 };
+      base.stroke = { curve: 'smooth', width: 2 };
+    }
+    return base;
+  };
 
   return (
-    <div id="chart" className=" chart-style relative pt-[6px]">
-      <div style={{ marginBottom: '8px', display: 'flex', gap: '10px' }}>
-        {/* Timeframe Selector */}
+    <div className="chart-container" style={{ background: 'transparent', borderRadius: 8, padding: 8 }}>
+      <div style={{ marginBottom: 8, display: 'flex', gap: 10 }}>
         <select
           value={timeframe}
-          onChange={(e) => setTimeframe(e.target.value)}
+          onChange={e => setTimeframe(e.target.value)}
           disabled={loading}
           style={{
             backgroundColor: '#02001B',
@@ -170,21 +199,15 @@ const CandleChart = ({ selectedPair }) => {
             opacity: loading ? 0.6 : 1,
           }}
         >
-          {timeframes.map((tf) => (
+          {timeframes.map(tf => (
             <option key={tf} value={tf} style={{ color: '#fff' }}>
               {tf}
             </option>
           ))}
         </select>
-
-        {/* Chart Type Selector */}
         <select
-          value={`${showCandle}-${showLine}`}
-          onChange={(e) => {
-            const [candle, line] = e.target.value.split('-').map((v) => v === 'true');
-            setShowCandle(candle);
-            setShowLine(line);
-          }}
+          value={chartType}
+          onChange={e => setChartType(e.target.value)}
           disabled={loading}
           style={{
             backgroundColor: '#02001B',
@@ -198,37 +221,63 @@ const CandleChart = ({ selectedPair }) => {
             opacity: loading ? 0.6 : 1,
           }}
         >
-          <option value="true-false" style={{ color: '#fff' }}>
-            Candlestick Only
-          </option>
-          <option value="false-true" style={{ color: '#fff' }}>
-            Line Only
-          </option>
-          <option value="true-true" style={{ color: '#fff' }}>
-            Candlestick & Line
-          </option>
-          <option value="false-false" style={{ color: '#fff' }}>
-            Area Chart
-          </option>
-          
+          {chartTypes.map(type => (
+            <option key={type.value} value={type.value} style={{ color: '#fff' }}>
+              {type.label}
+            </option>
+          ))}
         </select>
       </div>
 
       {loading ? (
-        <LoadingSpinner 
+        <LoadingSpinner
           size="medium"
           message="Loading chart data..."
-          height="450px"
+          height="500px"
           variant="chart"
         />
       ) : (
-        <Chart
-          key={`${showCandle}-${showLine}-${timeframe}`} // force re-init on toggle
-          options={options}
-          series={series}
-          type={rootChartType}
-          height={450}
-        />
+        <div>
+          {/* Top: Main Chart */}
+          <Chart
+            options={getMainChartOptions()}
+            series={getMainChartSeries()}
+            type={chartType === 'column' ? 'bar' : chartType}
+            height={350}
+          />
+
+          {/* Bottom: Volume Chart */}
+          <Chart
+            options={{
+              chart: {
+                type: 'bar',
+                height: 120,
+                id: 'volume',
+                background: 'transparent',
+                toolbar: { show: false },
+                zoom: { enabled: false }
+              },
+              xaxis: commonXaxis,
+              yaxis: {
+                show: true,
+                labels: { style: { colors: '#aaa' } }
+              },
+              colors: ['#2D9DA8'],
+              grid: { borderColor: '#2c2c2c', strokeDashArray: 3 },
+              tooltip: {
+                theme: 'dark',
+                x: { format: 'dd MMM HH:mm' },
+                y: {
+                  formatter: (val) => typeof val === 'number' ? val.toFixed(0) : ''
+                }
+              },
+              legend: { show: false }
+            }}
+            series={[{ name: 'Volume', data: volume }]}
+            type="bar"
+            height={120}
+          />
+        </div>
       )}
     </div>
   );

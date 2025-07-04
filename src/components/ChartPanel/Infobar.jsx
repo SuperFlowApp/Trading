@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom'; // <-- Add this import
 
 function Infobar({ selectedPair, setSelectedPair }) {
   const [ticker, setTicker] = useState({});
@@ -7,6 +8,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const MARKET_TYPE = 'spot';
+  const navigate = useNavigate(); // <-- Add this line
 
   // Fetch available trading pairs from /api/markets
   useEffect(() => {
@@ -128,6 +130,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
                           setSelectedPair(mkt.symbol);
                           setDropdownOpen(false);
                           localStorage.setItem('selectedPair', mkt.symbol); // Persist selected pair
+                          navigate(`/${mkt.base}`); // <-- Update the URL to /BTC, /ETH, etc.
                         }}
                       >
                         <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>
