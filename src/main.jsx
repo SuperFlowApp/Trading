@@ -1,6 +1,6 @@
 import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
 import CandleChart from './components/ChartPanel/CandleChart.jsx';
@@ -147,10 +147,20 @@ function MainApp() {
   );
 }
 
-createRoot(document.getElementById('root')).render(
+const container = document.getElementById('root');
+
+// Use a global variable to persist the root across HMR reloads
+if (!window._root) {
+  window._root = createRoot(container);
+}
+
+window._root.render(
   <StrictMode>
     <BrowserRouter>
-      <MainApp />
+      <Routes>
+        <Route path="/:base" element={<MainApp />} />
+        {/* ...other routes */}
+      </Routes>
     </BrowserRouter>
   </StrictMode>
 );

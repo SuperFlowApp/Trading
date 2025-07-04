@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom'; // <-- Add this import
+import { useNavigate, useParams } from 'react-router-dom'; // <-- Add useParams
 
 function Infobar({ selectedPair, setSelectedPair }) {
   const [ticker, setTicker] = useState({});
@@ -8,7 +8,8 @@ function Infobar({ selectedPair, setSelectedPair }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const MARKET_TYPE = 'spot';
-  const navigate = useNavigate(); // <-- Add this line
+  const navigate = useNavigate();
+  const { base } = useParams(); // <-- Get base from URL
 
   // Fetch available trading pairs from /api/markets
   useEffect(() => {
@@ -49,15 +50,17 @@ function Infobar({ selectedPair, setSelectedPair }) {
 
   // Fetch ticker for selected pair (for Infobar details)
   useEffect(() => {
-    if (!selectedPair) return;
+    // Use base from URL to construct symbol
+    const symbol = base ? `${base}USDT` : selectedPair;
+    if (!symbol) return;
     async function fetchTicker() {
       try {
-        const res = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${selectedPair}`);
+        const res = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${symbol}`);
         const data = await res.json();
         setTicker(data);
 
         // Persist selected pair details
-        const selectedMarket = markets.find(m => m.symbol === selectedPair);
+        const selectedMarket = markets.find(m => m.symbol === symbol);
         if (selectedMarket) {
           localStorage.setItem('selectedPairDetails', JSON.stringify(selectedMarket));
         }
@@ -69,7 +72,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
     fetchTicker();
     const interval = setInterval(fetchTicker, 5000);
     return () => clearInterval(interval);
-  }, [selectedPair, markets]);
+  }, [base, selectedPair, markets]); // <-- Add base to dependencies
 
   // Close dropdown on outside click
   useEffect(() => {

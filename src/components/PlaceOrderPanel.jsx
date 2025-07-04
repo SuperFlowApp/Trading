@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth, useAuthFetch } from '../context/Authentication.jsx';
 
-import { getSelectedPairDetails } from './ChartPanel/Infobar.jsx';
-
-const leverageSteps = [5, 10, 15, 20]
-const pairDetails = getSelectedPairDetails();
+const leverageSteps = [5, 10, 15, 20];
 
 function LeverageButton() {
-  const [index, setIndex] = useState(0)
-  const { token } = useAuth()
-  const symbol = "BTCUSDT"
+  const [index, setIndex] = useState(0);
+  const { token } = useAuth();
+  const { base } = useParams();
+  const navigate = useNavigate();
+
+  // If base is missing, show error
+  if (!base) {
+    return <div className="text-red-400">Invalid pair: No base currency in URL.</div>;
+  }
+
+  const symbol = `${base}USDT`; // fallback to BTCUSDT if not present
 
   const handleClick = async () => {
     if (!token) return; // Don't proceed without token
@@ -56,10 +62,20 @@ function LeverageButton() {
 
 
 
-function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrencyChange }) {
+function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
+  const { base } = useParams();
+  const navigate = useNavigate();
+
+  // If base is missing, show error
+  if (!base) {
+    return <div className="text-red-400">Invalid pair: No base currency in URL.</div>;
+  }
+
+  const selectedPair = `${base}USDT`; // fallback to BTCUSDT if not present
+  const pairDetails = { base, quote: 'USDT' }; // always USDT as quote
+
   const { token, logout, accountInfo, availableBalance } = useAuth(); // <-- Add availableBalance
   const authFetch = useAuthFetch();
-  const pairDetails = getSelectedPairDetails() || { base: 'BTC', quote: 'USDT' }; // fallback
 
   const [balanceTotal, setBalanceTotal] = useState("--");
   // Use availableBalance from context instead of local state
@@ -281,11 +297,10 @@ function LimitOrderForm({ selectedPair, priceMidpoint, selectedPrice, onCurrency
     }
   }, [selectedDropdownValue, onCurrencyChange]);
 
-  // Reset to the first currency when selectedPair changes
+  // Reset to the first currency when selectedPair (base in URL) changes
   useEffect(() => {
-    const details = getSelectedPairDetails() || { base: 'BTC' };
-    setSelectedDropdownValue(details.base);
-  }, [selectedPair]);
+    setSelectedDropdownValue(pairDetails.base);
+  }, [pairDetails.base]);
 
   // Add this useEffect to handle currency switching and maintain equivalent values
   useEffect(() => {
