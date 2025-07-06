@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom'; // <-- Add useParams
+import { useNavigate, useParams } from 'react-router-dom';
 
-function Infobar({ selectedPair, setSelectedPair }) {
+function Infobar() {
   const [ticker, setTicker] = useState({});
   const [markets, setMarkets] = useState([]);
   const [tickers, setTickers] = useState({});
@@ -9,13 +9,13 @@ function Infobar({ selectedPair, setSelectedPair }) {
   const dropdownRef = useRef(null);
   const MARKET_TYPE = 'spot';
   const navigate = useNavigate();
-  const { base } = useParams(); // <-- Get base from URL
+  const { base } = useParams();
 
-  // Fetch available trading pairs from /api/markets
+  // Fetch available trading pairs
   useEffect(() => {
     async function fetchPairs() {
       try {
-        const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets'); // Updated URL
+        const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets');
         const data = await res.json();
         const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
         setMarkets(filtered);
@@ -25,7 +25,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
         await Promise.all(
           filtered.map(async (mkt) => {
             try {
-              const tRes = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${mkt.symbol}`); // Updated URL
+              const tRes = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${mkt.symbol}`);
               if (!tRes.ok) return;
               const tData = await tRes.json();
               tickersObj[mkt.symbol] = tData;
@@ -33,25 +33,16 @@ function Infobar({ selectedPair, setSelectedPair }) {
           })
         );
         setTickers(tickersObj);
-
-        // Auto-set first pair if none selected
-        if (!selectedPair && filtered.length > 0) {
-          const firstPair = filtered[0].symbol;
-          setSelectedPair(firstPair);
-          localStorage.setItem('selectedPair', firstPair); // Persist selected pair
-        }
       } catch (err) {
         console.error('Failed to fetch trading pairs:', err);
       }
     }
     fetchPairs();
-    // eslint-disable-next-line
-  }, [selectedPair, setSelectedPair]);
+  }, []);
 
-  // Fetch ticker for selected pair (for Infobar details)
+  // Fetch ticker for selected pair (from URL)
   useEffect(() => {
-    // Use base from URL to construct symbol
-    const symbol = base ? `${base}USDT` : selectedPair;
+    const symbol = base ? `${base}USDT` : null;
     if (!symbol) return;
     async function fetchTicker() {
       try {
@@ -72,7 +63,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
     fetchTicker();
     const interval = setInterval(fetchTicker, 5000);
     return () => clearInterval(interval);
-  }, [base, selectedPair, markets]); // <-- Add base to dependencies
+  }, [base, markets]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -87,15 +78,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen]);
 
-  // Load selected pair from localStorage on component mount
-  useEffect(() => {
-    const storedPair = localStorage.getItem('selectedPair');
-    if (storedPair) {
-      setSelectedPair(storedPair);
-    }
-  }, [setSelectedPair]);
-
-  const selectedMarket = markets.find(m => m.symbol === selectedPair);
+  const selectedMarket = markets.find(m => m.symbol === `${base}USDT`);
 
   return (
     <div className="">
@@ -104,7 +87,7 @@ function Infobar({ selectedPair, setSelectedPair }) {
         <div className="relative flex items-center gap-3 py-1 cursor-pointer" onClick={() => setDropdownOpen(v => !v)} ref={dropdownRef}>
           <div className="flex flex-col text-white">
             <div className="font-normal text-base text-[22px]">
-              {selectedMarket ? `${selectedMarket.base} - ${selectedMarket.quote}` : selectedPair}
+              {selectedMarket ? `${selectedMarket.base} - ${selectedMarket.quote}` : `${base}USDT`}
             </div>
           </div>
           <div className="flex items-center justify-center w-6 h-6 rounded">
@@ -128,11 +111,9 @@ function Infobar({ selectedPair, setSelectedPair }) {
                     return (
                       <tr
                         key={mkt.id}
-                        className={`cursor-pointer border border-transparent hover:border-primary2 ${selectedPair === mkt.symbol ? 'bg-primary2/30' : ''}`}
+                        className={`cursor-pointer border border-transparent hover:border-primary2 ${`${base}USDT` === mkt.symbol ? 'bg-primary2/30' : ''}`}
                         onClick={() => {
-                          setSelectedPair(mkt.symbol);
                           setDropdownOpen(false);
-                          localStorage.setItem('selectedPair', mkt.symbol); // Persist selected pair
                           navigate(`/${mkt.base}`); // <-- Update the URL to /BTC, /ETH, etc.
                         }}
                       >
@@ -214,12 +195,6 @@ function Infobar({ selectedPair, setSelectedPair }) {
 
   );
 
-}
-
-// Function to get selected pair details
-export function getSelectedPairDetails() {
-  const storedDetails = localStorage.getItem('selectedPairDetails');
-  return storedDetails ? JSON.parse(storedDetails) : { base: null, quote: null };
 }
 
 export default Infobar;

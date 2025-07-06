@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
+import { useParams } from 'react-router-dom'; // <-- Add this import
 
 // Utility to merge order book updates into local state
 const mergeOrderBook = (prev, updates, isBid) => {
@@ -139,11 +140,11 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
         }}
       />
       <div className={rowClasses}>
-        {/* Price */ }
+        {/* Price */}
         <div className={`font-bold text-[15px] text-left w-1/4 ${textColor}`}>
           {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
-        {/* Size */ }
+        {/* Size */}
         {selectedCurrency === 'BTC' ? (
           <div className="text-[15px] text-left w-1/4">
             {size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
@@ -153,7 +154,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
             {(price * size).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
           </div>
         )}
-        {/* Total */ }
+        {/* Total */}
         {selectedCurrency === 'BTC' ? (
           <div className="text-[15px] text-left w-1/4">
             {total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
@@ -170,14 +171,15 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
 });
 
 const OrderBook = ({
-  selectedPair = 'btcusdt',
+  // Remove selectedPair prop
   onPriceMidpointChange,
   onRowSelect,
   selectedCurrency = 'BTC',
-  baseAsset = 'BTC',
-  quoteAsset = 'USDT'
 }) => {
-  const { asks, bids, wsFps } = useLocalhostOrderBook(selectedPair.toLowerCase());
+  const { base } = useParams(); // <-- Get base from URL
+  const selectedPair = base ? `${base}USDT` : null; // <-- Construct symbol
+
+  const { asks, bids, wsFps } = useLocalhostOrderBook(selectedPair ? selectedPair.toLowerCase() : ''); // Use selectedPair
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);

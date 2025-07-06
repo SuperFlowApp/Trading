@@ -69,14 +69,10 @@ function MainApp() {
                 <div className="flex gap-2">
                   <div className="bg-backgroundlight rounded-md flex-1 min-w-0 overflow-hidden">
                     <div className="overflow-visible">
-                      <Infobar
-                        className=""
-                        selectedPair={selectedPair}
-                        setSelectedPair={setSelectedPair}
-                      />
+                      <Infobar />
                     </div>
                     <div className="p-2">
-                      <CandleChart selectedPair={selectedPair} />
+                      <CandleChart />
                     </div>
                   </div>
                   <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden basis-[25%]">
@@ -105,7 +101,6 @@ function MainApp() {
                     <div className="bg-backgroundlight rounded-b-md p-2">
                       <div className={activeTab === 'OrderBook' ? 'block' : 'hidden'}>
                         <OrderBook
-                          selectedPair={selectedPair}
                           onPriceMidpointChange={setPriceMidpoint}
                           onRowSelect={setSelectedPrice}
                           selectedCurrency={selectedCurrency}
@@ -127,7 +122,6 @@ function MainApp() {
               <div className="flex flex-col basis-[20%] gap-2">
                 <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden">
                   <LimitOrderForm
-                    selectedPair={selectedPair}
                     priceMidpoint={priceMidpoint}
                     selectedPrice={selectedPrice}
                     onCurrencyChange={setSelectedCurrency}

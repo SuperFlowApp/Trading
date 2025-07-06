@@ -71,7 +71,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
     return <div className="text-red-400">Invalid pair: No base currency in URL.</div>;
   }
 
-  const selectedPair = `${base}USDT`; // fallback to BTCUSDT if not present
+  const selectedPair = `${base}USDT`; // Always get from URL
   const pairDetails = { base, quote: 'USDT' }; // always USDT as quote
 
   const { token, logout, accountInfo, availableBalance } = useAuth(); // <-- Add availableBalance

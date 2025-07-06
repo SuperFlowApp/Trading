@@ -1,6 +1,7 @@
 // src/CandleChart.jsx
 
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom'; // Add this import
 import Chart from 'react-apexcharts';
 import LoadingSpinner from '../LoadingSpinner';
 import './chart-styles.css';
@@ -37,7 +38,10 @@ const chartTypes = [
   { label: 'Range Area Chart', value: 'rangeArea' }
 ];
 
-const CandleChart = ({ selectedPair }) => {
+const CandleChart = () => { // Remove selectedPair prop
+  const { base } = useParams(); // Get base from URL
+  const selectedPair = base ? `${base}USDT` : null; // Construct symbol
+
   const [timeframe, setTimeframe] = useState('1m');
   const [chartType, setChartType] = useState('candlestick');
   const [candles, setCandles] = useState([]);
@@ -45,6 +49,7 @@ const CandleChart = ({ selectedPair }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!selectedPair) return;
     let destroyed = false;
 
     async function fetchData() {
