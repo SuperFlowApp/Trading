@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
 import CandleChart from './components/ChartPanel/CandleChart.jsx';
-// import TradingViewChart from './components/ChartPanel/TradingViewChart.jsx';
+import KlineChartProPanel  from './components/ChartPanel/KlineChart.jsx'; // Import KlineChart
 import OrderBook from './components/TradesPanel/OrderBook.jsx';
 import LimitOrderForm from './components/PlaceOrderPanel.jsx';
 import Infobar from './components/ChartPanel/Infobar.jsx';
@@ -14,7 +14,6 @@ import AccountInfoPanel from './components/PositionsPanel/AccountInfoPanel.jsx';
 import './index.css';
 
 function MainApp() {
-  const [selectedPair, setSelectedPair] = useState('BTCUSDT');
   const [activeTab, setActiveTab] = useState('OrderBook');
   const [priceMidpoint, setPriceMidpoint] = useState(null);
   const [selectedPrice, setSelectedPrice] = useState(null);
@@ -71,8 +70,9 @@ function MainApp() {
                     <div className="overflow-visible">
                       <Infobar />
                     </div>
-                    <div className="p-2">
-                      <CandleChart />
+                    <div className="p-2 h-[300%]">
+                      {/* KlineChart */}
+                      <KlineChartProPanel  /> {/* Add KlineChart here */}
                     </div>
                   </div>
                   <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden basis-[25%]">

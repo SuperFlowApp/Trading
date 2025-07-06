@@ -6,8 +6,9 @@
   line-height: 120%;
   font-weight: 400;
   color-scheme: light dark;
-  background-color: theme('colors.backgroundlight'); /* Use Tailwind's theme function */
-  letter-spacing:.06em;
+  background-color: theme('colors.backgroundlight');
+  /* Use Tailwind's theme function */
+  letter-spacing: .06em;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,44 +18,25 @@
 
 
 
-/* Change background and border of the dropdown */
-.apexcharts-menu {
-  background-color: #111 !important;        /* dark background */
-  border: 1px solid #2D9DA8 !important;     /* border color */
-  border-radius: 6px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  z-index: 9999;
+/* Hide KLineCharts watermark */
+.klinecharts-pro-watermark {
+  display: none !important;
 }
 
-/* Change menu item text color */
-.apexcharts-menu-item {
-  color: #ccc !important;                  /* text color */
-  font-size: 12px !important;
-  padding: 6px 12px !important;
-  cursor: pointer;
+/* Make all KLineCharts Pro UI text white */
+.klinecharts-pro,
+.klinecharts-pro * {
+  color: #8AABB2 !important;
+  fill: #565A93 !important;
 }
 
-/* On hover */
-.apexcharts-menu-item:hover {
-  background-color: #2D9DA8 !important;
-  color: #fff !important;
-}
-/* ApexCharts toolbar icon buttons */
-.apexcharts-toolbar button {
-  color: #2D9DA8 !important;  /* affects stroke/fill color for most icons */
-  fill: #2D9DA8 !important;
-  background: transparent !important;
-  border: none !important;
-  margin: 0 2px;
+.klinecharts-pro-modal .inner {
+  background-color: #02001B;
 }
 
-/* On hover */
-.apexcharts-toolbar button:hover {
-  opacity: 0.7;
-  background-color: rgba(45, 157, 168, 0.1) !important;
-  border-radius: 4px;
+.klinecharts-pro-indicator-modal-list .title {
+  background-color: #161A2C;
 }
-
 
 
 
@@ -67,7 +49,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 input[type="number"] {
-  -moz-appearance: textfield; /* For Firefox */
+  -moz-appearance: textfield;
+  /* For Firefox */
 }
 
 
@@ -84,23 +67,33 @@ input[type="number"] {
 }
 
 @keyframes blinkError {
-  0%, 100% {
+
+  0%,
+  100% {
     border-color: transparent;
     color: black;
   }
+
   50% {
-    border-color: #ef4444; /* red-500 */
-    color: #ef4444; /* red-500 */
+    border-color: #ef4444;
+    /* red-500 */
+    color: #ef4444;
+    /* red-500 */
   }
 }
 
 @keyframes blinkSuccess {
-  0%, 100% {
+
+  0%,
+  100% {
     border-color: transparent;
     color: black;
   }
+
   50% {
-    border-color: #22c55e; /* green-500 */
-    color: #22c55e; /* green-500 */
+    border-color: #22c55e;
+    /* green-500 */
+    color: #22c55e;
+    /* green-500 */
   }
 }
