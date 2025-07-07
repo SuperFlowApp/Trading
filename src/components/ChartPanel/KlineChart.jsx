@@ -4,8 +4,6 @@ const getRestUrl = (interval) =>
 const getWsUrl = (interval) =>
   `wss://stream.binance.com:9443/ws/btcusdt@kline_${interval}`;
 
-const INTERVALS = ['1m', '5m', '15m', '1h', '4h']; // Add more as needed
-
 const KlineChartProPanel = () => {
   const [interval, setInterval] = useState('5m');
   const chartRef = useRef(null);
@@ -145,7 +143,7 @@ const KlineChartProPanel = () => {
         width: '100%',
         height: '500px',
         background: 'transparent',
-        '--klinecharts-pro-border-color': '#565A93', // Add this line
+        '--klinecharts-pro-border-color': '#555', // Add this line
       }}
     />
   );
