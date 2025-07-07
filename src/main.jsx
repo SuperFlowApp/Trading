@@ -1,6 +1,6 @@
 import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
 import CandleChart from './components/ChartPanel/CandleChart.jsx';
@@ -152,7 +152,7 @@ window._root.render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainApp />} />
+        <Route path="/" element={<Navigate to="/BTC" replace />} />
         <Route path="/:base" element={<MainApp />} />
         {/* ...other routes */}
       </Routes>
