@@ -152,6 +152,7 @@ window._root.render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<MainApp />} />
         <Route path="/:base" element={<MainApp />} />
         {/* ...other routes */}
       </Routes>
