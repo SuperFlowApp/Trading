@@ -232,11 +232,13 @@ function AuthPanel({ onLoginSuccess, onClose }) {
 
   // --- UI ---
   return (
-    <div className="bg-backgroundlight text-white px-4 py-12 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2 relative">
+    <div className="bg-backgroundlight text-white px-8 py-12 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2 relative">
+      {/* Title */}
+      <div className="text-2xl font-medium text-center mb-2 cursor-default">Connect</div>
       {/* Close X button */}
       <button
-        className="absolute top-0 right-2 text-5xl font-medium text-white hover:text-primary2 focus:outline-none"
-        style={{ lineHeight: "1", fontSize: "3.5rem" }}
+        className="absolute top-2 right-4 text-5xl font-light text-white hover:text-primary2 focus:outline-none"
+        style={{ lineHeight: "0.25", fontSize: "3.5rem" }}
         onClick={() => {
           setConnectionMethod(null);
           setWalletAddress("");
@@ -274,7 +276,7 @@ function AuthPanel({ onLoginSuccess, onClose }) {
             Login with Email
           </button>
           {/* Divider with "or" */}
-          <div className="flex items-center my-1">
+          <div className="flex items-center my-1 cursor-default">
             <div className="flex-1 h-px bg-gray-500 opacity-40" />
             <span className="mx-2 text-xs text-gray-400 font-medium">or</span>
             <div className="flex-1 h-px bg-gray-500 opacity-40" />
