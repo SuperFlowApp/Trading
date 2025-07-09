@@ -68,14 +68,6 @@ function Navbar() {
 
         {/* Right Side */}
         <div className="flex items-center gap-4">
-          {/* Deposit Button */}
-          <button
-            className="flex text-black items-center gap-2 px-4 py-2 bg-primary2 rounded-md text-sm font-semibold hover:bg-primary2/80 transition"
-            onClick={() => alert("Deposit clicked!")}
-          >
-            <img src="/assets/left_icon.svg" alt="Deposit Icon" className="w-4 h-4" />
-            Deposit
-          </button>
           {/* Login/User Button */}
           {!accessToken ? (
             <button
@@ -134,7 +126,7 @@ function Navbar() {
             </button>
             <AuthPanel
               onLoginSuccess={handleLoginSuccess}
-              hideClose={true}
+              onClose={() => setShowLogin(false)}
             />
           </div>
         </div>

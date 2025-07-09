@@ -9,7 +9,7 @@ function getDetectedWallet() {
   return null;
 }
 
-function AuthPanel({ onLoginSuccess }) {
+function AuthPanel({ onLoginSuccess, onClose }) {
   const [connectionMethod, setConnectionMethod] = useState(null); // "email" | "metamask" | null
   const [detectedWallet, setDetectedWallet] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
@@ -232,19 +232,56 @@ function AuthPanel({ onLoginSuccess }) {
 
   // --- UI ---
   return (
-    <div className="bg-backgroundlight text-white p-6 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2">
+    <div className="bg-backgroundlight text-white px-4 py-12 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2 relative">
+      {/* Close X button */}
+      <button
+        className="absolute top-0 right-2 text-5xl font-medium text-white hover:text-primary2 focus:outline-none"
+        style={{ lineHeight: "1", fontSize: "3.5rem" }}
+        onClick={() => {
+          setConnectionMethod(null);
+          setWalletAddress("");
+          setTermsStep(false);
+          setCheckbox1(false);
+          setCheckbox2(false);
+          setSignature("");
+          setWalletError("");
+          setIsSignup(false);
+          setLoginError("");
+          setSignupError("");
+          setUsernameTouched(false);
+          setPasswordTouched(false);
+          setRepeatPasswordTouched(false);
+          setUsername("");
+          setPassword("");
+          setRepeatPassword("");
+          setResponseData(null);
+          setUserId(null);
+          if (typeof onClose === "function") onClose(); // <-- Close the panel
+        }}
+        aria-label="Close"
+        type="button"
+      >
+        ×
+      </button>
+
       {/* Top-level menu */}
       {!connectionMethod && (
-        <div className="flex flex-col gap-3 mb-4">
+        <div className="flex flex-col gap-4">
           <button
-            className="bg-primary2 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
+            className="bg-secondary2 text-white px-4 py-2 rounded font-medium hover:bg-opacity-80"
             onClick={() => setConnectionMethod("email")}
           >
             Login with Email
           </button>
+          {/* Divider with "or" */}
+          <div className="flex items-center my-1">
+            <div className="flex-1 h-px bg-gray-500 opacity-40" />
+            <span className="mx-2 text-xs text-gray-400 font-medium">or</span>
+            <div className="flex-1 h-px bg-gray-500 opacity-40" />
+          </div>
           {detectedWallet && (
             <button
-              className="bg-secondary1 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80 flex items-center justify-center gap-2"
+              className="bg-secondary2 text-white px-4 py-2 rounded font-medium hover:bg-opacity-80 flex items-center justify-center gap-2"
               onClick={async () => {
                 setWalletError("");
                 if (!window.ethereum || !window.ethereum.isMetaMask) {
@@ -265,6 +302,33 @@ function AuthPanel({ onLoginSuccess }) {
               MetaMask
             </button>
           )}
+
+          {/* Additional wallets */}
+          <button
+            className="bg-secondary2 text-white px-4 py-2 rounded font-medium hover:bg-opacity-80 flex items-center justify-center gap-2"
+            type="button"
+            onClick={() => setWalletError("WalletConnect integration coming soon.")}
+          >
+            <img src="/assets/WalletConnect.svg" alt="WalletConnect" className="w-6 h-6" />
+            WalletConnect
+          </button>
+          <button
+            className="bg-secondary2 text-white px-4 py-2 rounded font-medium hover:bg-opacity-80 flex items-center justify-center gap-2"
+            type="button"
+            onClick={() => setWalletError("OKX Wallet integration coming soon.")}
+          >
+            <img src="/assets/OKX.svg" alt="OKX Wallet" className="w-6 h-6" />
+            OKX Wallet
+          </button>
+          <button
+            className="bg-secondary2 text-white px-4 py-2 rounded font-medium hover:bg-opacity-80 flex items-center justify-center gap-2"
+            type="button"
+            onClick={() => setWalletError("Coinbase Wallet integration coming soon.")}
+          >
+            <img src="https://avatars.githubusercontent.com/u/18060234?s=200&v=4" alt="Coinbase Wallet" className="w-6 h-6" />
+            Coinbase Wallet
+          </button>
+          {/* End additional wallets */}
           {walletError && (
             <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
               {walletError}
