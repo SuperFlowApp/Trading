@@ -20,6 +20,7 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   const [checkbox2, setCheckbox2] = useState(false);
   const [signature, setSignature] = useState("");
   const [walletError, setWalletError] = useState("");
+  const [isSignup, setIsSignup] = useState(false);
 
   // Use AuthContext
   const { token, logout } = useAuth();
@@ -100,7 +101,13 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   return (
     <div className="bg-backgroundlight text-white px-8 py-12 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2 relative">
       {/* Title */}
-      <div className="text-2xl font-medium text-center mb-2 cursor-default">Connect</div>
+      <div className="text-2xl font-medium text-center mb-2 cursor-default">
+        {connectionMethod === "email"
+          ? isSignup
+            ? "Sign up with Email"
+            : "Login with Email"
+          : "Connect"}
+      </div>
       {/* Close X button */}
       <button
         className="absolute top-2 right-4 text-5xl font-light text-white hover:text-primary2 focus:outline-none"
@@ -214,6 +221,8 @@ function AuthPanel({ onLoginSuccess, onClose }) {
         <EmailLoginPanel
           onBack={() => setConnectionMethod(null)}
           onLoginSuccess={onLoginSuccess}
+          isSignup={isSignup}
+          setIsSignup={setIsSignup}
         />
       )}
 
