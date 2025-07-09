@@ -4,7 +4,6 @@ import metamaskLogo from "/assets/metamask.svg";
 import defaultWalletIcon from "/assets/defaultWallet.svg";
 import EmailLoginPanel from "./EmailLoginPanel";
 
-
 function getDetectedWallet() {
   if (typeof window !== "undefined" && window.ethereum && window.ethereum.isMetaMask) {
     return { name: "MetaMask", icon: metamaskLogo };
@@ -33,7 +32,6 @@ function AuthPanel({ onLoginSuccess, onClose }) {
 
     const logoutAfterInactivity = () => {
       logoutUser();
-      setResponseData({ msg: "Logged out due to inactivity." });
     };
 
     const resetTimer = () => {
@@ -60,123 +58,9 @@ function AuthPanel({ onLoginSuccess, onClose }) {
     setDetectedWallet(getDetectedWallet());
   }, []);
 
-  // --- Signup handler ---
-  const createUser = async () => {
-    setSignupError("");
-    let valid = true;
-    if (!validateUsername(username)) {
-      setUsernameTouched(true);
-      setSignupError("Username must be at least 4 letters.");
-      valid = false;
-    }
-    if (!validatePassword(password)) {
-      setPasswordTouched(true);
-      setSignupError("Password must have 1 uppercase letter, 1 number and 1 special character.");
-      valid = false;
-    }
-    if (password !== repeatPassword) {
-      setRepeatPasswordTouched(true);
-      setSignupError("Passwords do not match.");
-      valid = false;
-    }
-    if (!valid) return;
-
-    setResponseData({ msg: "Signing up..." });
-    try {
-      const result = await signup(username, password);
-      if (result.success) {
-        setUserId(result.data.userId || null);
-        setResponseData({ msg: "Signup successful!", detail: result.data });
-        setSignupError("");
-        setIsSignup(false); // Switch to login after signup
-      } else {
-        setSignupError(result.error || "Signup failed.");
-        setResponseData({ msg: "Signup failed", detail: result.data });
-      }
-    } catch (err) {
-      setSignupError("Signup error: " + (err?.message || err));
-      setResponseData({ msg: "Signup error", detail: err?.message || err });
-    }
-  };
-
-  // --- Login handler using AuthContext ---
-  const handleLogin = async () => {
-    setLoginError("");
-    let valid = true;
-    if (!validateUsername(username)) {
-      setUsernameTouched(true);
-      setLoginError("Username must be at least 4 letters.");
-      valid = false;
-    }
-    if (!validatePassword(password)) {
-      setPasswordTouched(true);
-      setLoginError("Password must have 1 uppercase letter, 1 number and 1 special character.");
-      valid = false;
-    }
-    if (!valid) return;
-    setResponseData({ msg: "Logging in..." });
-    try {
-      const result = await login(username, password);
-      if (result.success) {
-        setResponseData({ msg: "Logged in successfully", detail: result.token });
-        // Store username in localStorage
-        localStorage.setItem("username", username);
-        if (typeof onLoginSuccess === "function") {
-          onLoginSuccess(result.token, username);
-        }
-        setPassword(""); // Clear old password after login
-      } else {
-        setResponseData({ msg: "Failed to log in", detail: result.error });
-      }
-    } catch (err) {
-      setResponseData({ msg: "Login error" });
-    }
-  };
-
   const logoutUser = () => {
     logout();
-    setUserId(null);
-    setResponseData({ msg: "Logged out" });
-    setUsername("");
-    setPassword("");
     localStorage.removeItem("username"); // Remove username on logout
-  };
-  // Signup function: create user on server
-  const signup = async (username, password) => {
-    try {
-      const res = await fetch(
-        `https://fastify-serverless-function-rimj.onrender.com/api/create_user?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-        { method: "POST" }
-      );
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        data = { error: await res.text() };
-      }
-      if (res.ok && !data.error) {
-        return { success: true, data };
-      } else {
-        return { success: false, error: data.error || "Signup failed", data };
-      }
-    } catch (err) {
-      return { success: false, error: err?.message || "Signup error" };
-    }
-  };
-  // --- Wallet connect handler ---
-  const handleMetaMaskConnect = async () => {
-    setWalletError("");
-    if (!window.ethereum || !window.ethereum.isMetaMask) {
-      setWalletError("MetaMask not detected.");
-      return;
-    }
-    try {
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      setWalletAddress(accounts[0]);
-      setTermsStep(true);
-    } catch (err) {
-      setWalletError("MetaMask connection rejected.");
-    }
   };
 
   // --- Accept terms signature handler ---
@@ -229,17 +113,6 @@ function AuthPanel({ onLoginSuccess, onClose }) {
           setCheckbox2(false);
           setSignature("");
           setWalletError("");
-          setIsSignup(false);
-          setLoginError("");
-          setSignupError("");
-          setUsernameTouched(false);
-          setPasswordTouched(false);
-          setRepeatPasswordTouched(false);
-          setUsername("");
-          setPassword("");
-          setRepeatPassword("");
-          setResponseData(null);
-          setUserId(null);
           if (typeof onClose === "function") onClose(); // <-- Close the panel
         }}
         aria-label="Close"
