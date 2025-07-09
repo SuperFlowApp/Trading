@@ -9,7 +9,25 @@ function Infobar() {
   const dropdownRef = useRef(null);
   const MARKET_TYPE = 'spot';
   const navigate = useNavigate();
-  const { base } = useParams();
+  const { base: urlBase } = useParams();
+
+  // --- New: Load selected pair from localStorage if no URL param ---
+  const [base, setBase] = useState(() => {
+    if (urlBase) return urlBase;
+    const stored = localStorage.getItem('selectedPairDetails');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        return parsed.base;
+      } catch { }
+    }
+    return null;
+  });
+
+  // Keep base in sync with URL param
+  useEffect(() => {
+    if (urlBase && urlBase !== base) setBase(urlBase);
+  }, [urlBase]);
 
   // Fetch available trading pairs
   useEffect(() => {
@@ -40,7 +58,7 @@ function Infobar() {
     fetchPairs();
   }, []);
 
-  // Fetch ticker for selected pair (from URL)
+  // Fetch ticker for selected pair (from URL or localStorage)
   useEffect(() => {
     const symbol = base ? `${base}USDT` : null;
     if (!symbol) return;
@@ -84,7 +102,11 @@ function Infobar() {
     <div className="">
       <div className="flex gap-8 items-start items-center px-4 py-2">
         {/* Custom Dropdown */}
-        <div className="relative flex items-center gap-3 py-1 cursor-pointer" onClick={() => setDropdownOpen(v => !v)} ref={dropdownRef}>
+        <div
+          className="relative flex items-center gap-3 py-1 cursor-pointer"
+          onClick={() => setDropdownOpen(v => !v)}
+          ref={dropdownRef}
+        >
           <div className="flex flex-col text-white">
             <div className="font-normal text-base text-[22px]">
               {selectedMarket ? `${selectedMarket.base} - ${selectedMarket.quote}` : `${base}USDT`}
@@ -112,9 +134,12 @@ function Infobar() {
                       <tr
                         key={mkt.id}
                         className={`cursor-pointer border border-transparent hover:border-primary2 ${`${base}USDT` === mkt.symbol ? 'bg-primary2/30' : ''}`}
-                        onClick={() => {
+                        onClick={e => {
+                          e.stopPropagation(); // Prevent parent click handler
                           setDropdownOpen(false);
-                          navigate(`/${mkt.base}`); // <-- Update the URL to /BTC, /ETH, etc.
+                          setBase(mkt.base);
+                          localStorage.setItem('selectedPairDetails', JSON.stringify(mkt));
+                          navigate(`/${mkt.base}`);
                         }}
                       >
                         <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>

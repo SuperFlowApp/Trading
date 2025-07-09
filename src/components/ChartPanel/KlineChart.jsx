@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom'; // Add this import
 
-const REST_URL = (interval) =>
-  `https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=500`;
-const WS_URL = (interval) =>
-  `wss://stream.binance.com:9443/ws/btcusdt@kline_${interval}`;
+const REST_URL = (pair, interval) =>
+  `https://api.binance.com/api/v3/klines?symbol=${pair.toUpperCase()}USDT&interval=${interval}&limit=500`;
+const WS_URL = (pair, interval) =>
+  `wss://stream.binance.com:9443/ws/${pair.toLowerCase()}usdt@kline_${interval}`;
 
 class BinanceFeed {
-  constructor() {
+  constructor(pair) {
+    this.pair = pair;
     this.subscribers = [];
     this.history = [];
     this.ws = null;
   }
 
   async getHistoryKLineData(symbol, period, from, to) {
-    const url = REST_URL(period.text);
+    const url = REST_URL(this.pair, period.text);
     const res = await fetch(url);
     const data = await res.json();
     this.history = data.map(k => ({
@@ -45,7 +47,7 @@ class BinanceFeed {
     if (this.ws) {
       this.ws.close();
     }
-    this.ws = new WebSocket(WS_URL(interval));
+    this.ws = new WebSocket(WS_URL(this.pair, interval));
     this.ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       if (!msg.k) return;
@@ -77,16 +79,20 @@ class BinanceFeed {
 }
 
 
-export default function KlineChartProPanel() {
+export default function KlineChartProPanel({ selectedPair }) {
+  const { base } = useParams(); // e.g., { base: 'BTC' }
   const [interval, setInterval] = useState('5m');
+  const [pair, setPair] = useState(selectedPair || base || 'BTC'); // Default to BTC if not set
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
-    const feed = new BinanceFeed();
+    const feed = new BinanceFeed(pair);
 
-    feed.getHistoryKLineData('BTCUSDT', { text: interval }).then(() => {
+    const symbol = `${pair.toUpperCase()}USDT`;
+
+    feed.getHistoryKLineData(symbol, { text: interval }).then(() => {
       if (!isMounted) return;
       import('https://cdn.skypack.dev/@klinecharts/pro').then(kline => {
         if (!isMounted) return;
@@ -96,8 +102,8 @@ export default function KlineChartProPanel() {
           container: chartRef.current,
           locale: 'en-US',
           symbol: {
-            shortName: 'BTC/USDT',
-            ticker: 'BTCUSDT',
+            shortName: `${pair.toUpperCase()}/USDT`,
+            ticker: symbol,
             priceCurrency: 'USDT',
             type: 'spot',
           },
@@ -120,10 +126,17 @@ export default function KlineChartProPanel() {
       chartInstanceRef.current?.dispose();
       feed.unsubscribe();
     };
-  }, [interval]);
+  }, [interval, pair]);
+
+  // Example: update pair from infobar
+  const handlePairChange = (newPair) => {
+    setPair(newPair);
+  };
 
   return (
     <div>
+      {/* Example infobar for changing pair */}
+      {/* <Infobar onPairChange={handlePairChange} /> */}
       <div
         ref={chartRef}
         style={{
