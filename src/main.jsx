@@ -69,7 +69,7 @@ function MainApp() {
                     <div className="bg-backgrounddark rounded-md overflow-visible mb-2">
                       <Infobar />
                     </div>
-                    <div className="bg-backgrounddark rounded-md p-2 h-[300%]">
+                    <div className="bg-backgrounddark rounded-md p-4 h-[300%]">
                       {/* KlineChart */}
                       <KlineChartProPanel  /> {/* Add KlineChart here */}
                     </div>

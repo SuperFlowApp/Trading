@@ -130,7 +130,7 @@ export default function KlineChartProPanel() {
           width: '100%',
           height: '500px',
           background: 'transparent',
-          '--klinecharts-pro-border-color': '#565A93',
+          '--klinecharts-pro-border-color': 'transparent',
         }}
       />
     </div>
