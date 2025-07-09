@@ -1,14 +1,25 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/Authentication"; // <-- use AuthContext
+import { useAuth } from "../context/Authentication";
+import metamaskLogo from "/assets/metamask.svg";
 
-// Credential validation helpers
-const validateUsername = (username) => username.length >= 4;
-const validatePassword = (password) =>
-  /[A-Z]/.test(password) && // at least one uppercase letter
-  /[0-9]/.test(password) && // at least one number
-  /[^A-Za-z0-9]/.test(password); // at least one special character
+function getDetectedWallet() {
+  if (typeof window !== "undefined" && window.ethereum && window.ethereum.isMetaMask) {
+    return { name: "MetaMask", icon: metamaskLogo };
+  }
+  return null;
+}
 
 function AuthPanel({ onLoginSuccess }) {
+  const [connectionMethod, setConnectionMethod] = useState(null); // "email" | "metamask" | null
+  const [detectedWallet, setDetectedWallet] = useState(null);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [termsStep, setTermsStep] = useState(false);
+  const [checkbox1, setCheckbox1] = useState(false);
+  const [checkbox2, setCheckbox2] = useState(false);
+  const [signature, setSignature] = useState("");
+  const [walletError, setWalletError] = useState("");
+
+  // Email login/signup states
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [userId, setUserId] = useState(null);
@@ -62,6 +73,10 @@ function AuthPanel({ onLoginSuccess }) {
       window.removeEventListener("click", resetTimer);
     };
   }, [token]);
+
+  useEffect(() => {
+    setDetectedWallet(getDetectedWallet());
+  }, []);
 
   // --- Signup handler ---
   const createUser = async () => {
@@ -166,233 +181,403 @@ function AuthPanel({ onLoginSuccess }) {
       return { success: false, error: err?.message || "Signup error" };
     }
   };
+  // --- Wallet connect handler ---
+  const handleMetaMaskConnect = async () => {
+    setWalletError("");
+    if (!window.ethereum || !window.ethereum.isMetaMask) {
+      setWalletError("MetaMask not detected.");
+      return;
+    }
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      setWalletAddress(accounts[0]);
+      setTermsStep(true);
+    } catch (err) {
+      setWalletError("MetaMask connection rejected.");
+    }
+  };
+
+  // --- Accept terms signature handler ---
+  const handleAcceptTerms = async () => {
+    setWalletError("");
+    if (!window.ethereum || !walletAddress) return;
+    const now = Date.now(); // <-- Use Unix timestamp in ms
+    // EIP-712 typed data for "SuperFlow:Accept terms" with time
+    const msgParams = {
+      domain: { name: "TradingApp", version: "1" },
+      message: { time: now },
+      primaryType: "SuperFlow:Accept terms",
+      types: {
+        EIP712Domain: [
+          { name: "name", type: "string" },
+          { name: "version", type: "string" }
+        ],
+        "SuperFlow:Accept terms": [
+          { name: "time", type: "string" }
+        ]
+      }
+    };
+    try {
+      const sig = await window.ethereum.request({
+        method: "eth_signTypedData_v4",
+        params: [walletAddress, JSON.stringify(msgParams)]
+      });
+      setSignature(sig);
+      setWalletError("");
+      // You can now send the signature to your backend for verification if needed
+    } catch (err) {
+      setWalletError("Signature rejected.");
+    }
+  };
+
   // --- UI ---
   return (
     <div className="bg-backgroundlight text-white p-6 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2">
-      {/* Username viewer bar */}
-      <div className="mb-4 flex items-center justify-between px-4 py-2 rounded">
-        <span className="text-sm font-bold text-white">
-          {token ? username : "login"}
-        </span>
-      </div>
-
-      {/* Auth Forms */}
-      {!token && (
-        <div className="space-y-3">
-          {!isSignup ? (
-            // --- Login Form ---
-            <>
-              <div>
-                <input
-                  className={`w-full px-4 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${usernameTouched && !validateUsername(username)
-                    ? "border-warningcolor"
-                    : "border-transparent"
-                    }`}
-                  placeholder="Username"
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    setUsernameTouched(true);
-                    setLoginError("");
-                  }}
-                  onBlur={() => setUsernameTouched(true)}
-                  autoComplete="off"
-                  required
-                />
-              </div>
-              <div>
-                <input
-                  className={`w-full px-4 py-2 rounded bg-backgrounddark text-white  border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${passwordTouched && !validatePassword(password)
-                    ? "border-warningcolor"
-                    : "border-transparent"
-                    }`}
-                  placeholder="Password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setPasswordTouched(true);
-                    setLoginError("");
-                  }}
-                  onBlur={() => setPasswordTouched(true)}
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
-              {loginError && (
-                <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
-                  {loginError}
-                </div>
-              )}
-              <div className="flex items-center gap-3 mt-2">
-                <button
-                  onClick={handleLogin}
-                  className="bg-primary2 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
-                  type="button"
-                >
-                  Log in
-                </button>
-                <span
-                  className="text-primary2 text-sm cursor-pointer hover:underline"
-                  onClick={() => {
-                    setIsSignup(true);
-                    setSignupError("");
-                    setUsernameTouched(false);
-                    setPasswordTouched(false);
-                    setRepeatPasswordTouched(false);
-                    setUsername("");
-                    setPassword("");
-                    setRepeatPassword("");
-                  }}
-                >
-                  Sign up
-                </span>
-              </div>
-            </>
-          ) : (
-            // --- Signup Form ---
-            <div className="p-4 rounded space-y-2">
-              <div>
-                <label className="block text-xs mb-1">Username</label>
-                <input
-                  className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${usernameTouched && !validateUsername(username)
-                    ? "border-warningcolor"
-                    : "border-transparent"
-                    }`}
-                  placeholder="Username"
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    setUsernameTouched(true);
-                    setSignupError("");
-                  }}
-                  onBlur={() => setUsernameTouched(true)}
-                  autoComplete="off"
-                  required
-                />
-                {usernameTouched && !validateUsername(username) && (
-                  <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
-                    Username must be at least 4 letters.
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs mb-1">Password</label>
-                <input
-                  className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${passwordTouched && !validatePassword(password)
-                    ? "border-warningcolor"
-                    : "border-transparent"
-                    }`}
-                  placeholder="Password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setPasswordTouched(true);
-                    setSignupError("");
-                  }}
-                  onBlur={() => setPasswordTouched(true)}
-                  autoComplete="new-password"
-                  required
-                />
-                {passwordTouched && !validatePassword(password) && (
-                  <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
-                    Password must have 1 uppercase letter, 1 number and 1 special character.
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs mb-1">Repeat Password</label>
-                <input
-                  className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${repeatPasswordTouched && password !== repeatPassword
-                    ? "border-warningcolor"
-                    : "border-transparent"
-                    }`}
-                  placeholder="Repeat Password"
-                  type="password"
-                  value={repeatPassword}
-                  onChange={(e) => {
-                    setRepeatPassword(e.target.value);
-                    setRepeatPasswordTouched(true);
-                    setSignupError("");
-                  }}
-                  onBlur={() => setRepeatPasswordTouched(true)}
-                  autoComplete="new-password"
-                  required
-                />
-                {repeatPasswordTouched && password !== repeatPassword && (
-                  <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
-                    Passwords do not match.
-                  </div>
-                )}
-              </div>
-              {signupError && (
-                <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
-                  {signupError}
-                </div>
-              )}
-              <div className="flex items-center gap-3 mt-2">
-                <button
-                  onClick={createUser}
-                  className="bg-primary2 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
-                  type="button"
-                >
-                  Sign up
-                </button>
-                <span
-                  className="text-primary2 text-sm cursor-pointer hover:underline"
-                  onClick={() => {
-                    setIsSignup(false);
-                    setLoginError("");
-                    setUsernameTouched(false);
-                    setPasswordTouched(false);
-                    setRepeatPasswordTouched(false);
-                    setUsername("");
-                    setPassword("");
-                    setRepeatPassword("");
-                  }}
-                >
-                  Log in
-                </span>
-              </div>
+      {/* Top-level menu */}
+      {!connectionMethod && (
+        <div className="flex flex-col gap-3 mb-4">
+          <button
+            className="bg-primary2 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
+            onClick={() => setConnectionMethod("email")}
+          >
+            Login with Email
+          </button>
+          {detectedWallet && (
+            <button
+              className="bg-secondary1 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80 flex items-center justify-center gap-2"
+              onClick={async () => {
+                setWalletError("");
+                if (!window.ethereum || !window.ethereum.isMetaMask) {
+                  setWalletError("MetaMask not detected.");
+                  return;
+                }
+                try {
+                  const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                  setWalletAddress(accounts[0]);
+                  setTermsStep(true);
+                  setConnectionMethod("metamask"); // Only show terms after successful connect
+                } catch (err) {
+                  setWalletError("MetaMask connection rejected.");
+                }
+              }}
+            >
+              <img src={detectedWallet.icon} alt="MetaMask" className="w-6 h-6" />
+              MetaMask
+            </button>
+          )}
+          {walletError && (
+            <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
+              {walletError}
             </div>
           )}
         </div>
       )}
 
-      {/* Password change section (only after login) */}
-      {token && (
+      {/* Email login/signup panel */}
+      {connectionMethod === "email" && (
         <>
-          {/* Logout button outside password panel */}
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={logoutUser}
-              className="bg-warningcolor px-4 py-2 rounded font-medium hover:bg-opacity-80"
-              type="button"
-            >
-              Logout
-            </button>
+          <button
+            className="text-xs text-primary2 underline mb-2"
+            onClick={() => setConnectionMethod(null)}
+            type="button"
+          >
+            &larr; Back
+          </button>
+
+          {/* Username viewer bar */}
+          <div className="mb-4 flex items-center justify-between px-4 py-2 rounded">
+            <span className="text-sm font-bold text-white">
+              {token ? username : "login"}
+            </span>
           </div>
+
+          {/* Auth Forms */}
+          {!token && (
+            <div className="space-y-3">
+              {!isSignup ? (
+                // --- Login Form ---
+                <>
+                  <div>
+                    <input
+                      className={`w-full px-4 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${usernameTouched && !validateUsername(username)
+                        ? "border-warningcolor"
+                        : "border-transparent"
+                        }`}
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => {
+                        setUsername(e.target.value);
+                        setUsernameTouched(true);
+                        setLoginError("");
+                      }}
+                      onBlur={() => setUsernameTouched(true)}
+                      autoComplete="off"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <input
+                      className={`w-full px-4 py-2 rounded bg-backgrounddark text-white  border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${passwordTouched && !validatePassword(password)
+                        ? "border-warningcolor"
+                        : "border-transparent"
+                        }`}
+                      placeholder="Password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setPasswordTouched(true);
+                        setLoginError("");
+                      }}
+                      onBlur={() => setPasswordTouched(true)}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+                  {loginError && (
+                    <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
+                      {loginError}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 mt-2">
+                    <button
+                      onClick={handleLogin}
+                      className="bg-primary2 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
+                      type="button"
+                    >
+                      Log in
+                    </button>
+                    <span
+                      className="text-primary2 text-sm cursor-pointer hover:underline"
+                      onClick={() => {
+                        setIsSignup(true);
+                        setSignupError("");
+                        setUsernameTouched(false);
+                        setPasswordTouched(false);
+                        setRepeatPasswordTouched(false);
+                        setUsername("");
+                        setPassword("");
+                        setRepeatPassword("");
+                      }}
+                    >
+                      Sign up
+                    </span>
+                  </div>
+                </>
+              ) : (
+                // --- Signup Form ---
+                <div className="p-4 rounded space-y-2">
+                  <div>
+                    <label className="block text-xs mb-1">Username</label>
+                    <input
+                      className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${usernameTouched && !validateUsername(username)
+                        ? "border-warningcolor"
+                        : "border-transparent"
+                        }`}
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => {
+                        setUsername(e.target.value);
+                        setUsernameTouched(true);
+                        setSignupError("");
+                      }}
+                      onBlur={() => setUsernameTouched(true)}
+                      autoComplete="off"
+                      required
+                    />
+                    {usernameTouched && !validateUsername(username) && (
+                      <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
+                        Username must be at least 4 letters.
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1">Password</label>
+                    <input
+                      className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${passwordTouched && !validatePassword(password)
+                        ? "border-warningcolor"
+                        : "border-transparent"
+                        }`}
+                      placeholder="Password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setPasswordTouched(true);
+                        setSignupError("");
+                      }}
+                      onBlur={() => setPasswordTouched(true)}
+                      autoComplete="new-password"
+                      required
+                    />
+                    {passwordTouched && !validatePassword(password) && (
+                      <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
+                        Password must have 1 uppercase letter, 1 number and 1 special character.
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1">Repeat Password</label>
+                    <input
+                      className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${repeatPasswordTouched && password !== repeatPassword
+                        ? "border-warningcolor"
+                        : "border-transparent"
+                        }`}
+                      placeholder="Repeat Password"
+                      type="password"
+                      value={repeatPassword}
+                      onChange={(e) => {
+                        setRepeatPassword(e.target.value);
+                        setRepeatPasswordTouched(true);
+                        setSignupError("");
+                      }}
+                      onBlur={() => setRepeatPasswordTouched(true)}
+                      autoComplete="new-password"
+                      required
+                    />
+                    {repeatPasswordTouched && password !== repeatPassword && (
+                      <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-1">
+                        Passwords do not match.
+                      </div>
+                    )}
+                  </div>
+                  {signupError && (
+                    <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
+                      {signupError}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 mt-2">
+                    <button
+                      onClick={createUser}
+                      className="bg-primary2 text-black px-4 py-2 rounded font-medium hover:bg-opacity-80"
+                      type="button"
+                    >
+                      Sign up
+                    </button>
+                    <span
+                      className="text-primary2 text-sm cursor-pointer hover:underline"
+                      onClick={() => {
+                        setIsSignup(false);
+                        setLoginError("");
+                        setUsernameTouched(false);
+                        setPasswordTouched(false);
+                        setRepeatPasswordTouched(false);
+                        setUsername("");
+                        setPassword("");
+                        setRepeatPassword("");
+                      }}
+                    >
+                      Log in
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Password change section (only after login) */}
+          {token && (
+            <>
+              {/* Logout button outside password panel */}
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={logoutUser}
+                  className="bg-warningcolor px-4 py-2 rounded font-medium hover:bg-opacity-80"
+                  type="button"
+                >
+                  Logout
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Response messages */}
+          {responseData && (
+            <div className="text-sm mt-2 text-white">
+              {responseData.msg && <div>{responseData.msg}</div>}
+              {responseData.detail && (
+                <pre className="bg-black/40 p-2 rounded mt-2 text-xs overflow-x-auto">
+                  {typeof responseData.detail === "string"
+                    ? responseData.detail
+                    : JSON.stringify(responseData.detail, null, 2)}
+                </pre>
+              )}
+            </div>
+          )}
+
+          {/* User ID after signup */}
+          {userId && <div className="text-sm mt-1 text-green-400"><strong>User ID:</strong> {userId}</div>}
         </>
       )}
 
-      {/* Response messages */}
-      {responseData && (
-        <div className="text-sm mt-2 text-white">
-          {responseData.msg && <div>{responseData.msg}</div>}
-          {responseData.detail && (
-            <pre className="bg-black/40 p-2 rounded mt-2 text-xs overflow-x-auto">
-              {typeof responseData.detail === "string"
-                ? responseData.detail
-                : JSON.stringify(responseData.detail, null, 2)}
-            </pre>
+      {/* MetaMask terms flow */}
+      {connectionMethod === "metamask" && (
+        <>
+          {walletAddress && !signature && (
+            <div className="space-y-4 text-[12px]">
+              <div className="mb-2 text-lg font-bold">Accept Terms</div>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={checkbox1}
+                    onChange={e => setCheckbox1(e.target.checked)}
+                  />
+                  <span>We acknowledge that you have read, understood, and agreed to the Terms of Use and Privacy policy.</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={checkbox2}
+                    onChange={e => setCheckbox2(e.target.checked)}
+                  />
+                  <span>This site uses cookies to ensure the best user experience. These cookies are strictly necessary or essential for optimal functionality. By using this site, you agree to the coockie policy.</span>
+                </label>
+              </div>
+              <div className="flex gap-3 mt-2">
+                <button
+                  className={`px-4 py-2 rounded font-medium hover:bg-opacity-80
+    ${checkbox1 && checkbox2
+                      ? "bg-primary2 text-black"
+                      : "bg-gray-500 text-gray-300"
+                    }`}
+                  onClick={handleAcceptTerms}
+                  type="button"
+                  disabled={!(checkbox1 && checkbox2)}
+                >
+                  Accept
+                </button>
+                <button
+                  className="bg-warningcolor text-white px-4 py-2 rounded font-medium hover:bg-opacity-80"
+                  type="button"
+                  onClick={() => {
+                    setConnectionMethod(null);
+                    setWalletAddress("");
+                    setTermsStep(false);
+                    setCheckbox1(false);
+                    setCheckbox2(false);
+                    setSignature("");
+                    setWalletError("");
+                  }}
+                >
+                  Decline
+                </button>
+              </div>
+              {walletError && (
+                <div className="bg-warningcolor text-white text-xs rounded px-2 py-1 mt-2">
+                  {walletError}
+                </div>
+              )}
+            </div>
           )}
-        </div>
+          {signature && (
+            <div className="text-green-400">
+              Terms accepted and signed!<br />
+              <span className="break-all text-xs">{signature}</span>
+            </div>
+          )}
+        </>
       )}
-
-      {/* User ID after signup */}
-      {userId && <div className="text-sm mt-1 text-green-400"><strong>User ID:</strong> {userId}</div>}
-
     </div>
   );
 }

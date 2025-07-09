@@ -107,7 +107,7 @@ function Navbar() {
                     className="block w-full text-left px-4 py-2 hover:bg-opacity-80"
                     onClick={handleLogout}
                   >
-                    Logout
+                    Disconnect
                   </button>
                 </div>
               )}
