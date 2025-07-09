@@ -82,7 +82,7 @@ function Infobar() {
 
   return (
     <div className="">
-      <div className="flex gap-8 items-start items-center p-8">
+      <div className="flex gap-8 items-start items-center px-4 py-2">
         {/* Custom Dropdown */}
         <div className="relative flex items-center gap-3 py-1 cursor-pointer" onClick={() => setDropdownOpen(v => !v)} ref={dropdownRef}>
           <div className="flex flex-col text-white">

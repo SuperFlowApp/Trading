@@ -32,7 +32,7 @@ function MainApp() {
   if (isMobile) {
     return (
       <div
-        className="flex items-center justify-center h-screen w-screen bg-backgroundlight text-white"
+        className="flex items-center justify-center h-screen w-screen bg-backgrounddark text-white"
         style={{
           backgroundImage: `url('/assets/background.jpg')`,
           backgroundSize: 'cover',
@@ -48,7 +48,6 @@ function MainApp() {
   return (
     <AuthProvider>
       <div
-        className="bg-backgroundlight"
         style={{
           backgroundImage: `url('/assets/background.jpg')`,
           backgroundSize: 'cover',
@@ -65,23 +64,23 @@ function MainApp() {
             <div className="flex flex-1 p-2 gap-2">
               {/* TradingViewChart/Infobar */}
               <div className="flex flex-col h-full gap-2 bg-transparent basis-[80%] min-w-0 ">
-                <div className="flex gap-2">
-                  <div className="bg-backgroundlight rounded-md flex-1 min-w-0 overflow-hidden">
-                    <div className="overflow-visible">
+                <div className="flex">
+                  <div className="mr-2  flex-1 min-w-0 overflow-hidden">
+                    <div className="bg-backgrounddark rounded-md overflow-visible mb-2">
                       <Infobar />
                     </div>
-                    <div className="p-2 h-[300%]">
+                    <div className="bg-backgrounddark rounded-md p-2 h-[300%]">
                       {/* KlineChart */}
                       <KlineChartProPanel  /> {/* Add KlineChart here */}
                     </div>
                   </div>
-                  <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden basis-[25%]">
+                  <div className="flex flex-col bg-backgrounddark  rounded-md min-w-0 overflow-hidden basis-[25%]">
                     {/* Tab Selector */}
                     <div className="flex relative">
                       <button
                         className={`flex-1 p-2 text-center ${activeTab === 'OrderBook'
-                          ? 'bg-backgroundlight/10 text-white font-bold border-b-2 border-primary2'
-                          : 'bg-backgroundlight text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
+                          ? 'bg-backgrounddark text-white font-bold border-b-2 border-primary2'
+                          : 'bg-backgrounddark text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
                           }`}
                         onClick={() => setActiveTab('OrderBook')}
                       >
@@ -89,8 +88,8 @@ function MainApp() {
                       </button>
                       <button
                         className={`flex-1 p-2 text-center ${activeTab === 'Trades'
-                          ? 'bg-bg-backgroundlight/10 text-white font-bold border-b-2 border-primary2'
-                          : 'bg-bg-backgroundlight text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
+                          ? 'bg-bg-backgrounddark text-white font-bold border-b-2 border-primary2'
+                          : 'bg-bg-backgrounddark text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
                           }`}
                         onClick={() => setActiveTab('Trades')}
                       >
@@ -98,7 +97,7 @@ function MainApp() {
                       </button>
                     </div>
                     {/* Render Both Components */}
-                    <div className="bg-backgroundlight rounded-b-md p-2">
+                    <div className="bg-backgrounddark rounded-b-md p-2">
                       <div className={activeTab === 'OrderBook' ? 'block' : 'hidden'}>
                         <OrderBook
                           onPriceMidpointChange={setPriceMidpoint}
@@ -113,14 +112,14 @@ function MainApp() {
                   </div>
                 </div>
                 <section className="text-white">
-                  <div className="bg-backgroundlight rounded-md">
+                  <div className="bg-backgrounddark rounded-md">
                     <PositionsPanel />
                   </div>
                 </section>
               </div>
               {/* PositionsPanel */}
               <div className="flex flex-col basis-[20%] gap-2">
-                <div className="flex flex-col bg-backgroundlight rounded-md min-w-0 overflow-hidden">
+                <div className="flex flex-col bg-backgrounddark rounded-md min-w-0 overflow-hidden">
                   <LimitOrderForm
                     priceMidpoint={priceMidpoint}
                     selectedPrice={selectedPrice}
@@ -128,7 +127,7 @@ function MainApp() {
                   />
                 </div>
                 {/* Account Information */}
-                <div className="flex flex-col bg-backgroundlight rounded-md  p-3 min-w-0 overflow-hidden">
+                <div className="flex flex-col bg-backgrounddark rounded-md  p-3 min-w-0 overflow-hidden">
                   <AccountInfoPanel />
                 </div>
               </div>

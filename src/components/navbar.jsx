@@ -43,24 +43,21 @@ function Navbar() {
 
   return (
     <>
-      <nav className="pl-[20px] pr-[30px] w-full flex items-center justify-between px-4 py-2 bg-backgrounddark/50 text-white ">
+      <nav className="pl-[20px] pr-[30px] w-full flex items-center justify-between px-4 py-2 bg-backgrounddark text-white ">
         {/* Left Side */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-14">
           <div className="flex items-end gap-2">
             <img src="/assets/Logo.svg" alt="Logo" className="h-8 w-auto" />
             <img src="/assets/Bysymmio.svg" alt="Logo" className="h-5 w-auto" />
           </div>
           <ul className="flex gap-6 text-sm font-small">
             <li className="flex items-center gap-2 cursor-pointer hover:text-[#FFFFFF]">
-              <img src="/assets/trading-view-candles.svg" alt="Trade Icon" className="w-4 h-4" />
               Trade
             </li>
             <li className="flex items-center gap-2 cursor-pointer text-secondary1 hover:text-[#FFFFFF]">
-              <img src="/assets/maney.svg" alt="Earn Icon" className="w-4 h-4" />
               Earn Points
             </li>
             <li className="flex items-center gap-2 cursor-pointer text-secondary1 hover:text-[#FFFFFF]">
-              <img src="/assets/group.svg" alt="Referral Icon" className="w-4 h-4" />
               Referrals
             </li>
           </ul>
@@ -105,9 +102,11 @@ function Navbar() {
               )}
             </div>
           )}
+          {/*
           <button className="px-2 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-opacity-80 transition">
             <img src="/assets/language-icon.svg" alt="Language" className="w-5 h-5" />
           </button>
+          */}
           <button className="px-2 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-opacity-80 transition">
             <img src="/assets/settings-icon.svg" alt="Settings" className="w-5 h-5" />
           </button>

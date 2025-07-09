@@ -101,11 +101,11 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   return (
     <div className="bg-backgroundlight text-white px-8 py-12 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2 relative">
       {/* Title */}
-      <div className="text-2xl font-medium text-center mb-2 cursor-default">
+      <div className="text-2xl font-medium text-center pb-2 cursor-default">
         {connectionMethod === "email"
           ? isSignup
-            ? "Sign up with Email"
-            : "Login with Email"
+            ? "Sign up"
+            : "Login"
           : "Connect"}
       </div>
       {/* Close X button */}
@@ -120,7 +120,8 @@ function AuthPanel({ onLoginSuccess, onClose }) {
           setCheckbox2(false);
           setSignature("");
           setWalletError("");
-          if (typeof onClose === "function") onClose(); // <-- Close the panel
+          setIsSignup(false); // <-- Always reset to login mode
+          if (typeof onClose === "function") onClose();
         }}
         aria-label="Close"
         type="button"
@@ -219,7 +220,10 @@ function AuthPanel({ onLoginSuccess, onClose }) {
       {/* Email login/signup panel */}
       {connectionMethod === "email" && (
         <EmailLoginPanel
-          onBack={() => setConnectionMethod(null)}
+          onBack={() => {
+            setConnectionMethod(null);
+            setIsSignup(false); // <-- Always reset to login mode
+          }}
           onLoginSuccess={onLoginSuccess}
           isSignup={isSignup}
           setIsSignup={setIsSignup}
