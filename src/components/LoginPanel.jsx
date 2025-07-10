@@ -23,7 +23,7 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   const [isSignup, setIsSignup] = useState(false);
 
   // Use AuthContext
-  const { token, logout } = useAuth();
+  const { token, logout, setWalletAddress: setGlobalWalletAddress } = useAuth(); // Add setWalletAddress to context
 
   const inactivityTimeout = useRef(null);
 
@@ -59,6 +59,51 @@ function AuthPanel({ onLoginSuccess, onClose }) {
     setDetectedWallet(getDetectedWallet());
   }, []);
 
+  // Check wallet connection on mount and on account change
+  useEffect(() => {
+    async function checkWalletConnection() {
+      if (window.ethereum && window.ethereum.isMetaMask) {
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_accounts" });
+          if (accounts && accounts[0]) {
+            setWalletAddress(accounts[0]);
+            setGlobalWalletAddress && setGlobalWalletAddress(accounts[0]); // Update global context
+            if (typeof onLoginSuccess === "function") {
+              onLoginSuccess(accounts[0]);
+            }
+          }
+        } catch (err) {
+          setWalletAddress("");
+          setGlobalWalletAddress && setGlobalWalletAddress("");
+        }
+      }
+    }
+
+    checkWalletConnection();
+
+    // Listen for account changes
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", (accounts) => {
+        if (accounts.length > 0) {
+          setWalletAddress(accounts[0]);
+          setGlobalWalletAddress && setGlobalWalletAddress(accounts[0]);
+          if (typeof onLoginSuccess === "function") {
+            onLoginSuccess(accounts[0]);
+          }
+        } else {
+          setWalletAddress("");
+          setGlobalWalletAddress && setGlobalWalletAddress("");
+        }
+      });
+    }
+
+    return () => {
+      if (window.ethereum && window.ethereum.removeListener) {
+        window.ethereum.removeListener("accountsChanged", () => {});
+      }
+    };
+  }, [onLoginSuccess, setGlobalWalletAddress]);
+
   const logoutUser = () => {
     logout();
     localStorage.removeItem("username"); // Remove username on logout
@@ -68,8 +113,7 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   const handleAcceptTerms = async () => {
     setWalletError("");
     if (!window.ethereum || !walletAddress) return;
-    const now = Date.now(); // <-- Use Unix timestamp in ms
-    // EIP-712 typed data for "SuperFlow:Accept terms" with time
+    const now = Date.now();
     const msgParams = {
       domain: { name: "TradingApp", version: "1" },
       message: { time: now },
@@ -91,7 +135,10 @@ function AuthPanel({ onLoginSuccess, onClose }) {
       });
       setSignature(sig);
       setWalletError("");
-      // You can now send the signature to your backend for verification if needed
+      // Call onLoginSuccess with wallet address
+      if (typeof onLoginSuccess === "function") {
+        onLoginSuccess(walletAddress);
+      }
     } catch (err) {
       setWalletError("Signature rejected.");
     }
@@ -288,12 +335,6 @@ function AuthPanel({ onLoginSuccess, onClose }) {
                   {walletError}
                 </div>
               )}
-            </div>
-          )}
-          {signature && (
-            <div className="text-green-400">
-              Terms accepted and signed!<br />
-              <span className="break-all text-xs">{signature}</span>
             </div>
           )}
         </>

@@ -25,6 +25,7 @@ function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(initialSettings);
+  const [walletAddress, setWalletAddress] = useState(""); // <-- Add this line
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
 
@@ -32,12 +33,61 @@ function Navbar() {
   const { token: accessToken, logout, token } = useAuth();
   const username = localStorage.getItem("username") || "";
 
+  // --- Wallet connection check on mount ---
+  useEffect(() => {
+    async function checkWallet() {
+      // Try to get from localStorage first
+      let stored = localStorage.getItem("walletAddress");
+      if (stored) {
+        setWalletAddress(stored);
+      }
+      // Check MetaMask connection
+      if (window.ethereum && window.ethereum.isMetaMask) {
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_accounts" });
+          if (accounts && accounts[0]) {
+            setWalletAddress(accounts[0]);
+            localStorage.setItem("walletAddress", accounts[0]);
+          } else {
+            setWalletAddress("");
+            localStorage.removeItem("walletAddress");
+          }
+        } catch (err) {
+          setWalletAddress("");
+          localStorage.removeItem("walletAddress");
+        }
+      }
+    }
+    checkWallet();
+
+    // Listen for account changes
+    if (window.ethereum && window.ethereum.on) {
+      const handleAccountsChanged = (accounts) => {
+        if (accounts.length > 0) {
+          setWalletAddress(accounts[0]);
+          localStorage.setItem("walletAddress", accounts[0]);
+        } else {
+          setWalletAddress("");
+          localStorage.removeItem("walletAddress");
+        }
+      };
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      return () => {
+        window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+      };
+    }
+  }, []);
+
   // Handle logout using AuthContext
   const handleLogout = () => {
     logout(); // <-- Use AuthContext logout
     setDropdownOpen(false);
     setShowManageAccount(false);
     setShowLogin(false);
+    setWalletAddress("");
+    localStorage.removeItem("walletAddress");
+    window.ethereum?.removeAllListeners?.();
+
   };
 
   // Listen for clicks outside dropdown to close it
@@ -74,8 +124,12 @@ function Navbar() {
   }, [settingsOpen]);
 
   // Callback for AuthPanel to close modal on login
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (walletAddr) => {
     setShowLogin(false);
+    if (walletAddr) {
+      setWalletAddress(walletAddr);
+      localStorage.setItem("walletAddress", walletAddr); // Optional: persist
+    }
   };
 
   const handleSettingChange = (key) => {
@@ -84,6 +138,10 @@ function Navbar() {
       [key]: !prev[key],
     }));
   };
+
+  // Helper to shorten wallet address
+  const shortenAddress = (addr) =>
+    addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
 
   return (
     <>
@@ -110,7 +168,7 @@ function Navbar() {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           {/* Login/User Button */}
-          {!accessToken ? (
+          {!accessToken && !walletAddress ? (
             <button
               className="px-4 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-secondary2/80 transition"
               onClick={() => setShowLogin(true)}
@@ -129,7 +187,9 @@ function Navbar() {
                 className="px-4 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-opacity-80 transition"
                 onClick={() => setDropdownOpen((v) => !v)}
               >
-                {username}
+                {walletAddress
+                  ? shortenAddress(walletAddress)
+                  : username}
               </button>
               {dropdownOpen && (
                 <div
@@ -138,7 +198,21 @@ function Navbar() {
                 >
                   <button
                     className="block w-full text-left px-4 py-2 hover:bg-opacity-80"
-                    onClick={handleLogout}
+                    onClick={async () => {
+                      handleLogout();
+                      setWalletAddress(""); // Clear wallet address on disconnect
+                      localStorage.removeItem("walletAddress");
+                      // Attempt to disconnect from wallet (MetaMask does not support programmatic disconnect)
+                      if (window.ethereum && window.ethereum.request) {
+                        try {
+                          // For MetaMask, remove all listeners and reset state
+                          window.ethereum.removeAllListeners && window.ethereum.removeAllListeners();
+                          // Optionally, you can suggest the user disconnects from MetaMask manually
+                        } catch (e) {
+                          // Ignore errors
+                        }
+                      }
+                    }}
                   >
                     Disconnect
                   </button>
