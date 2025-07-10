@@ -17,20 +17,6 @@ class BinanceFeed {
     this.shouldReconnect = true;
   }
 
-  subscribe(cb) {
-    if (typeof cb === 'function') {
-      this.subscribers.push(cb);
-      if (this.history.length > 0) {
-        cb(this.history[this.history.length - 1], true);
-      }
-    }
-  }
-
-  unsubscribe(cb) {
-    if (typeof cb === 'function') {
-      this.subscribers = this.subscribers.filter(sub => sub !== cb);
-    }
-  }
 
   // Call this on React cleanup to stop everything
   destroy() {
@@ -85,7 +71,7 @@ class BinanceFeed {
     this.ws.onerror = () => this.ws.close();
   }
 
-  async getHistoryKLineData(symbol, period) {
+   async getHistoryKLineData(symbol, period, from, to) {
     const res = await fetch(REST_URL(this.pair, period.text));
     const data = await res.json();
     this.history = data.map(d => ({
@@ -97,20 +83,39 @@ class BinanceFeed {
       volume: +d[5],
     }));
     this.initWs(period.text);
+    // return full bar array
     return this.history;
+  }
+
+  // subscribe with correct signature
+  subscribe(symbol, period, callback) {
+    // send full history first
+    if (this.history.length > 0) {
+      callback(this.history, true);
+    }
+    // then attach WS updates
+    this.subscribers.push(callback);
+  }
+
+  unsubscribe(symbol, period) {
+    // close WS and clear subscribers
+    this.destroy();
   }
 }
 
 
+// ...existing imports and BinanceFeed...
 
 export default function KlineChartProPanel({ selectedPair }) {
-  const { base } = useParams(); // e.g., { base: 'BTC' }
+  const { base } = useParams();
   const [interval] = useState('5m');
-  const [pair, setPair] = useState(selectedPair || base || 'BTC'); // <-- make pair stateful
+  const [pair, setPair] = useState(selectedPair || base || 'BTC');
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
-  // Update pair when selectedPair or base changes
+  // NEW: State for last price
+  const [lastPrice, setLastPrice] = useState(null);
+
   useEffect(() => {
     setPair(selectedPair || base || 'BTC');
   }, [selectedPair, base]);
@@ -154,6 +159,12 @@ export default function KlineChartProPanel({ selectedPair }) {
       });
     });
 
+    // Subscribe to live updates and update lastPrice
+    const handleBar = (bar, isHistory) => {
+      if (!isHistory) setLastPrice(bar.close);
+    };
+    feed.subscribe(handleBar);
+
     return () => {
       isMounted = false;
       if (
@@ -163,15 +174,16 @@ export default function KlineChartProPanel({ selectedPair }) {
         chartInstanceRef.current.dispose();
         chartInstanceRef.current = null;
       }
-      feed.unsubscribe();
+      feed.destroy();
     };
   }, [interval, pair]);
 
-
   return (
     <div>
-      {/* Example infobar for changing pair */}
-      {/* <Infobar onPairChange={handlePairChange} /> */}
+      <div>
+        <strong>Last live price:</strong>{' '}
+        {lastPrice !== null ? lastPrice : 'Waiting for update...'}
+      </div>
       <div
         ref={chartRef}
         style={{
