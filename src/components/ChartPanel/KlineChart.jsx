@@ -6,47 +6,49 @@ const REST_URL = (pair, interval) =>
 const WS_URL = (pair, interval) =>
   `wss://stream.binance.com:9443/ws/${pair.toLowerCase()}usdt@kline_${interval}`;
 
+
+
 class BinanceFeed {
   constructor(pair) {
     this.pair = pair;
     this.subscribers = [];
     this.history = [];
     this.ws = null;
+    this.shouldReconnect = true;
   }
 
-  async getHistoryKLineData(symbol, period, from, to) {
-    const url = REST_URL(this.pair, period.text);
-    const res = await fetch(url);
-    const data = await res.json();
-    this.history = data.map(k => ({
-      timestamp: k[0],
-      open: +k[1],
-      high: +k[2],
-      low: +k[3],
-      close: +k[4],
-      volume: +k[5],
-    }));
-    this.initWs(period.text);
-    return this.history;
-  }
-
-  subscribe(symbol, period, callback) {
-    this.subscribers.push(callback);
-    // Only send history on subscribe
-    if (this.history.length) {
-      callback(this.history, true);
+  subscribe(cb) {
+    if (typeof cb === 'function') {
+      this.subscribers.push(cb);
+      if (this.history.length > 0) {
+        cb(this.history[this.history.length - 1], true);
+      }
     }
   }
 
-  unsubscribe() {
+  unsubscribe(cb) {
+    if (typeof cb === 'function') {
+      this.subscribers = this.subscribers.filter(sub => sub !== cb);
+    }
+  }
+
+  // Call this on React cleanup to stop everything
+  destroy() {
+    this.shouldReconnect = false;
+    if (this.ws) {
+      this.ws.onclose = null;
+      this.ws.close();
+      this.ws = null;
+    }
     this.subscribers = [];
-    if (this.ws) this.ws.close();
   }
 
   initWs(interval) {
     if (this.ws) {
+      this.ws.onclose = null;
       this.ws.close();
     }
+    this.shouldReconnect = true;
     this.ws = new WebSocket(WS_URL(this.pair, interval));
     this.ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
@@ -69,22 +71,49 @@ class BinanceFeed {
         h.push(bar);
         if (h.length > 500) h.shift();
       }
-      // Send ONLY the latest bar, and as a single object, not array, and isHistory=false!
-      this.subscribers.forEach(cb => cb(bar, false));
+      // Only call function subscribers
+      this.subscribers.forEach(cb => {
+        if (typeof cb === 'function') cb(bar, false);
+      });
     };
 
-    this.ws.onclose = () => setTimeout(() => this.initWs(interval), 1000);
+    this.ws.onclose = () => {
+      if (this.shouldReconnect) {
+        setTimeout(() => this.initWs(interval), 1000);
+      }
+    };
     this.ws.onerror = () => this.ws.close();
+  }
+
+  async getHistoryKLineData(symbol, period) {
+    const res = await fetch(REST_URL(this.pair, period.text));
+    const data = await res.json();
+    this.history = data.map(d => ({
+      timestamp: d[0],
+      open: +d[1],
+      high: +d[2],
+      low: +d[3],
+      close: +d[4],
+      volume: +d[5],
+    }));
+    this.initWs(period.text);
+    return this.history;
   }
 }
 
 
+
 export default function KlineChartProPanel({ selectedPair }) {
   const { base } = useParams(); // e.g., { base: 'BTC' }
-  const [interval, setInterval] = useState('5m');
-  const [pair, setPair] = useState(selectedPair || base || 'BTC'); // Default to BTC if not set
+  const [interval] = useState('5m');
+  const [pair, setPair] = useState(selectedPair || base || 'BTC'); // <-- make pair stateful
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
+
+  // Update pair when selectedPair or base changes
+  useEffect(() => {
+    setPair(selectedPair || base || 'BTC');
+  }, [selectedPair, base]);
 
   useEffect(() => {
     let isMounted = true;
@@ -96,7 +125,11 @@ export default function KlineChartProPanel({ selectedPair }) {
       if (!isMounted) return;
       import('https://cdn.skypack.dev/@klinecharts/pro').then(kline => {
         if (!isMounted) return;
-        chartInstanceRef.current?.dispose();
+
+        // Clear the chart container before creating a new chart
+        if (chartRef.current) {
+          chartRef.current.innerHTML = '';
+        }
 
         chartInstanceRef.current = new kline.KLineChartPro({
           container: chartRef.current,
@@ -123,15 +156,17 @@ export default function KlineChartProPanel({ selectedPair }) {
 
     return () => {
       isMounted = false;
-      chartInstanceRef.current?.dispose();
+      if (
+        chartInstanceRef.current &&
+        typeof chartInstanceRef.current.dispose === 'function'
+      ) {
+        chartInstanceRef.current.dispose();
+        chartInstanceRef.current = null;
+      }
       feed.unsubscribe();
     };
   }, [interval, pair]);
 
-  // Example: update pair from infobar
-  const handlePairChange = (newPair) => {
-    setPair(newPair);
-  };
 
   return (
     <div>
