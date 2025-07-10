@@ -38,7 +38,9 @@
   background-color: #161A2C;
 }
 
-
+.symbol {
+  display: none !important;
+}
 
 
 

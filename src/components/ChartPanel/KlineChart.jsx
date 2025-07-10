@@ -71,7 +71,7 @@ class BinanceFeed {
     this.ws.onerror = () => this.ws.close();
   }
 
-   async getHistoryKLineData(symbol, period, from, to) {
+  async getHistoryKLineData(symbol, period, from, to) {
     const res = await fetch(REST_URL(this.pair, period.text));
     const data = await res.json();
     this.history = data.map(d => ({
@@ -103,18 +103,12 @@ class BinanceFeed {
   }
 }
 
-
-// ...existing imports and BinanceFeed...
-
 export default function KlineChartProPanel({ selectedPair }) {
   const { base } = useParams();
   const [interval] = useState('5m');
   const [pair, setPair] = useState(selectedPair || base || 'BTC');
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
-
-  // NEW: State for last price
-  const [lastPrice, setLastPrice] = useState(null);
 
   useEffect(() => {
     setPair(selectedPair || base || 'BTC');
@@ -139,6 +133,32 @@ export default function KlineChartProPanel({ selectedPair }) {
         chartInstanceRef.current = new kline.KLineChartPro({
           container: chartRef.current,
           locale: 'en-US',
+          formatter: {
+            formatDate: (timestamp, format, type) => {
+              const options = (type === 'time')
+                ? { hour: '2-digit', minute: '2-digit', hour12: false }
+                : { year: 'numeric', month: '2-digit', day: '2-digit' };
+              return new Date(timestamp).toLocaleString('en-US', options);
+            }
+          },
+          periods: [
+            { multiplier: 1, timespan: 'minute', text: '1m' },
+            { multiplier: 5, timespan: 'minute', text: '5m' },
+            //{ multiplier: 15, timespan: 'minute', text: '15m' },
+            { multiplier: 30, timespan: 'minute', text: '30m' },
+            { multiplier: 1, timespan: 'hour', text: '1h' },
+            //{ multiplier: 2, timespan: 'hour', text: '2h' },
+            { multiplier: 4, timespan: 'hour', text: '4h' },
+            //{ multiplier: 6, timespan: 'hour', text: '6h' },
+            { multiplier: 8, timespan: 'hour', text: '8h' },
+            //{ multiplier: 12, timespan: 'hour', text: '12h' },
+            //{ multiplier: 1, timespan: 'day', text: '1d' },
+            //{ multiplier: 3, timespan: 'day', text: '3d' },
+            //{ multiplier: 1, timespan: 'week', text: '1w' },
+            { multiplier: 1, timespan: 'month', text: '1M' },
+          ],
+          period: { multiplier: 5, timespan: 'minute', text: '5m' }, // default selection
+          datafeed: feed,
           symbol: {
             shortName: `${pair.toUpperCase()}/USDT`,
             ticker: symbol,
@@ -159,11 +179,8 @@ export default function KlineChartProPanel({ selectedPair }) {
       });
     });
 
-    // Subscribe to live updates and update lastPrice
-    const handleBar = (bar, isHistory) => {
-      if (!isHistory) setLastPrice(bar.close);
-    };
-    feed.subscribe(handleBar);
+    // No need to subscribe to live updates for lastPrice
+    feed.subscribe(() => { });
 
     return () => {
       isMounted = false;
@@ -180,10 +197,6 @@ export default function KlineChartProPanel({ selectedPair }) {
 
   return (
     <div>
-      <div>
-        <strong>Last live price:</strong>{' '}
-        {lastPrice !== null ? lastPrice : 'Waiting for update...'}
-      </div>
       <div
         ref={chartRef}
         style={{
