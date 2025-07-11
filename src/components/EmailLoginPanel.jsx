@@ -118,8 +118,8 @@ export default function EmailLoginPanel({
         try {
             const result = await login(username, password);
             if (result.success) {
-                setResponseData({ msg: "Logged in successfully", detail: result.token });
                 localStorage.setItem("username", username);
+                setResponseData({ msg: "Logged in successfully", detail: username });
                 if (typeof onLoginSuccess === "function") {
                     onLoginSuccess(result.token, username);
                 }
@@ -330,7 +330,10 @@ export default function EmailLoginPanel({
                 </div>
             )}
             {token && (
-                <div className="mt-4 flex gap-2">
+                <div className="mt-4 flex gap-2 items-center">
+                    <span className="text-white bg-primary2 px-4 py-2 rounded font-medium">
+                        {localStorage.getItem("username") || "User"}
+                    </span>
                     <button
                         onClick={logoutUser}
                         className="bg-warningcolor px-4 py-2 rounded font-medium hover:bg-opacity-80"

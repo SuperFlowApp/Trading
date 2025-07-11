@@ -98,6 +98,11 @@ function AuthPanel({ onLoginSuccess, onClose }) {
     }
   };
 
+  const handleEmailLoginSuccess = (token, username) => {
+    localStorage.setItem("username", username);
+    if (typeof onClose === "function") onClose(); // Close panel after login
+  };
+
   // --- UI ---
   return (
     <div className="bg-backgroundlight text-white px-8 py-12 rounded-lg w-full max-w-md mx-auto space-y-4 border border-secondary2 relative">
@@ -225,7 +230,7 @@ function AuthPanel({ onLoginSuccess, onClose }) {
             setConnectionMethod(null);
             setIsSignup(false);
           }}
-          onLoginSuccess={onLoginSuccess}
+          onLoginSuccess={handleEmailLoginSuccess}
           isSignup={isSignup}
           setIsSignup={setIsSignup}
           responseData={responseData}           // <-- Pass this
