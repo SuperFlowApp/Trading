@@ -169,7 +169,7 @@ function Navbar() {
               </button>
               {dropdownOpen && (
                 <div
-                  className="absolute right-0 mt-0 w-20 bg-secondary2 rounded shadow-lg z-50"
+                  className="absolute right-0 mt-0 w-26 bg-secondary2 rounded shadow-lg z-50"
                   style={{ top: "100%" }}
                 >
                   <button
