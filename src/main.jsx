@@ -63,9 +63,9 @@ function MainApp() {
           <div className="relative w-screen h-auto overflow-visible">
             <div className="flex flex-1 p-2 gap-2">
               {/* TradingViewChart/Infobar */}
-              <div className="flex flex-col h-full gap-2 bg-transparent w-full min-w-0 ">
+              <div className="flex flex-col h-full gap-2 bg-transparent w-full ">
                 <div className="flex">
-                  <div className="mr-2  flex-1 min-w-0 overflow-hidden">
+                  <div className="mr-2  flex-1 overflow-hidden">
                     <div className="bg-backgrounddark rounded-md overflow-visible mb-2">
                       <Infobar />
                     </div>
@@ -74,7 +74,7 @@ function MainApp() {
                       <KlineChartProPanel  /> {/* Add KlineChart here */}
                     </div>
                   </div>
-                  <div className="flex flex-col bg-backgrounddark  rounded-md min-w-0 overflow-hidden w-[400px]">
+                  <div className="flex flex-col bg-backgrounddark rounded-md overflow-hidden w-[400px]">
                     {/* Tab Selector */}
                     <div className="flex relative">
                       <button

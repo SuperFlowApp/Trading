@@ -84,7 +84,7 @@ const useLocalhostOrderBook = (symbol = 'btcusdt') => {
 };
 
 // Memoized Row for per-row update
-const Row = memo(({ size, price, total, progress, color, onSelect, isNew, selectedCurrency, fontStyle }) => {
+const Row = memo(({ size, price, total, progress, color, onSelect, isNew, selectedCurrency, fontStyle, textAlign }) => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -103,6 +103,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
   };
 
   const textColor = color === 'green' ? 'text-primary2' : 'text-primary1';
+  const alignClass = textAlign === "right" ? "text-right" : "text-left";
   const rowClasses = `relative flex justify-between w-full py-[2px] px-2 text-xs transition-colors cursor-pointer ${isBlinking
     ? color === 'red'
       ? 'bg-primary1/40'
@@ -122,30 +123,21 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
       />
       <div className={rowClasses} style={fontStyle}>
         {/* Price */}
-        <div className={`font-bold text-[15px] text-left w-1/4 ${textColor}`}>
+        <div className={`font-medium text-[14px] w-1/4 ${textColor} text-left`}>
           {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
         {/* Size */}
-        {selectedCurrency === 'BTC' ? (
-          <div className="text-[15px] text-left w-1/4">
-            {size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
-          </div>
-        ) : (
-          <div className="text-[15px] text-left w-1/4">
-            {(price * size).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
-          </div>
-        )}
+        <div className={`text-[15px] w-1/4 ${textAlign === "right" ? "text-right" : "text-left"}`}>
+          {selectedCurrency === 'BTC'
+            ? size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })
+            : (price * size).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+        </div>
         {/* Total */}
-        {selectedCurrency === 'BTC' ? (
-          <div className="text-[15px] text-left w-1/4">
-            {total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
-          </div>
-        ) : (
-          <div className="text-[15px] text-left w-1/4">
-            {(price * total).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
-          </div>
-        )}
-        {/* Hide the other columns */}
+        <div className={`text-[15px] w-1/4 ${textAlign === "right" ? "text-right" : "text-left"}`}>
+          {selectedCurrency === 'BTC'
+            ? total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })
+            : (price * total).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+        </div>
       </div>
     </li>
   );
@@ -245,8 +237,8 @@ const OrderBook = ({
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
       <div className="font-normal flex justify-between text-secondary1 px-2 pb-3 font-semibold text-xs">
         <div className="text-left w-1/4">Price</div>
-        <div className="text-left w-1/4">Size ({selectedCurrency})</div>
-        <div className="text-left w-1/4">Total ({selectedCurrency})</div>
+        <div className="text-right w-1/4">Size ({selectedCurrency})</div>
+        <div className="text-right w-1/4">Total ({selectedCurrency})</div>
       </div>
 
       {/* Ask Section */}
@@ -260,6 +252,7 @@ const OrderBook = ({
             onSelect={handleRowSelect}
             selectedCurrency={selectedCurrency}
             fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
+            textAlign="right" // Pass alignment prop
           />
         ))}
       </ul>
@@ -284,6 +277,7 @@ const OrderBook = ({
             onSelect={handleRowSelect}
             selectedCurrency={selectedCurrency}
             fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
+            textAlign="right" // Pass alignment prop
 
           />
         ))}
