@@ -17,6 +17,7 @@
     "apexcharts": "^4.7.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
+    "ethers": "^6.15.0",
     "express": "^5.1.0",
     "klinecharts": "^9.5.0",
     "lightweight-charts": "^5.0.8",
@@ -30,7 +31,8 @@
     "reconnecting-websocket": "^4.4.0",
     "trading-vue-js": "^1.0.2",
     "vue": "^2.7.16",
-    "vue-custom-element": "^3.3.0"
+    "vue-custom-element": "^3.3.0",
+    "web3modal": "^1.9.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

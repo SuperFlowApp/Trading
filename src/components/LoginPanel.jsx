@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/Authentication";
-import metamaskLogo from "/assets/metamask.svg";
-import defaultWalletIcon from "/assets/defaultWallet.svg";
 import EmailLoginPanel from "./EmailLoginPanel";
 
 function getDetectedWallet() {
   if (typeof window !== "undefined" && window.ethereum && window.ethereum.isMetaMask) {
-    return { name: "MetaMask", icon: metamaskLogo };
+    return { name: "MetaMask", icon: "/assets/metamask.svg" };
   }
   return null;
 }
@@ -21,9 +19,10 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   const [signature, setSignature] = useState("");
   const [walletError, setWalletError] = useState("");
   const [isSignup, setIsSignup] = useState(false);
+  const [responseData, setResponseData] = useState(null); // <-- Add this
 
   // Use AuthContext
-  const { token, logout, setWalletAddress: setGlobalWalletAddress } = useAuth(); // Add setWalletAddress to context
+  const { token, logout } = useAuth();
 
   const inactivityTimeout = useRef(null);
 
@@ -58,51 +57,6 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   useEffect(() => {
     setDetectedWallet(getDetectedWallet());
   }, []);
-
-  // Check wallet connection on mount and on account change
-  useEffect(() => {
-    async function checkWalletConnection() {
-      if (window.ethereum && window.ethereum.isMetaMask) {
-        try {
-          const accounts = await window.ethereum.request({ method: "eth_accounts" });
-          if (accounts && accounts[0]) {
-            setWalletAddress(accounts[0]);
-            setGlobalWalletAddress && setGlobalWalletAddress(accounts[0]); // Update global context
-            if (typeof onLoginSuccess === "function") {
-              onLoginSuccess(accounts[0]);
-            }
-          }
-        } catch (err) {
-          setWalletAddress("");
-          setGlobalWalletAddress && setGlobalWalletAddress("");
-        }
-      }
-    }
-
-    checkWalletConnection();
-
-    // Listen for account changes
-    if (window.ethereum) {
-      window.ethereum.on("accountsChanged", (accounts) => {
-        if (accounts.length > 0) {
-          setWalletAddress(accounts[0]);
-          setGlobalWalletAddress && setGlobalWalletAddress(accounts[0]);
-          if (typeof onLoginSuccess === "function") {
-            onLoginSuccess(accounts[0]);
-          }
-        } else {
-          setWalletAddress("");
-          setGlobalWalletAddress && setGlobalWalletAddress("");
-        }
-      });
-    }
-
-    return () => {
-      if (window.ethereum && window.ethereum.removeListener) {
-        window.ethereum.removeListener("accountsChanged", () => {});
-      }
-    };
-  }, [onLoginSuccess, setGlobalWalletAddress]);
 
   const logoutUser = () => {
     logout();
@@ -224,7 +178,7 @@ function AuthPanel({ onLoginSuccess, onClose }) {
               </>
             ) : (
               <>
-                <img src={defaultWalletIcon} alt="Default wallet" className="w-5 h-5" />
+                <img src="/assets/defaultWallet.svg" alt="Default wallet" className="w-5 h-5" />
                 Default wallet
               </>
             )}
@@ -269,11 +223,13 @@ function AuthPanel({ onLoginSuccess, onClose }) {
         <EmailLoginPanel
           onBack={() => {
             setConnectionMethod(null);
-            setIsSignup(false); // <-- Always reset to login mode
+            setIsSignup(false);
           }}
           onLoginSuccess={onLoginSuccess}
           isSignup={isSignup}
           setIsSignup={setIsSignup}
+          responseData={responseData}           // <-- Pass this
+          setResponseData={setResponseData}     // <-- Pass this
         />
       )}
 

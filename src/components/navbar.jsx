@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/Authentication"; // <-- Import useAuth
 import AuthPanel from "./LoginPanel";
 import ManageAccountModal from "./ManageAccountModal";
+import { ethers } from "ethers";
+import Web3Modal from "web3modal";
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -33,60 +35,12 @@ function Navbar() {
   const { token: accessToken, logout, token } = useAuth();
   const username = localStorage.getItem("username") || "";
 
-  // --- Wallet connection check on mount ---
-  useEffect(() => {
-    async function checkWallet() {
-      // Try to get from localStorage first
-      let stored = localStorage.getItem("walletAddress");
-      if (stored) {
-        setWalletAddress(stored);
-      }
-      // Check MetaMask connection
-      if (window.ethereum && window.ethereum.isMetaMask) {
-        try {
-          const accounts = await window.ethereum.request({ method: "eth_accounts" });
-          if (accounts && accounts[0]) {
-            setWalletAddress(accounts[0]);
-            localStorage.setItem("walletAddress", accounts[0]);
-          } else {
-            setWalletAddress("");
-            localStorage.removeItem("walletAddress");
-          }
-        } catch (err) {
-          setWalletAddress("");
-          localStorage.removeItem("walletAddress");
-        }
-      }
-    }
-    checkWallet();
-
-    // Listen for account changes
-    if (window.ethereum && window.ethereum.on) {
-      const handleAccountsChanged = (accounts) => {
-        if (accounts.length > 0) {
-          setWalletAddress(accounts[0]);
-          localStorage.setItem("walletAddress", accounts[0]);
-        } else {
-          setWalletAddress("");
-          localStorage.removeItem("walletAddress");
-        }
-      };
-      window.ethereum.on("accountsChanged", handleAccountsChanged);
-      return () => {
-        window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
-      };
-    }
-  }, []);
-
   // Handle logout using AuthContext
   const handleLogout = () => {
     logout(); // <-- Use AuthContext logout
     setDropdownOpen(false);
     setShowManageAccount(false);
     setShowLogin(false);
-    setWalletAddress("");
-    localStorage.removeItem("walletAddress");
-    window.ethereum?.removeAllListeners?.();
 
   };
 
@@ -142,6 +96,28 @@ function Navbar() {
   // Helper to shorten wallet address
   const shortenAddress = (addr) =>
     addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
+
+  // WalletConnect logic
+  const [provider, setProvider] = useState(null);
+  const [address, setAddress] = useState("");
+
+  const connectWallet = async () => {
+    const web3Modal = new Web3Modal();
+    const instance = await web3Modal.connect();
+    const ethersProvider = new ethers.providers.Web3Provider(instance);
+    setProvider(ethersProvider);
+    const signer = ethersProvider.getSigner();
+    setAddress(await signer.getAddress());
+  };
+
+  const disconnectWallet = async () => {
+    setProvider(null);
+    setAddress("");
+    // Clear cached provider so web3modal pops up next time
+    if (window.localStorage.getItem("WEB3_CONNECT_CACHED_PROVIDER")) {
+      window.localStorage.removeItem("WEB3_CONNECT_CACHED_PROVIDER");
+    }
+  };
 
   return (
     <>
