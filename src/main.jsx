@@ -63,7 +63,7 @@ function MainApp() {
           <div className="relative w-screen h-auto overflow-visible">
             <div className="flex flex-1 p-2 gap-2">
               {/* TradingViewChart/Infobar */}
-              <div className="flex flex-col h-full gap-2 bg-transparent basis-[80%] min-w-0 ">
+              <div className="flex flex-col h-full gap-2 bg-transparent w-full min-w-0 ">
                 <div className="flex">
                   <div className="mr-2  flex-1 min-w-0 overflow-hidden">
                     <div className="bg-backgrounddark rounded-md overflow-visible mb-2">
@@ -74,7 +74,7 @@ function MainApp() {
                       <KlineChartProPanel  /> {/* Add KlineChart here */}
                     </div>
                   </div>
-                  <div className="flex flex-col bg-backgrounddark  rounded-md min-w-0 overflow-hidden basis-[25%]">
+                  <div className="flex flex-col bg-backgrounddark  rounded-md min-w-0 overflow-hidden w-[400px]">
                     {/* Tab Selector */}
                     <div className="flex relative">
                       <button
@@ -118,7 +118,7 @@ function MainApp() {
                 </section>
               </div>
               {/* PositionsPanel */}
-              <div className="flex flex-col basis-[20%] gap-2">
+              <div className="flex flex-col w-[360px] gap-2">
                 <div className="flex flex-col bg-backgrounddark rounded-md min-w-0 overflow-hidden">
                   <LimitOrderForm
                     priceMidpoint={priceMidpoint}
@@ -127,7 +127,7 @@ function MainApp() {
                   />
                 </div>
                 {/* Account Information */}
-                <div className="flex flex-col bg-backgrounddark rounded-md  p-3 min-w-0 overflow-hidden">
+                <div className="flex flex-col bg-backgrounddark rounded-md  p-2 min-w-0 overflow-hidden">
                   <AccountInfoPanel />
                 </div>
               </div>

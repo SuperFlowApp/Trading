@@ -19,7 +19,7 @@ function LeverageButton() {
 
   const handleClick = async () => {
     if (!token) return; // Don't proceed without token
-    
+
     const newIndex = (index + 1) % leverageSteps.length
     setIndex(newIndex)
 
@@ -38,11 +38,11 @@ function LeverageButton() {
         },
         body: JSON.stringify(requestBody),
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to set leverage');
       }
-      
+
       const data = await response.json()
       console.log('Leverage set successfully:', data);
     } catch (err) {
@@ -175,13 +175,13 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
       } else {
         errorData = await response.text();
       }
-      
+
       if (!response.ok) {
         // Use error message from response if available
-        const errorMessage = errorData && typeof errorData === 'object' && errorData.message 
-          ? errorData.message 
+        const errorMessage = errorData && typeof errorData === 'object' && errorData.message
+          ? errorData.message
           : typeof errorData === 'string' ? errorData : 'Failed to place order';
-          
+
         throw new Error(errorMessage);
       }
 
@@ -269,7 +269,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
         const calculatedAmount = (sliderValue / 100) * parseFloat(balanceFree);
         setAmount(calculatedAmount.toFixed(2)); // Fewer decimals for quote currency like USDT
       }
-      
+
       // Reset input source after processing
       setInputSource(null);
     }
@@ -305,13 +305,13 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
   // Add this useEffect to handle currency switching and maintain equivalent values
   useEffect(() => {
     if (!amount) return;
-    
+
     const currentAmount = parseFloat(amount);
     // Use price if available (Limit/Scale mode), otherwise use priceMidpoint (Market mode)
     const currentPrice = parseFloat(price) || priceMidpoint;
-    
+
     if (isNaN(currentAmount) || !currentPrice || isNaN(currentPrice)) return;
-    
+
     // When switching from base to quote, convert amount to quote value
     if (selectedDropdownValue === pairDetails.quote) {
       const quoteValue = currentAmount * currentPrice;
@@ -325,7 +325,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
   }, [selectedDropdownValue]); // Only trigger when currency selection changes
 
   return (
-    <div className="w-full text-white flex flex-col gap-4">
+    <div className="w-full text-white flex flex-col gap-3">
       {/* Head Tabs */}
       <div className="flex justify-between items-center text-sm font-semibold">
         <button
@@ -387,16 +387,16 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
       </div>
 
       {/* Conditionally render the Price field */}
-      <div className="px-2 flex flex-col gap-3 mt-3 text-sm">
+      <div className="px-2 flex flex-col text-sm">
         {market !== 'market' && (
           <>
-            <label className="text-white">Price</label>
+            <label className=" pl-1 text-white pt-2">Price</label>
             <div className="gap-2 w-full justify-between items-center">
               <div className="w-full relative">
                 <input
                   type="number"
                   placeholder="$0.0"
-                  className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 "
+                  className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-1 rounded-md text-sm placeholder-white/50 "
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                 />
@@ -418,19 +418,19 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
         {/* Conditionally render the Amount field */}
         {market !== '' && (
           <>
-            <label className="text-white">Size</label>
+            <label className="pt-2 pl-1 text-white">Size</label>
             <div className="w-full relative">
               <input
                 type="number"
                 placeholder="0.0"
-                className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-2 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
+                className="bg-backgrounddark border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 w-full text-white p-1 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
                 value={amount}
                 onChange={handleAmountChange}
               />
               {/* Selecting currency */}
-              <div className="bg-backgrounddark absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer">
+              <div className=" absolute right-0 top-1/2 transform -translate-y-1/2 px-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer">
                 <button
-                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.base ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary1 hover:text-white'}`}
+                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.base ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary2 hover:text-white'}`}
                   onClick={() => {
                     if (selectedDropdownValue !== pairDetails.base) {
                       setSelectedDropdownValue(pairDetails.base);
@@ -440,7 +440,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
                   {pairDetails.base}
                 </button>
                 <button
-                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.quote ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary1 hover:text-white'}`}
+                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.quote ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary2 hover:text-white'}`}
                   onClick={() => {
                     if (selectedDropdownValue !== pairDetails.quote) {
                       setSelectedDropdownValue(pairDetails.quote);
@@ -457,7 +457,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
       </div>
 
       {/* --- AmountSlider UI moved here --- */}
-      <div className="flex items-center gap-3 mt-3 px-4">
+      <div className="flex items-center gap-3 my-1 px-4">
         {/* Slider markers */}
         <div className="relative w-full">
           {/* Circles at 25%, 50%, 75%, 100% */}
@@ -516,7 +516,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
 
       {/* Place Order Button */}
       <button
-        className={`mx-2 mt-4 py-2 rounded-md font-semibold text-lg transition-colors border-2 border-transparent ${side === 'buy'
+        className={`mx-2 mt-8 rounded-md font-semibold text-lg transition-colors border-2 border-transparent ${side === 'buy'
           ? 'bg-primary2 text-black hover:bg-primary2/80'
           : 'bg-primary1 text-black hover:bg-primary1/80'
           } ${blinkClass}`} // <-- Add blinkClass here
@@ -538,31 +538,31 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
       </div>
 
       {/* Order Information */}
-      <div className="px-4 mt-4">
-        <div className="border-t border-secondary2 p-3 text-xs flex flex-col gap-2">
+      <div className="px-2 mt-4">
+        <div className="border-t border-secondary2 py-3 text-xs flex flex-col gap-2">
           <span className="w-full flex justify-between text-white font-semibold">
             Order Value
             <span>
               {amount && (price || priceMidpoint)
                 ? `$${(() => {
-                    const numAmount = parseFloat(amount);
-                    // Use price if available (Limit/Scale mode), otherwise use priceMidpoint (Market mode)
-                    const numPrice = parseFloat(price) || priceMidpoint;
-                    
-                    // If we're in quote currency mode (USDT), the amount IS the order value
-                    if (selectedDropdownValue === pairDetails.quote) {
-                      return numAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    }
-                    // If we're in base currency mode (BTC), multiply by price to get order value
-                    else {
-                      return (numAmount * numPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    }
-                  })()}`
+                  const numAmount = parseFloat(amount);
+                  // Use price if available (Limit/Scale mode), otherwise use priceMidpoint (Market mode)
+                  const numPrice = parseFloat(price) || priceMidpoint;
+
+                  // If we're in quote currency mode (USDT), the amount IS the order value
+                  if (selectedDropdownValue === pairDetails.quote) {
+                    return numAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  }
+                  // If we're in base currency mode (BTC), multiply by price to get order value
+                  else {
+                    return (numAmount * numPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  }
+                })()}`
                 : "--"}
             </span>
           </span>
           <span className="w-full flex justify-between text-white font-semibold">
-            Fees  
+            Fees
             <span>0.0700% / 0.0400%</span>
           </span>
         </div>

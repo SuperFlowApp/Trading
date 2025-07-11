@@ -1,25 +1,6 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { useParams } from 'react-router-dom'; // <-- Add this import
 
-// Utility to merge order book updates into local state
-const mergeOrderBook = (prev, updates, isBid) => {
-  const map = new Map(prev.map(({ price, size }) => [price, size]));
-  updates.forEach(([price, size]) => {
-    price = parseFloat(price);
-    size = parseFloat(size);
-    if (size === 0) {
-      map.delete(price);
-    } else {
-      map.set(price, size);
-    }
-  });
-  // Sort: bids desc, asks asc
-  const sorted = Array.from(map.entries())
-    .map(([price, size]) => ({ price, size }))
-    .sort((a, b) => (isBid ? b.price - a.price : a.price - b.price));
-  return sorted.slice(0, 50); // keep top 50 for performance
-};
-
 // Custom hook for localhost SSE order book
 const useLocalhostOrderBook = (symbol = 'btcusdt') => {
   const [bids, setBids] = useState([]);
@@ -103,7 +84,7 @@ const useLocalhostOrderBook = (symbol = 'btcusdt') => {
 };
 
 // Memoized Row for per-row update
-const Row = memo(({ size, price, total, progress, color, onSelect, isNew, selectedCurrency }) => {
+const Row = memo(({ size, price, total, progress, color, onSelect, isNew, selectedCurrency, fontStyle }) => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -122,7 +103,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
   };
 
   const textColor = color === 'green' ? 'text-primary2' : 'text-primary1';
-  const rowClasses = `relative flex justify-between items-center w-full py-[2px] px-2 text-xs font-medium transition-colors cursor-pointer ${isBlinking
+  const rowClasses = `relative flex justify-between w-full py-[2px] px-2 text-xs transition-colors cursor-pointer ${isBlinking
     ? color === 'red'
       ? 'bg-primary1/40'
       : 'bg-primary2/40'
@@ -139,7 +120,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
           opacity: 0.3,
         }}
       />
-      <div className={rowClasses}>
+      <div className={rowClasses} style={fontStyle}>
         {/* Price */}
         <div className={`font-bold text-[15px] text-left w-1/4 ${textColor}`}>
           {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -278,6 +259,7 @@ const OrderBook = ({
             key={`ask-${row.price}`}
             onSelect={handleRowSelect}
             selectedCurrency={selectedCurrency}
+            fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
           />
         ))}
       </ul>
@@ -301,6 +283,8 @@ const OrderBook = ({
             key={`bid-${row.price}`}
             onSelect={handleRowSelect}
             selectedCurrency={selectedCurrency}
+            fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
+
           />
         ))}
       </ul>

@@ -19,7 +19,7 @@
     "crypto-js": "^4.2.0",
     "ethers": "^6.15.0",
     "express": "^5.1.0",
-    "klinecharts": "^9.5.0",
+    "klinecharts": "^9.8.12",
     "lightweight-charts": "^5.0.8",
     "node-fetch": "^3.3.2",
     "react": "^19.1.0",

@@ -18,31 +18,6 @@
 
 
 
-/* Hide KLineCharts watermark */
-.klinecharts-pro-watermark {
-  display: none !important;
-}
-
-/* Make all KLineCharts Pro UI text white */
-.klinecharts-pro,
-.klinecharts-pro * {
-  color: #8AABB2 !important;
-  fill: #ffffff !important;
-}
-
-.klinecharts-pro-modal .inner {
-  background-color: #02001B;
-}
-
-.klinecharts-pro-indicator-modal-list .title {
-  background-color: #161A2C;
-}
-
-.symbol {
-  display: none !important;
-}
-
-
 
 /* Hide the spinner for input[type="number"] */
 input[type="number"]::-webkit-inner-spin-button,
