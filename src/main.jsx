@@ -11,6 +11,7 @@ import Infobar from './components/ChartPanel/Infobar.jsx';
 import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
 import TradesModal from './components/TradesPanel/AllTradesList.jsx';
 import AccountInfoPanel from './components/PositionsPanel/AccountInfoPanel.jsx';
+import AuthPanel from './components/LoginPanel.jsx'; // Import AuthPanel
 import './index.css';
 
 function MainApp() {
@@ -19,6 +20,7 @@ function MainApp() {
   const [selectedPrice, setSelectedPrice] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState('BTC');
+  const [showLoginPanel, setShowLoginPanel] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -124,6 +126,7 @@ function MainApp() {
                     priceMidpoint={priceMidpoint}
                     selectedPrice={selectedPrice}
                     onCurrencyChange={setSelectedCurrency}
+                    onConnect={() => setShowLoginPanel(true)} // Pass handler
                   />
                 </div>
                 {/* Account Information */}
@@ -131,6 +134,12 @@ function MainApp() {
                   <AccountInfoPanel />
                 </div>
               </div>
+              {/* Show LoginPanel modal */}
+              {showLoginPanel && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                  <AuthPanel onClose={() => setShowLoginPanel(false)} />
+                </div>
+              )}
             </div>
             <footer className=""></footer>
           </div>

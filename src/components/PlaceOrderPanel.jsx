@@ -62,7 +62,7 @@ function LeverageButton() {
 
 
 
-function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
+function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConnect }) {
   const { base } = useParams();
   const navigate = useNavigate();
 
@@ -519,9 +519,17 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange }) {
         className={`mx-2 mt-8 rounded-md font-semibold text-lg transition-colors border-2 border-transparent ${side === 'buy'
           ? 'bg-primary2 text-black hover:bg-primary2/80'
           : 'bg-primary1 text-black hover:bg-primary1/80'
-          } ${blinkClass}`} // <-- Add blinkClass here
+          } ${blinkClass}`}
         type="button"
-        onClick={placeOrder}
+        onClick={() => {
+          if (!token) {
+            if (typeof onConnect === 'function') {
+              onConnect();
+            }
+            return;
+          }
+          placeOrder();
+        }}
       >
         {!token
           ? "Connect"
