@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/Authentication";
 import EmailLoginPanel from "./EmailLoginPanel";
+import { ethers } from "ethers";
+import Web3Modal from "web3modal";
 
 function getDetectedWallet() {
   if (typeof window !== "undefined" && window.ethereum && window.ethereum.isMetaMask) {
@@ -8,6 +10,10 @@ function getDetectedWallet() {
   }
   return null;
 }
+
+// Helper to shorten wallet address
+export const shortenAddress = (addr) =>
+  addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
 
 function AuthPanel({ onLoginSuccess, onClose }) {
   const [connectionMethod, setConnectionMethod] = useState(null); // "email" | "metamask" | null
@@ -19,7 +25,11 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   const [signature, setSignature] = useState("");
   const [walletError, setWalletError] = useState("");
   const [isSignup, setIsSignup] = useState(false);
-  const [responseData, setResponseData] = useState(null); // <-- Add this
+  const [responseData, setResponseData] = useState(null);
+  
+  // Web3 wallet states
+  const [provider, setProvider] = useState(null);
+  const [address, setAddress] = useState("");
 
   // Use AuthContext
   const { token, logout } = useAuth();
@@ -58,9 +68,67 @@ function AuthPanel({ onLoginSuccess, onClose }) {
     setDetectedWallet(getDetectedWallet());
   }, []);
 
+  // Connect wallet using Web3Modal
+  const connectWallet = async () => {
+    try {
+      const web3Modal = new Web3Modal();
+      const instance = await web3Modal.connect();
+      const ethersProvider = new ethers.providers.Web3Provider(instance);
+      setProvider(ethersProvider);
+      const signer = ethersProvider.getSigner();
+      const userAddress = await signer.getAddress();
+      setAddress(userAddress);
+      setWalletAddress(userAddress);
+      
+      // Notify parent component about successful connection
+      if (typeof onLoginSuccess === "function") {
+        onLoginSuccess(userAddress);
+      }
+      
+      // Close the modal after successful connection
+      if (typeof onClose === "function") {
+        onClose();
+      }
+      
+      return { success: true, address: userAddress };
+    } catch (error) {
+      setWalletError("Failed to connect wallet: " + error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Disconnect wallet
+  const disconnectWallet = async () => {
+    setProvider(null);
+    setAddress("");
+    setWalletAddress("");
+    
+    // Clear cached provider so web3modal pops up next time
+    if (window.localStorage.getItem("WEB3_CONNECT_CACHED_PROVIDER")) {
+      window.localStorage.removeItem("WEB3_CONNECT_CACHED_PROVIDER");
+    }
+    
+    // Attempt to revoke permissions (if supported by wallet)
+    if (window.ethereum && window.ethereum.request) {
+      try {
+        await window.ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [{ eth_accounts: {} }],
+        });
+      } catch (e) {
+        // Ignore errors or handle gracefully
+      }
+    }
+    
+    localStorage.removeItem("walletAddress");
+    return { success: true };
+  };
+
+  // Logout user from auth context
   const logoutUser = () => {
     logout();
-    localStorage.removeItem("username"); // Remove username on logout
+    localStorage.removeItem("username");
+    disconnectWallet(); // Also disconnect wallet when logging out
   };
 
   // --- Accept terms signature handler ---
@@ -189,14 +257,14 @@ function AuthPanel({ onLoginSuccess, onClose }) {
             )}
           </button>
 
-          {/* Additional wallets */}
+          {/* Additional wallets - Web3Modal button */}
           <button
             className="bg-secondary2 text-white px-4 py-2 rounded font-medium hover:bg-opacity-80 flex items-center justify-center gap-2"
             type="button"
-            onClick={() => setWalletError("WalletConnect integration coming soon.")}
+            onClick={connectWallet}
           >
             <img src="/assets/WalletConnect.svg" alt="WalletConnect" className="w-6 h-6" />
-            WalletConnect
+            Connect with Web3Modal
           </button>
           <button
             className="bg-secondary2 text-white px-4 py-2 rounded font-medium hover:bg-opacity-80 flex items-center justify-center gap-2"
@@ -233,8 +301,8 @@ function AuthPanel({ onLoginSuccess, onClose }) {
           onLoginSuccess={handleEmailLoginSuccess}
           isSignup={isSignup}
           setIsSignup={setIsSignup}
-          responseData={responseData}           // <-- Pass this
-          setResponseData={setResponseData}     // <-- Pass this
+          responseData={responseData}
+          setResponseData={setResponseData}
         />
       )}
 
@@ -304,4 +372,5 @@ function AuthPanel({ onLoginSuccess, onClose }) {
   );
 }
 
+// Export functions for external use
 export default AuthPanel;

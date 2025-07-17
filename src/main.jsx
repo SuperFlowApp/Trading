@@ -12,7 +12,22 @@ import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
 import TradesModal from './components/TradesPanel/AllTradesList.jsx';
 import AccountInfoPanel from './components/PositionsPanel/AccountInfoPanel.jsx';
 import AuthPanel from './components/LoginPanel.jsx'; // Import AuthPanel
+import { WagmiProvider } from 'wagmi';
+import { createConfig, http } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // <-- Add this import
 import './index.css';
+
+// Create wagmi config (customize for your chains/providers)
+const config = createConfig({
+  chains: [mainnet],
+  transports: {
+    [mainnet.id]: http(),
+  },
+});
+
+// Create a QueryClient instance
+const queryClient = new QueryClient();
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState('OrderBook');
@@ -159,11 +174,15 @@ if (!window._root) {
 window._root.render(
   <StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/BTC" replace />} />
-        <Route path="/:base" element={<MainApp />} />
-        {/* ...other routes */}
-      </Routes>
+      <QueryClientProvider client={queryClient}> {/* <-- Wrap with QueryClientProvider */}
+        <WagmiProvider config={config}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/BTC" replace />} />
+            <Route path="/:base" element={<MainApp />} />
+            {/* ...other routes */}
+          </Routes>
+        </WagmiProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   </StrictMode>
 );
