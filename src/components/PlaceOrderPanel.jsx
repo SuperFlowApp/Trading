@@ -324,6 +324,11 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
 
   return (
     <div className="w-full text-white flex flex-col gap-3">
+
+
+
+
+
       {/* Head Tabs */}
       <div className="flex justify-between items-center text-sm font-semibold">
         <button
@@ -350,6 +355,31 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
       </div>
 
 
+      {/* Head Tabs */}
+      <div className="flex justify-between items-center text-sm font-semibold p-4 gap-2">
+
+        <button
+          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
+        >
+          Cross
+        </button>
+
+        <div
+          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
+        >
+          <LeverageButton />
+        </div>
+
+        <button
+          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
+        >
+          One-way
+        </button>
+
+
+      </div>
+
+
       {/* Side + Leverage */}
       <div className="px-2 flex gap-4 items-center">
         <div className="flex w-full gap-2 bg-backgrounddark border border-secondary2 p-1 rounded-lg">
@@ -373,9 +403,6 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
           </button>
         </div>
 
-        <div className="w-[48px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer">
-          <LeverageButton />
-        </div>
       </div>
       {/* Balance Row */}
       <div className="px-2 font-semibold text-[12px]">
