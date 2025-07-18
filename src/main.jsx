@@ -3,13 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
-import CandleChart from './components/ChartPanel/CandleChart.jsx';
 import KlineChartProPanel  from './components/ChartPanel/KlineChart.jsx'; // Import KlineChart
 import OrderBook from './components/TradesPanel/OrderBook.jsx';
 import LimitOrderForm from './components/PlaceOrderPanel.jsx';
-import Infobar from './components/ChartPanel/Infobar.jsx';
+import Infobar from './components/Infobar.jsx';
 import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
-import TradesModal from './components/TradesPanel/AllTradesList.jsx';
+import TradesModal from './components/TradesPanel/TradesHistory.jsx';
 import AccountInfoPanel from './components/PositionsPanel/AccountInfoPanel.jsx';
 import AuthPanel from './components/LoginPanel.jsx'; // Import AuthPanel
 import { WagmiProvider } from 'wagmi';
@@ -88,7 +87,7 @@ function MainApp() {
                     </div>
                     <div className="bg-backgrounddark rounded-md p-4 h-[300%]">
                       {/* KlineChart */}
-                      <KlineChartProPanel  /> {/* Add KlineChart here */}
+                      <KlineChartProPanel  />
                     </div>
                   </div>
                   <div className="flex flex-col bg-backgrounddark rounded-md overflow-hidden w-[400px]">

@@ -1,7 +1,6 @@
-import { createSlice, current } from '@reduxjs/toolkit';
-import { RootState } from '../../store';
-import { groupByTicketSize } from "../../helpers";
-import { ORDERBOOK_LEVELS } from "../../constants";
+import { useState, useEffect } from 'react';
+import { groupByTicketSize } from "../helpers";
+import { ORDERBOOK_LEVELS } from "../constants";
 
 export interface OrderbookState {
   market: string;
@@ -14,18 +13,9 @@ export interface OrderbookState {
   groupingSize: number;
 }
 
-const initialState: OrderbookState = {
-  market: 'PI_XBTUSD', // PI_ETHUSD
-  rawBids: [],
-  bids: [],
-  maxTotalBids: 0,
-  rawAsks: [],
-  asks: [],
-  maxTotalAsks: 0,
-  groupingSize: 0.5
-};
-
-const removePriceLevel = (price: number, levels: number[][]): number[][] => levels.filter(level => level[0] !== price);
+// Helper functions
+const removePriceLevel = (price: number, levels: number[][]): number[][] => 
+  levels.filter(level => level[0] !== price);
 
 const updatePriceLevel = (updatedLevel: number[], levels: number[][]): number[][] => {
   return levels.map(level => {
@@ -36,7 +26,8 @@ const updatePriceLevel = (updatedLevel: number[], levels: number[][]): number[][
   });
 };
 
-const levelExists = (deltaLevelPrice: number, currentLevels: number[][]): boolean => currentLevels.some(level => level[0] === deltaLevelPrice);
+const levelExists = (deltaLevelPrice: number, currentLevels: number[][]): boolean => 
+  currentLevels.some(level => level[0] === deltaLevelPrice);
 
 const addPriceLevel = (deltaLevel: number[], levels: number[][]): number[][] => {
   return [ ...levels, deltaLevel ];
@@ -50,8 +41,6 @@ const addPriceLevel = (deltaLevel: number[], levels: number[][]): number[][] => 
 
  - The orders returned by the feed are in the format
  of [price, size][].
- * @param currentLevels Existing price levels - `bids` or `asks`
- * @param orders Update of a price level
  */
 const applyDeltas = (currentLevels: number[][], orders: number[][]): number[][] => {
   let updatedLevels: number[][] = currentLevels;
@@ -115,69 +104,113 @@ const getMaxTotalSum = (orders: number[][]): number => {
   return Math.max.apply(Math, totalSums);
 }
 
-export const orderbookSlice = createSlice({
-  name: 'orderbook',
-  initialState,
-  reducers: {
-    addBids: (state, { payload }) => {
-      const currentTicketSize: number = current(state).groupingSize;
+// Custom hook
+export function useOrderbook(initialMarket: string = 'PI_XBTUSD', initialGroupingSize: number = 0.5) {
+  const [state, setState] = useState<OrderbookState>({
+    market: initialMarket,
+    rawBids: [],
+    bids: [],
+    maxTotalBids: 0,
+    rawAsks: [],
+    asks: [],
+    maxTotalAsks: 0,
+    groupingSize: initialGroupingSize
+  });
+
+  const addBids = (payload: number[][]) => {
+    setState(prevState => {
+      const currentTicketSize: number = prevState.groupingSize;
       const groupedCurrentBids: number[][] = groupByTicketSize(payload, currentTicketSize);
       const updatedBids: number[][] = addTotalSums(
         applyDeltas(
-          groupByTicketSize(current(state).rawBids, currentTicketSize),
+          groupByTicketSize(prevState.rawBids, currentTicketSize),
           groupedCurrentBids
         )
       );
 
-      state.maxTotalBids = getMaxTotalSum(updatedBids);
-      state.bids = addDepths(updatedBids, current(state).maxTotalBids);
-    },
-    addAsks: (state, { payload }) => {
-      const currentTicketSize: number = current(state).groupingSize;
+      const maxTotalBids = getMaxTotalSum(updatedBids);
+      const bids = addDepths(updatedBids, maxTotalBids);
+
+      return {
+        ...prevState,
+        maxTotalBids,
+        bids,
+        rawBids: [...prevState.rawBids, ...payload]
+      };
+    });
+  };
+
+  const addAsks = (payload: number[][]) => {
+    setState(prevState => {
+      const currentTicketSize: number = prevState.groupingSize;
       const groupedCurrentAsks: number[][] = groupByTicketSize(payload, currentTicketSize);
       const updatedAsks: number[][] = addTotalSums(
         applyDeltas(
-          groupByTicketSize(current(state).rawAsks, currentTicketSize),
+          groupByTicketSize(prevState.rawAsks, currentTicketSize),
           groupedCurrentAsks
         )
       );
 
-      state.maxTotalAsks = getMaxTotalSum(updatedAsks);
-      state.asks = addDepths(updatedAsks, current(state).maxTotalAsks);
-    },
-    addExistingState: (state, { payload }) => {
+      const maxTotalAsks = getMaxTotalSum(updatedAsks);
+      const asks = addDepths(updatedAsks, maxTotalAsks);
+
+      return {
+        ...prevState,
+        maxTotalAsks,
+        asks,
+        rawAsks: [...prevState.rawAsks, ...payload]
+      };
+    });
+  };
+
+  const addExistingState = (payload: any) => {
+    setState(prevState => {
       const rawBids: number[][] = payload.bids;
       const rawAsks: number[][] = payload.asks;
-      const bids: number[][] = addTotalSums(groupByTicketSize(rawBids, current(state).groupingSize));
-      const asks: number[][] = addTotalSums(groupByTicketSize(rawAsks, current(state).groupingSize));
+      const bids: number[][] = addTotalSums(groupByTicketSize(rawBids, prevState.groupingSize));
+      const asks: number[][] = addTotalSums(groupByTicketSize(rawAsks, prevState.groupingSize));
 
-      state.market = payload['product_id'];
-      state.rawBids = rawBids;
-      state.rawAsks = rawAsks;
-      state.maxTotalBids = getMaxTotalSum(bids);
-      state.maxTotalAsks = getMaxTotalSum(asks);
-      state.bids = addDepths(bids, current(state).maxTotalBids);
-      state.asks = addDepths(asks, current(state).maxTotalAsks);
-    },
-    setGrouping: (state, { payload }) => {
-      state.groupingSize = payload;
-    },
-    clearOrdersState: (state) => {
-      state.bids = [];
-      state.asks = [];
-      state.rawBids = [];
-      state.rawAsks = [];
-      state.maxTotalBids = 0;
-      state.maxTotalAsks = 0;
-    }
-  }
-});
+      const maxTotalBids = getMaxTotalSum(bids);
+      const maxTotalAsks = getMaxTotalSum(asks);
 
-export const { addBids, addAsks, addExistingState, setGrouping, clearOrdersState } = orderbookSlice.actions;
+      return {
+        ...prevState,
+        market: payload['product_id'],
+        rawBids,
+        rawAsks,
+        maxTotalBids,
+        maxTotalAsks,
+        bids: addDepths(bids, maxTotalBids),
+        asks: addDepths(asks, maxTotalAsks)
+      };
+    });
+  };
 
-export const selectBids = (state: RootState): number[][] => state.orderbook.bids;
-export const selectAsks = (state: RootState): number[][] => state.orderbook.asks;
-export const selectGrouping = (state: RootState): number => state.orderbook.groupingSize;
-export const selectMarket = (state: RootState): string => state.orderbook.market;
+  const setGrouping = (size: number) => {
+    setState(prevState => ({
+      ...prevState,
+      groupingSize: size
+    }));
+  };
 
-export default orderbookSlice.reducer;
+  const clearOrdersState = () => {
+    setState(prevState => ({
+      ...prevState,
+      bids: [],
+      asks: [],
+      rawBids: [],
+      rawAsks: [],
+      maxTotalBids: 0,
+      maxTotalAsks: 0
+    }));
+  };
+
+  return {
+    state,
+    addBids,
+    addAsks,
+    addExistingState,
+    setGrouping,
+    clearOrdersState
+  };
+}
