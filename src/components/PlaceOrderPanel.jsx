@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useAuth, useAuthFetch } from '../context/Authentication.jsx';
+import usePanelStore from '../src/store/panelStore.js'; // <-- Add this import
 
 const leverageSteps = [5, 10, 15, 20];
 
@@ -8,7 +9,6 @@ function LeverageButton() {
   const [index, setIndex] = useState(0);
   const { token } = useAuth();
   const { base } = useParams();
-  const navigate = useNavigate();
 
   // If base is missing, show error
   if (!base) {
@@ -62,23 +62,21 @@ function LeverageButton() {
 
 
 
-function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConnect }) {
-  const { base } = useParams();
-  const navigate = useNavigate();
+function LimitOrderForm({ onCurrencyChange, onConnect }) {
+  const selectedPairBase = usePanelStore(s => s.selectedPair);
+  const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
+  const pairDetails = { base: selectedPairBase, quote: 'USDT' };
 
-  // If base is missing, show error
-  if (!base) {
-    return <div className="text-red-400">Invalid pair: No base currency in URL.</div>;
-  }
+  // Use Zustand for selectedCurrency
+  const selectedCurrency = usePanelStore(s => s.selectedCurrency);
+  const setSelectedCurrency = usePanelStore(s => s.setSelectedCurrency);
 
-  const selectedPair = `${base}USDT`; // Always get from URL
-  const pairDetails = { base, quote: 'USDT' }; // always USDT as quote
+  // Use Zustand for priceMidpoint
+  const priceMidpoint = usePanelStore(s => s.priceMidpoint);
 
-  const { token, logout, accountInfo, availableBalance } = useAuth(); // <-- Add availableBalance
-  const authFetch = useAuthFetch();
-
+  // Move this check AFTER all hooks
+  const { token, availableBalance } = useAuth();
   const [balanceTotal, setBalanceTotal] = useState("--");
-  // Use availableBalance from context instead of local state
   const balanceFree = availableBalance ? parseFloat(availableBalance).toFixed(2) : "--";
   const [price, setPrice] = useState(priceMidpoint || '');
   const [amount, setAmount] = useState('');
@@ -87,11 +85,11 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [selectedDropdownValue, setSelectedDropdownValue] = useState(pairDetails.base); // Initialize with the first currency
-  const [sliderValue, setSliderValue] = useState(0); // State for slider value
-  const [blinkClass, setBlinkClass] = useState(""); // <-- Add this state
-  // Add this state to track input source
+  const [sliderValue, setSliderValue] = useState(0);
+  const [blinkClass, setBlinkClass] = useState("");
   const [inputSource, setInputSource] = useState(null);
+
+  const selectedPrice = usePanelStore(s => s.selectedPrice); // <-- Read from Zustand
 
   // Update price when selectedPrice changes
   useEffect(() => {
@@ -111,7 +109,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
       setError('');
       setSuccess('');
       setSliderValue(0); // Reset slider to default value
-      setSelectedDropdownValue(pairDetails.base); // Reset to the first currency
+      setSelectedCurrency(pairDetails.base); // Reset to the first currency
     }
   }, [token]);
 
@@ -256,7 +254,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
     // Only update amount from slider when inputSource is 'slider'
     if (inputSource === 'slider' && sliderValue >= 0) {
       // Calculate based on selected currency
-      if (selectedDropdownValue === pairDetails.base) {
+      if (selectedCurrency === pairDetails.base) {
         // Convert balanceFree (in quote currency) to base currency
         const currentPrice = parseFloat(price) || priceMidpoint;
         if (currentPrice && !isNaN(currentPrice) && !isNaN(parseFloat(balanceFree))) {
@@ -273,7 +271,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
       // Reset input source after processing
       setInputSource(null);
     }
-  }, [sliderValue, balanceFree, selectedDropdownValue, price, priceMidpoint, inputSource]);
+  }, [sliderValue, balanceFree, selectedCurrency, price, priceMidpoint, inputSource]);
 
   // Auto-hide error and success messages after 3 seconds
   useEffect(() => {
@@ -293,14 +291,14 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
   // Notify parent when currency changes
   useEffect(() => {
     if (onCurrencyChange) {
-      onCurrencyChange(selectedDropdownValue);
+      onCurrencyChange(selectedCurrency);
     }
-  }, [selectedDropdownValue, onCurrencyChange]);
+  }, [selectedCurrency, onCurrencyChange]);
 
   // Reset to the first currency when selectedPair (base in URL) changes
   useEffect(() => {
-    setSelectedDropdownValue(pairDetails.base);
-  }, [pairDetails.base]);
+    setSelectedCurrency(pairDetails.base);
+  }, [pairDetails.base, setSelectedCurrency]);
 
   // Add this useEffect to handle currency switching and maintain equivalent values
   useEffect(() => {
@@ -313,16 +311,16 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
     if (isNaN(currentAmount) || !currentPrice || isNaN(currentPrice)) return;
 
     // When switching from base to quote, convert amount to quote value
-    if (selectedDropdownValue === pairDetails.quote) {
+    if (selectedCurrency === pairDetails.quote) {
       const quoteValue = currentAmount * currentPrice;
       setAmount(quoteValue.toFixed(2));
     }
     // When switching from quote to base, convert amount back to base value
-    else if (selectedDropdownValue === pairDetails.base) {
+    else if (selectedCurrency === pairDetails.base) {
       const baseValue = currentAmount / currentPrice;
       setAmount(baseValue.toFixed(6));
     }
-  }, [selectedDropdownValue]); // Only trigger when currency selection changes
+  }, [selectedCurrency]); // Only trigger when currency selection changes
 
   return (
     <div className="w-full text-white flex flex-col gap-3">
@@ -403,9 +401,23 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
                 {/* "Mid" Button */}
                 <button
                   type="button"
-                  className=" absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white"
-                  onClick={() => setPrice(priceMidpoint?.toFixed(1) || '')} // Set price to priceMidpoint
-                  disabled={!priceMidpoint} // Disable if priceMidpoint is null
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white cursor-pointer"
+                  onClick={async () => {
+                    // Fetch orderbook from your API (adjust symbol as needed)
+                    const symbol = selectedPair; // e.g. BTCUSDT
+                    try {
+                      const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
+                      const data = await res.json();
+                      const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
+                      const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
+                      if (bestBid && bestAsk) {
+                        const mid = ((bestBid + bestAsk) / 2).toFixed(1);
+                        setPrice(mid);
+                      }
+                    } catch (err) {
+                      console.error('Failed to fetch orderbook for mid price:', err);
+                    }
+                  }}
                 >
                   Mid
                 </button>
@@ -430,20 +442,20 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
               {/* Selecting currency */}
               <div className=" absolute right-0 top-1/2 transform -translate-y-1/2 px-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer">
                 <button
-                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.base ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary2 hover:text-white'}`}
+                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedCurrency === pairDetails.base ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary2 hover:text-white'}`}
                   onClick={() => {
-                    if (selectedDropdownValue !== pairDetails.base) {
-                      setSelectedDropdownValue(pairDetails.base);
+                    if (selectedCurrency !== pairDetails.base) {
+                      setSelectedCurrency(pairDetails.base);
                     }
                   }}
                 >
                   {pairDetails.base}
                 </button>
                 <button
-                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedDropdownValue === pairDetails.quote ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary2 hover:text-white'}`}
+                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedCurrency === pairDetails.quote ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary2 hover:text-white'}`}
                   onClick={() => {
-                    if (selectedDropdownValue !== pairDetails.quote) {
-                      setSelectedDropdownValue(pairDetails.quote);
+                    if (selectedCurrency !== pairDetails.quote) {
+                      setSelectedCurrency(pairDetails.quote);
                     }
                   }}
                 >
@@ -456,7 +468,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
         )}
       </div>
 
-      {/* --- AmountSlider UI moved here --- */}
+      {/* --- AmountSlider UI --- */}
       <div className="flex items-center gap-3 my-1 px-4">
         {/* Slider markers */}
         <div className="relative w-full">
@@ -558,7 +570,7 @@ function LimitOrderForm({ priceMidpoint, selectedPrice, onCurrencyChange, onConn
                   const numPrice = parseFloat(price) || priceMidpoint;
 
                   // If we're in quote currency mode (USDT), the amount IS the order value
-                  if (selectedDropdownValue === pairDetails.quote) {
+                  if (selectedCurrency === pairDetails.quote) {
                     return numAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                   }
                   // If we're in base currency mode (BTC), multiply by price to get order value

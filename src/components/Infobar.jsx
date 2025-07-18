@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import usePanelStore from '../src/store/panelStore.js';
 
 function Infobar() {
   const [ticker, setTicker] = useState({});
@@ -11,23 +12,24 @@ function Infobar() {
   const navigate = useNavigate();
   const { base: urlBase } = useParams();
 
-  // --- New: Load selected pair from localStorage if no URL param ---
-  const [base, setBase] = useState(() => {
-    if (urlBase) return urlBase;
-    const stored = localStorage.getItem('selectedPairDetails');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        return parsed.base;
-      } catch { }
-    }
-    return null;
-  });
+  // Zustand global state
+  const selectedPair = usePanelStore((s) => s.selectedPair);
+  const setSelectedPair = usePanelStore((s) => s.setSelectedPair);
 
-  // Keep base in sync with URL param
+  // On mount: set selectedPair from URL or localStorage
   useEffect(() => {
-    if (urlBase && urlBase !== base) setBase(urlBase);
-  }, [urlBase]);
+    if (urlBase) {
+      setSelectedPair(urlBase);
+    } else {
+      const stored = localStorage.getItem('selectedPairDetails');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setSelectedPair(parsed.base);
+        } catch { }
+      }
+    }
+  }, [urlBase, setSelectedPair]);
 
   // Fetch available trading pairs
   useEffect(() => {
@@ -58,9 +60,9 @@ function Infobar() {
     fetchPairs();
   }, []);
 
-  // Fetch ticker for selected pair (from URL or localStorage)
+  // Fetch ticker for selected pair (from Zustand)
   useEffect(() => {
-    const symbol = base ? `${base}USDT` : null;
+    const symbol = selectedPair ? `${selectedPair}USDT` : null;
     if (!symbol) return;
     async function fetchTicker() {
       try {
@@ -81,7 +83,7 @@ function Infobar() {
     fetchTicker();
     const interval = setInterval(fetchTicker, 5000);
     return () => clearInterval(interval);
-  }, [base, markets]);
+  }, [selectedPair, markets]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -96,7 +98,7 @@ function Infobar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen]);
 
-  const selectedMarket = markets.find(m => m.symbol === `${base}USDT`);
+  const selectedMarket = markets.find(m => m.symbol === `${selectedPair}USDT`);
 
   return (
     <div className="">
@@ -109,7 +111,7 @@ function Infobar() {
         >
           <div className="flex flex-col text-white">
             <div className="font-normal text-base text-[22px]">
-              {selectedMarket ? `${selectedMarket.base} - ${selectedMarket.quote}` : `${base}USDT`}
+              {selectedMarket ? `${selectedMarket.base} - ${selectedMarket.quote}` : `${selectedPair}USDT`}
             </div>
           </div>
           <div className="flex items-center justify-center w-6 h-6 rounded">
@@ -133,11 +135,11 @@ function Infobar() {
                     return (
                       <tr
                         key={mkt.id}
-                        className={`cursor-pointer border border-transparent hover:border-primary2 ${`${base}USDT` === mkt.symbol ? 'bg-primary2/30' : ''}`}
+                        className={`cursor-pointer border border-transparent hover:border-primary2 ${`${selectedPair}USDT` === mkt.symbol ? 'bg-primary2/30' : ''}`}
                         onClick={e => {
-                          e.stopPropagation(); // Prevent parent click handler
+                          e.stopPropagation();
                           setDropdownOpen(false);
-                          setBase(mkt.base);
+                          setSelectedPair(mkt.base);
                           localStorage.setItem('selectedPairDetails', JSON.stringify(mkt));
                           navigate(`/${mkt.base}`);
                         }}

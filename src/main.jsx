@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
-import KlineChartProPanel  from './components/ChartPanel/KlineChart.jsx'; // Import KlineChart
+import KlineChartProPanel from './components/ChartPanel/KlineChart.jsx'; // Import KlineChart
 import OrderBook from './components/TradesPanel/OrderBook.jsx';
 import LimitOrderForm from './components/PlaceOrderPanel.jsx';
 import Infobar from './components/Infobar.jsx';
@@ -16,6 +16,7 @@ import { createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // <-- Add this import
 import './index.css';
+import usePanelStore from './src/store/panelStore.js';
 
 // Create wagmi config (customize for your chains/providers)
 const config = createConfig({
@@ -30,8 +31,6 @@ const queryClient = new QueryClient();
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState('OrderBook');
-  const [priceMidpoint, setPriceMidpoint] = useState(null);
-  const [selectedPrice, setSelectedPrice] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState('BTC');
   const [showLoginPanel, setShowLoginPanel] = useState(false);
@@ -87,7 +86,7 @@ function MainApp() {
                     </div>
                     <div className="bg-backgrounddark rounded-md p-4 h-[300%]">
                       {/* KlineChart */}
-                      <KlineChartProPanel  />
+                      <KlineChartProPanel />
                     </div>
                   </div>
                   <div className="flex flex-col bg-backgrounddark rounded-md overflow-hidden w-[400px]">
@@ -115,11 +114,7 @@ function MainApp() {
                     {/* Render Both Components */}
                     <div className="bg-backgrounddark rounded-b-md p-2">
                       <div className={activeTab === 'OrderBook' ? 'block' : 'hidden'}>
-                        <OrderBook
-                          onPriceMidpointChange={setPriceMidpoint}
-                          onRowSelect={setSelectedPrice}
-                          selectedCurrency={selectedCurrency}
-                        />
+                        <OrderBook />
                       </div>
                       <div className={activeTab === 'Trades' ? 'block' : 'hidden'}>
                         <TradesModal />
@@ -137,10 +132,8 @@ function MainApp() {
               <div className="flex flex-col w-[360px] gap-2">
                 <div className="flex flex-col bg-backgrounddark rounded-md min-w-0 overflow-hidden">
                   <LimitOrderForm
-                    priceMidpoint={priceMidpoint}
-                    selectedPrice={selectedPrice}
                     onCurrencyChange={setSelectedCurrency}
-                    onConnect={() => setShowLoginPanel(true)} // Pass handler
+                    onConnect={() => setShowLoginPanel(true)}
                   />
                 </div>
                 {/* Account Information */}

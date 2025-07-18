@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { useParams } from 'react-router-dom'; // <-- Add this import
+import usePanelStore from '../../src/store/panelStore.js'; // Add this import
 
 // Custom hook for localhost SSE order book
 const useLocalhostOrderBook = (symbol = 'btcusdt') => {
@@ -143,12 +144,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
   );
 });
 
-const OrderBook = ({
-  // Remove selectedPair prop
-  onPriceMidpointChange,
-  onRowSelect,
-  selectedCurrency = 'BTC',
-}) => {
+const OrderBook = () => {
   const { base } = useParams(); // <-- Get base from URL
   const selectedPair = base ? `${base}USDT` : null; // <-- Construct symbol
 
@@ -215,23 +211,22 @@ const OrderBook = ({
       setSpreadPercentage(percentage);
 
       const newPriceMidpoint = calculatePriceMidpoint();
-      setPriceMidpoint(newPriceMidpoint);
+      setPriceMidpoint(newPriceMidpoint); // <-- Write to Zustand
 
-      if (onPriceMidpointChange) {
-        onPriceMidpointChange(newPriceMidpoint);
-      }
     } else {
       setSpreadValue(null);
       setSpreadPercentage(null);
-      setPriceMidpoint(null);
+      setPriceMidpoint(null); // <-- Reset in Zustand
     }
-  }, [bids, asks, onPriceMidpointChange]);
+  }, [bids, asks, setPriceMidpoint]);
+
+  const setSelectedPrice = usePanelStore(s => s.setSelectedPrice);
 
   const handleRowSelect = (price) => {
-    if (onRowSelect) {
-      onRowSelect(price);
-    }
+    setSelectedPrice(price); // <-- Write to Zustand
   };
+
+  const selectedCurrency = usePanelStore(s => s.selectedCurrency); // <-- Zustand global state
 
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
@@ -252,7 +247,7 @@ const OrderBook = ({
             onSelect={handleRowSelect}
             selectedCurrency={selectedCurrency}
             fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
-            textAlign="right" // Pass alignment prop
+            textAlign="right"
           />
         ))}
       </ul>

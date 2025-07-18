@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import usePanelStore from '../../src/store/panelStore.js'; // <-- Import Zustand store
 import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
 
@@ -105,16 +105,17 @@ class BinanceFeed {
   }
 }
 
-export default function KlineChartProPanel({ selectedPair }) {
-  const { base } = useParams();
+export default function KlineChartProPanel() {
+  const selectedPairBase = usePanelStore(s => s.selectedPair); // <-- Zustand state
   const [interval] = useState('5m');
-  const [pair, setPair] = useState(selectedPair || base || 'BTC');
+  const [pair, setPair] = useState(selectedPairBase || 'BTC');
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
+  // Update pair when Zustand state changes
   useEffect(() => {
-    setPair(selectedPair || base || 'BTC');
-  }, [selectedPair, base]);
+    setPair(selectedPairBase || 'BTC');
+  }, [selectedPairBase]);
 
   useEffect(() => {
     let isMounted = true;
