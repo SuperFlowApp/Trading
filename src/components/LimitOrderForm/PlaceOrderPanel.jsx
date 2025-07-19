@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useAuthFetch } from '../../context/Authentication.jsx';
-import usePanelStore from '../../store/panelStore.js'; // <-- Add this import
+import usePanelStore from '../../store/panelStore.js'; // already imported
 import LeveragePanel from './Leverage.jsx';
 import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';
 
-function LimitOrderForm({ onCurrencyChange, onConnect }) {
+function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   const selectedPairBase = usePanelStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
   const pairDetails = { base: selectedPairBase, quote: 'USDT' };
@@ -38,6 +38,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
   const marginMode = usePanelStore(s => s.marginMode);
   const setMarginModePanelOpen = usePanelStore(s => s.setMarginModePanelOpen);
   const selectedPrice = usePanelStore(s => s.selectedPrice); // <-- Read from Zustand
+  const setShowLoginPanel = usePanelStore(s => s.setShowLoginPanel); // ADD THIS
 
   // Update price when selectedPrice changes
   useEffect(() => {
@@ -514,9 +515,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
         type="button"
         onClick={() => {
           if (!token) {
-            if (typeof onConnect === 'function') {
-              onConnect();
-            }
+            setShowLoginPanel(true); // <-- OPEN LOGIN PANEL WITH ZUSTAND
             return;
           }
           placeOrder();

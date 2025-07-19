@@ -3,20 +3,26 @@ import { createRoot } from 'react-dom/client';
 import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
 import KlineChartProPanel from './components/ChartPanel/KlineChart.jsx'; // Import KlineChart
-import OrderBook from './components/TradesPanel/OrderBook.jsx';
 import LimitOrderForm from './components/LimitOrderForm/PlaceOrderPanel.jsx';
 import Infobar from './components/Infobar.jsx';
 import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
-import TradesModal from './components/TradesPanel/TradesHistory.jsx';
 import AccountInfoPanel from './components/PositionsPanel/AccountInfoPanel.jsx';
 import AuthPanel from './components/LoginPanel.jsx'; // Import AuthPanel
+import usePanelStore from './store/panelStore.js'; // Zustand Storage
+import TradesPanel from './components/TradesPanel/TradesPanel.jsx';
 import './index.css';
 
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState('OrderBook');
   const [isMobile, setIsMobile] = useState(false);
-  const [showLoginPanel, setShowLoginPanel] = useState(false);
+
+  // Zustand storage 
+  const showLoginPanel = usePanelStore(s => s.showLoginPanel);
+  const setShowLoginPanel = usePanelStore(s => s.setShowLoginPanel);
+
+
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -72,38 +78,7 @@ function MainApp() {
                       <KlineChartProPanel />
                     </div>
                   </div>
-                  <div className="flex flex-col bg-backgrounddark rounded-md overflow-hidden w-[400px]">
-                    {/* Tab Selector */}
-                    <div className="flex relative">
-                      <button
-                        className={`flex-1 p-2 text-center ${activeTab === 'OrderBook'
-                          ? 'bg-backgrounddark text-white font-bold border-b-2 border-primary2'
-                          : 'bg-backgrounddark text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
-                          }`}
-                        onClick={() => setActiveTab('OrderBook')}
-                      >
-                        Order Book
-                      </button>
-                      <button
-                        className={`flex-1 p-2 text-center ${activeTab === 'Trades'
-                          ? 'bg-bg-backgrounddark text-white font-bold border-b-2 border-primary2'
-                          : 'bg-bg-backgrounddark text-gray-400 border-b-2 border-primary2/30 hover:border-primary2/50'
-                          }`}
-                        onClick={() => setActiveTab('Trades')}
-                      >
-                        Trades
-                      </button>
-                    </div>
-                    {/* Render Both Components */}
-                    <div className="bg-backgrounddark rounded-b-md p-2">
-                      <div className={activeTab === 'OrderBook' ? 'block' : 'hidden'}>
-                        <OrderBook />
-                      </div>
-                      <div className={activeTab === 'Trades' ? 'block' : 'hidden'}>
-                        <TradesModal />
-                      </div>
-                    </div>
-                  </div>
+                  <TradesPanel />
                 </div>
                 <section className="text-white">
                   <div className="bg-backgrounddark rounded-md">
@@ -114,9 +89,7 @@ function MainApp() {
               {/* PositionsPanel */}
               <div className="flex flex-col w-[360px] gap-2">
                 <div className="flex flex-col bg-backgrounddark rounded-md min-w-0 overflow-hidden">
-                  <LimitOrderForm
-                    onConnect={() => setShowLoginPanel(true)}
-                  />
+                  <LimitOrderForm />
                 </div>
                 {/* Account Information */}
                 <div className="flex flex-col bg-backgrounddark rounded-md  p-2 min-w-0 overflow-hidden">
@@ -147,6 +120,6 @@ if (!window._root) {
 
 window._root.render(
   <StrictMode>
-          <MainApp />
+    <MainApp />
   </StrictMode>
 );
