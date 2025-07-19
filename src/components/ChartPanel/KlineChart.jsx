@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import usePanelStore from '../../src/store/panelStore.js'; // <-- Import Zustand store
+import usePanelStore from '../../store/panelStore.js'; // <-- Import Zustand store
 import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
 

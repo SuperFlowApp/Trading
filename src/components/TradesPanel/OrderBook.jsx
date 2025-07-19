@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { useParams } from 'react-router-dom'; // <-- Add this import
-import usePanelStore from '../../src/store/panelStore.js'; // Add this import
+import usePanelStore from '../../store/panelStore.js'; // Add this import
 
 // Custom hook for localhost SSE order book
 const useLocalhostOrderBook = (symbol = 'btcusdt') => {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import usePanelStore from '../src/store/panelStore.js';
+import usePanelStore from '../store/panelStore.js';
 
 function Infobar() {
   const [ticker, setTicker] = useState({});

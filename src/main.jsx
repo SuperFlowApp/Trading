@@ -5,7 +5,7 @@ import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
 import KlineChartProPanel from './components/ChartPanel/KlineChart.jsx'; // Import KlineChart
 import OrderBook from './components/TradesPanel/OrderBook.jsx';
-import LimitOrderForm from './components/PlaceOrderPanel.jsx';
+import LimitOrderForm from './components/LimitOrderForm/PlaceOrderPanel.jsx';
 import Infobar from './components/Infobar.jsx';
 import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
 import TradesModal from './components/TradesPanel/TradesHistory.jsx';
@@ -16,7 +16,6 @@ import { createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // <-- Add this import
 import './index.css';
-import usePanelStore from './src/store/panelStore.js';
 
 // Create wagmi config (customize for your chains/providers)
 const config = createConfig({

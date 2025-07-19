@@ -1,71 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useAuth, useAuthFetch } from '../context/Authentication.jsx';
-import usePanelStore from '../src/store/panelStore.js'; // <-- Add this import
-
-const leverageSteps = [5, 10, 15, 20];
-
-function LeverageButton() {
-  const [index, setIndex] = useState(0);
-  const { token } = useAuth();
-  const { base } = useParams();
-
-  // If base is missing, show error
-  if (!base) {
-    return <div className="text-red-400">Invalid pair: No base currency in URL.</div>;
-  }
-
-  const symbol = `${base}USDT`; // fallback to BTCUSDT if not present
-
-  const handleClick = async () => {
-    if (!token) return; // Don't proceed without token
-
-    const newIndex = (index + 1) % leverageSteps.length
-    setIndex(newIndex)
-
-    const requestBody = {
-      symbol,
-      leverage: leverageSteps[newIndex],
-    }
-
-    try {
-      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/leverage', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to set leverage');
-      }
-
-      const data = await response.json()
-      console.log('Leverage set successfully:', data);
-    } catch (err) {
-      console.error('Failed to set leverage:', err)
-      // Revert the index change if the API call failed
-      setIndex((prevIndex) => (prevIndex - 1 + leverageSteps.length) % leverageSteps.length)
-    }
-  }
-
-  return (
-    <button className="leverage" onClick={handleClick}>
-      {leverageSteps[index]}X
-    </button>
-  )
-}
-
-
-
+import { useAuth, useAuthFetch } from '../../context/Authentication.jsx';
+import usePanelStore from '../../store/panelStore.js'; // <-- Add this import
+import LeveragePanel from './Leverage.jsx';
+import MarginMode from './MarginMode.jsx';
+import PositionMode from './PositionMode.jsx';
 
 function LimitOrderForm({ onCurrencyChange, onConnect }) {
   const selectedPairBase = usePanelStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
   const pairDetails = { base: selectedPairBase, quote: 'USDT' };
+  const leverage = usePanelStore(s => s.leverage);
+  const setLeveragePanelOpen = usePanelStore(s => s.setLeveragePanelOpen);
+  const setPositionModePanelOpen = usePanelStore(s => s.setPositionModePanelOpen);
 
   // Use Zustand for selectedCurrency
   const selectedCurrency = usePanelStore(s => s.selectedCurrency);
@@ -89,6 +35,8 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
   const [blinkClass, setBlinkClass] = useState("");
   const [inputSource, setInputSource] = useState(null);
 
+  const marginMode = usePanelStore(s => s.marginMode);
+  const setMarginModePanelOpen = usePanelStore(s => s.setMarginModePanelOpen);
   const selectedPrice = usePanelStore(s => s.selectedPrice); // <-- Read from Zustand
 
   // Update price when selectedPrice changes
@@ -285,9 +233,6 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
     }
   }, [error, success]);
 
-  // Account information is already handled by the auth context
-  // No need to fetch it again here since we get accountInfo from useAuth()
-
   // Notify parent when currency changes
   useEffect(() => {
     if (onCurrencyChange) {
@@ -355,23 +300,30 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
       </div>
 
 
-      {/* Head Tabs */}
+      {/* Margin Mode - Leverage - Position Mode */}
       <div className="flex justify-between items-center text-sm font-semibold p-4 gap-2">
 
+
+        <MarginMode />
         <button
-          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
+          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
+          onClick={() => setMarginModePanelOpen(true)}
         >
-          Cross
+          {marginMode}
         </button>
 
-        <div
-          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
-        >
-          <LeverageButton />
-        </div>
-
+        <LeveragePanel />
         <button
-          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
+          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
+          onClick={() => setLeveragePanelOpen(true)}
+        >
+          {leverage}X
+        </button>
+
+        <PositionMode />
+        <button
+          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
+          onClick={() => setPositionModePanelOpen(true)}
         >
           One-way
         </button>
