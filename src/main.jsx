@@ -16,7 +16,6 @@ import './index.css';
 function MainApp() {
   const [activeTab, setActiveTab] = useState('OrderBook');
   const [isMobile, setIsMobile] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState('BTC');
   const [showLoginPanel, setShowLoginPanel] = useState(false);
 
   useEffect(() => {
@@ -116,7 +115,6 @@ function MainApp() {
               <div className="flex flex-col w-[360px] gap-2">
                 <div className="flex flex-col bg-backgrounddark rounded-md min-w-0 overflow-hidden">
                   <LimitOrderForm
-                    onCurrencyChange={setSelectedCurrency}
                     onConnect={() => setShowLoginPanel(true)}
                   />
                 </div>

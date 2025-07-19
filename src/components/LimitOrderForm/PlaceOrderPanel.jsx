@@ -213,7 +213,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
       } else {
         // quote currency, balanceFree directly
         const calculatedAmount = (sliderValue / 100) * parseFloat(balanceFree);
-        setAmount(calculatedAmount.toFixed(2)); 
+        setAmount(calculatedAmount.toFixed(2));
       }
 
       // Reset input source after processing
@@ -374,7 +374,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
                   type="number"
                   placeholder="$0.0"
                   className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-1 rounded-md text-sm placeholder-white/50 "
-                  value={price}
+                  value={price === null || price === undefined ? "" : price}
                   onChange={(e) => setPrice(e.target.value)}
                 />
                 {/* "Mid" Button */}
@@ -415,7 +415,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
                 type="number"
                 placeholder="0.0"
                 className="bg-backgrounddark border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 w-full text-white p-1 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
-                value={amount}
+                value={amount === null || amount === undefined ? "" : amount}
                 onChange={handleAmountChange}
               />
               {/* Selecting currency */}
@@ -472,7 +472,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
             min="0"
             max="100"
             step="1"
-            value={sliderValue || 0}
+            value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
             onChange={handleSliderChange}
             className="w-full h-[12px] rounded-lg appearance-none cursor-pointer z-10 relative
              [&::-webkit-slider-thumb]:appearance-none
@@ -486,7 +486,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
              [&::-moz-range-thumb]:bg-white
              [&::-moz-range-thumb]:rounded-full"
             style={{
-              background: `linear-gradient(to right, #565A93 0%, #565A93 ${sliderValue}%, #565A9350 ${sliderValue}%, #565A9350 100%)`
+              background: `linear-gradient(to right, #565A93 0%, #565A93 ${sliderValue ?? 0}%, #565A9350 ${sliderValue ?? 0}%, #565A9350 100%)`
             }}
           />
         </div>
@@ -496,7 +496,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
             min="0"
             max="100"
             step="1"
-            value={sliderValue}
+            value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
             onChange={handleInputChange}
             className="w-12 bg-backgrounddark border border-secondary2 rounded px-1 py-0.5 text-white text-sm text-right"
           />
