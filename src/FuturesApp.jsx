@@ -1,7 +1,7 @@
 import { AuthProvider } from './context/Authentication.jsx';
 import KlineChartProPanel from './components/Chart/KlineChart.jsx';
 import LimitOrderForm from './components/OrderForm/PlaceOrderPanel.jsx';
-import Infobar from './components/Infobar.jsx';
+import Infobar from './components/infobar/Infobar.jsx';
 import PositionsPanel from './components/Positions/PositionsPanel.jsx';
 import AccountInfoPanel from './components/Positions/AccountInfoPanel.jsx';
 import AuthPanel from './components/Login/LoginPanel.jsx';

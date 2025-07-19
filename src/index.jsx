@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp.jsx';
 import Navbar from './components/navbar.jsx';
 import CommingSoon from './components/CommonUIs/CommingSoon.jsx';
-import './index.css';
+import './components/index.css';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
