@@ -4,6 +4,7 @@ import usePanelStore from '../../Zustandstore/panelStore.js'; // already importe
 import LeveragePanel from './Leverage.jsx';
 import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';
+import { Input, Select, Space } from 'antd';
 
 function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   const selectedPairBase = usePanelStore(s => s.selectedPair);
@@ -366,78 +367,92 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
           <>
             <label className=" pl-1 text-white pt-2">Price</label>
             <div className="gap-2 w-full justify-between items-center">
-              <div className="w-full relative">
-                <input
-                  type="number"
-                  placeholder="$0.0"
-                  className="bg-backgrounddark border border-secondary2 hover:border-secondary1  focus:outline-none focus:border-secondary1 w-full text-white p-1 rounded-md text-sm placeholder-white/50 "
-                  value={price === null || price === undefined ? "" : price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-                {/* "Mid" Button */}
-                <button
-                  type="button"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white cursor-pointer"
-                  onClick={async () => {
-                    // Fetch orderbook from your API (adjust symbol as needed)
-                    const symbol = selectedPair; // e.g. BTCUSDT
-                    try {
-                      const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
-                      const data = await res.json();
-                      const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
-                      const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
-                      if (bestBid && bestAsk) {
-                        const mid = ((bestBid + bestAsk) / 2).toFixed(1);
-                        setPrice(mid);
+              <Input
+                type="number"
+                placeholder="$0.0"
+                value={price === null || price === undefined ? "" : price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="bg-backgrounddark border-secondary2 text-white placeholder-white/50"
+                style={{
+                  background: 'var(--color-backgrounddark)',
+                  color: 'white',
+                  borderColor: 'var(--color-secondary2)',
+                  borderRadius: 6,
+                  fontSize: 14,
+                  paddingRight: 0,
+                }}
+                addonAfter={
+                  <button
+                    type="button"
+                    className="text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white cursor-pointer"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--color-secondary1)',
+                    }}
+                    onClick={async () => {
+                      const symbol = selectedPair;
+                      try {
+                        const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
+                        const data = await res.json();
+                        const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
+                        const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
+                        if (bestBid && bestAsk) {
+                          const mid = ((bestBid + bestAsk) / 2).toFixed(1);
+                          setPrice(mid);
+                        }
+                      } catch (err) {
+                        console.error('Failed to fetch orderbook for mid price:', err);
                       }
-                    } catch (err) {
-                      console.error('Failed to fetch orderbook for mid price:', err);
-                    }
-                  }}
-                >
-                  Mid
-                </button>
-              </div>
+                    }}
+                  >
+                    Mid
+                  </button>
+                }
+              />
             </div>
           </>
         )}
 
 
         {/* Conditionally render the Amount field */}
+                {/* Conditionally render the Amount field */}
         {market !== '' && (
           <>
             <label className="pt-2 pl-1 text-white">Size</label>
-            <div className="w-full relative">
-              <input
-                type="number"
-                placeholder="0.0"
-                className="bg-backgrounddark border border-secondary2 hover:border-secondary1 focus:outline-none focus:border-secondary1 w-full text-white p-1 rounded-md text-sm placeholder-white/50 focus:outline-none focus:border-secondary1 "
-                value={amount === null || amount === undefined ? "" : amount}
-                onChange={handleAmountChange}
-              />
-              {/* Selecting currency */}
-              <div className=" absolute right-0 top-1/2 transform -translate-y-1/2 px-1 rounded text-xs font-semibold focus:outline-none hover:text-white focus:text-white cursor-pointer">
-                <button
-                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedCurrency === pairDetails.base ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary2 hover:text-white'}`}
-                  onClick={() => {
-                    if (selectedCurrency !== pairDetails.base) {
-                      setSelectedCurrency(pairDetails.base);
-                    }
+            <div className="w-full relative flex items-center">
+              <Space.Compact className="w-full">
+                <Input
+                  type="number"
+                  placeholder="0.0"
+                  value={amount === null || amount === undefined ? "" : amount}
+                  onChange={handleAmountChange}
+                  className="bg-backgrounddark border-secondary2 text-white placeholder-white/50"
+                  style={{
+                    background: 'var(--color-backgrounddark)',
+                    color: 'white',
+                    borderColor: 'var(--color-secondary2)',
+                    borderRadius: 6,
+                    fontSize: 14,
                   }}
-                >
-                  {pairDetails.base}
-                </button>
-                <button
-                  className={`px-4 border border-transparent rounded-md font-semibold text-sm transition-colors ${selectedCurrency === pairDetails.quote ? 'bg-secondary2 text-white' : 'bg-backgrounddark text-secondary1 hover:border-secondary2 hover:text-white'}`}
-                  onClick={() => {
-                    if (selectedCurrency !== pairDetails.quote) {
-                      setSelectedCurrency(pairDetails.quote);
-                    }
+                />
+                <Select
+                  value={selectedCurrency}
+                  onChange={(val) => setSelectedCurrency(val)}
+                  options={[
+                    { value: pairDetails.base, label: pairDetails.base },
+                    { value: pairDetails.quote, label: pairDetails.quote }
+                  ]}
+                  className="!bg-backgrounddark !text-white !border-secondary2"
+                  style={{
+                    background: 'var(--color-backgrounddark)',
+                    color: 'white',
+                    borderColor: 'var(--color-secondary2)',
+                    borderRadius: 6,
+                    minWidth: 90,
                   }}
-                >
-                  {pairDetails.quote}
-                </button>
-              </div>
+                />
+              </Space.Compact>
             </div>
 
           </>
