@@ -1,4 +1,5 @@
 import usePanelStore from '../../Zustandstore/panelStore';
+import { Modal, Button } from 'antd';
 
 export default function MarginMode() {
     const isOpen = usePanelStore(s => s.isMarginModePanelOpen);
@@ -6,11 +7,24 @@ export default function MarginMode() {
     const marginMode = usePanelStore(s => s.marginMode);
     const setMarginMode = usePanelStore(s => s.setMarginMode);
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="modal-container p-6 min-w-[260px] shadow-lg flex flex-col gap-4">
+        <Modal
+            open={isOpen}
+            onCancel={() => setOpen(false)}
+            footer={null}
+            closable={false}
+            centered
+            bodyStyle={{
+                background: 'var(--color-backgrounddark)',
+                borderRadius: '0.5rem',
+                padding: '1.5rem',
+                minWidth: 260,
+            }}
+            maskStyle={{ background: 'rgba(0,0,0,0.4)' }}
+            width={340}
+            title={null}
+        >
+            <div className="flex flex-col gap-4">
                 <h2 className="text-lg font-bold text-white mb-2">Select Margin Mode</h2>
                 <label
                     className={`flex items-center gap-2 py-2 px-4 rounded-md font-semibold cursor-pointer transition-colors ${
@@ -23,7 +37,6 @@ export default function MarginMode() {
                         onChange={() => setMarginMode("Cross")}
                         className="check-box"
                         style={{
-                            // Hide the checkmark/tick
                             backgroundImage: "none"
                         }}
                     />
@@ -40,21 +53,29 @@ export default function MarginMode() {
                         onChange={() => setMarginMode("Isolated")}
                         className="check-box"
                         style={{
-                            // Hide the checkmark/tick
                             backgroundImage: "none"
                         }}
                     />
                     <span className="text-white">Isolated</span>
                 </label>
                 <div className="flex gap-2 mt-4">
-                    <button
-                        className="flex-1 py-2 rounded bg-primary2 text-black font-semibold"
+                    <Button
+                        type="primary"
+                        className="flex-1 py-2 !bg-primary2 !text-black !rounded font-semibold hover:!bg-primary2/80"
+                        style={{
+                            background: 'var(--color-primary2)',
+                            color: 'black',
+                            border: 'none',
+                            fontWeight: 600,
+                            borderRadius: 8,
+                        }}
                         onClick={() => setOpen(false)}
+                        block
                     >
                         Confirm
-                    </button>
+                    </Button>
                 </div>
             </div>
-        </div>
+        </Modal>
     );
 }

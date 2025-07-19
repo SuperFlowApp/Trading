@@ -15,14 +15,21 @@
   -moz-osx-font-smoothing: grayscale;
   font-family: 'Sofia Sans Condensed', sans-serif;
 
-  --color-primary1: theme('colors.primary1');
-  --color-primary2: theme('colors.primary2');
-  --color-backgrounddark: theme('colors.backgrounddark');
-  --color-secondary1: theme('colors.secondary1');
-  --color-secondary2: theme('colors.secondary2');
+  --color-primary1: #F59DEF;
+  --color-primary2: #00B7C9;
+  --color-secondary1: #8AABB2;
+  --color-secondary2: #565A93;
+  --color-backgrounddark: #02001Bdd;
+  --color-backgroundlight: #161A2C;
+  --color-warncolor: #a44b4b;
+  
 
-  /* Add more as needed */
 }
+
+.ant-modal-content {
+  background: var(--color-backgrounddark) !important;
+}
+
 
 
 .modal-container {

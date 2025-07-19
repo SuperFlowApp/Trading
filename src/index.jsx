@@ -5,6 +5,7 @@ import Navbar from './components/navbar.jsx';
 import CommingSoon from './components/CommonUIs/CommingSoon.jsx';
 import { AuthProvider } from './context/Authentication.jsx'; // <-- import AuthProvider
 import './components/index.css';
+import 'antd/dist/reset.css'; // Ant Design 
 
 const container = document.getElementById('root');
 const root = createRoot(container);
