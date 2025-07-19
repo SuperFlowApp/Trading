@@ -14,10 +14,24 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: 'Sofia Sans Condensed', sans-serif;
+
+  --color-primary1: theme('colors.primary1');
+  --color-primary2: theme('colors.primary2');
+  --color-backgrounddark: theme('colors.backgrounddark');
+  --color-secondary1: theme('colors.secondary1');
+  --color-secondary2: theme('colors.secondary2');
+
+  /* Add more as needed */
 }
 
 
+.modal-container {
+  @apply bg-backgrounddark rounded-lg overflow-hidden;
+}
 
+.check-box {
+  @apply accent-primary2 appearance-none w-4 h-4 border-2 border-primary2 rounded transition-colors bg-backgrounddark checked:bg-primary2 checked:border-primary2;
+}
 
 /* Hide the spinner for input[type="number"] */
 input[type="number"]::-webkit-inner-spin-button,

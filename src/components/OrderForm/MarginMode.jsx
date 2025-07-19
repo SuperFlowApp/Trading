@@ -10,23 +10,39 @@ export default function MarginMode() {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-backgrounddark rounded-lg p-6 min-w-[260px] shadow-lg flex flex-col gap-4">
+            <div className="modal-container p-6 min-w-[260px] shadow-lg flex flex-col gap-4">
                 <h2 className="text-lg font-bold text-white mb-2">Select Margin Mode</h2>
-                <label className="flex items-center gap-2 py-2 px-4 rounded-md font-semibold cursor-pointer bg-background">
+                <label
+                    className={`flex items-center gap-2 py-2 px-4 rounded-md font-semibold cursor-pointer transition-colors ${
+                        marginMode === "Cross" ? "bg-primary2/20" : "bg-background"
+                    }`}
+                >
                     <input
                         type="checkbox"
                         checked={marginMode === "Cross"}
                         onChange={() => setMarginMode("Cross")}
-                        className="accent-primary2"
+                        className="check-box"
+                        style={{
+                            // Hide the checkmark/tick
+                            backgroundImage: "none"
+                        }}
                     />
                     <span className="text-white">Cross</span>
                 </label>
-                <label className="flex items-center gap-2 py-2 px-4 rounded-md font-semibold cursor-pointer bg-background">
+                <label
+                    className={`flex items-center gap-2 py-2 px-4 rounded-md font-semibold cursor-pointer transition-colors ${
+                        marginMode === "Isolated" ? "bg-primary2/20" : "bg-background"
+                    }`}
+                >
                     <input
                         type="checkbox"
                         checked={marginMode === "Isolated"}
                         onChange={() => setMarginMode("Isolated")}
-                        className="accent-primary2"
+                        className="check-box"
+                        style={{
+                            // Hide the checkmark/tick
+                            backgroundImage: "none"
+                        }}
                     />
                     <span className="text-white">Isolated</span>
                 </label>

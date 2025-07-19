@@ -1,13 +1,13 @@
 import { AuthProvider } from './context/Authentication.jsx';
 import KlineChartProPanel from './components/Chart/KlineChart.jsx';
-import LimitOrderForm from './components/OrderForm/PlaceOrderPanel.jsx';
+import LimitOrderForm from './components/OrderForm/OrderPanel.jsx';
 import Infobar from './components/infobar/Infobar.jsx';
 import PositionsPanel from './components/Positions/PositionsPanel.jsx';
 import AccountInfoPanel from './components/Positions/AccountInfoPanel.jsx';
 import AuthPanel from './components/Login/LoginPanel.jsx';
 import usePanelStore from './Zustandstore/panelStore.js';
 import TradesPanel from './components/History/TradesPanel.jsx';
-
+ 
 function FuturesApp() {
   const showLoginPanel = usePanelStore(s => s.showLoginPanel);
   const setShowLoginPanel = usePanelStore(s => s.setShowLoginPanel);
