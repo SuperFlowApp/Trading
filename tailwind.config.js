@@ -12,7 +12,7 @@ export default {
         secondary1: '#8AABB2',
         secondary2: '#565A93',
         backgroundlight: '#161A2C',
-        backgrounddark: '#02001B',
+        backgrounddark: '#02001Bdd',
         warningcolor: '#a44b4b',
       },
     },

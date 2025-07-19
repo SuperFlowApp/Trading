@@ -26,6 +26,10 @@ function Navbar() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(initialSettings);
   const [walletAddress, setWalletAddress] = useState(localStorage.getItem("walletAddress") || ""); // <-- Retrieve from localStorage if available
+  const [activeTab, setActiveTab] = useState(() => {
+    if (window.location.pathname.includes("options-trading")) return "options";
+    return "futures";
+  });
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
   const authPanelRef = useRef(null);
@@ -83,6 +87,15 @@ function Navbar() {
     }));
   };
 
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    if (tab === "futures") {
+      window.location.href = "/futures-trading";
+    } else {
+      window.location.href = "/options-trading";
+    }
+  };
+
   return (
     <>
       <nav className="pl-[20px] pr-[30px] w-full flex items-center justify-between px-4 py-2 bg-backgrounddark text-white ">
@@ -93,10 +106,38 @@ function Navbar() {
             <img src="/assets/Bysymmio.svg" alt="Logo" className="h-4 w-auto" />
           </div>
           <ul className="flex gap-6 text-sm font-small">
-            <li className="flex items-center gap-2 cursor-pointer hover:text-[#FFFFFF]">
+            <li
+              className={`group flex items-center gap-2 cursor-pointer ${
+                activeTab === "futures" ? "text-white" : "text-secondary1"
+              }`}
+              onClick={() => handleTabClick("futures")}
+            >
+              <img
+                src="/assets/chart-candlestick.svg"
+                alt="Futures"
+                className={`w-5 h-5 ${
+                  activeTab === "futures"
+                    ? "brightness-200"
+                    : "brightness-100 group-hover:brightness-200"
+                }`}
+              />
               Futures Trading
             </li>
-            <li className="flex items-center gap-2 cursor-pointer text-secondary1 hover:text-[#FFFFFF]">
+            <li
+              className={`group flex items-center gap-2 cursor-pointer ${
+                activeTab === "options" ? "text-white" : "text-secondary1"
+              }`}
+              onClick={() => handleTabClick("options")}
+            >
+              <img
+                src="/assets/chart-line.svg"
+                alt="Options"
+                className={`w-5 h-5 ${
+                  activeTab === "options"
+                    ? "brightness-200"
+                    : "brightness-100 group-hover:brightness-200"
+                }`}
+              />
               Options Trading
             </li>
           </ul>

@@ -1,66 +1,21 @@
-import { StrictMode, useState, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
 import { AuthProvider } from './context/Authentication.jsx';
-import Navbar from './components/navbar.jsx';
-import KlineChartProPanel from './components/Chart/KlineChart.jsx'; // Import KlineChart
+import KlineChartProPanel from './components/Chart/KlineChart.jsx';
 import LimitOrderForm from './components/OrderForm/PlaceOrderPanel.jsx';
 import Infobar from './components/Infobar.jsx';
 import PositionsPanel from './components/Positions/PositionsPanel.jsx';
 import AccountInfoPanel from './components/Positions/AccountInfoPanel.jsx';
-import AuthPanel from './components/Login/LoginPanel.jsx'; // Import AuthPanel
-import usePanelStore from './store/panelStore.js'; // Zustand Storage
+import AuthPanel from './components/Login/LoginPanel.jsx';
+import usePanelStore from './store/panelStore.js';
 import TradesPanel from './components/History/TradesPanel.jsx';
 import './index.css';
 
-
 function MainApp() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Zustand storage 
   const showLoginPanel = usePanelStore(s => s.showLoginPanel);
   const setShowLoginPanel = usePanelStore(s => s.setShowLoginPanel);
 
-
-
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  if (isMobile) {
-    return (
-      <div
-        className="flex items-center justify-center h-screen w-screen bg-backgrounddark text-white"
-        style={{
-          backgroundImage: `url('/assets/background.jpg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        <h1 className="text-2xl font-bold">Unavailable for mobile at the moment</h1>
-      </div>
-    );
-  }
-
   return (
     <AuthProvider>
-      <div
-        style={{
-          backgroundImage: `url('/assets/background.jpg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          height: '100vh',
-          width: '100vw',
-        }}
-      >
-        <Navbar />
+
         <div className="fixed top-0 left-0 w-screen h-screen pointer-events-none opacity-5 z-10" />
         <div className="flex flex-col h-auto overflow-y-auto">
           <div className="relative w-screen h-auto overflow-visible">
@@ -105,20 +60,9 @@ function MainApp() {
             <footer className=""></footer>
           </div>
         </div>
-      </div>
+
     </AuthProvider>
   );
 }
 
-const container = document.getElementById('root');
-
-// Use a global variable to persist the root across HMR reloads
-if (!window._root) {
-  window._root = createRoot(container);
-}
-
-window._root.render(
-  <StrictMode>
-    <MainApp />
-  </StrictMode>
-);
+export default MainApp;
