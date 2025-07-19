@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import usePanelStore from '../store/panelStore.js';
+import usePanelStore from '../Zustandstore/panelStore.js';
 
 function Infobar() {
   const [ticker, setTicker] = useState({});

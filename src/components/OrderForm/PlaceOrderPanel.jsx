@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useAuthFetch } from '../../context/Authentication.jsx';
-import usePanelStore from '../../store/panelStore.js'; // already imported
+import usePanelStore from '../../Zustandstore/panelStore.js'; // already imported
 import LeveragePanel from './Leverage.jsx';
 import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';

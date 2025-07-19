@@ -1,4 +1,4 @@
-import usePanelStore from '../../store/panelStore';
+import usePanelStore from '../../Zustandstore/panelStore';
 
 export default function MarginMode() {
     const isOpen = usePanelStore(s => s.isMarginModePanelOpen);

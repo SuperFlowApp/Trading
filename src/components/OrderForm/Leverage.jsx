@@ -1,4 +1,4 @@
-import usePanelStore from '../../store/panelStore.js';
+import usePanelStore from '../../Zustandstore/panelStore.js';
 
 const MIN_LEVERAGE = 1;
 const MAX_LEVERAGE = 20;

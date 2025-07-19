@@ -5,7 +5,7 @@ import Infobar from './components/Infobar.jsx';
 import PositionsPanel from './components/Positions/PositionsPanel.jsx';
 import AccountInfoPanel from './components/Positions/AccountInfoPanel.jsx';
 import AuthPanel from './components/Login/LoginPanel.jsx';
-import usePanelStore from './store/panelStore.js';
+import usePanelStore from './Zustandstore/panelStore.js';
 import TradesPanel from './components/History/TradesPanel.jsx';
 
 function FuturesApp() {
