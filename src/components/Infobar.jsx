@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import usePanelStore from '../store/panelStore.js';
 
 function Infobar() {
@@ -9,27 +8,21 @@ function Infobar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const MARKET_TYPE = 'spot';
-  const navigate = useNavigate();
-  const { base: urlBase } = useParams();
 
   // Zustand global state
   const selectedPair = usePanelStore((s) => s.selectedPair);
   const setSelectedPair = usePanelStore((s) => s.setSelectedPair);
 
-  // On mount: set selectedPair from URL or localStorage
+  // On mount: set selectedPair from localStorage if available
   useEffect(() => {
-    if (urlBase) {
-      setSelectedPair(urlBase);
-    } else {
-      const stored = localStorage.getItem('selectedPairDetails');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          setSelectedPair(parsed.base);
-        } catch { }
-      }
+    const stored = localStorage.getItem('selectedPairDetails');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setSelectedPair(parsed.base);
+      } catch { }
     }
-  }, [urlBase, setSelectedPair]);
+  }, [setSelectedPair]);
 
   // Fetch available trading pairs
   useEffect(() => {
@@ -141,7 +134,6 @@ function Infobar() {
                           setDropdownOpen(false);
                           setSelectedPair(mkt.base);
                           localStorage.setItem('selectedPairDetails', JSON.stringify(mkt));
-                          navigate(`/${mkt.base}`);
                         }}
                       >
                         <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>
@@ -219,7 +211,6 @@ function Infobar() {
         </div>
       </div>
     </div>
-
   );
 
 }

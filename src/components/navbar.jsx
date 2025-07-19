@@ -94,13 +94,10 @@ function Navbar() {
           </div>
           <ul className="flex gap-6 text-sm font-small">
             <li className="flex items-center gap-2 cursor-pointer hover:text-[#FFFFFF]">
-              Trade
+              Futures Trading
             </li>
             <li className="flex items-center gap-2 cursor-pointer text-secondary1 hover:text-[#FFFFFF]">
-              Earn Points
-            </li>
-            <li className="flex items-center gap-2 cursor-pointer text-secondary1 hover:text-[#FFFFFF]">
-              Referrals
+              Options Trading
             </li>
           </ul>
         </div>

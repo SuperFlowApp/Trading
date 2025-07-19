@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
-import { useParams } from 'react-router-dom'; // <-- Add this import
-import usePanelStore from '../../store/panelStore.js'; // Add this import
+import usePanelStore from '../../store/panelStore.js';
 
 // Custom hook for localhost SSE order book
 const useLocalhostOrderBook = (symbol = 'btcusdt') => {
@@ -145,14 +144,15 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
 });
 
 const OrderBook = () => {
-  const { base } = useParams(); // <-- Get base from URL
-  const selectedPair = base ? `${base}USDT` : null; // <-- Construct symbol
+  // Remove useParams and all routing logic
+  const selectedPairBase = usePanelStore(s => s.selectedPair);
+  const selectedPair = selectedPairBase ? `${selectedPairBase}usdt` : 'btcusdt';
 
-  const { asks, bids, wsFps } = useLocalhostOrderBook(selectedPair ? selectedPair.toLowerCase() : ''); // Use selectedPair
+  const { asks, bids, wsFps } = useLocalhostOrderBook(selectedPair);
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
-  const [priceMidpoint, setPriceMidpoint] = useState(null);
+  const setPriceMidpoint = usePanelStore(s => s.setPriceMidpoint);
 
   // Track previous prices for asks and bids
   const prevAskPrices = useRef(new Set());
@@ -272,8 +272,7 @@ const OrderBook = () => {
             onSelect={handleRowSelect}
             selectedCurrency={selectedCurrency}
             fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
-            textAlign="right" // Pass alignment prop
-
+            textAlign="right"
           />
         ))}
       </ul>

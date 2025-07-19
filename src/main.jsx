@@ -1,6 +1,5 @@
 import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
 import KlineChartProPanel from './components/ChartPanel/KlineChart.jsx'; // Import KlineChart
@@ -11,22 +10,8 @@ import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
 import TradesModal from './components/TradesPanel/TradesHistory.jsx';
 import AccountInfoPanel from './components/PositionsPanel/AccountInfoPanel.jsx';
 import AuthPanel from './components/LoginPanel.jsx'; // Import AuthPanel
-import { WagmiProvider } from 'wagmi';
-import { createConfig, http } from 'wagmi';
-import { mainnet } from 'wagmi/chains';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // <-- Add this import
 import './index.css';
 
-// Create wagmi config (customize for your chains/providers)
-const config = createConfig({
-  chains: [mainnet],
-  transports: {
-    [mainnet.id]: http(),
-  },
-});
-
-// Create a QueryClient instance
-const queryClient = new QueryClient();
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState('OrderBook');
@@ -164,16 +149,6 @@ if (!window._root) {
 
 window._root.render(
   <StrictMode>
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}> {/* <-- Wrap with QueryClientProvider */}
-        <WagmiProvider config={config}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/BTC" replace />} />
-            <Route path="/:base" element={<MainApp />} />
-            {/* ...other routes */}
-          </Routes>
-        </WagmiProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+          <MainApp />
   </StrictMode>
 );
