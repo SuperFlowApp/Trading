@@ -7,7 +7,6 @@ import AccountInfoPanel from './components/Positions/AccountInfoPanel.jsx';
 import AuthPanel from './components/Login/LoginPanel.jsx';
 import usePanelStore from './store/panelStore.js';
 import TradesPanel from './components/History/TradesPanel.jsx';
-import './index.css';
 
 function FuturesApp() {
   const showLoginPanel = usePanelStore(s => s.showLoginPanel);

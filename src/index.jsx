@@ -1,9 +1,9 @@
 import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import FuturesApp from './main.jsx';
+import FuturesApp from './FuturesApp.jsx';
 import Navbar from './components/navbar.jsx';
 import CommingSoon from './components/CommonUIs/CommingSoon.jsx';
-import { AuthProvider } from './context/Authentication.jsx';
+import './index.css';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
@@ -45,7 +45,6 @@ function RootApp() {
 
   return (
     <StrictMode>
-      <AuthProvider>
         <div
           style={{
             backgroundImage: `url('/assets/desktopBG.jpg')`,
@@ -59,7 +58,6 @@ function RootApp() {
           <Navbar />
           {TradingPanel(isMobile)}
         </div>
-      </AuthProvider>
     </StrictMode>
   );
 }

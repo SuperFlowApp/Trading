@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/Authentication"; // <-- Import useAuth
 import AuthPanel, { shortenAddress } from "./Login/LoginPanel";
 import ManageAccountModal from "./Login/ManageAccountModal";
 
@@ -34,8 +33,7 @@ function Navbar() {
   const settingsRef = useRef(null);
   const authPanelRef = useRef(null);
 
-  // Use AuthContext for auth state
-  const { token: accessToken, logout, token } = useAuth();
+  // Instead, rely on walletAddress or other props/state for login status
   const username = localStorage.getItem("username") || "";
 
   // Listen for clicks outside dropdown to close it
@@ -146,7 +144,7 @@ function Navbar() {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           {/* Login/User Button */}
-          {!accessToken && !walletAddress ? (
+          {!walletAddress ? (
             <button
               className="px-4 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-secondary2/80 transition"
               onClick={() => setShowLogin(true)}
