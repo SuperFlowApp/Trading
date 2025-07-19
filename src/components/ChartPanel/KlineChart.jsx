@@ -106,15 +106,15 @@ class BinanceFeed {
 }
 
 export default function KlineChartProPanel() {
-  const selectedPairBase = usePanelStore(s => s.selectedPair); // <-- Zustand state
+  const selectedPairBase = usePanelStore(s => s.selectedPair);
   const [interval] = useState('5m');
-  const [pair, setPair] = useState(selectedPairBase || 'BTC');
+  const [pair, setPair] = useState(selectedPairBase );
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
   // Update pair when Zustand state changes
   useEffect(() => {
-    setPair(selectedPairBase || 'BTC');
+    setPair(selectedPairBase);
   }, [selectedPairBase]);
 
   useEffect(() => {

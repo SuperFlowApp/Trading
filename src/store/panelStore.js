@@ -38,7 +38,7 @@ const usePanelStore = create((set) => ({
   setShowLoginPanel: (show) => set({ showLoginPanel: show }),
 
   // selected pair settings
-  selectedPair: null,
+  selectedPair: 'BTC',
   setSelectedPair: (pair) => set({ selectedPair: pair }),
 }));
 

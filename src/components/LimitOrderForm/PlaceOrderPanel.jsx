@@ -24,7 +24,7 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
   const { token, availableBalance } = useAuth();
   const [balanceTotal, setBalanceTotal] = useState("--");
   const balanceFree = availableBalance ? parseFloat(availableBalance).toFixed(2) : "--";
-  const [price, setPrice] = useState(priceMidpoint || '');
+  const [price, setPrice] = useState(priceMidpoint);
   const [amount, setAmount] = useState('');
   const [side, setSide] = useState('buy');
   const [market, setMarket] = useState('limit');
@@ -208,12 +208,12 @@ function LimitOrderForm({ onCurrencyChange, onConnect }) {
         if (currentPrice && !isNaN(currentPrice) && !isNaN(parseFloat(balanceFree))) {
           const baseEquivalent = parseFloat(balanceFree) / currentPrice;
           const calculatedAmount = (sliderValue / 100) * baseEquivalent;
-          setAmount(calculatedAmount.toFixed(6)); // More decimals for base currency like BTC
+          setAmount(calculatedAmount.toFixed(6));
         }
       } else {
-        // For quote currency, use balanceFree directly
+        // quote currency, balanceFree directly
         const calculatedAmount = (sliderValue / 100) * parseFloat(balanceFree);
-        setAmount(calculatedAmount.toFixed(2)); // Fewer decimals for quote currency like USDT
+        setAmount(calculatedAmount.toFixed(2)); 
       }
 
       // Reset input source after processing
