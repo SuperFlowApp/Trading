@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/Authentication";
-import EmailLoginPanel from "./EmailLoginPanel";
+import { useAuth } from "../../context/Authentication";
+import EmailLoginPanel from "../Login/EmailLoginPanel";
 import { ethers } from "ethers";
 import Web3Modal from "web3modal";
 

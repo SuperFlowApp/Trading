@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../context/Authentication";
+import { useAuth } from "../../context/Authentication";
 
 function validateUsername(username) {
     return typeof username === "string" && username.length >= 4;

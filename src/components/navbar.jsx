@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/Authentication"; // <-- Import useAuth
-import AuthPanel, { shortenAddress } from "./LoginPanel";
-import ManageAccountModal from "./ManageAccountModal";
+import AuthPanel, { shortenAddress } from "./Login/LoginPanel";
+import ManageAccountModal from "./Login/ManageAccountModal";
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,

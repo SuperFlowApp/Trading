@@ -2,19 +2,18 @@ import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AuthProvider } from './context/Authentication.jsx';
 import Navbar from './components/navbar.jsx';
-import KlineChartProPanel from './components/ChartPanel/KlineChart.jsx'; // Import KlineChart
-import LimitOrderForm from './components/LimitOrderForm/PlaceOrderPanel.jsx';
+import KlineChartProPanel from './components/Chart/KlineChart.jsx'; // Import KlineChart
+import LimitOrderForm from './components/OrderForm/PlaceOrderPanel.jsx';
 import Infobar from './components/Infobar.jsx';
-import PositionsPanel from './components/PositionsPanel/PositionsPanel.jsx';
-import AccountInfoPanel from './components/PositionsPanel/AccountInfoPanel.jsx';
-import AuthPanel from './components/LoginPanel.jsx'; // Import AuthPanel
+import PositionsPanel from './components/Positions/PositionsPanel.jsx';
+import AccountInfoPanel from './components/Positions/AccountInfoPanel.jsx';
+import AuthPanel from './components/Login/LoginPanel.jsx'; // Import AuthPanel
 import usePanelStore from './store/panelStore.js'; // Zustand Storage
-import TradesPanel from './components/TradesPanel/TradesPanel.jsx';
+import TradesPanel from './components/History/TradesPanel.jsx';
 import './index.css';
 
 
 function MainApp() {
-  const [activeTab, setActiveTab] = useState('OrderBook');
   const [isMobile, setIsMobile] = useState(false);
 
   // Zustand storage 
