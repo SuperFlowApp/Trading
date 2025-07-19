@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp.jsx';
 import Navbar from './components/navbar.jsx';
 import CommingSoon from './components/CommonUIs/CommingSoon.jsx';
+import { AuthProvider } from './context/Authentication.jsx'; // <-- import AuthProvider
 import './components/index.css';
 
 const container = document.getElementById('root');
@@ -45,6 +46,7 @@ function RootApp() {
 
   return (
     <StrictMode>
+      <AuthProvider>
         <div
           style={{
             backgroundImage: `url('/assets/desktopBG.jpg')`,
@@ -58,6 +60,7 @@ function RootApp() {
           <Navbar />
           {TradingPanel(isMobile)}
         </div>
+      </AuthProvider>
     </StrictMode>
   );
 }

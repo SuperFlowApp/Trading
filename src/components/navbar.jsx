@@ -29,6 +29,7 @@ function Navbar() {
     if (window.location.pathname.includes("options-trading")) return "options";
     return "futures";
   });
+  const [isConnected, setIsConnected] = useState(false);
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
   const authPanelRef = useRef(null);
@@ -91,6 +92,89 @@ function Navbar() {
       window.location.href = "/futures-trading";
     } else {
       window.location.href = "/options-trading";
+    }
+  };
+
+  // Effect to handle wallet connection and disconnection
+  useEffect(() => {
+    // Only run if MetaMask is present
+    if (window.ethereum) {
+      const handleAccountsChanged = (accounts) => {
+        if (!accounts || accounts.length === 0) {
+          setWalletAddress("");
+          localStorage.removeItem("walletAddress");
+        } else {
+          setWalletAddress(accounts[0]);
+          localStorage.setItem("walletAddress", accounts[0]);
+        }
+      };
+
+      const handleDisconnect = () => {
+        setWalletAddress("");
+        localStorage.removeItem("walletAddress");
+      };
+
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("disconnect", handleDisconnect);
+
+      // On mount, check if still connected
+      window.ethereum.request({ method: "eth_accounts" }).then((accounts) => {
+        if (!accounts || accounts.length === 0) {
+          setWalletAddress("");
+          localStorage.removeItem("walletAddress");
+        }
+      });
+
+      return () => {
+        window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+        window.ethereum.removeListener("disconnect", handleDisconnect);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    // Function to check connection status
+    const checkConnection = async () => {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: "eth_accounts" });
+        setIsConnected(accounts.length > 0);
+      }
+    };
+
+    // Listen for account changes
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", checkConnection);
+      window.ethereum.on("disconnect", () => setIsConnected(false));
+    }
+
+    // Initial check
+    checkConnection();
+
+    // Cleanup listeners on unmount
+    return () => {
+      if (window.ethereum) {
+        window.ethereum.removeListener("accountsChanged", checkConnection);
+        window.ethereum.removeListener("disconnect", () => setIsConnected(false));
+      }
+    };
+  }, []);
+
+  // Add this function inside Navbar
+  const handleDisconnectWallet = async () => {
+    setWalletAddress("");
+    localStorage.removeItem("walletAddress");
+    setDropdownOpen(false);
+    setIsConnected(false);
+    // Optionally, revoke permissions if supported
+    if (window.ethereum && window.ethereum.request) {
+      try {
+        await window.ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [{ eth_accounts: {} }],
+        });
+      } catch (e) {
+        // Ignore errors
+      }
     }
   };
 
@@ -174,10 +258,7 @@ function Navbar() {
                 >
                   <button
                     className="block w-full text-left px-4 py-2 hover:bg-opacity-80"
-                    onClick={() => {
-                      // Show the login panel with disconnection/logout functionality
-                      setShowLogin(true);
-                    }}
+                    onClick={handleDisconnectWallet} // <-- Change here
                   >
                     Disconnect
                   </button>
