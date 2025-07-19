@@ -5,6 +5,7 @@ import LeveragePanel from './Leverage.jsx';
 import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';
 import { Input, Select, Space } from 'antd';
+import Slider from '@mui/material/Slider';
 
 function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   const selectedPairBase = usePanelStore(s => s.selectedPair);
@@ -372,7 +373,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
                 placeholder="$0.0"
                 value={price === null || price === undefined ? "" : price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="bg-backgrounddark border-secondary2 text-white placeholder-white/50"
+                className="bg-backgrounddark border-secondary2 text-white placeholder-white/50 "
                 style={{
                   background: 'var(--color-backgrounddark)',
                   color: 'white',
@@ -384,7 +385,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
                 addonAfter={
                   <button
                     type="button"
-                    className="text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white cursor-pointer"
+                    className="text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white cursor-pointer "
                     style={{
                       background: 'transparent',
                       border: 'none',
@@ -461,53 +462,34 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
       {/* --- AmountSlider UI --- */}
       <div className="flex items-center gap-3 my-1 px-4">
-        {/* Slider markers */}
-        <div className="relative w-full">
-          {/* Circles at 25%, 50%, 75%, 100% */}
-          <div className="absolute left-0 top-[8px] w-full h-0 pointer-events-none">
-            {[25, 50, 75].map((percent) => (
-              <span
-                key={percent}
-                className="absolute -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  left: `${percent}%`,
-                  top: '50%',
-                }}
-              >
-                <span className="w-[12px] h-[12px] rounded-full bg-secondary2/50 block " />
-              </span>
-            ))}
-          </div>
-          {/* The slider itself */}
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
-            onChange={handleSliderChange}
-            className="w-full h-[12px] rounded-lg appearance-none cursor-pointer z-10 relative
-             [&::-webkit-slider-thumb]:appearance-none
-             [&::-webkit-slider-thumb]:h-[16px]
-             [&::-webkit-slider-thumb]:w-[16px]
-             [&::-webkit-slider-thumb]:rounded-full
-             [&::-webkit-slider-thumb]:bg-white
-             [&::-webkit-slider-thumb]:shadow
-             [&::-webkit-slider-thumb]:transition
-             [&::-webkit-slider-thumb]:duration-200
-             [&::-moz-range-thumb]:bg-white
-             [&::-moz-range-thumb]:rounded-full"
-            style={{
-              background: `linear-gradient(to right, #565A93 0%, #565A93 ${sliderValue ?? 0}%, #565A9350 ${sliderValue ?? 0}%, #565A9350 100%)`
-            }}
-          />
-        </div>
+        <Slider
+          min={0}
+          max={100}
+          step={1}
+          value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
+          onChange={(_, value) => {
+            setSliderValue(value);
+            setInputSource('slider');
+          }}
+          tooltip={{ open: false }}
+          trackStyle={{ backgroundColor: 'var(--color-secondary2)', height: 12 }}
+          railStyle={{ backgroundColor: '#565A9350', height: 12 }}
+          handleStyle={{
+            height: 20,
+            width: 20,
+            backgroundColor: 'white',
+            border: '2px solid var(--color-secondary2)',
+            marginTop: -4,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+          }}
+          style={{ width: '100%' }}
+        />
         <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
-          <input
+          <Input
             type="number"
-            min="0"
-            max="100"
-            step="1"
+            min={0}
+            max={100}
+            step={1}
             value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
             onChange={handleInputChange}
             className="w-12 bg-backgrounddark border border-secondary2 rounded px-1 py-0.5 text-white text-sm text-right"
