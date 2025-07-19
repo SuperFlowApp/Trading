@@ -9,7 +9,8 @@ function PositionsPanel() {
     }`;
 
   return (
-    <div className="flex flex-col w-full">
+
+    <div className="flex flex-col w-full bg-backgrounddark rounded-md">
       {/* Tab Headers */}
       <div className="flex border-b-2 border-primary2/50">
         <button onClick={() => setActiveTab('positions')}

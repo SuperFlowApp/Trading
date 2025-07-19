@@ -269,11 +269,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   }, [selectedCurrency]); // Only trigger when currency selection changes
 
   return (
-    <div className="w-full text-white flex flex-col gap-3">
-
-
-
-
+    <div className="w-full text-white flex flex-col gap-3 flex flex-col bg-backgrounddark rounded-md min-w-0 overflow-hidden">
 
       {/* Head Tabs */}
       <div className="flex justify-between items-center text-sm font-semibold">

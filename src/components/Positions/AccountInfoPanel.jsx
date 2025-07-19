@@ -49,7 +49,7 @@ function AccountInfoPanel() {
     }, [token]);
 
     return (
-        <div className="">
+        <div className="flex flex-col bg-backgrounddark rounded-md  p-2 min-w-0 overflow-hidden">
             {accountInfoError && (
                 <div className="text-red-400 text-xs">{accountInfoError}</div>
             )}

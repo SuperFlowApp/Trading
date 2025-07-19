@@ -1,6 +1,6 @@
 import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import MainApp from './main.jsx';
+import FuturesApp from './main.jsx';
 import Navbar from './components/navbar.jsx';
 import CommingSoon from './components/CommonUIs/CommingSoon.jsx';
 import { AuthProvider } from './context/Authentication.jsx';
@@ -28,7 +28,7 @@ function TradingPanel(isMobile) {
     return <CommingSoon />;
   }
   // Default to futures trading
-  return <MainApp />;
+  return <FuturesApp />;
 }
 
 function RootApp() {

@@ -108,7 +108,7 @@ class BinanceFeed {
 export default function KlineChartProPanel() {
   const selectedPairBase = usePanelStore(s => s.selectedPair);
   const [interval] = useState('5m');
-  const [pair, setPair] = useState(selectedPairBase );
+  const [pair, setPair] = useState(selectedPairBase);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
@@ -194,7 +194,7 @@ export default function KlineChartProPanel() {
   }, [interval, pair]);
 
   return (
-    <div>
+    <div className="bg-backgrounddark rounded-md p-4 ">
       <div
         ref={chartRef}
         style={{

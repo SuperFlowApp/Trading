@@ -94,7 +94,7 @@ function Infobar() {
   const selectedMarket = markets.find(m => m.symbol === `${selectedPair}USDT`);
 
   return (
-    <div className="">
+    <div className="bg-backgrounddark rounded-md overflow-visible mb-2">
       <div className="flex gap-8 items-start items-center px-4 py-2">
         {/* Custom Dropdown */}
         <div
