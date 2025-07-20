@@ -1,0 +1,36 @@
+/* Add to your global CSS */
+.native-slider {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--color-primary2) 0%, var(--color-primary2) 100%);
+  outline: none;
+  transition: background 0.3s;
+}
+.native-slider::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary2);
+  border: 2px solid var(--color-primary2);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.native-slider:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
+}
+.native-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary2);
+  border: 2px solid var(--color-primary2);
+  cursor: pointer;
+}
+.native-slider::-ms-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary2);
+  border: 2px solid var(--color-primary2);
+  cursor: pointer;
+}

@@ -1,9 +1,10 @@
 import usePanelStore from '../../Zustandstore/panelStore.js';
-import Slider from '@mui/material/Slider';
 import { Modal, Button } from 'antd';
+import NativeSlider from '../CommonUIs/slider.jsx';
+import '../../components/CommonUIs/slider.css';
 
-const MIN_LEVERAGE = 1;
-const MAX_LEVERAGE = 20;
+const MIN_SLIDER = 1;
+const MAX_SLIDER = 20;
 
 export default function LeveragePanel() {
   const leverage = usePanelStore(s => s.leverage);
@@ -32,35 +33,12 @@ export default function LeveragePanel() {
         <div className="w-full flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold text-white">Set Leverage</h2>
         </div>
-        <Slider
-          min={MIN_LEVERAGE}
-          max={MAX_LEVERAGE}
+        <NativeSlider
+          min={MIN_SLIDER}
+          max={MAX_SLIDER}
+          step={1}
           value={leverage}
           onChange={(_, value) => setLeverage(Number(value))}
-          valueLabelDisplay="off"
-          sx={{
-            color: 'var(--color-primary2)',
-            height: 8,
-            '& .MuiSlider-thumb': {
-              height: 20,
-              width: 20,
-              backgroundColor: 'var(--color-primary2)',
-              border: '2px solid var(--color-primary2)',
-              boxShadow: '0px 2px 1px -1px rgba(255, 255, 255, 0.0)',
-              '&:hover': {
-                boxShadow: '0px 3px 1px -2px rgba(255, 255, 255, 0.0)',
-              },
-            },
-            '& .MuiSlider-rail': {
-              opacity: 0.3,
-              backgroundColor: 'var(--color-primary2)',
-              height: 8,
-            },
-            '& .MuiSlider-track': {
-              backgroundColor: 'var(--color-primary2)',
-              height: 8,
-            },
-          }}
         />
         <div className="text-2xl font-bold text-primary2">{leverage}X</div>
         <Button

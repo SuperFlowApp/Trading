@@ -5,8 +5,9 @@ import LeveragePanel from './Leverage.jsx';
 import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';
 import { Input, Select, Space } from 'antd';
-import Slider from '@mui/material/Slider';
 import Tab from '../CommonUIs/tab.jsx';
+import ModalModButton from '../CommonUIs/modalmodbutton';
+import NativeSlider from '../CommonUIs/slider.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   const selectedPairBase = usePanelStore(s => s.selectedPair);
@@ -162,17 +163,6 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   }, [market, priceMidpoint]);
 
 
-
-  // Update on slider change
-  const handleSliderChange = (e) => {
-    let value = Number(e.target.value);
-    if (isNaN(value)) value = 0;
-    if (value < 0) value = 0;
-    if (value > 100) value = 100;
-    setSliderValue(value);
-    setInputSource('slider');
-  };
-
   // Update on input change
   const handleInputChange = (e) => {
     let value = e.target.value.replace(/[^0-9.]/g, '');
@@ -283,32 +273,23 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
 
       {/* Margin Mode - Leverage - Position Mode */}
-      <div className="flex justify-between items-center text-sm font-semibold p-4 gap-2">
+      <div className="flex justify-between items-center text-sm font-semibold px-8 py-4 gap-2">
 
 
         <MarginMode />
-        <button
-          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
-          onClick={() => setMarginModePanelOpen(true)}
-        >
+        <ModalModButton onClick={() => setMarginModePanelOpen(true)}>
           {marginMode}
-        </button>
+        </ModalModButton>
 
         <LeveragePanel />
-        <button
-          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
-          onClick={() => setLeveragePanelOpen(true)}
-        >
+        <ModalModButton onClick={() => setLeveragePanelOpen(true)}>
           {leverage}X
-        </button>
+        </ModalModButton>
 
         <PositionMode />
-        <button
-          className={`w-[70px] h-[38px] bg-backgrounddark flex items-center justify-center border border-secondary2 hover:border-secondary1 text-secondary1 hover:text-white  rounded-lg cursor-pointer`}
-          onClick={() => setPositionModePanelOpen(true)}
-        >
+        <ModalModButton onClick={() => setPositionModePanelOpen(true)}>
           One-way
-        </button>
+        </ModalModButton>
 
 
       </div>
@@ -400,7 +381,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
 
         {/* Conditionally render the Amount field */}
-        {/* Conditionally render the Amount field */}
+
         {market !== '' && (
           <>
             <label className="pt-2 pl-1 text-white">Size</label>
@@ -445,7 +426,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
       {/* --- AmountSlider UI --- */}
       <div className="flex items-center gap-3 my-1 px-4">
-        <Slider
+        <NativeSlider
           min={0}
           max={100}
           step={1}
@@ -453,30 +434,6 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
           onChange={(_, value) => {
             setSliderValue(value);
             setInputSource('slider');
-          }}
-          valueLabelDisplay="off"
-          sx={{
-            color: 'var(--color-primary2)',
-            height: 8,
-            '& .MuiSlider-thumb': {
-              height: 20,
-              width: 20,
-              backgroundColor: 'var(--color-primary2)',
-              border: '2px solid var(--color-primary2)',
-              boxShadow: '0px 2px 1px -1px rgba(255, 255, 255, 0.0)',
-              '&:hover': {
-                boxShadow: '0px 3px 1px -2px rgba(255, 255, 255, 0.0)',
-              },
-            },
-            '& .MuiSlider-rail': {
-              opacity: 0.3,
-              backgroundColor: 'var(--color-primary2)',
-              height: 8,
-            },
-            '& .MuiSlider-track': {
-              backgroundColor: 'var(--color-primary2)',
-              height: 8,
-            },
           }}
           style={{ width: '100%' }}
         />
