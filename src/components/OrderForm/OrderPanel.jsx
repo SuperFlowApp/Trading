@@ -6,6 +6,7 @@ import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';
 import { Input, Select, Space } from 'antd';
 import Slider from '@mui/material/Slider';
+import Tab from '../CommonUIs/tab.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   const selectedPairBase = usePanelStore(s => s.selectedPair);
@@ -274,29 +275,11 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
     <div className="w-full text-white flex flex-col gap-3 flex flex-col bg-backgrounddark rounded-md min-w-0 overflow-hidden">
 
       {/* Head Tabs */}
-      <div className="flex justify-between items-center text-sm font-semibold">
-        <button
-          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'market' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
-            }`}
-          onClick={() => setMarket('market')}
-        >
-          Market
-        </button>
-        <button
-          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'limit' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
-            }`}
-          onClick={() => setMarket('limit')}
-        >
-          Limit
-        </button>
-        <button
-          className={`w-full py-2 font-semibold text-sm transition-colors ${market === 'scale' ? 'text-white border-b-2 border-primary2' : 'text-secondary1 border-b-2 border-primary2/30 hover:border-primary2/50'
-            }`}
-          onClick={() => setMarket('scale')}
-        >
-          Scale
-        </button>
-      </div>
+      <Tab
+        tabs={['market', 'limit', 'scale']}
+        active={market}
+        onChange={setMarket}
+      />
 
 
       {/* Margin Mode - Leverage - Position Mode */}
@@ -417,7 +400,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
 
         {/* Conditionally render the Amount field */}
-                {/* Conditionally render the Amount field */}
+        {/* Conditionally render the Amount field */}
         {market !== '' && (
           <>
             <label className="pt-2 pl-1 text-white">Size</label>
