@@ -471,16 +471,29 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
             setSliderValue(value);
             setInputSource('slider');
           }}
-          tooltip={{ open: false }}
-          trackStyle={{ backgroundColor: 'var(--color-secondary2)', height: 12 }}
-          railStyle={{ backgroundColor: '#565A9350', height: 12 }}
-          handleStyle={{
-            height: 20,
-            width: 20,
-            backgroundColor: 'white',
-            border: '2px solid var(--color-secondary2)',
-            marginTop: -4,
-            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+          valueLabelDisplay="off"
+          sx={{
+            color: 'var(--color-primary2)',
+            height: 8,
+            '& .MuiSlider-thumb': {
+              height: 20,
+              width: 20,
+              backgroundColor: 'var(--color-primary2)',
+              border: '2px solid var(--color-primary2)',
+              boxShadow: '0px 2px 1px -1px rgba(255, 255, 255, 0.0)',
+              '&:hover': {
+                boxShadow: '0px 3px 1px -2px rgba(255, 255, 255, 0.0)',
+              },
+            },
+            '& .MuiSlider-rail': {
+              opacity: 0.3,
+              backgroundColor: 'var(--color-primary2)',
+              height: 8,
+            },
+            '& .MuiSlider-track': {
+              backgroundColor: 'var(--color-primary2)',
+              height: 8,
+            },
           }}
           style={{ width: '100%' }}
         />
