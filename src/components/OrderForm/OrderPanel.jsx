@@ -8,6 +8,7 @@ import { Input, Select, Space } from 'antd';
 import Tab from '../CommonUIs/tab.jsx';
 import ModalModButton from '../CommonUIs/modalmodbutton';
 import NativeSlider from '../CommonUIs/slider.jsx';
+import Button from '../CommonUIs/Button.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   const selectedPairBase = usePanelStore(s => s.selectedPair);
@@ -453,19 +454,26 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
       {/* --- End AmountSlider UI --- */}
 
       {/* Place Order Button */}
-      <button
-        className={`mx-2 mt-8 rounded-md font-semibold text-lg transition-colors border-2 border-transparent ${side === 'buy'
-          ? 'bg-primary2 text-black hover:bg-primary2/80'
-          : 'bg-primary1 text-black hover:bg-primary1/80'
-          } ${blinkClass}`}
-        type="button"
+      <Button
+        type={
+          error
+            ? 'danger'
+            : success
+              ? 'success'
+              : side === 'buy'
+                ? 'primary'
+                : 'secondary'
+        }
+        className={`mt-8 text-lg transition-colors border-2 border-transparent ${blinkClass}`}
+        block
         onClick={() => {
           if (!token) {
-            setShowLoginPanel(true); // <-- OPEN LOGIN PANEL WITH ZUSTAND
+            setShowLoginPanel(true);
             return;
           }
           placeOrder();
         }}
+        disabled={loading}
       >
         {!token
           ? "Connect"
@@ -474,7 +482,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
             : side === 'buy'
               ? 'Place buy order'
               : 'Place sell order'}
-      </button>
+      </Button>
 
       <div className='px-4' style={{ minHeight: '16px' }}>
         {error && <div className="text-red-400 text-xs">{error}</div>}

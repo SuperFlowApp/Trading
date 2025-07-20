@@ -1,5 +1,6 @@
 import usePanelStore from '../../Zustandstore/panelStore';
-import { Modal, Button } from 'antd';
+import { Modal } from 'antd';
+import Button from '../CommonUIs/Button.jsx';
 
 export default function PositionMode() {
   const isOpen = usePanelStore(s => s.isPositionModePanelOpen);
@@ -33,14 +34,7 @@ export default function PositionMode() {
         </div>
         <Button
           type="primary"
-          className="mt-6 py-2 !bg-primary2 !text-black !rounded font-semibold hover:!bg-primary2/80"
-          style={{
-            background: 'var(--color-primary2)',
-            color: 'black',
-            border: 'none',
-            fontWeight: 600,
-            borderRadius: 8,
-          }}
+          className="mt-6"
           onClick={() => setOpen(false)}
           block
         >

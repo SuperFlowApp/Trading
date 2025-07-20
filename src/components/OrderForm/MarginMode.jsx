@@ -1,5 +1,6 @@
 import usePanelStore from '../../Zustandstore/panelStore';
-import { Modal, Button } from 'antd';
+import { Modal } from 'antd';
+import Button from '../CommonUIs/Button.jsx';
 
 export default function MarginMode() {
     const isOpen = usePanelStore(s => s.isMarginModePanelOpen);
@@ -61,14 +62,7 @@ export default function MarginMode() {
                 <div className="flex gap-2 mt-4">
                     <Button
                         type="primary"
-                        className="flex-1 py-2 !bg-primary2 !text-black !rounded font-semibold hover:!bg-primary2/80"
-                        style={{
-                            background: 'var(--color-primary2)',
-                            color: 'black',
-                            border: 'none',
-                            fontWeight: 600,
-                            borderRadius: 8,
-                        }}
+                        className="flex-1 py-2"
                         onClick={() => setOpen(false)}
                         block
                     >
