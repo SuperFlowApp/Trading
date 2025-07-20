@@ -343,7 +343,6 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
                   background: 'var(--color-backgrounddark)',
                   color: 'white',
                   borderColor: 'var(--color-secondary2)',
-                  borderRadius: 6,
                   fontSize: 14,
                   paddingRight: 0,
                 }}
@@ -398,7 +397,6 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
                     background: 'var(--color-backgrounddark)',
                     color: 'white',
                     borderColor: 'var(--color-secondary2)',
-                    borderRadius: 6,
                     fontSize: 14,
                   }}
                 />
