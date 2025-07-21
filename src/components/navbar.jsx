@@ -230,7 +230,7 @@ function Navbar() {
           {/* Login/User Button */}
           {!walletAddress ? (
             <button
-              className="px-4 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-secondary2/80 transition"
+              className="px-4 py-2 bg-backgroundlight rounded-md text-sm font-semibold hover:bg-primary2deactive transition"
               onClick={() => setShowLogin(true)}
             >
               Connect
@@ -268,7 +268,7 @@ function Navbar() {
           )}
           <div className="relative" ref={settingsRef}>
             <button
-              className="px-2 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-opacity-80 transition"
+              className="px-2 py-2 bg-backgroundlight rounded-md text-sm font-semibold hover:bg-primary2deactive transition"
               onClick={() => setSettingsOpen((v) => !v)}
             >
               <img src="/assets/settings-icon.svg" alt="Settings" className="w-5 h-5" />

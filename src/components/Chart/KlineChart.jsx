@@ -194,7 +194,7 @@ export default function KlineChartProPanel() {
   }, [interval, pair]);
 
   return (
-    <div className="bg-backgroundmid rounded-md p-4 ">
+    <div className="bg-backgroundmid rounded-md ">
       <div
         ref={chartRef}
         style={{

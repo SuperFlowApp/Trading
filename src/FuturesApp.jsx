@@ -15,11 +15,11 @@ function FuturesApp() {
   return (
     <AuthProvider>
       <div className="relative w-screen h-auto overflow-visible">
-        <div className="flex flex-1 p-2 gap-2">
+        <div className="flex flex-1 p-1 gap-1">
           {/* TradingViewChart/Infobar */}
-          <div className="flex flex-col gap-2 w-full ">
+          <div className="flex flex-col gap-1 w-full ">
             <div className="flex">
-              <div className="mr-2 flex-1">
+              <div className="flex flex-col mr-1 flex-1 gap-1">
                 <Infobar />
                 <KlineChartProPanel />
               </div>
@@ -27,7 +27,7 @@ function FuturesApp() {
             </div>
             <PositionsPanel />
           </div>
-          <div className="flex flex-col w-[360px] gap-2">
+          <div className="flex flex-col w-[360px] gap-1">
             <LimitOrderForm />
             <AccountInfoPanel />
           </div>
