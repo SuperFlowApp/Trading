@@ -7,7 +7,7 @@ import AccountInfoPanel from './components/UserInfoPanels/AccountInfoPanel.jsx';
 import AuthPanel from './components/Login/LoginPanel.jsx';
 import usePanelStore from './Zustandstore/panelStore.js';
 import TradesPanel from './components/History/TradesPanel.jsx';
- 
+
 function FuturesApp() {
   const showLoginPanel = usePanelStore(s => s.showLoginPanel);
   const setShowLoginPanel = usePanelStore(s => s.setShowLoginPanel);
@@ -17,15 +17,13 @@ function FuturesApp() {
       <div className="relative w-screen h-auto overflow-visible">
         <div className="flex flex-1 p-1 gap-1">
           {/* TradingViewChart/Infobar */}
-          <div className="flex flex-col gap-1 w-full ">
-            <div className="flex">
-              <div className="flex flex-col mr-1 flex-1 gap-1">
-                <Infobar />
-                <KlineChartProPanel />
-              </div>
-              <TradesPanel />
+          <div className="flex gap-1 w-full ">
+            <div className="flex flex-col mr-1 flex-1 gap-1">
+              <Infobar />
+              <KlineChartProPanel />
+              <PositionsPanel />
             </div>
-            <PositionsPanel />
+            <TradesPanel />
           </div>
           <div className="flex flex-col w-[360px] gap-1">
             <LimitOrderForm />
