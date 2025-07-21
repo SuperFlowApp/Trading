@@ -187,42 +187,40 @@ function Navbar() {
             <img src="/assets/Logo.svg" alt="Logo" className="h-8 w-auto" />
             <img src="/assets/Bysymmio.svg" alt="Logo" className="h-4 w-auto" />
           </div>
-          <ul className="flex gap-6 text-sm font-small">
+          <div className="flex items-center gap-14">
+
             <li
-              className={`group flex items-center gap-2 cursor-pointer ${
-                activeTab === "futures" ? "text-white" : "text-secondary1"
-              }`}
+              className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-white" : "text-secondary1"
+                }`}
               onClick={() => handleTabClick("futures")}
             >
               <img
                 src="/assets/chart-candlestick.svg"
                 alt="Futures"
-                className={`w-5 h-5 ${
-                  activeTab === "futures"
-                    ? "brightness-200"
-                    : "brightness-100 group-hover:brightness-200"
-                }`}
+                className={` ${activeTab === "futures"
+                  ? "brightness-200"
+                  : "brightness-100 group-hover:brightness-200"
+                  }`}
               />
               Futures Trading
             </li>
             <li
-              className={`group flex items-center gap-2 cursor-pointer ${
-                activeTab === "options" ? "text-white" : "text-secondary1"
-              }`}
+              className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-white" : "text-secondary1"
+                }`}
               onClick={() => handleTabClick("options")}
             >
               <img
                 src="/assets/chart-line.svg"
                 alt="Options"
-                className={`w-5 h-5 ${
-                  activeTab === "options"
-                    ? "brightness-200"
-                    : "brightness-100 group-hover:brightness-200"
-                }`}
+                className={`${activeTab === "options"
+                  ? "brightness-200"
+                  : "brightness-100 group-hover:brightness-200"
+                  }`}
               />
               Options Trading
             </li>
-          </ul>
+          </div>
+
         </div>
 
         {/* Right Side */}
