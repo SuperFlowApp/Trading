@@ -18,7 +18,7 @@ function FuturesApp() {
         <div className="flex flex-1 p-1 gap-1">
           {/* TradingViewChart/Infobar */}
           <div className="flex gap-1 w-full ">
-            <div className="flex flex-col mr-1 flex-1 gap-1">
+            <div className="flex flex-col flex-1 gap-1">
               <Infobar />
               <KlineChartProPanel />
               <PositionsPanel />
