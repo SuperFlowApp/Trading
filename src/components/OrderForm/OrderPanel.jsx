@@ -264,7 +264,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   }, [selectedCurrency]); // Only trigger when currency selection changes
 
   return (
-    <div className="w-full text-white flex flex-col gap-3 flex flex-col bg-backgrounddark rounded-md min-w-0 overflow-hidden">
+    <div className="p-2 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
 
       {/* Head Tabs */}
       <Tab
@@ -275,7 +275,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
 
       {/* Margin Mode - Leverage - Position Mode */}
-      <div className="flex justify-between items-center text-sm font-semibold px-2 py-4 gap-2">
+      <div className="flex justify-between items-center text-sm font-semibold py-2 gap-2">
 
 
         <MarginMode />
@@ -298,23 +298,23 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
 
       {/* Side + Leverage */}
-      <div className="px-2 flex gap-4 items-center">
+      <div className="flex gap-4 items-center">
         <SideSelectorButton side={side} setSide={setSide} />
       </div>
       {/* Balance Row */}
-      <div className="px-2 font-semibold text-[12px]">
+      <div className="font-semibold text-[12px]">
         <span className="flex items-center justify-between w-full text-secondary1">
           Free Balance: <span className="text-white">{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(1) : "--"} USDT</span>
         </span>
       </div>
 
       {/* Conditionally render the Price field */}
-      <div className="px-2 flex flex-col text-sm">
+      <div className=" flex flex-col text-sm">
         {market !== 'market' && (
           <>
-            <label className=" pl-1 text-white pt-2">Price</label>
-            <div className="gap-2 w-full justify-between items-center">
-              <Space.Compact>
+            <label className="text-secondary1 pt-2">Price</label>
+            <div className=" w-full justify-between items-center">
+              <Space.Compact style={{ width: '100%' }}>
                 <Input
                   type="primary"
                   placeholder="0.0"
@@ -417,35 +417,37 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
       {/* --- End AmountSlider UI --- */}
 
       {/* Place Order Button */}
-      <Button
-        type={
-          error
-            ? 'danger'
-            : success
-              ? 'success'
-              : side === 'buy'
-                ? 'primary'
-                : 'secondary'
-        }
-        className={`mt-8 text-lg transition-colors border-2 border-transparent ${blinkClass}`}
-        block
-        onClick={() => {
-          if (!token) {
-            setShowLoginPanel(true);
-            return;
+      <div className="px-2" >
+        <Button
+          type={
+            error
+              ? 'danger'
+              : success
+                ? 'success'
+                : side === 'buy'
+                  ? 'primary'
+                  : 'secondary'
           }
-          placeOrder();
-        }}
-        disabled={loading}
-      >
-        {!token
-          ? "Connect"
-          : loading
-            ? "Placing..."
-            : side === 'buy'
-              ? 'Place buy order'
-              : 'Place sell order'}
-      </Button>
+          className={` mt-8 text-lg transition-colors border-2 border-transparent ${blinkClass}`}
+          block
+          onClick={() => {
+            if (!token) {
+              setShowLoginPanel(true);
+              return;
+            }
+            placeOrder();
+          }}
+          disabled={loading}
+        >
+          {!token
+            ? "Connect"
+            : loading
+              ? "Placing..."
+              : side === 'buy'
+                ? 'Place buy order'
+                : 'Place sell order'}
+        </Button>
+      </div>
 
       <div className='px-4' style={{ minHeight: '16px' }}>
         {error && <div className="text-red-400 text-xs">{error}</div>}

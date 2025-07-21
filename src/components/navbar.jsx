@@ -180,7 +180,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className="pl-[20px] pr-[30px] w-full flex items-center justify-between px-4 py-2 bg-backgrounddark text-white ">
+      <nav className="pl-[20px] pr-[30px] w-full flex items-center justify-between px-4 py-2 bg-backgroundmid text-white ">
         {/* Left Side */}
         <div className="flex items-center gap-14">
           <div className="flex items-end gap-2">

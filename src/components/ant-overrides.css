@@ -121,3 +121,8 @@
     box-shadow: none !important;
 
 }
+
+
+.currencyselector .ant-select-selector {
+    background: none !important;
+}

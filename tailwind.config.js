@@ -13,6 +13,7 @@ export default {
         secondary1: '#8AABB2',
         secondary2: '#565A93',
         backgroundlight: '#1b2937ff',
+        backgroundmid:'#0f1529ee',
         backgrounddark: '#02001Bdd',
         warningcolor: '#a44b4b',
       },

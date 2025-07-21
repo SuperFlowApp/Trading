@@ -79,7 +79,7 @@ function Infobar() {
   }, [selectedPair, markets]);
 
   return (
-    <div className="bg-backgrounddark rounded-md overflow-visible mb-2">
+    <div className="bg-backgroundmid rounded-md overflow-visible mb-2">
       <div className="flex gap-8 items-start items-center px-4 py-2">
         {/* Pair Selector */}
         <PairSelector
