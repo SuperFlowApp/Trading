@@ -1,0 +1,123 @@
+.ant-input,
+.ant-input-number,
+.ant-input-affix-wrapper,
+.ant-input-group-addon {
+    background: none !important;
+    color: white !important;
+    border-color: var(--color-backgroundlight) !important;
+}
+
+
+.ant-input:hover {
+    border-color: var(--color-primary2deactive) !important;
+    box-shadow: none !important;
+}
+
+.ant-input:focus {
+    border-color: var(--color-primary2) !important;
+    box-shadow: none !important;
+
+}
+
+.ant-input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Optional: Button in compact group */
+.ant-input-group .ant-btn-primary {
+    background: var(--color-primary2) !important;
+    color: black !important;
+    border: none !important;
+}
+
+/* Ant Design Select (dropdown) global styles */
+.ant-select-dropdown,
+.ant-select-dropdown .ant-select-item {
+    background: var(--color-backgrounddark) !important;
+    color: white !important;
+    border-color: var(--color-secondary2) !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+.ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+    background: var(--color-primary2) !important;
+    color: black !important;
+}
+
+.ant-select-dropdown .ant-select-item-option {
+    transition: background 0.15s;
+}
+
+.ant-select-dropdown .ant-select-item-option:hover {
+    color: var(--color-primary2deactive) !important;
+}
+
+.ant-select-selector {
+    background: var(--color-backgrounddark) !important;
+    color: white !important;
+    border-color: var(--color-secondary2) !important;
+}
+
+.ant-select-single .ant-select-selector .ant-select-selection-item,
+.ant-select-single .ant-select-selector .ant-select-selection-placeholder {
+    color: white !important;
+}
+
+.ant-select-item-option-selected {
+    border-color: var(--color-primary2) !important;
+    color: black !important;
+}
+
+.ant-select-item-option-active {
+    border-color: var(--color-primary2) !important;
+    color: black !important;
+}
+
+.ant-modal-content {
+    background: var(--color-backgrounddark) !important;
+
+}
+
+.ant-select-selector {
+    box-shadow: none !important;
+    border-color: var(--color-backgroundlight) !important;
+}
+
+.ant-select-selector:hover {
+    box-shadow: none !important;
+    border-color: var(--color-primary2deactive) !important;
+}
+.ant-select-selector:focus {
+    box-shadow: none !important;
+    border-color: var(--color-primary2) !important;
+}
+.ant-select-open .ant-select-selector {
+    border-color: var(--color-primary2) !important;
+    box-shadow: none !important;
+}
+
+.ant-select-arrow {
+    color: var(--color-secondary1) !important;
+}
+
+.mid-btn {
+    transition: background 0.2s !important;
+    color: #ffffffaa !important;
+    border-color: var(--color-backgroundlight) !important;
+    box-shadow: none !important;
+    z-index: 2;
+}
+
+.mid-btn:hover {
+    color: #ffffff !important;
+    border-color: var(--color-primary2deactive) !important;
+    box-shadow: none !important;
+
+}
+
+.mid-btn:active {
+    color: #ffffff !important;
+    border-color: var(--color-primary2) !important;
+    box-shadow: none !important;
+
+}

@@ -15,54 +15,16 @@
   -moz-osx-font-smoothing: grayscale;
   font-family: 'Sofia Sans Condensed', sans-serif;
 
-  --color-primary1: #F59DEF;
+  --color-primary1: #ED7088;
   --color-primary2: #00B7C9;
   --color-primary2deactive: #00B7C950;
   --color-secondary1: #8AABB2;
   --color-secondary2: #565A93;
   --color-backgrounddark: #02001Bdd;
-  --color-backgroundlight: #161A2C;
+  --color-backgroundlight: #1b2937ff;
   --color-warncolor: #a44b4b;
 
 
-}
-
-.ant-input,
-.ant-input-number,
-.ant-input-affix-wrapper,
-.ant-input-group-addon {
-  background: var(--color-backgrounddark) !important;
-  color: white !important;
-  border-color: var(--color-secondary2) !important;
-}
-
-.ant-input-group-addon:hover {
-  background: #00B7C920 !important;
-}
-.ant-input-group-addon:active {
-  background: #00B7C930 !important;
-}
-.ant-input:hover {
-  background: #00B7C920 !important;
-}
-.ant-input:focus {
-  background: #00B7C930 !important;
-}
-
-.ant-input::placeholder {
-  color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* Optional: Button in compact group */
-.ant-input-group .ant-btn-primary {
-  background: var(--color-primary2) !important;
-  color: black !important;
-  border: none !important;
-}
-
-input[type="number"] {
-  background: var(--color-backgrounddark);
-  color: white;
 }
 
 .modal-container {
@@ -70,7 +32,7 @@ input[type="number"] {
 }
 
 .check-box {
-  @apply accent-primary2 appearance-none w-4 h-4 border-2 border-primary2 rounded transition-colors bg-backgrounddark checked:bg-primary2 checked:border-primary2;
+  @apply accent-primary2 appearance-none w-4 h-4 border-2 border-primary1 rounded transition-colors bg-backgrounddark checked:bg-primary2 checked:border-primary2;
 }
 
 /* Hide the spinner for input[type="number"] */
@@ -128,56 +90,4 @@ input[type="number"] {
     color: #22c55e;
     /* green-500 */
   }
-}
-
-/* Ant Design Select (dropdown) global styles */
-.ant-select-dropdown,
-.ant-select-dropdown .ant-select-item {
-  background: var(--color-backgrounddark) !important;
-  color: white !important;
-  border-color: var(--color-secondary2) !important;
-}
-
-.ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
-.ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
-  background: var(--color-primary2) !important;
-  color: black !important;
-}
-
-.ant-select-dropdown .ant-select-item-option {
-  transition: background 0.15s;
-}
-
-.ant-select-dropdown .ant-select-item-option:hover {
-  background: #00B7C930 !important;
-  color: var(--color-primary2) !important;
-}
-
-.ant-select-selector {
-  background: var(--color-backgrounddark) !important;
-  color: white !important;
-  border-color: var(--color-secondary2) !important;
-}
-
-.ant-select-single .ant-select-selector .ant-select-selection-item,
-.ant-select-single .ant-select-selector .ant-select-selection-placeholder {
-  color: white !important;
-}
-
-.ant-select-arrow {
-  color: var(--color-secondary2) !important;
-}
-
-.ant-select-item-option-selected {
-  background: var(--color-primary2) !important;
-  color: black !important;
-}
-
-.ant-select-item-option-active {
-  background: var(--color-primary2) !important;
-  color: black !important;
-}
-
-.ant-modal-content {
-  background: var(--color-backgrounddark) !important;
 }

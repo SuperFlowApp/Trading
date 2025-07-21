@@ -6,26 +6,13 @@ import CommingSoon from './components/CommonUIs/CommingSoon.jsx';
 import { AuthProvider } from './context/Authentication.jsx'; // <-- import AuthProvider
 import './components/index.css';
 import 'antd/dist/reset.css'; // Ant Design 
+import './components/ant-overrides.css';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 function TradingPanel(isMobile) {
-  if (isMobile) {
-    return (
-      <div
-        className="flex items-center justify-center h-screen w-screen bg-backgrounddark text-white"
-        style={{
-          backgroundImage: `url('/assets/background.jpg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        <h1 className="text-2xl font-bold">Unavailable for mobile at the moment</h1>
-      </div>
-    );
-  }
+
   if (window.location.pathname.includes('options-trading')) {
     return <CommingSoon />;
   }
@@ -48,19 +35,9 @@ function RootApp() {
   return (
     <StrictMode>
       <AuthProvider>
-        <div
-          style={{
-            backgroundImage: `url('/assets/desktopBG.jpg')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            height: '100vh',
-            width: '100vw',
-          }}
-        >
-          <Navbar />
-          {TradingPanel(isMobile)}
-        </div>
+
+        <Navbar />
+        {TradingPanel(isMobile)}
       </AuthProvider>
     </StrictMode>
   );

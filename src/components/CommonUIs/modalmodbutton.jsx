@@ -12,7 +12,7 @@ import React from "react";
 const ModalModButton = ({ children, onClick, className = "", style = {}, disabled = false }) => (
   <button
     type="button"
-    className={`flex items-center justify-center pb-1 border-b-[1px] border-primary2deactive hover:border-primary2 text-white/85 hover:text-white min-w-14 cursor-pointer transition-colors ${className}`}
+    className={`flex items-center justify-center bg-backgroundlight rounded-md p-1 border-[1px] border-transparent hover:border-primary2 hover:border-[1px] text-white/85 hover:text-white min-w-[80px] cursor-pointer transition-colors ${className}`}
     onClick={onClick}
     style={style}
     disabled={disabled}

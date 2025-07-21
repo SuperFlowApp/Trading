@@ -8,7 +8,8 @@ import { Input, Select, Space } from 'antd';
 import Tab from '../CommonUIs/tab.jsx';
 import ModalModButton from '../CommonUIs/modalmodbutton';
 import NativeSlider from '../CommonUIs/slider.jsx';
-import Button from '../CommonUIs/Button.jsx';
+import Button from '../CommonUIs/OrderButton.jsx';
+import SideSelectorButton from '../CommonUIs/SideSelectorButton.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   const selectedPairBase = usePanelStore(s => s.selectedPair);
@@ -274,7 +275,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
 
       {/* Margin Mode - Leverage - Position Mode */}
-      <div className="flex justify-between items-center text-sm font-semibold px-8 py-4 gap-2">
+      <div className="flex justify-between items-center text-sm font-semibold px-2 py-4 gap-2">
 
 
         <MarginMode />
@@ -298,27 +299,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
       {/* Side + Leverage */}
       <div className="px-2 flex gap-4 items-center">
-        <div className="flex w-full gap-2 bg-backgrounddark border border-secondary2 p-1 rounded-lg">
-          <button
-            className={`w-full py-1 rounded-md font-bold ${side === 'buy'
-              ? 'bg-primary2 text-black border border-transparent'
-              : 'hover:border border-primary2 text-white'
-              } flex items-center justify-center gap-2`}
-            onClick={() => setSide('buy')}
-          >
-            Buy
-          </button>
-          <button
-            className={`w-full py-1 rounded-md font-bold  ${side === 'sell'
-              ? 'bg-primary1 text-black border border-transparent'
-              : 'hover:border border-primary1 text-white'
-              } flex items-center justify-center gap-2`}
-            onClick={() => setSide('sell')}
-          >
-            Sell
-          </button>
-        </div>
-
+        <SideSelectorButton side={side} setSide={setSide} />
       </div>
       {/* Balance Row */}
       <div className="px-2 font-semibold text-[12px]">
@@ -333,48 +314,43 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
           <>
             <label className=" pl-1 text-white pt-2">Price</label>
             <div className="gap-2 w-full justify-between items-center">
-              <Input
-                type="number"
-                placeholder="$0.0"
-                value={price === null || price === undefined ? "" : price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="bg-backgrounddark border-secondary2 text-white placeholder-white/50 "
-                style={{
-                  background: 'var(--color-backgrounddark)',
-                  color: 'white',
-                  borderColor: 'var(--color-secondary2)',
-                  fontSize: 14,
-                  paddingRight: 0,
-                }}
-                addonAfter={
-                  <button
-                    type="button"
-                    className="text-secondary1 px-2 py-1 rounded text-xs font-semibold hover:text-white cursor-pointer "
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--color-secondary1)',
-                    }}
-                    onClick={async () => {
-                      const symbol = selectedPair;
-                      try {
-                        const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
-                        const data = await res.json();
-                        const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
-                        const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
-                        if (bestBid && bestAsk) {
-                          const mid = ((bestBid + bestAsk) / 2).toFixed(1);
-                          setPrice(mid);
-                        }
-                      } catch (err) {
-                        console.error('Failed to fetch orderbook for mid price:', err);
+              <Space.Compact>
+                <Input
+                  type="primary"
+                  placeholder="0.0"
+                  value={price === null || price === undefined ? "" : price}
+                  onChange={(e) => setPrice(e.target.value)}
+                />
+                <Button
+                  type="submit"
+                  className="mid-btn"
+                  style={{
+                    borderTopLeftRadius: '0px',
+                    borderBottomLeftRadius: '0px',
+                    borderTopRightRadius: '8px',
+                    borderBottomRightRadius: '8px',
+                    border: '1px solid #444',
+                  }}
+                  onClick={async () => {
+                    const symbol = selectedPair;
+                    try {
+                      const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
+                      const data = await res.json();
+                      const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
+                      const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
+                      if (bestBid && bestAsk) {
+                        const mid = ((bestBid + bestAsk) / 2).toFixed(1);
+                        setPrice(mid);
                       }
-                    }}
-                  >
-                    Mid
-                  </button>
-                }
-              />
+                    } catch (err) {
+                      console.error('Failed to fetch orderbook for mid price:', err);
+                    }
+                  }}
+                >
+                  Mid
+                </Button>
+              </Space.Compact>
+
             </div>
           </>
         )}
@@ -392,13 +368,6 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
                   placeholder="0.0"
                   value={amount === null || amount === undefined ? "" : amount}
                   onChange={handleAmountChange}
-                  className="bg-backgrounddark border-secondary2 text-white placeholder-white/50"
-                  style={{
-                    background: 'var(--color-backgrounddark)',
-                    color: 'white',
-                    borderColor: 'var(--color-secondary2)',
-                    fontSize: 14,
-                  }}
                 />
                 <Select
                   value={selectedCurrency}
@@ -407,14 +376,10 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
                     { value: pairDetails.base, label: pairDetails.base },
                     { value: pairDetails.quote, label: pairDetails.quote }
                   ]}
-                  className="!bg-backgrounddark !text-white !border-secondary2"
                   style={{
-                    background: 'var(--color-backgrounddark)',
-                    color: 'white',
-                    borderColor: 'var(--color-secondary2)',
-                    borderRadius: 6,
                     minWidth: 90,
                   }}
+                  className="currencyselector"
                 />
               </Space.Compact>
             </div>
