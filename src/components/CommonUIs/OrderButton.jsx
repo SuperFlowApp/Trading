@@ -1,5 +1,5 @@
 
-export default function Button({
+export default function OrderButton({
     children,
     type = 'order',
     onClick,

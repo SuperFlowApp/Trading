@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useAuthFetch } from '../../context/Authentication.jsx';
+import { Input, Select, Space, Button  } from 'antd';
+
 import usePanelStore from '../../Zustandstore/panelStore.js'; // already imported
 import LeveragePanel from './Leverage.jsx';
 import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';
-import { Input, Select, Space } from 'antd';
 import Tab from '../CommonUIs/tab.jsx';
 import ModalModButton from '../CommonUIs/modalmodbutton';
 import NativeSlider from '../CommonUIs/slider.jsx';
-import Button from '../CommonUIs/OrderButton.jsx';
+import OrderButton from '../CommonUIs/OrderButton.jsx';
 import SideSelectorButton from '../CommonUIs/SideSelectorButton.jsx';
 import TifSelector from './TifSelector.jsx';
 
@@ -428,7 +429,7 @@ function LimitOrderForm({ onCurrencyChange }) {
         />
 
 
-        
+
         <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
           <Input
             type="number"
@@ -445,15 +446,14 @@ function LimitOrderForm({ onCurrencyChange }) {
 
 
 
-
-      <TifSelector />
-
-
-
+      <div className='w-full flex flex-row items-center justify-end gap-4'>
+        <span>TIF</span>
+        <TifSelector />
+      </div>
 
 
       {/* Place Order Button */}
-      <Button
+      <OrderButton
         type={
           error
             ? 'danger'
@@ -481,7 +481,7 @@ function LimitOrderForm({ onCurrencyChange }) {
             : side === 'buy'
               ? 'Place buy order'
               : 'Place sell order'}
-      </Button>
+      </OrderButton>
 
       <div className='px-4' style={{ minHeight: '16px' }}>
         {error && <div className="text-red-400 text-xs">{error}</div>}
