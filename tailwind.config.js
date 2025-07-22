@@ -9,9 +9,11 @@ export default {
       colors: {
         primary1: '#ED7088',
         primary2: '#00B7C9',
+        primary2active: '#00eaff',
         primary2deactive: '#00505c',
-        primary2deactivehover: '#005f6e',
-        secondary1: '#8AABB2',
+        primary2deactiveactive: '#005f6e',
+        backgroundlighthover:'#1d2c3c',
+        liquidwhite: '#8AABB2',
         secondary2: '#565A93',
         backgroundlight: '#1b2937ff',
         backgroundmid:'#0f1529ee',

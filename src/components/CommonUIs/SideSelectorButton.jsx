@@ -13,7 +13,7 @@ const SideSelectorButton = ({ side, setSide }) => (
     />
     <button
       className={`w-1/2 py-1 rounded-md font-bold z-10 transition-colors duration-200 ${
-        side === 'buy' ? 'text-black' : 'text-white hover:bg-primary2deactivehover'
+        side === 'buy' ? 'text-black' : 'text-white hover:bg-primary2deactiveactive'
       }`}
       onClick={() => setSide('buy')}
       type="button"

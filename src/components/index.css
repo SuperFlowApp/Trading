@@ -17,13 +17,15 @@
 
   --color-primary1: #ED7088;
   --color-primary2: #00B7C9;
+  --color-primary2active: #00eaff;
   --color-primary2deactive: #00505c;
-  --color-primary2deactivehover: #005f6e;
-  --color-secondary1: #8AABB2;
+  --color-primary2deactiveactive: #005f6e;
+  --color-liquidwhite: #8AABB2;
   --color-secondary2: #565A93;
   --color-backgrounddark: #02001Bdd;
   --color-backgroundmid: #0f1529ee;
-  --color-backgroundlight: #1b2937ff;
+  --color-backgroundlight: #1b2937;
+  --color-backgroundlighthover: #1d2c3c;
   --color-warncolor: #a44b4b;
 
 

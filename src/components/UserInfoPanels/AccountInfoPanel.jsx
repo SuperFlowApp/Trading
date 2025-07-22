@@ -55,7 +55,7 @@ function AccountInfoPanel() {
             )}
             <div className="text-xs flex flex-col gap-2">
                 <div className="flex justify-between">
-                    <span className="text-secondary1">Account Equity</span>
+                    <span className="text-liquidwhite">Account Equity</span>
                     <span className="text-white font-semibold">
                         {token && accountInfo
                             ? `$${parseFloat(accountInfo.availableBalance || 0).toLocaleString(
@@ -66,7 +66,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-secondary1">Balance</span>
+                    <span className="text-liquidwhite">Balance</span>
                     <span className="text-white font-semibold">
                         {token && accountInfo
                             ? `$${parseFloat(accountInfo.crossBalance || 0).toLocaleString(
@@ -77,7 +77,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-secondary1">Unrealized PNL</span>
+                    <span className="text-liquidwhite">Unrealized PNL</span>
                     <span className="text-white font-semibold">
                         {token && accountInfo
                             ? `$${parseFloat(accountInfo.UnrealizedPnl || 0).toLocaleString(
@@ -88,7 +88,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-secondary1">Maintenance Margin</span>
+                    <span className="text-liquidwhite">Maintenance Margin</span>
                     <span className="text-white font-semibold">
                         {token && accountInfo
                             ? `$${parseFloat(
@@ -101,7 +101,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-secondary1">Cross Account Leverage</span>
+                    <span className="text-liquidwhite">Cross Account Leverage</span>
                     <span className="text-white font-semibold">
                         {token && accountInfo
                             ? `${accountInfo.positions?.[0]?.leverage || 0}x`

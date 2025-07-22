@@ -158,7 +158,7 @@ export default function EmailLoginPanel({
                         <>
                             <div>
                                 <input
-                                    className={`w-full px-4 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${usernameTouched && !validateUsername(username)
+                                    className={`w-full px-4 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-liquidwhite focus:outline-none focus:border-liquidwhite transition-colors ${usernameTouched && !validateUsername(username)
                                         ? "border-warningcolor"
                                         : "border-transparent"
                                         }`}
@@ -176,7 +176,7 @@ export default function EmailLoginPanel({
                             </div>
                             <div>
                                 <input
-                                    className={`w-full px-4 py-2 rounded bg-backgrounddark text-white  border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${passwordTouched && !validatePassword(password)
+                                    className={`w-full px-4 py-2 rounded bg-backgrounddark text-white  border border-transparent hover:border-liquidwhite focus:outline-none focus:border-liquidwhite transition-colors ${passwordTouched && !validatePassword(password)
                                         ? "border-warningcolor"
                                         : "border-transparent"
                                         }`}
@@ -227,7 +227,7 @@ export default function EmailLoginPanel({
                         <div className=" rounded space-y-2">
                             <div>
                                 <input
-                                    className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${usernameTouched && !validateUsername(username)
+                                    className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-liquidwhite focus:outline-none focus:border-liquidwhite transition-colors ${usernameTouched && !validateUsername(username)
                                         ? "border-warningcolor"
                                         : "border-transparent"
                                         }`}
@@ -250,7 +250,7 @@ export default function EmailLoginPanel({
                             </div>
                             <div>
                                 <input
-                                    className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${passwordTouched && !validatePassword(password)
+                                    className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-liquidwhite focus:outline-none focus:border-liquidwhite transition-colors ${passwordTouched && !validatePassword(password)
                                         ? "border-warningcolor"
                                         : "border-transparent"
                                         }`}
@@ -274,7 +274,7 @@ export default function EmailLoginPanel({
                             </div>
                             <div>
                                 <input
-                                    className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-secondary1 focus:outline-none focus:border-secondary1 transition-colors ${repeatPasswordTouched && password !== repeatPassword
+                                    className={`w-full px-3 py-2 rounded bg-backgrounddark text-white border border-transparent hover:border-liquidwhite focus:outline-none focus:border-liquidwhite transition-colors ${repeatPasswordTouched && password !== repeatPassword
                                         ? "border-warningcolor"
                                         : "border-transparent"
                                         }`}

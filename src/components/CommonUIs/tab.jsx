@@ -24,7 +24,7 @@ const Tab = ({ tabs, active, onChange, renderLabel, className = "" }) => {
           className={`w-full py-2 text-sm transition-colors
             ${active === tab
               ? "text-white "
-              : "text-secondary1 hover:text-white font-normal"}
+              : "text-liquidwhite hover:text-white font-normal"}
           `}
           onClick={() => onChange(tab)}
           type="button"

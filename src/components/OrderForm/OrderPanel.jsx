@@ -10,8 +10,9 @@ import ModalModButton from '../CommonUIs/modalmodbutton';
 import NativeSlider from '../CommonUIs/slider.jsx';
 import Button from '../CommonUIs/OrderButton.jsx';
 import SideSelectorButton from '../CommonUIs/SideSelectorButton.jsx';
+import TifSelector from './TifSelector.jsx';
 
-function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
+function LimitOrderForm({ onCurrencyChange }) {
   const selectedPairBase = usePanelStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
   const pairDetails = { base: selectedPairBase, quote: 'USDT' };
@@ -40,6 +41,8 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
   const [sliderValue, setSliderValue] = useState(0);
   const [blinkClass, setBlinkClass] = useState("");
   const [inputSource, setInputSource] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isSliderHovered, setIsSliderHovered] = useState(false); // <-- Add this
 
   const marginMode = usePanelStore(s => s.marginMode);
   const setMarginModePanelOpen = usePanelStore(s => s.setMarginModePanelOpen);
@@ -303,7 +306,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
       </div>
       {/* Balance Row */}
       <div className="font-semibold text-[12px]">
-        <span className="flex items-center justify-between w-full text-secondary1">
+        <span className="flex items-center justify-between w-full text-liquidwhite">
           Free Balance: <span className="text-white">{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(1) : "--"} USDT</span>
         </span>
       </div>
@@ -312,7 +315,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
       <div className=" flex flex-col text-sm">
         {market !== 'market' && (
           <>
-            <label className="text-secondary1 pt-2">Price</label>
+            <label className="text-liquidwhite pt-2">Price</label>
             <div className=" w-full justify-between items-center">
               <Space.Compact style={{ width: '100%' }}>
                 <Input
@@ -362,7 +365,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
           <>
             <label className="pt-2 pl-1 text-white">Size</label>
             <div className="w-full relative flex items-center">
-              <Space.Compact className="w-full">
+              <Space.Compact className="w-full h-[28px]">
                 <Input
                   type="number"
                   placeholder="0.0"
@@ -379,7 +382,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
                   style={{
                     minWidth: 90,
                   }}
-                  className="currencyselector"
+                  className="currencyselector h-[28px]"
                 />
               </Space.Compact>
             </div>
@@ -389,7 +392,10 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
       </div>
 
       {/* --- AmountSlider UI --- */}
-      <div className="flex items-center gap-3 my-1 px-4">
+      <div className="flex items-center gap-3 my-1 ">
+
+
+
         <NativeSlider
           min={0}
           max={100}
@@ -400,7 +406,29 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
             setInputSource('slider');
           }}
           style={{ width: '100%' }}
+          filledColor={
+            isDragging
+              ? 'var(--color-primary2deactiveactive)' // color while dragging
+              : isSliderHovered
+                ? 'var(--color-primary2deactiveactive)' // color on hover
+                : 'var(--color-primary2deactive)' // normal color
+          }
+          unfilledColor={
+            isSliderHovered
+              ? 'var(--color-backgroundlighthover)' // hover color for unfilled
+              : 'var(--color-backgroundlight)' // normal color
+          }
+          onMouseDown={() => setIsDragging(true)}
+          onMouseUp={() => setIsDragging(false)}
+          onMouseLeave={() => { setIsDragging(false); setIsSliderHovered(false); }}
+          onTouchStart={() => setIsDragging(true)}
+          onTouchEnd={() => setIsDragging(false)}
+          onMouseEnter={() => setIsSliderHovered(true)} // <-- Add this
+          onMouseOut={() => setIsSliderHovered(false)} // <-- Add this
         />
+
+
+        
         <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
           <Input
             type="number"
@@ -409,45 +437,51 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
             step={1}
             value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
             onChange={handleInputChange}
-            className="w-12 bg-backgrounddark border border-secondary2 rounded px-1 py-0.5 text-white text-sm text-right"
+            className="h-[28px]"
           />
           <span>%</span>
         </div>
       </div>
-      {/* --- End AmountSlider UI --- */}
+
+
+
+
+      <TifSelector />
+
+
+
+
 
       {/* Place Order Button */}
-      <div className="px-2" >
-        <Button
-          type={
-            error
-              ? 'danger'
-              : success
-                ? 'success'
-                : side === 'buy'
-                  ? 'primary'
-                  : 'secondary'
-          }
-          className={` mt-8 text-lg transition-colors border-2 border-transparent ${blinkClass}`}
-          block
-          onClick={() => {
-            if (!token) {
-              setShowLoginPanel(true);
-              return;
-            }
-            placeOrder();
-          }}
-          disabled={loading}
-        >
-          {!token
-            ? "Connect"
-            : loading
-              ? "Placing..."
+      <Button
+        type={
+          error
+            ? 'danger'
+            : success
+              ? 'success'
               : side === 'buy'
-                ? 'Place buy order'
-                : 'Place sell order'}
-        </Button>
-      </div>
+                ? 'primary'
+                : 'secondary'
+        }
+        className={` mt-8 text-lg transition-colors border-2 border-transparent ${blinkClass}`}
+        block
+        onClick={() => {
+          if (!token) {
+            setShowLoginPanel(true);
+            return;
+          }
+          placeOrder();
+        }}
+        disabled={loading}
+      >
+        {!token
+          ? "Connect"
+          : loading
+            ? "Placing..."
+            : side === 'buy'
+              ? 'Place buy order'
+              : 'Place sell order'}
+      </Button>
 
       <div className='px-4' style={{ minHeight: '16px' }}>
         {error && <div className="text-red-400 text-xs">{error}</div>}
@@ -456,7 +490,7 @@ function LimitOrderForm({ onCurrencyChange }) { // REMOVE onConnect from props
 
       {/* Order Information */}
       <div className="px-2 mt-4">
-        <div className="border-t border-secondary2 py-3 text-xs flex flex-col gap-2">
+        <div className="border-t border-liquidwhite py-3 text-xs flex flex-col gap-2">
           <span className="w-full flex justify-between text-white font-semibold">
             Order Value
             <span>

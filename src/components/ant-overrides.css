@@ -104,7 +104,7 @@
 }
 
 .ant-select-arrow {
-    color: var(--color-secondary1) !important;
+    color: var(--color-liquidwhite) !important;
 }
 
 .mid-btn {
@@ -156,4 +156,41 @@
     background: var(--color-primary2) !important;
     color: #000000 !important;
 
+}
+
+/* Style the Dropdown trigger button like the currency selector */
+.currencyselector {
+    background: var(--color-backgrounddark) !important;
+    color: white !important;
+    border: 1px solid var(--color-backgroundlight) !important;
+    border-radius: 8px !important;
+    min-width: 90px;
+    height: 28px;
+    box-shadow: none !important;
+    font-weight: 500;
+    transition: background 0.15s;
+}
+.currencyselector:hover,
+.currencyselector:focus {
+    background: var(--color-primary2deactive) !important;
+    color: white !important;
+    box-shadow: none !important;
+}
+
+/* Style the Dropdown menu to match the Select dropdown */
+.ant-dropdown-menu {
+    background: var(--color-backgrounddark) !important;
+    color: white !important;
+    border: 1px solid var(--color-secondary2) !important;
+    border-radius: 8px !important;
+}
+.ant-dropdown-menu-item {
+    color: white !important;
+    background: none !important;
+    transition: background 0.15s;
+}
+.ant-dropdown-menu-item:hover,
+.ant-dropdown-menu-item-active {
+    background: var(--color-primary2deactive) !important;
+    color: white !important;
 }

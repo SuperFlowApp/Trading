@@ -67,7 +67,7 @@ const Positions = () => {
 
       <div className="overflow-x-auto ">
         <div className="min-w-[900px]">
-          <div className="grid grid-cols-8 gap-2  text-xs font-semibold text-secondary1">
+          <div className="grid grid-cols-8 gap-2  text-xs font-semibold text-liquidwhite">
             <div>Pair</div>
             <div>Size</div>
             <div>Open Price</div>
@@ -81,7 +81,7 @@ const Positions = () => {
             <div
               key={pos.symbol + pos.positionSide}
               className={`rounded-md grid grid-cols-8 gap-2 items-center px-3 py-1 mt-2 text-sm ${
-                idx % 2 ? 'bg-secondary1/10' : 'bg-secondary1/20'
+                idx % 2 ? 'bg-liquidwhite/10' : 'bg-liquidwhite/20'
               }`}
             >
               <div className="font-semibold">{pos.symbol} <span className="ml-1 text-xs text-gray-400">{pos.positionSide}</span></div>
@@ -93,12 +93,12 @@ const Positions = () => {
                 {formatNumber(pos.unrealizedPnl)}
               </div>
               <div>
-                <button className="bg-backgrounddark  border border-transparent hover:border-secondary1 text-secondary1 hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
-                <button className="bg-backgrounddark  border border-transparent hover:border-secondary1 text-secondary1 hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
+                <button className="bg-backgrounddark  border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
+                <button className="bg-backgrounddark  border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
               </div>
               <div className="flex gap-1">
-                <button className=" border border-primary2 hover:border-secondary1 text-white px-2 py-1 rounded text-xs">Edit</button>
-                <button className="bg-warningcolor  border border-transparent hover:border-secondary1 text-white   px-2 py-1 rounded text-xs">Close</button>
+                <button className=" border border-primary2 hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
+                <button className="bg-warningcolor  border border-transparent hover:border-liquidwhite text-white   px-2 py-1 rounded text-xs">Close</button>
               </div>
             </div>
           ))}

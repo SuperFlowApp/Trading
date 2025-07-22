@@ -1,3 +1,5 @@
+import './slider.css';
+
 export default function NativeSlider({
   min = 0,
   max = 100,
@@ -6,6 +8,8 @@ export default function NativeSlider({
   onChange,
   style = {},
   className = '',
+  filledColor = 'var(--color-primary2deactive)',
+  unfilledColor = 'var(--color-backgroundlight)',
   ...props
 }) {
   // Helper to round to nearest step
@@ -14,6 +18,9 @@ export default function NativeSlider({
     const stepped = Math.round((num - min) / step) * step + Number(min);
     return Math.min(max, Math.max(min, Number(stepped.toFixed(10))));
   };
+
+  // Calculate filled percentage
+  const percent = ((value - min) * 100) / (max - min);
 
   return (
     <input
@@ -29,7 +36,8 @@ export default function NativeSlider({
       className={`native-slider ${className}`}
       style={{
         width: '100%',
-        accentColor: 'var(--color-primary2)',
+        accentColor: filledColor,
+        background: `linear-gradient(90deg, ${filledColor} ${percent}%, ${unfilledColor} ${percent}%)`,
         ...style,
       }}
       {...props}

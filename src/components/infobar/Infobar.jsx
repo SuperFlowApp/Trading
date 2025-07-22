@@ -91,7 +91,7 @@ function Infobar() {
           setDropdownOpen={setDropdownOpen}
         />
         {/* Ticker Details */}
-        <div className="flex  text-[14px] items-center gap-8 text-secondary1">
+        <div className="flex  text-[14px] items-center gap-8 text-liquidwhite">
           <div className="flex flex-col">
             <span>Price:</span>
             <span className="text-white ">{ticker.last}</span>

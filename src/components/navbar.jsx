@@ -190,7 +190,7 @@ function Navbar() {
           <div className="flex items-center gap-14">
 
             <li
-              className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-white" : "text-secondary1"
+              className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-white" : "text-liquidwhite"
                 }`}
               onClick={() => handleTabClick("futures")}
             >
@@ -205,7 +205,7 @@ function Navbar() {
               Futures Trading
             </li>
             <li
-              className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-white" : "text-secondary1"
+              className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-white" : "text-liquidwhite"
                 }`}
               onClick={() => handleTabClick("options")}
             >
