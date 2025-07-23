@@ -4,6 +4,8 @@
 .ant-input-group-addon {
     background: none !important;
     color: white !important;
+        background: var(--color-backgroundlight) !important;
+
     border-color: var(--color-backgroundlight) !important;
 }
 
@@ -16,8 +18,9 @@
 
 .ant-input:focus {
     background: var(--color-primary2deactive) !important;
-    border-color: none !important;
+    border-color: white !important;
     box-shadow: none !important;
+    z-index: 2;
 }
 
 .ant-input::placeholder {
@@ -27,14 +30,13 @@
 /* Optional: Button in compact group */
 .ant-input-group .ant-btn-primary {
     background: var(--color-primary2) !important;
-    color: black !important;
     border: none !important;
 }
 
 /* Ant Design Select (dropdown) global styles */
 .ant-select-dropdown,
 .ant-select-dropdown .ant-select-item {
-    background: var(--color-backgrounddark) !important;
+    background: var(--color-backgroundlight) !important;
     color: white !important;
     border-color: var(--color-secondary2) !important;
 }
@@ -101,6 +103,7 @@
 .ant-select-open .ant-select-selector {
     background: var(--color-primary2deactive) !important;
     box-shadow: none !important;
+    border-color: white !important;
 }
 
 .ant-select-arrow {
@@ -109,10 +112,10 @@
 
 .mid-btn {
     transition: background 0.2s !important;
-    color: #ffffffaa !important;
+    color: #ffffff !important;
     border-color: var(--color-backgroundlight) !important;
     box-shadow: none !important;
-    z-index: 2;
+    background: var(--color-backgroundlight) !important;
 }
 
 .mid-btn:hover {
@@ -123,15 +126,15 @@
 }
 
 .mid-btn:active {
-    color: #ffffff !important;
     box-shadow: none !important;
-
+    background: var(--color-primary2deactiveactive) !important;
+    border-color: white !important;
 }
 
 
 
 .ant-select-dropdown .ant-select-item-option {
-    background: none !important;
+    background: var(--color-backgroundlight) !important;
     transition: background 0.15s, color 0.15s;
     color: #ffffff !important;
 
@@ -207,16 +210,25 @@
 .ant-dropdown-menu {
     background: var(--color-backgroundlight) !important;
     color: white !important;
+    
 }
 
 .ant-dropdown-menu-item {
     color: white !important;
     background: none !important;
     transition: background 0.15s;
+    
 }
 
 .ant-dropdown-menu-item:hover,
 .ant-dropdown-menu-item-active {
     background: var(--color-primary2deactive) !important;
     color: white !important;
+}
+
+
+.TifSelector.TifSelector-open {
+    border: 1px solid white !important;
+    color: white !important;
+    box-shadow: none !important;
 }

@@ -8,14 +8,15 @@ const TIF_OPTIONS = [
 ];
 
 function TifSelector({ value, onChange }) {
-    // Always have a valid selection, default to first option
     const [selected, setSelected] = useState(value || TIF_OPTIONS[0].label);
+    const [open, setOpen] = useState(false); // <-- Add open state
     const selectedKey = TIF_OPTIONS.find(opt => opt.label === selected)?.key || TIF_OPTIONS[0].key;
 
     const handleMenuClick = ({ key }) => {
         const selectedLabel = TIF_OPTIONS.find(opt => opt.key === key)?.label || TIF_OPTIONS[0].label;
         setSelected(selectedLabel);
         if (onChange) onChange(selectedLabel);
+        setOpen(false); // Close dropdown after selection
     };
 
     const menu = (
@@ -28,8 +29,15 @@ function TifSelector({ value, onChange }) {
 
     return (
         <div className="my-2">
-            <Dropdown overlay={menu} trigger={['click']}>
-                <Button className="TifSelector h-[28px]">
+            <Dropdown
+                overlay={menu}
+                trigger={['click']}
+                open={open}
+                onOpenChange={setOpen}
+            >
+                <Button
+                    className={`TifSelector h-[28px]${open ? ' TifSelector-open' : ''}`}
+                >
                     {selected}
                 </Button>
             </Dropdown>
