@@ -9,8 +9,8 @@ import PositionMode from './PositionMode.jsx';
 import Tab from '../CommonUIs/tab.jsx';
 import ModalModButton from '../CommonUIs/modalmodbutton';
 import NativeSlider from '../CommonUIs/slider.jsx';
-import OrderButton from '../CommonUIs/OrderButton.jsx';
-import SideSelectorButton from '../CommonUIs/SideSelectorButton.jsx';
+import OrderButton from './OrderButton.jsx';
+import SideSelectorButton from './SideSelectorButton.jsx';
 import TifSelector from './TifSelector.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) {
