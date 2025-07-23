@@ -1,5 +1,5 @@
 import { AuthProvider } from './context/Authentication.jsx';
-import KlineChartProPanel from './components/Chart/KlineChart.jsx';
+import ChartPanel from './components/Chart/ChartPanel.jsx';
 import LimitOrderForm from './components/OrderForm/OrderPanel.jsx';
 import Infobar from './components/infobar/Infobar.jsx';
 import NotificationBar from './components/notificationBar.jsx';
@@ -22,7 +22,7 @@ function FuturesApp() {
             <div className="flex flex-col flex-1 gap-1">
               <NotificationBar />
               <Infobar />
-              <KlineChartProPanel />
+              <ChartPanel />
               <PositionsPanel />
             </div>
             <TradesPanel />

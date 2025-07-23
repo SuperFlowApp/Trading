@@ -456,7 +456,7 @@
     height: 38px;
     width: 100%;
     box-sizing: border-box;
-    border-bottom: solid 1px var(--klinecharts-pro-border-color)
+    border-bottom: none
 }
 
 .klinecharts-pro-period-bar .menu-container {
@@ -543,7 +543,6 @@
     justify-content: center;
     height: 100%;
     padding: 0 12px;
-    border-right: solid 1px var(--klinecharts-pro-border-color)
 }
 
 .klinecharts-pro-period-bar .tools:hover {

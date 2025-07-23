@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import usePanelStore from '../../Zustandstore/panelStore.js'; // <-- Import Zustand store
-import { KLineChartPro } from '@klinecharts/pro';
+import { KLineChartPro } from '../../vendor/klinecharts/pro/dist/klinecharts-pro.js';
 import './klinecharts-pro.min.css';
 
 const REST_URL = (pair, interval) =>
@@ -105,9 +105,8 @@ class BinanceFeed {
   }
 }
 
-export default function KlineChartProPanel() {
+export default function KlineChartProPanel({ interval = '5m' }) {
   const selectedPairBase = usePanelStore(s => s.selectedPair);
-  const [interval] = useState('5m');
   const [pair, setPair] = useState(selectedPairBase);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
@@ -145,20 +144,13 @@ export default function KlineChartProPanel() {
         periods: [
           { multiplier: 1, timespan: 'minute', text: '1m' },
           { multiplier: 5, timespan: 'minute', text: '5m' },
-          //{ multiplier: 15, timespan: 'minute', text: '15m' },
           { multiplier: 30, timespan: 'minute', text: '30m' },
           { multiplier: 1, timespan: 'hour', text: '1h' },
-          //{ multiplier: 2, timespan: 'hour', text: '2h' },
           { multiplier: 4, timespan: 'hour', text: '4h' },
-          //{ multiplier: 6, timespan: 'hour', text: '6h' },
           { multiplier: 8, timespan: 'hour', text: '8h' },
-          //{ multiplier: 12, timespan: 'hour', text: '12h' },
-          //{ multiplier: 1, timespan: 'day', text: '1d' },
-          //{ multiplier: 3, timespan: 'day', text: '3d' },
-          //{ multiplier: 1, timespan: 'week', text: '1w' },
           { multiplier: 1, timespan: 'month', text: '1M' },
         ],
-        period: { multiplier: 5, timespan: 'minute', text: '5m' }, // default selection
+        period: { text: interval }, // use prop
         datafeed: feed,
         symbol: {
           shortName: `${pair.toUpperCase()}/USDT`,
