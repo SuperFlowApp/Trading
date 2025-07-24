@@ -80,6 +80,4 @@ const useZustandStore = create((set, get) => ({
   },
 }));
 
-console.log("Zustand panelStore state:", useZustandStore.getState());
-
 export default useZustandStore;
