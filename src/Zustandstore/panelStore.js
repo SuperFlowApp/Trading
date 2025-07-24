@@ -31,8 +31,8 @@ const useZustandStore = create((set, get) => ({
   setPriceMidpoint: (value) => set({ priceMidpoint: value }),
 
   // selected price settings
-  selectedPrice: null,
-  setSelectedPrice: (value) => set({ selectedPrice: value }),
+  OrderBookClickedPrice: null,
+  setOrderBookClickedPrice: (value) => set({ OrderBookClickedPrice: value }),
 
   // selected price settings
   selectedCurrency: null,

@@ -220,10 +220,10 @@ const OrderBook = () => {
     }
   }, [bids, asks, setPriceMidpoint]);
 
-  const setSelectedPrice = useZustandStore(s => s.setSelectedPrice);
+  const setOrderBookClickedPrice = useZustandStore(s => s.setOrderBookClickedPrice);
 
   const handleRowSelect = (price) => {
-    setSelectedPrice(price); // <-- Write to Zustand
+    setOrderBookClickedPrice(price); // <-- Write to Zustand
   };
 
   const selectedCurrency = useZustandStore(s => s.selectedCurrency); // <-- Zustand global state

@@ -36,7 +36,20 @@
 }
 
 .check-box {
-  @apply accent-primary2 appearance-none w-4 h-4 border-2 border-primary1 rounded transition-colors bg-backgrounddark checked:bg-primary2 checked:border-primary2;
+  @apply accent-primary2 appearance-none w-4 h-4 border-2 border-primary1 rounded transition-colors bg-backgrounddark;
+  /* Unchecked state styles */
+  border-color: var(--color-primary2deactive);
+}
+
+/* Checked state (already present) */
+.check-box:checked {
+  background-color: var(--color-primary2);
+  border-color: var(--color-primary2);
+}
+
+/* Optional: add a hover effect for unchecked */
+.check-box:hover {
+  border-color: var(--color-primary2);
 }
 
 /* Hide the spinner for input[type="number"] */

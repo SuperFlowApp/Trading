@@ -47,15 +47,15 @@ function LimitOrderForm({ onCurrencyChange }) {
 
   const marginMode = useZustandStore(s => s.marginMode);
   const setMarginModePanelOpen = useZustandStore(s => s.setMarginModePanelOpen);
-  const selectedPrice = useZustandStore(s => s.selectedPrice); // <-- Read from Zustand
+  const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
   const setShowLoginPanel = useZustandStore(s => s.setShowLoginPanel); // ADD THIS
 
-  // Update price when selectedPrice changes
+  // Update price when OrderBookClickedPrice changes
   useEffect(() => {
-    if (selectedPrice) {
-      setPrice(selectedPrice);
+    if (OrderBookClickedPrice) {
+      setPrice(OrderBookClickedPrice);
     }
-  }, [selectedPrice]);
+  }, [OrderBookClickedPrice]);
 
   // Clear all fields and reset states when logged out
   useEffect(() => {
