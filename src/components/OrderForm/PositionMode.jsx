@@ -14,13 +14,14 @@ export default function PositionMode() {
       footer={null}
       closable={false}
       centered
-      bodyStyle={{
-        background: 'var(--color-backgrounddark)',
-        borderRadius: '0.5rem',
-        padding: '1.5rem',
-        minWidth: 320,
+      styles={{
+        body: {
+          background: 'var(--color-backgrounddark)',
+          borderRadius: '0.5rem',
+          padding: '1.5rem',
+          minWidth: 320,
+        }
       }}
-      maskStyle={{ background: 'rgba(0,0,0,0.4)' }}
       width={380}
       title={null}
     >

@@ -30,7 +30,7 @@ function TifSelector({ value, onChange }) {
     return (
         <div className="my-2">
             <Dropdown
-                overlay={menu}
+                menu={menu}
                 trigger={['click']}
                 open={open}
                 onOpenChange={setOpen}

@@ -18,7 +18,7 @@ function PairSelector({
       try {
         const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets');
         const data = await res.json();
-        console.log('Received markets data:', data);
+        //console.log('Received markets data:', data);
 
         // Filter for active and correct type
         const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);

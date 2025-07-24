@@ -40,13 +40,14 @@ export default function MarginMode() {
             footer={null}
             closable={false}
             centered
-            bodyStyle={{
-                background: 'var(--color-backgrounddark)',
-                borderRadius: '0.5rem',
-                padding: '1.5rem',
-                minWidth: 260,
+            styles={{
+                body: {
+                    background: 'var(--color-backgrounddark)',
+                    borderRadius: '0.5rem',
+                    padding: '1.5rem',
+                    minWidth: 260,
+                }
             }}
-            maskStyle={{ background: 'rgba(0,0,0,0.4)' }}
             width={340}
             title={null}
         >

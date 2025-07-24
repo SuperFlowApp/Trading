@@ -5,6 +5,19 @@ const DEFAULT_NOTIFICATION = {
   message: "Welcome to SuperFlow Trading app!",
 };
 
+// New: OrderFormState initial structure
+const DEFAULT_ORDER_FORM_STATE = {
+  symbol: "BTCUSDT",
+  type: "LIMIT",
+  side: "BUY",
+  positionSide: "BOTH",
+  quantity: 0,
+  price: 0,
+  timeInForce: "GTC",
+  orderRespType: "ACK",
+  params: {},
+};
+
 const useZustandStore = create((set, get) => ({
   // Leverage settings
   leverage: 5,
@@ -54,6 +67,17 @@ const useZustandStore = create((set, get) => ({
   // All market data storage
   allMarketData: [],
   setAllMarketData: (markets) => set({ allMarketData: markets }),
+
+  // Order Form State
+  OrderFormState: { ...DEFAULT_ORDER_FORM_STATE },
+  setOrderFormState: (updates) => {
+    set((state) => {
+      const newState = { ...state.OrderFormState, ...updates };
+      // Print whenever OrderFormState is updated
+      console.log("OrderFormState updated:", newState);
+      return { OrderFormState: newState };
+    });
+  },
 }));
 
 console.log("Zustand panelStore state:", useZustandStore.getState());

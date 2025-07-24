@@ -44,11 +44,13 @@ function LimitOrderForm({ onCurrencyChange }) {
   const [inputSource, setInputSource] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSliderHovered, setIsSliderHovered] = useState(false); // <-- Add this
+  const [timeInForce, setTimeInForce] = useState('GTC');
 
   const marginMode = useZustandStore(s => s.marginMode);
   const setMarginModePanelOpen = useZustandStore(s => s.setMarginModePanelOpen);
   const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
   const setShowLoginPanel = useZustandStore(s => s.setShowLoginPanel); // ADD THIS
+  const setOrderFormState = useZustandStore(s => s.setOrderFormState);
 
   // Update price when OrderBookClickedPrice changes
   useEffect(() => {
@@ -267,6 +269,21 @@ function LimitOrderForm({ onCurrencyChange }) {
     }
   }, [selectedCurrency]); // Only trigger when currency selection changes
 
+  // Update order form state on relevant changes
+  useEffect(() => {
+    setOrderFormState({
+      symbol: selectedPair,
+      type: market.toUpperCase(),
+      side: side.toUpperCase(),
+      positionSide: 'BOTH',
+      quantity: parseFloat(amount) || 0,
+      price: parseFloat(price) || 0,
+      timeInForce,
+      orderRespType: 'ACK',
+      params: {},
+    });
+  }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormState]);
+
   return (
     <div className="p-2 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
 
@@ -448,7 +465,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
       <div className='w-full flex flex-row items-center justify-end gap-4'>
         <span>TIF</span>
-        <TifSelector />
+        <TifSelector value={timeInForce} onChange={setTimeInForce} />
       </div>
 
 
