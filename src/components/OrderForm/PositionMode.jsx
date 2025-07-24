@@ -16,7 +16,7 @@ export default function PositionMode() {
       centered
       styles={{
         body: {
-          background: 'var(--color-backgrounddark)',
+          background: 'var(--color-backgroundmid)',
           borderRadius: '0.5rem',
           padding: '1.5rem',
           minWidth: 320,
