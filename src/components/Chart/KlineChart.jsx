@@ -34,7 +34,10 @@ class BinanceFeed {
   initWs(interval) {
     if (this.ws) {
       this.ws.onclose = null;
-      this.ws.close();
+      // Only close if already OPEN
+      if (this.ws.readyState === 1) {
+        this.ws.close();
+      }
     }
     this.shouldReconnect = true;
     this.ws = new WebSocket(WS_URL(this.pair, interval));
@@ -70,7 +73,12 @@ class BinanceFeed {
         setTimeout(() => this.initWs(interval), 1000);
       }
     };
-    this.ws.onerror = () => this.ws.close();
+    this.ws.onerror = () => {
+      // Only close if already OPEN
+      if (this.ws.readyState === 1) {
+        this.ws.close();
+      }
+    };
   }
 
   async getHistoryKLineData(symbol, period, from, to) {
