@@ -31,7 +31,15 @@ export default function ChartPanel() {
       </div>
       {/* Chart */}
       <div className="flex-1">
-        <KlineChartProPanel interval={interval} />
+        <KlineChartProPanel
+          interval={interval}
+          styles={{
+            candle: {
+              upColor: '#00580aff',
+              downColor: '#ef5350',
+            }
+          }}
+        />
       </div>
     </div>
   );

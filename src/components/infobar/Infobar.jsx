@@ -4,10 +4,7 @@ import PairSelector from './PairSelector';
 
 function Infobar() {
   const [ticker, setTicker] = useState({});
-  const [markets, setMarkets] = useState([]);
-  const [tickers, setTickers] = useState({});
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const MARKET_TYPE = 'spot';
 
   // Zustand global state
   const selectedPair = usePanelStore((s) => s.selectedPair);
@@ -24,67 +21,41 @@ function Infobar() {
     }
   }, [setSelectedPair]);
 
-  // Fetch available trading pairs
+  // Fetch ticker for selected pair (from Zustand) using WebSocket
   useEffect(() => {
-    async function fetchPairs() {
-      try {
-        const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets');
-        const data = await res.json();
-        const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
-        setMarkets(filtered);
+    if (!selectedPair) return;
 
-        // Fetch tickers for all pairs
-        const tickersObj = {};
-        await Promise.all(
-          filtered.map(async (mkt) => {
-            try {
-              const tRes = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${mkt.symbol}`);
-              if (!tRes.ok) return;
-              const tData = await tRes.json();
-              tickersObj[mkt.symbol] = tData;
-            } catch { }
-          })
-        );
-        setTickers(tickersObj);
-      } catch (err) {
-        console.error('Failed to fetch trading pairs:', err);
-      }
-    }
-    fetchPairs();
-  }, []);
+    const symbol = `${selectedPair}usdt`.toLowerCase();
+    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol}@ticker`);
 
-  // Fetch ticker for selected pair (from Zustand)
-  useEffect(() => {
-    const symbol = selectedPair ? `${selectedPair}USDT` : null;
-    if (!symbol) return;
-    async function fetchTicker() {
-      try {
-        const res = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/ticker?symbol=${symbol}`);
-        const data = await res.json();
-        setTicker(data);
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setTicker({
+        last: data.c,
+        change: data.p,
+        percentage: data.P,
+        baseVolume: data.v,
+        open: data.o,
+        bid: data.b,
+        ask: data.a,
+        previousClose: data.x,
+      });
+    };
 
-        // Persist selected pair details
-        const selectedMarket = markets.find(m => m.symbol === symbol);
-        if (selectedMarket) {
-          localStorage.setItem('selectedPairDetails', JSON.stringify(selectedMarket));
-        }
-      } catch (err) {
-        console.error('Failed to fetch ticker:', err);
-      }
-    }
+    ws.onerror = (err) => {
+      console.error('WebSocket error:', err);
+    };
 
-    fetchTicker();
-    const interval = setInterval(fetchTicker, 5000);
-    return () => clearInterval(interval);
-  }, [selectedPair, markets]);
+    return () => {
+      ws.close();
+    };
+  }, [selectedPair]);
 
   return (
     <div className="bg-backgroundmid rounded-md overflow-visible">
       <div className="flex gap-8 items-start items-center px-4 py-2">
         {/* Pair Selector */}
         <PairSelector
-          markets={markets}
-          tickers={tickers}
           selectedPair={selectedPair}
           setSelectedPair={setSelectedPair}
           dropdownOpen={dropdownOpen}
@@ -94,7 +65,7 @@ function Infobar() {
         <div className="flex  text-[14px] items-center gap-8 text-liquidwhite">
           <div className="flex flex-col">
             <span>Price:</span>
-            <span className="text-white ">{ticker.last}</span>
+            <span className="text-white ">{ticker.last && Number(ticker.last).toFixed(0)}</span>
           </div>
 
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
@@ -110,30 +81,30 @@ function Infobar() {
                     : undefined
               }}
             >
-              ${ticker.change} ({ticker.percentage}%)
+              ${ticker.change && Number(ticker.change).toFixed(0)} ({ticker.percentage && Number(ticker.percentage).toFixed(0)}%)
             </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>24h Volume:</span>
-            <span className="text-white ">{ticker.baseVolume}</span>
+            <span className="text-white ">{ticker.baseVolume && Number(ticker.baseVolume).toFixed(0)}</span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Open:</span>
-            <span className="text-white ">{ticker.open}</span>
+            <span className="text-white ">{ticker.open && Number(ticker.open).toFixed(0)}</span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Bid / Ask:</span>
             <span className="text-white">
-              {ticker.bid} / {ticker.ask}
+              {(ticker.bid && Number(ticker.bid).toFixed(0))} / {(ticker.ask && Number(ticker.ask).toFixed(0))}
             </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Previous Close:</span>
-            <span className="text-white">{ticker.previousClose}</span>
+            <span className="text-white">{ticker.previousClose && Number(ticker.previousClose).toFixed(0)}</span>
           </div>
         </div>
       </div>

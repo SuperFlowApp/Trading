@@ -1,14 +1,52 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 function PairSelector({
-  markets,
-  tickers,
   selectedPair,
   setSelectedPair,
   dropdownOpen,
   setDropdownOpen,
 }) {
+  const [markets, setMarkets] = useState([]);
+  // const [tickers, setTickers] = useState({});
+  const MARKET_TYPE = 'futures';
   const dropdownRef = useRef(null);
+
+  // Fetch available trading pairs and tickers
+  useEffect(() => {
+    async function fetchPairs() {
+      try {
+        const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets');
+        const data = await res.json();
+        console.log('Received markets data:', data);
+
+        // Filter for active and correct type
+        const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
+
+        // Extract base and quote from symbol if missing
+        const processed = filtered.map(mkt => {
+          let base = mkt.base;
+          let quote = mkt.quote;
+          if (!base || !quote) {
+            const match = mkt.symbol.match(/^([A-Z]+)(USDT|USD|BTC|ETH|BNB|EUR|TRY|USDC)$/);
+            if (match) {
+              base = match[1];
+              quote = match[2];
+            } else {
+              base = mkt.symbol;
+              quote = '';
+            }
+          }
+          return { ...mkt, base, quote };
+        });
+
+        setMarkets(processed);
+        
+      } catch (err) {
+        console.error('Failed to fetch trading pairs:', err);
+      }
+    }
+    fetchPairs();
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -25,6 +63,21 @@ function PairSelector({
 
   const selectedMarket = markets.find(m => m.symbol === `${selectedPair}USDT`);
 
+  const COIN_ICONS = {
+    BTC: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+    ETH: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+    XRP: "https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png",
+    DOGE: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png",
+    AAVE: "https://assets.coingecko.com/coins/images/12645/large/AAVE.png",
+    ADA: "https://assets.coingecko.com/coins/images/975/large/cardano.png",
+    XMR: "https://assets.coingecko.com/coins/images/69/large/monero_logo.png",
+    DASH: "https://assets.coingecko.com/coins/images/19/large/dash-logo.png",
+    ZEC: "https://assets.coingecko.com/coins/images/486/large/circle-zec.png",
+    XTZ: "https://assets.coingecko.com/coins/images/976/large/tezos.png",
+    BNB: "https://assets.coingecko.com/coins/images/825/large/binance-coin-logo.png",
+    // Add more as needed
+  };
+
   return (
     <div
       className="relative flex items-center gap-3 py-1 cursor-pointer"
@@ -32,7 +85,15 @@ function PairSelector({
       ref={dropdownRef}
     >
       <div className="flex flex-col text-white">
-        <div className="font-normal text-base text-[22px]">
+        <div className="font-normal text-base text-[22px] flex items-center gap-2">
+          {selectedMarket && COIN_ICONS[selectedMarket.base] && (
+            <img
+              src={COIN_ICONS[selectedMarket.base]}
+              alt={selectedMarket.base}
+              className="w-6 h-6 mr-1"
+              style={{ display: "inline-block", verticalAlign: "middle" }}
+            />
+          )}
           {selectedMarket ? `${selectedMarket.base} - ${selectedMarket.quote}` : `${selectedPair}USDT`}
         </div>
       </div>
@@ -45,15 +106,21 @@ function PairSelector({
             <thead>
               <tr className="bg-backgroundlight text-white">
                 <th className="px-2 py-1">Pair</th>
-                <th className="px-2 py-1">Last Price</th>
-                <th className="px-2 py-1">24h Change</th>
-                <th className="px-2 py-1">24h Volume</th>
-                <th className="px-2 py-1">Min/Max Size</th>
+                <th className="px-2 py-1">Maker Fee</th>
+                <th className="px-2 py-1">Taker Fee</th>
+                <th className="px-2 py-1">Funding Period</th>
+                <th className="px-2 py-1">Max Leverage</th>
+                <th className="px-2 py-1">Price Precision</th>
+                <th className="px-2 py-1">Qty Precision</th>
               </tr>
             </thead>
             <tbody>
               {markets.map(mkt => {
-                const t = tickers[mkt.symbol] || {};
+                // Find max leverage from marginTiers
+                let maxLeverage = "-";
+                if (Array.isArray(mkt.marginTiers) && mkt.marginTiers.length > 0) {
+                  maxLeverage = Math.max(...mkt.marginTiers.map(tier => Number(tier.maxLeverage)));
+                }
                 return (
                   <tr
                     key={mkt.id}
@@ -66,23 +133,12 @@ function PairSelector({
                     }}
                   >
                     <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>
-                    <td className="px-2 py-1">{t.last ?? "-"}</td>
-                    <td className={`px-2 py-1 ${t.change > 0 ? " text-primary2" : t.change < 0 ? "text-primary1" : "text-warningcolor"}`}>
-                      {t.change !== undefined ? `${t.change} (${t.percentage}%)` : "-"}
-                    </td>
-                    <td className="px-2 py-1">{t.baseVolume ?? "-"}</td>
-                    <td className="px-2 py-1">
-                      {mkt.limits?.quantity
-                        ? (
-                          <span>
-                            <span className="">{mkt.limits.quantity.min}</span>
-                            <span className="mx-1 ">-</span>
-                            <span className="">{mkt.limits.quantity.max}</span>
-                          </span>
-                        )
-                        : <span className="">-</span>
-                      }
-                    </td>
+                    <td className="px-2 py-1">{mkt.makerFee ?? "-"}</td>
+                    <td className="px-2 py-1">{mkt.takerFee ?? "-"}</td>
+                    <td className="px-2 py-1">{mkt.fundingPeriod ? `${mkt.fundingPeriod / 3600000}h` : "-"}</td>
+                    <td className="px-2 py-1">{maxLeverage}</td>
+                    <td className="px-2 py-1">{mkt.precision?.price ?? "-"}</td>
+                    <td className="px-2 py-1">{mkt.precision?.quantity ?? "-"}</td>
                   </tr>
                 );
               })}
