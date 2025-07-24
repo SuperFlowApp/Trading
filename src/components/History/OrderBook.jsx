@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
-import usePanelStore from '../../Zustandstore/panelStore.js';
+import useZustandStore from '../../Zustandstore/panelStore.js';
 
 // Custom hook for localhost SSE order book
 const useLocalhostOrderBook = (symbol = 'btcusdt') => {
@@ -145,14 +145,14 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
 
 const OrderBook = () => {
   // Remove useParams and all routing logic
-  const selectedPairBase = usePanelStore(s => s.selectedPair);
+  const selectedPairBase = useZustandStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}usdt` : 'btcusdt';
 
   const { asks, bids, wsFps } = useLocalhostOrderBook(selectedPair);
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
-  const setPriceMidpoint = usePanelStore(s => s.setPriceMidpoint);
+  const setPriceMidpoint = useZustandStore(s => s.setPriceMidpoint);
 
   // Track previous prices for asks and bids
   const prevAskPrices = useRef(new Set());
@@ -220,13 +220,13 @@ const OrderBook = () => {
     }
   }, [bids, asks, setPriceMidpoint]);
 
-  const setSelectedPrice = usePanelStore(s => s.setSelectedPrice);
+  const setSelectedPrice = useZustandStore(s => s.setSelectedPrice);
 
   const handleRowSelect = (price) => {
     setSelectedPrice(price); // <-- Write to Zustand
   };
 
-  const selectedCurrency = usePanelStore(s => s.selectedCurrency); // <-- Zustand global state
+  const selectedCurrency = useZustandStore(s => s.selectedCurrency); // <-- Zustand global state
 
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">

@@ -1,12 +1,12 @@
-import usePanelStore from '../../Zustandstore/panelStore';
+import useZustandStore from '../../Zustandstore/panelStore';
 import { Modal } from 'antd';
 import Button from '../CommonUIs/Button.jsx';
 
 export default function MarginMode() {
-    const isOpen = usePanelStore(s => s.isMarginModePanelOpen);
-    const setOpen = usePanelStore(s => s.setMarginModePanelOpen);
-    const marginMode = usePanelStore(s => s.marginMode);
-    const setMarginMode = usePanelStore(s => s.setMarginMode);
+    const isOpen = useZustandStore(s => s.isMarginModePanelOpen);
+    const setOpen = useZustandStore(s => s.setMarginModePanelOpen);
+    const marginMode = useZustandStore(s => s.marginMode);
+    const setMarginMode = useZustandStore(s => s.setMarginMode);
 
     return (
         <Modal

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import usePanelStore from '../../Zustandstore/panelStore.js';
+import useZustandStore from '../../Zustandstore/panelStore.js';
 import PairSelector from './PairSelector';
 
 function Infobar() {
@@ -7,8 +7,8 @@ function Infobar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Zustand global state
-  const selectedPair = usePanelStore((s) => s.selectedPair);
-  const setSelectedPair = usePanelStore((s) => s.setSelectedPair);
+  const selectedPair = useZustandStore((s) => s.selectedPair);
+  const setSelectedPair = useZustandStore((s) => s.setSelectedPair);
 
   // On mount: set selectedPair from localStorage if available
   useEffect(() => {
@@ -51,6 +51,16 @@ function Infobar() {
     };
   }, [selectedPair]);
 
+  function formatPrice(value) {
+    if (value == null || isNaN(value)) return '';
+    const num = Number(value);
+    if (num < 1) return num.toFixed(4);
+    if (num < 10) return num.toFixed(3);
+    if (num < 100) return num.toFixed(2);
+    if (num < 1000) return num.toFixed(1);
+    return num.toFixed(0);
+  }
+
   return (
     <div className="bg-backgroundmid rounded-md overflow-visible">
       <div className="flex gap-8 items-start items-center px-4 py-2">
@@ -65,7 +75,7 @@ function Infobar() {
         <div className="flex  text-[14px] items-center gap-8 text-liquidwhite">
           <div className="flex flex-col">
             <span>Price:</span>
-            <span className="text-white ">{ticker.last && Number(ticker.last).toFixed(0)}</span>
+            <span className="text-white ">{formatPrice(ticker.last)}</span>
           </div>
 
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
@@ -75,36 +85,36 @@ function Infobar() {
             <span className="text-white "
               style={{
                 color: ticker.change > 0
-                  ? '#00B7C9'
+                  ? 'var(--color-primary2)'
                   : ticker.change < 0
-                    ? '#F5CB9D'
+                    ? 'var(--color-primary1)'
                     : undefined
               }}
             >
-              ${ticker.change && Number(ticker.change).toFixed(0)} ({ticker.percentage && Number(ticker.percentage).toFixed(0)}%)
+              ${formatPrice(ticker.change)} ({ticker.percentage && Number(ticker.percentage).toFixed(0)}%)
             </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>24h Volume:</span>
-            <span className="text-white ">{ticker.baseVolume && Number(ticker.baseVolume).toFixed(0)}</span>
+            <span className="text-white ">{formatPrice(ticker.baseVolume)}</span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Open:</span>
-            <span className="text-white ">{ticker.open && Number(ticker.open).toFixed(0)}</span>
+            <span className="text-white ">{formatPrice(ticker.open)}</span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Bid / Ask:</span>
             <span className="text-white">
-              {(ticker.bid && Number(ticker.bid).toFixed(0))} / {(ticker.ask && Number(ticker.ask).toFixed(0))}
+              {formatPrice(ticker.bid)} / {formatPrice(ticker.ask)}
             </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Previous Close:</span>
-            <span className="text-white">{ticker.previousClose && Number(ticker.previousClose).toFixed(0)}</span>
+            <span className="text-white">{formatPrice(ticker.previousClose)}</span>
           </div>
         </div>
       </div>

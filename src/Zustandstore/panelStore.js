@@ -5,7 +5,7 @@ const DEFAULT_NOTIFICATION = {
   message: "Welcome to SuperFlow Trading app!",
 };
 
-const usePanelStore = create((set, get) => ({
+const useZustandStore = create((set, get) => ({
   // Leverage settings
   leverage: 5,
   isLeveragePanelOpen: false,
@@ -50,8 +50,12 @@ const usePanelStore = create((set, get) => ({
   notification: DEFAULT_NOTIFICATION,
   setNotification: (notification) => set({ notification }),
   clearNotification: () => set({ notification: DEFAULT_NOTIFICATION }),
+
+  // All market data storage
+  allMarketData: [],
+  setAllMarketData: (markets) => set({ allMarketData: markets }),
 }));
 
-console.log("Zustand panelStore state:", usePanelStore.getState());
+console.log("Zustand panelStore state:", useZustandStore.getState());
 
-export default usePanelStore;
+export default useZustandStore;

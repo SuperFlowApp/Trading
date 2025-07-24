@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth, useAuthFetch } from '../../context/Authentication.jsx';
 import { Input, Select, Space, Button  } from 'antd';
 
-import usePanelStore from '../../Zustandstore/panelStore.js'; // already imported
+import useZustandStore from '../../Zustandstore/panelStore.js'; // already imported
 import LeveragePanel from './Leverage.jsx';
 import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';
@@ -14,19 +14,19 @@ import SideSelectorButton from './SideSelectorButton.jsx';
 import TifSelector from './TifSelector.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) {
-  const selectedPairBase = usePanelStore(s => s.selectedPair);
+  const selectedPairBase = useZustandStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
   const pairDetails = { base: selectedPairBase, quote: 'USDT' };
-  const leverage = usePanelStore(s => s.leverage);
-  const setLeveragePanelOpen = usePanelStore(s => s.setLeveragePanelOpen);
-  const setPositionModePanelOpen = usePanelStore(s => s.setPositionModePanelOpen);
+  const leverage = useZustandStore(s => s.leverage);
+  const setLeveragePanelOpen = useZustandStore(s => s.setLeveragePanelOpen);
+  const setPositionModePanelOpen = useZustandStore(s => s.setPositionModePanelOpen);
 
   // Use Zustand for selectedCurrency
-  const selectedCurrency = usePanelStore(s => s.selectedCurrency);
-  const setSelectedCurrency = usePanelStore(s => s.setSelectedCurrency);
+  const selectedCurrency = useZustandStore(s => s.selectedCurrency);
+  const setSelectedCurrency = useZustandStore(s => s.setSelectedCurrency);
 
   // Use Zustand for priceMidpoint
-  const priceMidpoint = usePanelStore(s => s.priceMidpoint);
+  const priceMidpoint = useZustandStore(s => s.priceMidpoint);
 
   // Move this check AFTER all hooks
   const { token, availableBalance } = useAuth();
@@ -45,10 +45,10 @@ function LimitOrderForm({ onCurrencyChange }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isSliderHovered, setIsSliderHovered] = useState(false); // <-- Add this
 
-  const marginMode = usePanelStore(s => s.marginMode);
-  const setMarginModePanelOpen = usePanelStore(s => s.setMarginModePanelOpen);
-  const selectedPrice = usePanelStore(s => s.selectedPrice); // <-- Read from Zustand
-  const setShowLoginPanel = usePanelStore(s => s.setShowLoginPanel); // ADD THIS
+  const marginMode = useZustandStore(s => s.marginMode);
+  const setMarginModePanelOpen = useZustandStore(s => s.setMarginModePanelOpen);
+  const selectedPrice = useZustandStore(s => s.selectedPrice); // <-- Read from Zustand
+  const setShowLoginPanel = useZustandStore(s => s.setShowLoginPanel); // ADD THIS
 
   // Update price when selectedPrice changes
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import usePanelStore from '../../Zustandstore/panelStore.js'; // <-- Import Zustand store
+import useZustandStore from '../../Zustandstore/panelStore.js'; // <-- Import Zustand store
 import { KLineChartPro } from "@klinecharts/pro";
 import './klinecharts-pro.min.css';
 
@@ -106,7 +106,7 @@ class BinanceFeed {
 }
 
 export default function KlineChartProPanel({ interval = '5m' }) {
-  const selectedPairBase = usePanelStore(s => s.selectedPair);
+  const selectedPairBase = useZustandStore(s => s.selectedPair);
   const [pair, setPair] = useState(selectedPairBase);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);

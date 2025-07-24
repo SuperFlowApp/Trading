@@ -1,4 +1,4 @@
-import usePanelStore from '../../Zustandstore/panelStore.js';
+import useZustandStore from '../../Zustandstore/panelStore.js';
 import { Modal } from 'antd';
 import Button from '../CommonUIs/Button.jsx';
 import NativeSlider from '../CommonUIs/slider.jsx';
@@ -8,10 +8,10 @@ const MIN_SLIDER = 1;
 const MAX_SLIDER = 20;
 
 export default function LeveragePanel() {
-  const leverage = usePanelStore(s => s.leverage);
-  const setLeverage = usePanelStore(s => s.setLeverage);
-  const isOpen = usePanelStore(s => s.isLeveragePanelOpen);
-  const setOpen = usePanelStore(s => s.setLeveragePanelOpen);
+  const leverage = useZustandStore(s => s.leverage);
+  const setLeverage = useZustandStore(s => s.setLeverage);
+  const isOpen = useZustandStore(s => s.isLeveragePanelOpen);
+  const setOpen = useZustandStore(s => s.setLeveragePanelOpen);
 
   return (
     <Modal

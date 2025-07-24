@@ -6,12 +6,12 @@ import NotificationBar from './components/notificationBar.jsx';
 import PositionsPanel from './components/UserInfoPanels/PositionsPanel.jsx';
 import AccountInfoPanel from './components/UserInfoPanels/AccountInfoPanel.jsx';
 import AuthPanel from './components/Login/LoginPanel.jsx';
-import usePanelStore from './Zustandstore/panelStore.js';
+import useZustandStore from './Zustandstore/panelStore.js';
 import TradesPanel from './components/History/TradesPanel.jsx';
 
 function FuturesApp() {
-  const showLoginPanel = usePanelStore(s => s.showLoginPanel);
-  const setShowLoginPanel = usePanelStore(s => s.setShowLoginPanel);
+  const showLoginPanel = useZustandStore(s => s.showLoginPanel);
+  const setShowLoginPanel = useZustandStore(s => s.setShowLoginPanel);
 
   return (
     <AuthProvider>

@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import useZustandStore from '../../Zustandstore/panelStore';
 
 function PairSelector({
   selectedPair,
@@ -40,7 +41,10 @@ function PairSelector({
         });
 
         setMarkets(processed);
-        
+
+        // Store all market data in Zustand
+        useZustandStore.getState().setAllMarketData(processed);
+
       } catch (err) {
         console.error('Failed to fetch trading pairs:', err);
       }
@@ -106,12 +110,13 @@ function PairSelector({
             <thead>
               <tr className="bg-backgroundlight text-white">
                 <th className="px-2 py-1">Pair</th>
+                {/* <th className="px-2 py-1">Market</th> */}
+                <th className="px-2 py-1">Status</th>
                 <th className="px-2 py-1">Maker Fee</th>
                 <th className="px-2 py-1">Taker Fee</th>
-                <th className="px-2 py-1">Funding Period</th>
+                <th className="px-2 py-1">Funding Every</th>
                 <th className="px-2 py-1">Max Leverage</th>
-                <th className="px-2 py-1">Price Precision</th>
-                <th className="px-2 py-1">Qty Precision</th>
+                <th className="px-2 py-1">Margin Modes</th>
               </tr>
             </thead>
             <tbody>
@@ -121,10 +126,18 @@ function PairSelector({
                 if (Array.isArray(mkt.marginTiers) && mkt.marginTiers.length > 0) {
                   maxLeverage = Math.max(...mkt.marginTiers.map(tier => Number(tier.maxLeverage)));
                 }
+                // Margin Modes
+                let marginModes = "-";
+                if (mkt.marginModes) {
+                  marginModes = [
+                    mkt.marginModes.cross ? "Cross" : null,
+                    mkt.marginModes.isolated ? "Isolated" : null,
+                  ].filter(Boolean).join(", ");
+                }
                 return (
                   <tr
                     key={mkt.id}
-                    className={`cursor-pointer border border-transparent hover:border-primary2 ${`${selectedPair}USDT` === mkt.symbol ? 'bg-primary2/30' : ''}`}
+                    className={`cursor-pointer border border-transparent hover:bg-primary2deactiveactive ${`${selectedPair}USDT` === mkt.symbol ? 'bg-primary2deactive' : ''}`}
                     onClick={e => {
                       e.stopPropagation();
                       setDropdownOpen(false);
@@ -133,12 +146,16 @@ function PairSelector({
                     }}
                   >
                     <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>
-                    <td className="px-2 py-1">{mkt.makerFee ?? "-"}</td>
-                    <td className="px-2 py-1">{mkt.takerFee ?? "-"}</td>
+                    <td className="px-2 py-1">
+                      <span className={mkt.active ? "text-green-400" : "text-red-400"}>
+                        {mkt.active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="px-2 py-1">{mkt.makerFee ? `${(parseFloat(mkt.makerFee) * 100).toFixed(1)}%` : "-"}</td>
+                    <td className="px-2 py-1">{mkt.takerFee ? `${(parseFloat(mkt.takerFee) * 100).toFixed(1)}%` : "-"}</td>
                     <td className="px-2 py-1">{mkt.fundingPeriod ? `${mkt.fundingPeriod / 3600000}h` : "-"}</td>
-                    <td className="px-2 py-1">{maxLeverage}</td>
-                    <td className="px-2 py-1">{mkt.precision?.price ?? "-"}</td>
-                    <td className="px-2 py-1">{mkt.precision?.quantity ?? "-"}</td>
+                    <td className="px-2 py-1">{maxLeverage !== "-" ? `${maxLeverage}x` : "-"}</td>
+                    <td className="px-2 py-1">{marginModes}</td>
                   </tr>
                 );
               })}
