@@ -54,11 +54,14 @@ function Infobar() {
   function formatPrice(value) {
     if (value == null || isNaN(value)) return '';
     const num = Number(value);
-    if (num < 1) return num.toFixed(4);
-    if (num < 10) return num.toFixed(3);
-    if (num < 100) return num.toFixed(2);
-    if (num < 1000) return num.toFixed(1);
-    return num.toFixed(0);
+    let formatted;
+    if (num < 1) formatted = num.toFixed(4);
+    else if (num < 10) formatted = num.toFixed(3);
+    else if (num < 100) formatted = num.toFixed(2);
+    else if (num < 1000) formatted = num.toFixed(1);
+    else formatted = num.toFixed(0);
+    // Add thousands separator
+    return Number(formatted).toLocaleString();
   }
 
   return (
