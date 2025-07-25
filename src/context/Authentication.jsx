@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-
+import { authKey } from "../Zustandstore/panelStore";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -53,6 +53,7 @@ export function AuthProvider({ children }) {
     if (data.access_token) {
       setToken(data.access_token);
       localStorage.setItem("accessToken", data.access_token);
+      authKey.getState().setauthKey(data.access_token); // <-- Store in Zustand
 
       // Fetch and print balance after login
       try {
@@ -77,6 +78,7 @@ export function AuthProvider({ children }) {
       setToken("");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("username");
+      authKey.getState().setauthKey(null); // <-- Clear in Zustand
       return { success: false, error: data.error || "No token received" };
     }
   };
@@ -87,13 +89,15 @@ export function AuthProvider({ children }) {
     setAvailableBalance(null);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("username");
+    authKey.getState().setauthKey(null); // <-- Clear in Zustand
   };
 
   // Validate token on mount
   React.useEffect(() => {
     if (!token) {
       setLoading(false); // No token, done loading
-      console.log("Unauthorized");
+      authKey.getState().setauthKey(null); // <-- Clear in Zustand
+      //console.log("Unauthorized");
       return;
     }
     // Try to fetch balance or a protected endpoint to check token validity
@@ -106,12 +110,13 @@ export function AuthProvider({ children }) {
     })
       .then((res) => {
         if (!res.ok) throw new Error("Invalid token or server down");
-        // No need to parse JSON if you don't use it
-        console.log("Authorized");
+        authKey.getState().setauthKey(token); // <-- Store in Zustand
+        //console.log("Authorized");
       })
       .catch(() => {
         logout();
-        console.log("Unauthorized");
+        authKey.getState().setauthKey(null); // <-- Clear in Zustand
+        //console.log("Logged out");
       })
       .finally(() => setLoading(false));
   }, [token]);

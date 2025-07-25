@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Positions from './PositionsOpen.jsx';
-import Tab from '../CommonUIs/tab.jsx'; // Import the Tab component
+import Positions from './PositionsOpen';
+import Tab from '../CommonUIs/tab'; // Import the Tab component
 
 function PositionsPanel() {
   const [activeTab, setActiveTab] = useState('positions');

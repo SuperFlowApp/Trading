@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import AuthPanel, { shortenAddress } from "./Login/LoginPanel";
-import ManageAccountModal from "./Login/ManageAccountModal";
+import { Modal } from 'antd';
+import 'antd/dist/reset.css'; // or 'antd/dist/antd.css' for older versions
+import LoginPanel from "./Login/LoginPanel"; // Add this import at the top
+import { authKey } from "../Zustandstore/panelStore"; // keep this import
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -18,24 +20,23 @@ const initialSettings = {
   showAllWarnings: false,
 };
 
+
 function Navbar() {
+  // Zustand selector INSIDE the component:
+  const accessToken = authKey(state => state.authKey);
+  const username = authKey(state => state.username);
+
   const [showLogin, setShowLogin] = useState(false);
-  const [showManageAccount, setShowManageAccount] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(initialSettings);
-  const [walletAddress, setWalletAddress] = useState(localStorage.getItem("walletAddress") || ""); // <-- Retrieve from localStorage if available
   const [activeTab, setActiveTab] = useState(() => {
     if (window.location.pathname.includes("options-trading")) return "options";
     return "futures";
   });
-  const [isConnected, setIsConnected] = useState(false);
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
-  const authPanelRef = useRef(null);
 
-  // Instead, rely on walletAddress or other props/state for login status
-  const username = localStorage.getItem("username") || "";
 
   // Listen for clicks outside dropdown to close it
   useEffect(() => {
@@ -71,12 +72,8 @@ function Navbar() {
   }, [settingsOpen]);
 
   // Callback for AuthPanel to close modal on login
-  const handleLoginSuccess = (walletAddr) => {
+  const handleLoginSuccess = () => {
     setShowLogin(false);
-    if (walletAddr) {
-      setWalletAddress(walletAddr);
-      localStorage.setItem("walletAddress", walletAddr);
-    }
   };
 
   const handleSettingChange = (key) => {
@@ -92,89 +89,6 @@ function Navbar() {
       window.location.href = "/futures-trading";
     } else {
       window.location.href = "/options-trading";
-    }
-  };
-
-  // Effect to handle wallet connection and disconnection
-  useEffect(() => {
-    // Only run if MetaMask is present
-    if (window.ethereum) {
-      const handleAccountsChanged = (accounts) => {
-        if (!accounts || accounts.length === 0) {
-          setWalletAddress("");
-          localStorage.removeItem("walletAddress");
-        } else {
-          setWalletAddress(accounts[0]);
-          localStorage.setItem("walletAddress", accounts[0]);
-        }
-      };
-
-      const handleDisconnect = () => {
-        setWalletAddress("");
-        localStorage.removeItem("walletAddress");
-      };
-
-      window.ethereum.on("accountsChanged", handleAccountsChanged);
-      window.ethereum.on("disconnect", handleDisconnect);
-
-      // On mount, check if still connected
-      window.ethereum.request({ method: "eth_accounts" }).then((accounts) => {
-        if (!accounts || accounts.length === 0) {
-          setWalletAddress("");
-          localStorage.removeItem("walletAddress");
-        }
-      });
-
-      return () => {
-        window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
-        window.ethereum.removeListener("disconnect", handleDisconnect);
-      };
-    }
-  }, []);
-
-  useEffect(() => {
-    // Function to check connection status
-    const checkConnection = async () => {
-      if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: "eth_accounts" });
-        setIsConnected(accounts.length > 0);
-      }
-    };
-
-    // Listen for account changes
-    if (window.ethereum) {
-      window.ethereum.on("accountsChanged", checkConnection);
-      window.ethereum.on("disconnect", () => setIsConnected(false));
-    }
-
-    // Initial check
-    checkConnection();
-
-    // Cleanup listeners on unmount
-    return () => {
-      if (window.ethereum) {
-        window.ethereum.removeListener("accountsChanged", checkConnection);
-        window.ethereum.removeListener("disconnect", () => setIsConnected(false));
-      }
-    };
-  }, []);
-
-  // Add this function inside Navbar
-  const handleDisconnectWallet = async () => {
-    setWalletAddress("");
-    localStorage.removeItem("walletAddress");
-    setDropdownOpen(false);
-    setIsConnected(false);
-    // Optionally, revoke permissions if supported
-    if (window.ethereum && window.ethereum.request) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_revokePermissions",
-          params: [{ eth_accounts: {} }],
-        });
-      } catch (e) {
-        // Ignore errors
-      }
     }
   };
 
@@ -226,7 +140,7 @@ function Navbar() {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           {/* Login/User Button */}
-          {!walletAddress ? (
+          {!accessToken ? (
             <button
               className="px-4 py-2 bg-backgroundlight rounded-md text-sm font-semibold hover:bg-primary2deactive transition"
               onClick={() => setShowLogin(true)}
@@ -245,9 +159,7 @@ function Navbar() {
                 className="px-4 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-opacity-80 transition"
                 onClick={() => setDropdownOpen((v) => !v)}
               >
-                {walletAddress
-                  ? shortenAddress(walletAddress)
-                  : username}
+                {username ? username : "Logged in"}
               </button>
               {dropdownOpen && (
                 <div
@@ -256,7 +168,10 @@ function Navbar() {
                 >
                   <button
                     className="block w-full text-left px-4 py-2 hover:bg-opacity-80"
-                    onClick={handleDisconnectWallet} // <-- Change here
+                    onClick={() => {
+                      authKey.getState().setauthKey(null); // Logout: clear token
+                      setDropdownOpen(false);
+                    }}
                   >
                     Disconnect
                   </button>
@@ -300,32 +215,25 @@ function Navbar() {
       </nav>
 
       {/* Login Popup Modal */}
-      {showLogin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="rounded-lg shadow-lg p-0 relative w-full max-w-md">
-            <button
-              className="absolute top-2 right-2 text-white text-xl"
-              onClick={() => setShowLogin(false)}
-            >
-              &times;
-            </button>
-            <AuthPanel
-              ref={authPanelRef}
-              onLoginSuccess={handleLoginSuccess}
-              onClose={() => setShowLogin(false)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Manage Account Modal */}
-      {showManageAccount && (
-        <ManageAccountModal
-          accessToken={accessToken}
-          apiKeyData={null}
-          onClose={() => setShowManageAccount(false)}
+      <Modal
+        open={showLogin}
+        onCancel={() => setShowLogin(false)}
+        footer={null}
+        centered
+        width={420}
+        destroyOnHidden
+        styles={{
+          body: { padding: 0, background: "#23272f", borderRadius: 12 }
+        }}
+        closeIcon={<span style={{ color: "#fff", fontSize: 24 }}>&times;</span>}
+      >
+        <LoginPanel
+          open={showLogin}
+          onClose={() => setShowLogin(false)}
+          onLoginSuccess={handleLoginSuccess}
         />
-      )}
+      </Modal>
+
     </>
   );
 }

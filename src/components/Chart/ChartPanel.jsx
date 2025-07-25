@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import KlineChartProPanel from './KlineChart.jsx';
+import KlineChartProPanel from './KlineChart';
 
 const intervals = [
   { label: '1m', value: '1m' },

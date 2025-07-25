@@ -1,5 +1,15 @@
 import { create } from "zustand";
 
+const authKey = create((set) => ({
+  authKey: null,
+  setauthKey: (authKey) => set({ authKey }),
+}));
+
+// Log authKey value whenever it changes
+authKey.subscribe((state) => {
+  console.log("Zustand AuthKey:", state.authKey);
+});
+
 const marketsData = create((set) => ({
   allMarketData: [],
   setAllMarketData: (markets) => set({ allMarketData: markets }),
@@ -41,33 +51,35 @@ const useZustandStore = create((set, get) => ({
   // login panel settings
   showLoginPanel: false,
   setShowLoginPanel: (show) => set({ showLoginPanel: show }),
-
-
 }));
 
-// --- Sync Zustand store with localStorage across tabs ---
-const STORAGE_KEY = "zustand-store-state";
+// --- Sync Zustand stores with localStorage across tabs ---
+function syncZustandStore(store, storageKey) {
+  // Save to localStorage on every change
+  store.subscribe((state) => {
+    localStorage.setItem(storageKey, JSON.stringify(state));
+  });
 
-// Save to localStorage on every change
-useZustandStore.subscribe((state) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-});
+  // Listen for changes from other tabs
+  window.addEventListener("storage", (event) => {
+    if (event.key === storageKey && event.newValue) {
+      const newState = JSON.parse(event.newValue);
+      // Only update the data, not the functions
+      const currentState = store.getState();
+      const mergedState = { ...currentState };
+      Object.keys(newState).forEach((key) => {
+        if (typeof newState[key] !== "function") {
+          mergedState[key] = newState[key];
+        }
+      });
+      store.setState(mergedState, false);
+    }
+  });
+}
 
-// Listen for changes from other tabs
-window.addEventListener("storage", (event) => {
-  if (event.key === STORAGE_KEY && event.newValue) {
-    const newState = JSON.parse(event.newValue);
-    // Only update the data, not the functions
-    const currentState = useZustandStore.getState();
-    // Remove all function keys from currentState
-    const mergedState = { ...currentState };
-    Object.keys(newState).forEach((key) => {
-      if (typeof newState[key] !== "function") {
-        mergedState[key] = newState[key];
-      }
-    });
-    useZustandStore.setState(mergedState, false);
-  }
-});
+// Apply syncing to all stores
+syncZustandStore(useZustandStore, "zustand-store-state");
+syncZustandStore(marketsData, "markets-data-state");
+syncZustandStore(authKey, "auth-key-state");
 
-export { useZustandStore, marketsData };
+export { useZustandStore, marketsData, authKey };

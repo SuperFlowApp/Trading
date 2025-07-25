@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth, useAuthFetch } from '../../context/Authentication.jsx'; // <-- Import useAuthFetch
+import { useAuth, useAuthFetch } from '../../context/Authentication'; // <-- Import useAuthFetch
 
 function AccountInfoPanel() {
     const { token, logout } = useAuth(); // <-- Get logout from context

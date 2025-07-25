@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import OrderBook from './OrderBook.jsx';
-import TradesModal from './TradesHistory.jsx';
-import Tab from '../CommonUIs/tab.jsx';
+import OrderBook from './OrderBook';
+import TradesModal from './TradesHistory';
+import Tab from '../CommonUIs/tab';
 
 export default function TradesPanel() {
   const [activeTab, setActiveTab] = useState('OrderBook');

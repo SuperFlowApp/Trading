@@ -1,7 +1,7 @@
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import { Modal } from 'antd';
-import Button from '../CommonUIs/Button.jsx';
-import NativeSlider from '../CommonUIs/slider.jsx';
+import Button from '../CommonUIs/Button';
+import NativeSlider from '../CommonUIs/slider';
 import '../../components/CommonUIs/slider.css';
 
 const MIN_SLIDER = 1;

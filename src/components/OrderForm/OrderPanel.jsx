@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useAuth, useAuthFetch } from '../../context/Authentication.jsx';
+import { useAuth, useAuthFetch } from '../../context/Authentication';
 import { Input, Select, Space, Button  } from 'antd';
 
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import userInputStore from '../../Zustandstore/userInputStore.js';
 
-import LeveragePanel from './Leverage.jsx';
-import MarginMode from './MarginMode.jsx';
-import PositionMode from './PositionMode.jsx';
-import Tab from '../CommonUIs/tab.jsx';
+import LeveragePanel from './Leverage';
+import MarginMode from './MarginMode';
+import PositionMode from './PositionMode';
+import Tab from '../CommonUIs/tab';
 import ModalModButton from '../CommonUIs/modalmodbutton';
-import NativeSlider from '../CommonUIs/slider.jsx';
-import OrderButton from './OrderButton.jsx';
-import SideSelectorButton from './SideSelectorButton.jsx';
-import TifSelector from './TifSelector.jsx';
+import NativeSlider from '../CommonUIs/slider';
+import OrderButton from './OrderButton';
+import SideSelectorButton from './SideSelectorButton';
+import TifSelector from './TifSelector';
 
 function LimitOrderForm({ onCurrencyChange }) {
   const selectedPairBase = userInputStore(s => s.selectedPair);

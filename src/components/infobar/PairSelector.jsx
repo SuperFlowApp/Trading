@@ -16,11 +16,12 @@ function PairSelector({
 
   // Fetch available trading pairs and tickers
   useEffect(() => {
+    let intervalId;
+
     async function fetchPairs() {
       try {
         const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets');
         const data = await res.json();
-        //console.log('Received markets data:', data);
 
         // Filter for active and correct type
         const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
@@ -51,7 +52,11 @@ function PairSelector({
         console.error('Failed to fetch trading pairs:', err);
       }
     }
+
     fetchPairs();
+    intervalId = setInterval(fetchPairs, 3000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   // Close dropdown on outside click

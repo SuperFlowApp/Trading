@@ -1,13 +1,13 @@
-import { AuthProvider } from './context/Authentication.jsx';
-import ChartPanel from './components/Chart/ChartPanel.jsx';
-import LimitOrderForm from './components/OrderForm/OrderPanel.jsx';
-import Infobar from './components/infobar/Infobar.jsx';
-import NotificationBar from './components/notificationBar.jsx';
-import PositionsPanel from './components/UserInfoPanels/PositionsPanel.jsx';
-import AccountInfoPanel from './components/UserInfoPanels/AccountInfoPanel.jsx';
-import AuthPanel from './components/Login/LoginPanel.jsx';
-import { useZustandStore } from './Zustandstore/panelStore.js';
-import TradesPanel from './components/History/TradesPanel.jsx';
+import { AuthProvider } from './context/Authentication';
+import ChartPanel from './components/Chart/ChartPanel';
+import LimitOrderForm from './components/OrderForm/OrderPanel';
+import Infobar from './components/infobar/Infobar';
+import NotificationBar from './components/notificationBar';
+import PositionsPanel from './components/UserInfoPanels/PositionsPanel';
+import AccountInfoPanel from './components/UserInfoPanels/AccountInfoPanel';
+import AuthPanel from './components/Login/LoginPanel';
+import { useZustandStore } from './Zustandstore/panelStore';
+import TradesPanel from './components/History/TradesPanel';
 
 function FuturesApp() {
   const showLoginPanel = useZustandStore(s => s.showLoginPanel);

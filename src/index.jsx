@@ -1,10 +1,12 @@
 import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import FuturesApp from './FuturesApp.jsx';
-import Navbar from './components/navbar.jsx';
-import CommingSoon from './components/CommonUIs/CommingSoon.jsx';
-import { AuthProvider } from './context/Authentication.jsx';
-import AdminPanel from './admin.jsx'; // <-- import AdminPanel
+import FuturesApp from './FuturesApp';
+import Navbar from './components/navbar';
+import CommingSoon from './components/CommonUIs/CommingSoon';
+import { AuthProvider } from './context/Authentication';
+import DebeggerPanel from './debugger';
+import AdminPanel from './admin';
+
 import './components/index.css';
 import 'antd/dist/reset.css';
 import './components/ant-overrides.css';
@@ -31,17 +33,21 @@ function RootApp() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Routing logic for debug panel
+  if (window.location.pathname.startsWith('/debugger')) {
+    return (
+      <DebeggerPanel />
+    );
+  }
   // Routing logic for admin panel
   if (window.location.pathname.startsWith('/admin')) {
     return (
-      <StrictMode>
-        <AuthProvider>
-          <AdminPanel />
-        </AuthProvider>
-      </StrictMode>
+      <AdminPanel />
     );
   }
 
+
+  
   return (
     <StrictMode>
       <AuthProvider>
