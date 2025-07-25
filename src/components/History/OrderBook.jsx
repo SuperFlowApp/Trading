@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
-import useZustandStore from '../../Zustandstore/panelStore.js';
+import { useZustandStore } from '../../Zustandstore/panelStore.js';
 
 // Custom hook for localhost SSE order book
 const useLocalhostOrderBook = (symbol = 'btcusdt') => {

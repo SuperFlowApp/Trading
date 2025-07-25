@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import useZustandStore from '../../Zustandstore/panelStore';
+import { useZustandStore,marketsData } from '../../Zustandstore/panelStore';
 import useUserInputStore from '../../Zustandstore/userInputStore';
 
 function PairSelector({
@@ -44,8 +44,8 @@ function PairSelector({
 
         setMarkets(processed);
 
-        // Store all market data in Zustand
-        useZustandStore.getState().setAllMarketData(processed);
+        // Store all market data in marketsData store
+        marketsData.getState().setAllMarketData(processed);
 
       } catch (err) {
         console.error('Failed to fetch trading pairs:', err);

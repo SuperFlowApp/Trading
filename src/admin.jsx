@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import useZustandStore from './Zustandstore/panelStore.js';
+import { useState, useEffect } from 'react';
+import { marketsData } from './Zustandstore/panelStore.js';
 import notificationStore from './Zustandstore/notificationStore.js';
 import useUserInputStore from './Zustandstore/userInputStore.js';
 
 export default function AdminPanel() {
-  const storeState = useZustandStore();
   const notificationStoreState = notificationStore();
   const setNotification = notificationStore((s) => s.setNotification);
   const useUserInputStoreState = useUserInputStore();
+
+  const marketsDataState = marketsData(); // <-- get marketsData state
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -22,6 +23,35 @@ export default function AdminPanel() {
       setNotification({ ...notificationStoreState.notification, message: newMessage });
     }
   };
+
+  useEffect(() => {
+    // Only fetch if not already loaded
+    if (!marketsDataState.allMarketData || marketsDataState.allMarketData.length === 0) {
+      fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets')
+        .then((res) => res.json())
+        .then((data) => {
+          // Filter for active and correct type
+          const filtered = data.filter((m) => m.active && m.type === 'futures');
+          // Extract base and quote from symbol if missing
+          const processed = filtered.map((mkt) => {
+            let base = mkt.base;
+            let quote = mkt.quote;
+            if (!base || !quote) {
+              const match = mkt.symbol.match(/^([A-Z]+)(USDT|USD|BTC|ETH|BNB|EUR|TRY|USDC)$/);
+              if (match) {
+                base = match[1];
+                quote = match[2];
+              } else {
+                base = mkt.symbol;
+                quote = '';
+              }
+            }
+            return { ...mkt, base, quote };
+          });
+          marketsData.getState().setAllMarketData(processed);
+        });
+    }
+  }, [marketsDataState.allMarketData]);
 
   return (
     <div style={{ background: '#18181b', color: '#fff', minHeight: '100vh', padding: 32 }}>
@@ -72,20 +102,6 @@ export default function AdminPanel() {
         {JSON.stringify({ ...useUserInputStoreState }, null, 2)}
       </pre>
 
-      <h2 style={{ fontSize: 20, marginBottom: 8 }}>panelStore.js</h2>
-      <pre
-        style={{
-          background: '#23272f',
-          color: '#d1d5db',
-          padding: 16,
-          borderRadius: 8,
-          fontSize: 14,
-          overflowX: 'auto',
-          maxHeight: 400,
-        }}
-      >
-        {JSON.stringify({ ...storeState, allMarketData: '[See Modal]' }, null, 2)}
-      </pre>
       <button
         style={{
           marginTop: 16,
@@ -148,7 +164,7 @@ export default function AdminPanel() {
             </button>
             <h3 style={{ marginBottom: 12 }}>allMarketData</h3>
             <pre style={{ fontSize: 12, maxHeight: 500, overflow: 'auto' }}>
-              {JSON.stringify(storeState.allMarketData, null, 2)}
+              {JSON.stringify(marketsDataState.allMarketData, null, 2)}
             </pre>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth, useAuthFetch } from '../../context/Authentication.jsx';
 import { Input, Select, Space, Button  } from 'antd';
 
-import useZustandStore from '../../Zustandstore/panelStore.js';
+import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import userInputStore from '../../Zustandstore/userInputStore.js';
 
 import LeveragePanel from './Leverage.jsx';

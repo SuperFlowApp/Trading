@@ -23,8 +23,6 @@ const useUserInputStore = create((set) => ({
   setOrderFormState: (updates) => {
     set((state) => {
       const newState = { ...state.OrderFormState, ...updates };
-      // Print whenever OrderFormState is updated
-      console.log("OrderFormState updated:", newState);
       return { OrderFormState: newState };
     });
   },

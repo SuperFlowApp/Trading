@@ -1,4 +1,4 @@
-import useZustandStore from '../../Zustandstore/panelStore.js';
+import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import { Modal } from 'antd';
 import Button from '../CommonUIs/Button.jsx';
 import NativeSlider from '../CommonUIs/slider.jsx';

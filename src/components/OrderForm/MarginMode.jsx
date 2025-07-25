@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import useZustandStore from '../../Zustandstore/panelStore';
+import { useZustandStore,marketsData } from '../../Zustandstore/panelStore.js';
 import { Modal } from 'antd';
 import Button from '../CommonUIs/Button.jsx';
 
@@ -8,7 +8,7 @@ export default function MarginMode() {
     const setOpen = useZustandStore(s => s.setMarginModePanelOpen);
     const marginMode = useZustandStore(s => s.marginMode);
     const setMarginMode = useZustandStore(s => s.setMarginMode);
-    const allMarketData = useZustandStore(s => s.allMarketData);
+    const allMarketData = marketsData(s => s.allMarketData);
     const selectedPair = useZustandStore(s => s.selectedPair);
 
     // Find the current market object for the selected pair
