@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { CloseOutlined } from "@ant-design/icons";
-import useZustandStore from "../Zustandstore/panelStore.js";
+import notificationStore from "../Zustandstore/notificationStore.js";
 
 const colorMap = {
   info: "var(--color-backgroundmid)",
@@ -10,8 +10,8 @@ const colorMap = {
 };
 
 export default function NotificationBar() {
-  const notification = useZustandStore((s) => s.notification);
-  const clearNotification = useZustandStore((s) => s.clearNotification);
+  const notification = notificationStore((s) => s.notification);
+  const clearNotification = notificationStore((s) => s.clearNotification);
 
   useEffect(() => {
     if (notification && notification.message !== "Welcome to SuperFlow Trading app!") {

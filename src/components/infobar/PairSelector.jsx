@@ -1,16 +1,18 @@
 import { useRef, useEffect, useState } from 'react';
 import useZustandStore from '../../Zustandstore/panelStore';
+import useUserInputStore from '../../Zustandstore/userInputStore';
 
 function PairSelector({
-  selectedPair,
-  setSelectedPair,
   dropdownOpen,
   setDropdownOpen,
 }) {
   const [markets, setMarkets] = useState([]);
-  // const [tickers, setTickers] = useState({});
   const MARKET_TYPE = 'futures';
   const dropdownRef = useRef(null);
+
+  // Use userInputStore for selectedPair
+  const selectedPair = useUserInputStore(s => s.selectedPair);
+  const setSelectedPair = useUserInputStore(s => s.setSelectedPair);
 
   // Fetch available trading pairs and tickers
   useEffect(() => {

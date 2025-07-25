@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth, useAuthFetch } from '../../context/Authentication.jsx';
 import { Input, Select, Space, Button  } from 'antd';
 
-import useZustandStore from '../../Zustandstore/panelStore.js'; // already imported
+import useZustandStore from '../../Zustandstore/panelStore.js';
+import userInputStore from '../../Zustandstore/userInputStore.js';
+
 import LeveragePanel from './Leverage.jsx';
 import MarginMode from './MarginMode.jsx';
 import PositionMode from './PositionMode.jsx';
@@ -14,7 +16,7 @@ import SideSelectorButton from './SideSelectorButton.jsx';
 import TifSelector from './TifSelector.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) {
-  const selectedPairBase = useZustandStore(s => s.selectedPair);
+  const selectedPairBase = userInputStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
   const pairDetails = { base: selectedPairBase, quote: 'USDT' };
   const leverage = useZustandStore(s => s.leverage);
@@ -50,7 +52,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   const setMarginModePanelOpen = useZustandStore(s => s.setMarginModePanelOpen);
   const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
   const setShowLoginPanel = useZustandStore(s => s.setShowLoginPanel); // ADD THIS
-  const setOrderFormState = useZustandStore(s => s.setOrderFormState);
+  const setOrderFormState = userInputStore(s => s.setOrderFormState);
 
   // Update price when OrderBookClickedPrice changes
   useEffect(() => {

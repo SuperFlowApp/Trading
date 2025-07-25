@@ -1,83 +1,76 @@
 import { create } from "zustand";
 
-const DEFAULT_NOTIFICATION = {
-  type: "info",
-  message: "Welcome to SuperFlow Trading app!",
-};
 
-// New: OrderFormState initial structure
-const DEFAULT_ORDER_FORM_STATE = {
-  symbol: "BTCUSDT",
-  type: "LIMIT",
-  side: "BUY",
-  positionSide: "BOTH",
-  quantity: 0,
-  price: 0,
-  timeInForce: "GTC",
-  orderRespType: "ACK",
-  params: {},
-};
 
-const useZustandStore = create((set, get) => ({
-  // Leverage settings
-  leverage: 5,
-  isLeveragePanelOpen: false,
-  setLeverage: (leverage) => set({ leverage }),
-  setLeveragePanelOpen: (open) => set({ isLeveragePanelOpen: open }),
+const useZustandStore = create(
+  (set, get) => ({
+    // Leverage settings
+    leverage: 5,
+    isLeveragePanelOpen: false,
+    setLeverage: (leverage) => set({ leverage }),
+    setLeveragePanelOpen: (open) => set({ isLeveragePanelOpen: open }),
 
-  // Margin mode settings
-  marginMode: "Cross",
-  isMarginModePanelOpen: false,
-  setMarginMode: (mode) => set({ marginMode: mode }),
-  setMarginModePanelOpen: (open) => set({ isMarginModePanelOpen: open }),
+    // Margin mode settings
+    marginMode: "Cross",
+    isMarginModePanelOpen: false,
+    setMarginMode: (mode) => set({ marginMode: mode }),
+    setMarginModePanelOpen: (open) => set({ isMarginModePanelOpen: open }),
 
-  // Position mode settings
-  isPositionModePanelOpen: false,
-  setPositionModePanelOpen: (open) => set({ isPositionModePanelOpen: open }),
+    // Position mode settings
+    isPositionModePanelOpen: false,
+    setPositionModePanelOpen: (open) => set({ isPositionModePanelOpen: open }),
 
-  // active tab settings
-  activeTab: null,
-  setActiveTab: (tab) => set({ activeTab: tab }),
+    // active tab settings
+    activeTab: null,
+    setActiveTab: (tab) => set({ activeTab: tab }),
 
-  // price midpoint settings
-  priceMidpoint: null,
-  setPriceMidpoint: (value) => set({ priceMidpoint: value }),
+    // price midpoint settings
+    priceMidpoint: null,
+    setPriceMidpoint: (value) => set({ priceMidpoint: value }),
 
-  // selected price settings
-  OrderBookClickedPrice: null,
-  setOrderBookClickedPrice: (value) => set({ OrderBookClickedPrice: value }),
+    // selected price settings
+    OrderBookClickedPrice: null,
+    setOrderBookClickedPrice: (value) => set({ OrderBookClickedPrice: value }),
 
-  // selected price settings
-  selectedCurrency: null,
-  setSelectedCurrency: (currency) => set({ selectedCurrency: currency }),
+    // selected price settings
+    selectedCurrency: null,
+    setSelectedCurrency: (currency) => set({ selectedCurrency: currency }),
 
-  // login panel settings
-  showLoginPanel: false,
-  setShowLoginPanel: (show) => set({ showLoginPanel: show }),
+    // login panel settings
+    showLoginPanel: false,
+    setShowLoginPanel: (show) => set({ showLoginPanel: show }),
 
-  // selected pair settings
-  selectedPair: 'BTC',
-  setSelectedPair: (pair) => set({ selectedPair: pair }),
 
-  // notification settings
-  notification: DEFAULT_NOTIFICATION,
-  setNotification: (notification) => set({ notification }),
-  clearNotification: () => set({ notification: DEFAULT_NOTIFICATION }),
+    // All market data storage
+    allMarketData: [],
+    setAllMarketData: (markets) => set({ allMarketData: markets }),
 
-  // All market data storage
-  allMarketData: [],
-  setAllMarketData: (markets) => set({ allMarketData: markets }),
+  })
+);
 
-  // Order Form State
-  OrderFormState: { ...DEFAULT_ORDER_FORM_STATE },
-  setOrderFormState: (updates) => {
-    set((state) => {
-      const newState = { ...state.OrderFormState, ...updates };
-      // Print whenever OrderFormState is updated
-      console.log("OrderFormState updated:", newState);
-      return { OrderFormState: newState };
+// --- Sync Zustand store with localStorage across tabs ---
+const STORAGE_KEY = "zustand-store-state";
+
+// Save to localStorage on every change
+useZustandStore.subscribe((state) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+});
+
+// Listen for changes from other tabs
+window.addEventListener("storage", (event) => {
+  if (event.key === STORAGE_KEY && event.newValue) {
+    const newState = JSON.parse(event.newValue);
+    // Only update the data, not the functions
+    const currentState = useZustandStore.getState();
+    // Remove all function keys from currentState
+    const mergedState = { ...currentState };
+    Object.keys(newState).forEach((key) => {
+      if (typeof newState[key] !== "function") {
+        mergedState[key] = newState[key];
+      }
     });
-  },
-}));
+    useZustandStore.setState(mergedState, false);
+  }
+});
 
 export default useZustandStore;

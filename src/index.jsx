@@ -3,20 +3,19 @@ import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp.jsx';
 import Navbar from './components/navbar.jsx';
 import CommingSoon from './components/CommonUIs/CommingSoon.jsx';
-import { AuthProvider } from './context/Authentication.jsx'; // <-- import AuthProvider
+import { AuthProvider } from './context/Authentication.jsx';
+import AdminPanel from './admin.jsx'; // <-- import AdminPanel
 import './components/index.css';
-import 'antd/dist/reset.css'; // Ant Design 
+import 'antd/dist/reset.css';
 import './components/ant-overrides.css';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 function TradingPanel(isMobile) {
-
   if (window.location.pathname.includes('options-trading')) {
     return <CommingSoon />;
   }
-  // Default to futures trading
   return <FuturesApp />;
 }
 
@@ -32,10 +31,20 @@ function RootApp() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Routing logic for admin panel
+  if (window.location.pathname.startsWith('/admin')) {
+    return (
+      <StrictMode>
+        <AuthProvider>
+          <AdminPanel />
+        </AuthProvider>
+      </StrictMode>
+    );
+  }
+
   return (
     <StrictMode>
       <AuthProvider>
-
         <Navbar />
         {TradingPanel(isMobile)}
       </AuthProvider>
