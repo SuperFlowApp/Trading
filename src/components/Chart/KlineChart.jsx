@@ -138,6 +138,10 @@ export default function KlineChartProPanel({ interval = '5m' }) {
         chartRef.current.innerHTML = '';
       }
 
+      // Suppress KLineChartPro welcome message
+      const originalConsoleLog = console.log;
+      console.log = function () {};
+
       chartInstanceRef.current = new KLineChartPro({
         container: chartRef.current,
         locale: 'en-US',
@@ -175,6 +179,9 @@ export default function KlineChartProPanel({ interval = '5m' }) {
         },
         indicators: [{ name: 'MA' }],
       });
+
+      // Restore console.log
+      console.log = originalConsoleLog;
     });
 
     // No need to subscribe to live updates for lastPrice
