@@ -87,6 +87,7 @@ function PairSelector({
           stats[symbol] = {
             lastPrice: ticker.lastPrice,
             priceChangePercent: ticker.priceChangePercent,
+            priceChange: ticker.priceChange, // <-- add this line
             volume: ticker.volume,
             fundingRate: funding.lastFundingRate,
             openInterest: openInterest.openInterest,
@@ -167,11 +168,20 @@ function PairSelector({
                 <th className="px-2 py-1">8hr Funding</th>
                 <th className="px-2 py-1">Volume</th>
                 <th className="px-2 py-1">Open Interest</th>
+                {/* Removed max leverage column */}
               </tr>
             </thead>
             <tbody>
               {markets.map(mkt => {
                 const stats = marketStats[mkt.symbol] || {};
+                // Get market data from global store
+                const allMarketData = marketsData.getState().allMarketData || [];
+                const marketObj = allMarketData.find(md => md.symbol === mkt.symbol);
+                // Find max leverage
+                let maxLeverage = '-';
+                if (marketObj && Array.isArray(marketObj.marginTiers)) {
+                  maxLeverage = Math.max(...marketObj.marginTiers.map(tier => tier.maxLeverage));
+                }
                 return (
                   <tr
                     key={mkt.id}
@@ -183,9 +193,27 @@ function PairSelector({
                       localStorage.setItem('selectedPairDetails', JSON.stringify(mkt));
                     }}
                   >
-                    <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>
+                    <td className="px-2 py-1 font-bold text-white">
+                      {mkt.base} / {mkt.quote}
+                      {maxLeverage !== '-' && (
+                        <span className="ml-1 text-primary2">[{maxLeverage}x]</span>
+                      )}
+                    </td>
                     <td className="px-2 py-1">{stats.lastPrice ? formatPrice(stats.lastPrice) : "-"}</td>
-                    <td className="px-2 py-1">{stats.priceChangePercent ? `${formatPrice(stats.priceChangePercent)}%` : "-"}</td>
+                    <td className="px-2 py-1"
+                      style={{
+                        color:
+                          stats.priceChangePercent > 0
+                            ? 'var(--color-primary2)'
+                            : stats.priceChangePercent < 0
+                            ? 'var(--color-warncolor)'
+                            : undefined,
+                      }}
+                    >
+                      {stats.priceChangePercent && stats.lastPrice
+                        ? `${formatPrice(stats.priceChange)} / ${formatPrice(stats.priceChangePercent)}%`
+                        : "-"}
+                    </td>
                     <td className="px-2 py-1">{stats.fundingRate ? `${formatPrice(stats.fundingRate * 100)}%` : "-"}</td>
                     <td className="px-2 py-1">{stats.volume ? formatPrice(stats.volume) : "-"}</td>
                     <td className="px-2 py-1">{stats.openInterest ? formatPrice(stats.openInterest) : "-"}</td>
