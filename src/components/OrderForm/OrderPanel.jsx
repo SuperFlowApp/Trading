@@ -3,6 +3,7 @@ import { Input, Select, Space, Button } from 'antd';
 
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import userInputStore from '../../Zustandstore/userInputStore.js';
+import { getAuthKey } from '../../utils/authKeyStorage';
 
 import LeveragePanel from './Leverage';
 import MarginMode from './MarginMode';
@@ -13,8 +14,12 @@ import NativeSlider from '../CommonUIs/slider';
 import OrderButton from './OrderButton';
 import SideSelectorButton from './SideSelectorButton';
 import TifSelector from './TifSelector';
+import BalanceFetch from './BalanceFetch';
 
 function LimitOrderForm({ onCurrencyChange }) {
+  // Move this to the top, before any use of balanceFree!
+  const [balanceFree, setBalanceFree] = useState("--");
+
   const selectedPairBase = userInputStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
   const pairDetails = { base: selectedPairBase, quote: 'USDT' };
@@ -30,8 +35,6 @@ function LimitOrderForm({ onCurrencyChange }) {
   const priceMidpoint = useZustandStore(s => s.priceMidpoint);
 
   // Move this check AFTER all hooks
-  const [balanceTotal, setBalanceTotal] = useState("--");
-  const balanceFree = "--";
   const [price, setPrice] = useState(priceMidpoint);
   const [amount, setAmount] = useState('');
   const [side, setSide] = useState('buy');
@@ -302,11 +305,9 @@ function LimitOrderForm({ onCurrencyChange }) {
       <div className="flex gap-4 items-center">
         <SideSelectorButton side={side} setSide={setSide} />
       </div>
-      {/* Balance Row */}
+      {/* Balance Row - replaced with BalanceFetch */}
       <div className="font-semibold text-[12px]">
-        <span className="flex items-center justify-between w-full text-liquidwhite">
-          Free Balance: <span className="text-white">{balanceFree !== "--" ? parseFloat(balanceFree).toFixed(1) : "--"} USDT</span>
-        </span>
+        <BalanceFetch onBalance={setBalanceFree} />
       </div>
 
       {/* Conditionally render the Price field */}
