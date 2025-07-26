@@ -4,7 +4,7 @@
 .ant-input-group-addon {
     background: none !important;
     color: white !important;
-        background: var(--color-backgroundlight) !important;
+    background: var(--color-backgroundlight) !important;
 
     border-color: var(--color-backgroundlight) !important;
 }
@@ -70,15 +70,18 @@
     border-color: var(--color-primary2) !important;
     color: black !important;
 }
+.ant-modal-close-x{
+    color: white !important;
 
+}
 .ant-select-item-option-active {
     border-color: var(--color-primary2) !important;
     color: black !important;
 }
 
 .ant-modal-content {
-    background: var(--color-backgrounddark) !important;
-
+    background: var(--color-backgrounmid) !important;
+    padding: 0px !important;
 }
 
 .ant-select-selector {
@@ -210,14 +213,14 @@
 .ant-dropdown-menu {
     background: var(--color-backgroundlight) !important;
     color: white !important;
-    
+
 }
 
 .ant-dropdown-menu-item {
     color: white !important;
     background: none !important;
     transition: background 0.15s;
-    
+
 }
 
 .ant-dropdown-menu-item:hover,

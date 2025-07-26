@@ -70,9 +70,11 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess }) => {
       centered
       width={350}
       destroyOnHidden
-      title="Default API Login"
+      styles={{
+        body: { padding: 0, background: "#0f1529", borderRadius: 12 }
+      }}
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "60px 20px" }}>
         <Input
           placeholder="Username"
           value={username}
