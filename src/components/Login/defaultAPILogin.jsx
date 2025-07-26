@@ -5,11 +5,13 @@ import { getAuthKey, setAuthKey } from "../../utils/authKeyStorage";
 import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
 import Modal from "../CommonUIs/modal/modal";
+import DefaultAPISignup from "./defaultAPISignup"; // <-- import signup modal
 
 const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false); // <-- signup modal state
 
   // Get the setter from Zustand
   const setauthKey = useAuthKeyStore((state) => state.setauthKey);
@@ -61,35 +63,48 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   };
 
   const handleSignUp = () => {
-    onClose();
+    setSignupOpen(true); // <-- open signup modal
+  };
+
+  const handleSignupSuccess = (username) => {
+    setSignupOpen(false);
+    message.success(`Account created for ${username}. You can now log in.`);
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      width={350}
-      clickPosition={clickPosition}
-    >
-      <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "60px 20px" }}>
-        <UsernameInput
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <PasswordInput
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <Button type="secondary" onClick={handleLogin} disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </Button>
-          <Button type="primary" onClick={handleSignUp}>
-            SignUp
-          </Button>
+    <>
+      <Modal
+        open={open}
+        onClose={onClose}
+        width={350}
+        clickPosition={clickPosition}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "60px 20px" }}>
+          <UsernameInput
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <PasswordInput
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <Button type="secondary" onClick={handleLogin} disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
+            </Button>
+            <Button type="primary" onClick={handleSignUp}>
+              SignUp
+            </Button>
+          </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+      <DefaultAPISignup
+        open={signupOpen}
+        onClose={() => setSignupOpen(false)}
+        onSignupSuccess={handleSignupSuccess}
+        clickPosition={clickPosition}
+      />
+    </>
   );
 };
 

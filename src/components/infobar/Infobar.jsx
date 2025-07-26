@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import userInputStore from '../../Zustandstore/userInputStore.js';
 import PairSelector from './PairSelector';
+import { formatPrice } from '../../utils/priceFormater.js';
 
 function Infobar() {
   const [ticker, setTicker] = useState({});
@@ -43,20 +44,6 @@ function Infobar() {
       clearInterval(interval);
     };
   }, [selectedPair]);
-
-  function formatPrice(value) {
-    if (value == null || isNaN(value)) return '';
-    const num = Number(value);
-    let decimals = 0;
-    if (num < 1) decimals = 4;
-    else if (num < 10) decimals = 3;
-    else if (num < 100) decimals = 2;
-    else if (num < 1000) decimals = 1;
-    return num.toLocaleString(undefined, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    });
-  }
 
   return (
     <div className="bg-backgroundmid rounded-md overflow-visible">

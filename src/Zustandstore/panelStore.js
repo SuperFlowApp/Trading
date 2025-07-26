@@ -5,10 +5,15 @@ const useAuthKeyStore = create((set) => ({
   setauthKey: (authKey) => set({ authKey }),
 }));
 
-
 const marketsData = create((set) => ({
   allMarketData: [],
   setAllMarketData: (markets) => set({ allMarketData: markets }),
+}));
+
+const marketsStats = create((set) => ({
+  allmarketsStats: [],
+  setAllMarketData: (currentMarketsStats) =>
+    set({ allmarketsStats: currentMarketsStats }),
 }));
 
 const useZustandStore = create((set, get) => ({
@@ -77,5 +82,6 @@ function syncZustandStore(store, storageKey) {
 syncZustandStore(useZustandStore, "zustand-store-state");
 syncZustandStore(marketsData, "markets-data-state");
 syncZustandStore(useAuthKeyStore, "auth-key-state");
+syncZustandStore(marketsStats, "markets-stats-state");
 
-export { useZustandStore, marketsData, useAuthKeyStore };
+export { useZustandStore, marketsData, useAuthKeyStore, marketsStats };

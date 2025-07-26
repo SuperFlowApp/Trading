@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Modal } from 'antd';
+import { Modal, notification, message } from 'antd';
 import 'antd/dist/reset.css';
 import LoginPanel from "./Login/LoginPanel";
 import { getAuthKey } from "../utils/authKeyStorage";
@@ -101,6 +101,7 @@ function Navbar() {
     localStorage.clear(); // Clear all localStorage, not just authKey
     setAccessToken(null);
     setDropdownOpen(false);
+    message.info("Disconnected"); // Show top notification
   };
 
   return (
@@ -167,7 +168,7 @@ function Navbar() {
               <Button
                 type="secondary"
               >
-                Logged in
+                Connected
               </Button>
               {dropdownOpen && (
                 <div className="absolute right-0 bg-backgrounddark text-white rounded shadow-lg z-50 p-2">

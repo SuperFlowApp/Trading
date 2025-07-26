@@ -1,12 +1,14 @@
 import { useRef, useEffect, useState } from 'react';
-import { useZustandStore,marketsData } from '../../Zustandstore/panelStore';
+import { marketsData } from '../../Zustandstore/panelStore';
 import useUserInputStore from '../../Zustandstore/userInputStore';
+import { formatPrice } from '../../utils/priceFormater.js';
 
 function PairSelector({
   dropdownOpen,
   setDropdownOpen,
 }) {
   const [markets, setMarkets] = useState([]);
+  const [marketStats, setMarketStats] = useState({}); // New state for stats
   const MARKET_TYPE = 'futures';
   const dropdownRef = useRef(null);
 
@@ -58,6 +60,49 @@ function PairSelector({
 
     return () => clearInterval(intervalId);
   }, []);
+
+  // Fetch stats for each market from Binance every 5 seconds
+  useEffect(() => {
+    if (markets.length === 0) return;
+    let statsInterval;
+
+    async function fetchStats() {
+      const stats = {};
+      await Promise.all(markets.map(async mkt => {
+        try {
+          // Binance Futures API endpoints
+          const symbol = mkt.symbol;
+          // 24h ticker
+          const tickerRes = await fetch(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${symbol}`);
+          const ticker = await tickerRes.json();
+
+          // Funding rate (8hr)
+          const fundingRes = await fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`);
+          const funding = await fundingRes.json();
+
+          // Open Interest
+          const oiRes = await fetch(`https://fapi.binance.com/fapi/v1/openInterest?symbol=${symbol}`);
+          const openInterest = await oiRes.json();
+
+          stats[symbol] = {
+            lastPrice: ticker.lastPrice,
+            priceChangePercent: ticker.priceChangePercent,
+            volume: ticker.volume,
+            fundingRate: funding.lastFundingRate,
+            openInterest: openInterest.openInterest,
+          };
+        } catch (err) {
+          stats[mkt.symbol] = null;
+        }
+      }));
+      setMarketStats(stats);
+    }
+
+    fetchStats();
+    statsInterval = setInterval(fetchStats, 5000);
+
+    return () => clearInterval(statsInterval);
+  }, [markets]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -112,35 +157,21 @@ function PairSelector({
         <img src="/assets/arrow.svg" alt="icon" className="w-3.5 h-[10px]" />
       </div>
       {dropdownOpen && (
-        <div className="absolute z-50 left-0 top-full mt-2 bg-backgrounddark border border-secondary2 rounded-lg shadow-lg w-[600px] max-h-[350px] overflow-auto">
+        <div className="absolute z-50 left-0 top-full mt-2 bg-backgrounddark border border-secondary2 rounded-lg shadow-lg w-[900px] max-h-[350px] overflow-auto">
           <table className="min-w-full text-xs text-left">
             <thead>
               <tr className="bg-backgroundlight text-white">
                 <th className="px-2 py-1">Pair</th>
-                {/* <th className="px-2 py-1">Market</th> */}
-                <th className="px-2 py-1">Status</th>
-                <th className="px-2 py-1">Maker Fee</th>
-                <th className="px-2 py-1">Taker Fee</th>
-                <th className="px-2 py-1">Funding Every</th>
-                <th className="px-2 py-1">Max Leverage</th>
-                <th className="px-2 py-1">Margin Modes</th>
+                <th className="px-2 py-1">Last Price</th>
+                <th className="px-2 py-1">24h Change</th>
+                <th className="px-2 py-1">8hr Funding</th>
+                <th className="px-2 py-1">Volume</th>
+                <th className="px-2 py-1">Open Interest</th>
               </tr>
             </thead>
             <tbody>
               {markets.map(mkt => {
-                // Find max leverage from marginTiers
-                let maxLeverage = "-";
-                if (Array.isArray(mkt.marginTiers) && mkt.marginTiers.length > 0) {
-                  maxLeverage = Math.max(...mkt.marginTiers.map(tier => Number(tier.maxLeverage)));
-                }
-                // Margin Modes
-                let marginModes = "-";
-                if (mkt.marginModes) {
-                  marginModes = [
-                    mkt.marginModes.cross ? "Cross" : null,
-                    mkt.marginModes.isolated ? "Isolated" : null,
-                  ].filter(Boolean).join(", ");
-                }
+                const stats = marketStats[mkt.symbol] || {};
                 return (
                   <tr
                     key={mkt.id}
@@ -153,16 +184,11 @@ function PairSelector({
                     }}
                   >
                     <td className="px-2 py-1 font-bold text-white">{mkt.base} / {mkt.quote}</td>
-                    <td className="px-2 py-1">
-                      <span className={mkt.active ? "text-green-400" : "text-red-400"}>
-                        {mkt.active ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-2 py-1">{mkt.makerFee ? `${(parseFloat(mkt.makerFee) * 100).toFixed(1)}%` : "-"}</td>
-                    <td className="px-2 py-1">{mkt.takerFee ? `${(parseFloat(mkt.takerFee) * 100).toFixed(1)}%` : "-"}</td>
-                    <td className="px-2 py-1">{mkt.fundingPeriod ? `${mkt.fundingPeriod / 3600000}h` : "-"}</td>
-                    <td className="px-2 py-1">{maxLeverage !== "-" ? `${maxLeverage}x` : "-"}</td>
-                    <td className="px-2 py-1">{marginModes}</td>
+                    <td className="px-2 py-1">{stats.lastPrice ? formatPrice(stats.lastPrice) : "-"}</td>
+                    <td className="px-2 py-1">{stats.priceChangePercent ? `${formatPrice(stats.priceChangePercent)}%` : "-"}</td>
+                    <td className="px-2 py-1">{stats.fundingRate ? `${formatPrice(stats.fundingRate * 100)}%` : "-"}</td>
+                    <td className="px-2 py-1">{stats.volume ? formatPrice(stats.volume) : "-"}</td>
+                    <td className="px-2 py-1">{stats.openInterest ? formatPrice(stats.openInterest) : "-"}</td>
                   </tr>
                 );
               })}
