@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/Authentication";
+import React from "react";
 
-// Example: Replace with your actual data fetching logic
+// Dummy data for UI preview
 const positions = [
   {
     symbol: "BTCUSDT",
@@ -12,7 +11,6 @@ const positions = [
     unrealizedPnl: "100",
     positionSide: "LONG",
     leverage: 10,
-    // ...other fields
   },
   {
     symbol: "ETHUSDT",
@@ -23,51 +21,15 @@ const positions = [
     unrealizedPnl: "-50",
     positionSide: "SHORT",
     leverage: 5,
-    // ...other fields
   }
 ];
 
-function formatNumber(num, decimals = 2) {
-  return Number(num).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-}
-
-const pnlColor = (pnl) => pnl >= 0 ? 'text-primary2' : 'text-warningcolor';
-
 const Positions = () => {
-  const { token } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!token) return;
-
-    setLoading(true);
-    setError("");
-    fetch("https://fastify-serverless-function-rimj.onrender.com/api/positions?limit=20", {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to fetch positions");
-        return res.json();
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [token]);
-
-  if (!token) return <div>Please log in to view positions.</div>;
-  if (loading) return <div>Loading positions...</div>;
-  if (error) return <div>Error: {error}</div>;
-
   return (
     <div className="w-full">
-
-      <div className="overflow-x-auto ">
+      <div className="overflow-x-auto">
         <div className="min-w-[900px]">
-          <div className="grid grid-cols-8 gap-2  text-xs font-semibold text-liquidwhite">
+          <div className="grid grid-cols-8 gap-2 text-xs font-semibold text-liquidwhite">
             <div>Pair</div>
             <div>Size</div>
             <div>Open Price</div>
@@ -80,25 +42,25 @@ const Positions = () => {
           {positions.map((pos, idx) => (
             <div
               key={pos.symbol + pos.positionSide}
-              className={`rounded-md grid grid-cols-8 gap-2 items-center px-3 py-1 mt-2 text-sm ${
-                idx % 2 ? 'bg-liquidwhite/10' : 'bg-liquidwhite/20'
-              }`}
+              className={`rounded-md grid grid-cols-8 gap-2 items-center px-3 py-1 mt-2 text-sm ${idx % 2 ? 'bg-liquidwhite/10' : 'bg-liquidwhite/20'}`}
             >
-              <div className="font-semibold">{pos.symbol} <span className="ml-1 text-xs text-gray-400">{pos.positionSide}</span></div>
-              <div>{formatNumber(pos.positionAmt)}</div>
-              <div>{formatNumber(pos.entryPrice)}</div>
-              <div>{formatNumber(pos.markPrice)}</div>
-              <div>{formatNumber(pos.liquidationPrice)}</div>
-              <div className={pnlColor(Number(pos.unrealizedPnl))}>
-                {formatNumber(pos.unrealizedPnl)}
+              <div className="font-semibold">
+                {pos.symbol} <span className="ml-1 text-xs text-gray-400">{pos.positionSide}</span>
+              </div>
+              <div>{pos.positionAmt}</div>
+              <div>{pos.entryPrice}</div>
+              <div>{pos.markPrice}</div>
+              <div>{pos.liquidationPrice}</div>
+              <div className={Number(pos.unrealizedPnl) >= 0 ? 'text-primary2' : 'text-warningcolor'}>
+                {pos.unrealizedPnl}
               </div>
               <div>
-                <button className="bg-backgrounddark  border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
-                <button className="bg-backgrounddark  border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
+                <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
+                <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
               </div>
               <div className="flex gap-1">
-                <button className=" border border-primary2 hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
-                <button className="bg-warningcolor  border border-transparent hover:border-liquidwhite text-white   px-2 py-1 rounded text-xs">Close</button>
+                <button className="border border-primary2 hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
+                <button className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Close</button>
               </div>
             </div>
           ))}

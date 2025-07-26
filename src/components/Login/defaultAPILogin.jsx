@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Modal, Input, Button, message } from "antd";
-import { authKey } from "../../Zustandstore/panelStore"; // <-- import the store
+import { useAuthKeyStore } from "../../Zustandstore/panelStore"; // <-- import the store
 
 const DefaultAPILogin = ({ open, onClose, onLoginSuccess }) => {
   const [username, setUsername] = useState("");
@@ -8,13 +8,7 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
 
   // Get the setter from Zustand
-  const setauthKey = authKey((state) => state.setauthKey);
-
-  // Set a static string to authKey on component mount and show a message
-  useEffect(() => {
-    setauthKey("STATIC_TEST_STRING");
-    message.info("Static authKey set on load");
-  }, [setauthKey]);
+  const setauthKey = useAuthKeyStore((state) => state.setauthKey);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -39,6 +33,7 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess }) => {
       const data = await response.json();
       if (data.access_token) {
         message.success("Login successful!");
+        setauthKey(data.access_token); // Set the received token to Zustand store
         onLoginSuccess && onLoginSuccess(username, data.access_token);
         onClose();
       } else {

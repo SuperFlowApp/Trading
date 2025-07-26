@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Modal } from 'antd';
 import 'antd/dist/reset.css'; // or 'antd/dist/antd.css' for older versions
-import LoginPanel from "./Login/LoginPanel"; // Add this import at the top
-import { authKey } from "../Zustandstore/panelStore"; // keep this import
+import LoginPanel from "./Login/LoginPanel";
+import { useAuthKeyStore } from "../Zustandstore/panelStore";
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -23,8 +23,7 @@ const initialSettings = {
 
 function Navbar() {
   // Zustand selector INSIDE the component:
-  const accessToken = authKey(state => state.authKey);
-  const username = authKey(state => state.username);
+  const accessToken = useAuthKeyStore(state => state.authKey);
 
   const [showLogin, setShowLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -159,7 +158,7 @@ function Navbar() {
                 className="px-4 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-opacity-80 transition"
                 onClick={() => setDropdownOpen((v) => !v)}
               >
-                {username ? username : "Logged in"}
+                {"Logged in"}
               </button>
               {dropdownOpen && (
                 <div

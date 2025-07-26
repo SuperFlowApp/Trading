@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp';
 import Navbar from './components/navbar';
 import CommingSoon from './components/CommonUIs/CommingSoon';
-import { AuthProvider } from './context/Authentication';
 import DebeggerPanel from './debugger';
 import AdminPanel from './admin';
 
@@ -50,10 +49,8 @@ function RootApp() {
   
   return (
     <StrictMode>
-      <AuthProvider>
         <Navbar />
         {TradingPanel(isMobile)}
-      </AuthProvider>
     </StrictMode>
   );
 }

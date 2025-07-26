@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@ant-design/web3": "^1.24.0",
-    "@ant-design/web3-wagmi": "^2.11.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@klinecharts/pro": "^0.1.1",
@@ -36,7 +35,6 @@
     "viem": "^2.33.0",
     "vue": "^2.7.16",
     "vue-custom-element": "^3.3.0",
-    "wagmi": "^2.16.0",
     "web3modal": "^1.9.12",
     "zustand": "^5.0.6"
   },
@@ -53,5 +51,8 @@
     "postcss": "^8.5.4",
     "tailwindcss": "^3.4.17",
     "vite": "^6.3.5"
+  },
+  "resolutions": {
+    "zustand": "5.0.6"
   }
 }

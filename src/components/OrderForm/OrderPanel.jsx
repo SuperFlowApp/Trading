@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth, useAuthFetch } from '../../context/Authentication';
-import { Input, Select, Space, Button  } from 'antd';
+import { Input, Select, Space, Button } from 'antd';
 
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import userInputStore from '../../Zustandstore/userInputStore.js';
@@ -31,9 +30,8 @@ function LimitOrderForm({ onCurrencyChange }) {
   const priceMidpoint = useZustandStore(s => s.priceMidpoint);
 
   // Move this check AFTER all hooks
-  const { token, availableBalance } = useAuth();
   const [balanceTotal, setBalanceTotal] = useState("--");
-  const balanceFree = availableBalance ? parseFloat(availableBalance).toFixed(2) : "--";
+  const balanceFree = "--";
   const [price, setPrice] = useState(priceMidpoint);
   const [amount, setAmount] = useState('');
   const [side, setSide] = useState('buy');
@@ -61,28 +59,8 @@ function LimitOrderForm({ onCurrencyChange }) {
     }
   }, [OrderBookClickedPrice]);
 
-  // Clear all fields and reset states when logged out
-  useEffect(() => {
-    if (!token) {
-      setBalanceTotal("--");
-      setPrice('');
-      setAmount('');
-      setSide('buy');
-      setMarket('limit');
-      setError('');
-      setSuccess('');
-      setSliderValue(0); // Reset slider to default value
-      setSelectedCurrency(pairDetails.base); // Reset to the first currency
-    }
-  }, [token]);
 
   const placeOrder = async () => {
-    if (!token) {
-      // Just blink when not logged in, no error message
-      setBlinkClass("blink-error");
-      setTimeout(() => setBlinkClass(""), 400);
-      return;
-    }
 
     if (!selectedPair || !amount) {
       setError('Please fill all fields.');
@@ -485,21 +463,18 @@ function LimitOrderForm({ onCurrencyChange }) {
         className={` mt-8 text-lg transition-colors border-2 border-transparent ${blinkClass}`}
         block
         onClick={() => {
-          if (!token) {
-            setShowLoginPanel(true);
-            return;
-          }
           placeOrder();
         }}
         disabled={loading}
       >
-        {!token
+        {/*!token
           ? "Connect"
           : loading
             ? "Placing..."
             : side === 'buy'
               ? 'Place buy order'
-              : 'Place sell order'}
+              : 'Place sell order'*/}
+        {'place order'}
       </OrderButton>
 
       <div className='px-4' style={{ minHeight: '16px' }}>

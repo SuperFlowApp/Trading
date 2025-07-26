@@ -1,4 +1,3 @@
-import { AuthProvider } from './context/Authentication';
 import ChartPanel from './components/Chart/ChartPanel';
 import LimitOrderForm from './components/OrderForm/OrderPanel';
 import Infobar from './components/infobar/Infobar';
@@ -14,7 +13,6 @@ function FuturesApp() {
   const setShowLoginPanel = useZustandStore(s => s.setShowLoginPanel);
 
   return (
-    <AuthProvider>
       <div className="relative w-screen h-auto overflow-visible">
         <div className="flex flex-1 p-1 gap-1">
           {/* TradingViewChart/Infobar */}
@@ -36,7 +34,6 @@ function FuturesApp() {
           )}
         </div>
       </div>
-    </AuthProvider>
   );
 }
 

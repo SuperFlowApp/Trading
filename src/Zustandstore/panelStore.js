@@ -1,13 +1,17 @@
 import { create } from "zustand";
 
-const authKey = create((set) => ({
+const useAuthKeyStore = create((set) => ({
   authKey: null,
   setauthKey: (authKey) => set({ authKey }),
 }));
 
-// Log authKey value whenever it changes
-authKey.subscribe((state) => {
+// Log authKey value whenever it changes and dispatch a custom event
+useAuthKeyStore.subscribe((state) => {
   console.log("Zustand AuthKey:", state.authKey);
+  // Dispatch custom event for debugger panel
+  window.dispatchEvent(
+    new CustomEvent("authKeyChanged", { detail: state.authKey })
+  );
 });
 
 const marketsData = create((set) => ({
@@ -80,6 +84,6 @@ function syncZustandStore(store, storageKey) {
 // Apply syncing to all stores
 syncZustandStore(useZustandStore, "zustand-store-state");
 syncZustandStore(marketsData, "markets-data-state");
-syncZustandStore(authKey, "auth-key-state");
+syncZustandStore(useAuthKeyStore, "auth-key-state");
 
-export { useZustandStore, marketsData, authKey };
+export { useZustandStore, marketsData, useAuthKeyStore };
