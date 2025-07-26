@@ -10,12 +10,6 @@ const marketsData = create((set) => ({
   setAllMarketData: (markets) => set({ allMarketData: markets }),
 }));
 
-const marketsStats = create((set) => ({
-  allmarketsStats: [],
-  setAllMarketData: (currentMarketsStats) =>
-    set({ allmarketsStats: currentMarketsStats }),
-}));
-
 const useZustandStore = create((set, get) => ({
   // Leverage settings
   leverage: 5,
@@ -82,6 +76,5 @@ function syncZustandStore(store, storageKey) {
 syncZustandStore(useZustandStore, "zustand-store-state");
 syncZustandStore(marketsData, "markets-data-state");
 syncZustandStore(useAuthKeyStore, "auth-key-state");
-syncZustandStore(marketsStats, "markets-stats-state");
 
-export { useZustandStore, marketsData, useAuthKeyStore, marketsStats };
+export { useZustandStore, marketsData, useAuthKeyStore };
