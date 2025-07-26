@@ -3,6 +3,7 @@ import { Modal } from 'antd';
 import 'antd/dist/reset.css';
 import LoginPanel from "./Login/LoginPanel";
 import { getAuthKey } from "../utils/authKeyStorage";
+import Button from "./CommonUIs/Button"; // <-- Add this import
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -97,7 +98,7 @@ function Navbar() {
   };
 
   const handleDisconnect = () => {
-    localStorage.removeItem("authKey");
+    localStorage.clear(); // Clear all localStorage, not just authKey
     setAccessToken(null);
     setDropdownOpen(false);
   };
@@ -150,37 +151,32 @@ function Navbar() {
         <div className="flex items-center gap-4">
           {/* Login/User Button */}
           {!accessToken ? (
-            <button
-              className="px-4 py-2 bg-backgroundlight rounded-md text-sm font-semibold hover:bg-primary2deactive transition"
+            <Button
+              type="primary"
               onClick={() => setShowLogin(true)}
             >
               Connect
-            </button>
+            </Button>
           ) : (
             <div
               className="relative"
               ref={dropdownRef}
-              style={{ display: "inline-block" }}
               onMouseEnter={() => setDropdownOpen(true)}
               onMouseLeave={() => setDropdownOpen(false)}
             >
-              <button
-                className="px-4 py-2 bg-secondary2 rounded-md text-sm font-semibold hover:bg-opacity-80 transition"
-                onClick={() => setDropdownOpen((v) => !v)}
+              <Button
+                type="secondary"
               >
-                {"Logged in"}
-              </button>
+                Logged in
+              </Button>
               {dropdownOpen && (
-                <div
-                  className="absolute right-0 mt-0 w-26 bg-secondary2 rounded shadow-lg z-50"
-                  style={{ top: "100%" }}
-                >
-                  <button
-                    className="block w-full text-left px-4 py-2 hover:bg-opacity-80"
+                <div className="absolute right-0 bg-backgrounddark text-white rounded shadow-lg z-50 p-2">
+                  <Button
+                    type="button-base button-danger"
                     onClick={handleDisconnect}
                   >
                     Disconnect
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -221,24 +217,13 @@ function Navbar() {
       </nav>
 
       {/* Login Popup Modal */}
-      <Modal
-        open={showLogin}
-        onCancel={() => setShowLogin(false)}
-        footer={null}
-        centered
-        width={420}
-        destroyOnHidden
-        styles={{
-          body: { padding: 0, background: "#23272f", borderRadius: 12 }
-        }}
-        closeIcon={<span style={{ color: "#fff", fontSize: 24 }}>&times;</span>}
-      >
+      {showLogin && (
         <LoginPanel
           open={showLogin}
           onClose={() => setShowLogin(false)}
           onLoginSuccess={handleLoginSuccess}
         />
-      </Modal>
+      )}
     </>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Modal, Button } from "antd";
+import Modal from "../CommonUIs/modal/modal"; // <-- Use your native Modal
 import DefaultAPILogin from "./defaultAPILogin";
+import Button from "../CommonUIs/Button";
 
 const LoginPanel = ({ onClose, open, onLoginSuccess }) => {
   const [showDefaultLogin, setShowDefaultLogin] = useState(false);
@@ -9,22 +10,17 @@ const LoginPanel = ({ onClose, open, onLoginSuccess }) => {
     <>
       <Modal
         open={open}
-        onCancel={onClose}
-        footer={null}
-        centered
+        onClose={onClose}
         width={420}
-        destroyOnHidden
-        styles={{
-          body: { padding: 0, background: "#0f1529", borderRadius: 12 }
-        }}
-        closeIcon={<span style={{ color: "#fff", fontSize: 24 }}>&times;</span>}
       >
         <div style={{
           minHeight: 200,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          borderRadius: 12,
+          padding: 0
         }}>
           <span style={{ color: "#fff", marginBottom: 24 }}>
             Login

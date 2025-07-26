@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Input, Button, message } from "antd";
+import { message } from "antd";
 import { useAuthKeyStore } from "../../Zustandstore/panelStore";
 import { getAuthKey, setAuthKey } from "../../utils/authKeyStorage";
+import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
+import Button from "../CommonUIs/Button";
+import Modal from "../CommonUIs/modal/modal";
 
-const DefaultAPILogin = ({ open, onClose, onLoginSuccess }) => {
+const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,7 +17,6 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess }) => {
   // On mount, check localStorage for authKey and set it to Zustand store
   useEffect(() => {
     const storedToken = getAuthKey();
-    console.log("AuthKeyStorage value on refresh:", storedToken); // Debug print
     if (storedToken) {
       setauthKey(storedToken);
     }
@@ -36,19 +38,20 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess }) => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
       const data = await response.json();
+
       if (data.access_token) {
         message.success("Login successful!");
-        setauthKey(data.access_token); // Set the received token to Zustand store
-        setAuthKey(data.access_token); // Save to localStorage
+        setauthKey(data.access_token);
+        setAuthKey(data.access_token);
         onLoginSuccess && onLoginSuccess(username, data.access_token);
         onClose();
       } else {
-        message.error("Invalid credentials or unexpected response.");
+        if (data.detail && Array.isArray(data.detail) && data.detail[0]?.msg) {
+          message.error(data.detail[0].msg);
+        } else {
+          message.error("Invalid credentials.");
+        }
       }
     } catch (err) {
       message.error("Login failed: " + err.message);
@@ -58,38 +61,32 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess }) => {
   };
 
   const handleSignUp = () => {
-    // Add your signup logic here
     onClose();
   };
 
   return (
     <Modal
       open={open}
-      onCancel={onClose}
-      footer={null}
-      centered
+      onClose={onClose}
       width={350}
-      destroyOnHidden
-      styles={{
-        body: { padding: 0, background: "#0f1529", borderRadius: 12 }
-      }}
+      clickPosition={clickPosition}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "60px 20px" }}>
-        <Input
-          placeholder="Username"
+        <UsernameInput
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
-        <Input.Password
-          placeholder="Password"
+        <PasswordInput
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <Button type="primary" onClick={handleLogin} loading={loading}>
-            Login
+          <Button type="secondary" onClick={handleLogin} disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </Button>
-          <Button onClick={handleSignUp}>SignUp</Button>
+          <Button type="primary" onClick={handleSignUp}>
+            SignUp
+          </Button>
         </div>
       </div>
     </Modal>
