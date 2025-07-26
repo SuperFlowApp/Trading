@@ -2,12 +2,16 @@
   position: relative;
   width: 100%;
   margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
 
 .custom-input {
   width: 100%;
-  padding: 12px 40px 12px 40px; /* left for icon, right for eye */
-  border-radius: 8px;
+  height: 40px;
+  padding: 0px 18px;
+  border-radius: 8px 0px 0px 8px;
   border: 1.5px solid #23263a;
   background: #23263a;
   color: #fff;
@@ -29,29 +33,37 @@
   font-size: 15px;
 }
 
-.custom-input-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  opacity: 0.7;
-  display: flex;
-  align-items: center;
-  height: 18px;
+.custom-input-btn {
+  border: 1.5px solid #23263a;
+  background: #23263a;
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 0 24px;
+  height: 40px;
+  border-radius: 0px 8px 8px 0px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
 }
 
-.custom-input-eye {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  padding: 0;
+.custom-input-btn:hover, .custom-input-btn:focus {
+  border-color: #3a6cf4;
+  background: #2a2d4a;
+}
+
+.custom-input-dropdown {
+  min-width: 90px;
+  border-radius: 0px 8px 8px 0px;
+  border: 1.5px solid #23263a;
+  background: #23263a;
+  color: #fff;
+  font-size: 15px;
+  height: 40px;
   cursor: pointer;
-  opacity: 0.8;
-  display: flex;
-  align-items: center;
-  height: 18px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.custom-input-dropdown:focus, .custom-input-dropdown:hover {
+  border-color: #3a6cf4;
+  background: #2a2d4a;
 }

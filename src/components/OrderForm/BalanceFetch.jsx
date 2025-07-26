@@ -77,8 +77,10 @@ const BalanceFetch = ({ onBalance }) => {
   }, [token, onBalance]);
 
   return (
-    <span className="text-white font-semibold text-xs">
-      Balance: {balance !== "--" ? parseFloat(balance).toFixed(1) : "--"} USDT
+<span className="flex w-full justify-between text-liquidwhite font-semibold text-xs">
+      Balance: {<span className="text-white font-semibold text-xs gap-4">
+        {balance !== "--" ? parseFloat(balance).toFixed(1) : "--"} USDT
+      </span>}
     </span>
   );
 };

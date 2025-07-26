@@ -15,6 +15,7 @@ import OrderButton from './OrderButton';
 import SideSelectorButton from './SideSelectorButton';
 import TifSelector from './TifSelector';
 import BalanceFetch from './BalanceFetch';
+import { InputWithButton, InputWithDropDown } from '../CommonUIs/inputs/inputs.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
@@ -315,45 +316,27 @@ function LimitOrderForm({ onCurrencyChange }) {
         {market !== 'market' && (
           <>
             <label className="text-liquidwhite pt-2">Price</label>
-            <div className=" w-full justify-between items-center">
-              <Space.Compact style={{ width: '100%' }}>
-                <Input
-                  type="primary"
-                  placeholder="0.0"
-                  value={price === null || price === undefined ? "" : price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-                <Button
-                  type="submit"
-                  className="mid-btn"
-                  style={{
-                    borderTopLeftRadius: '0px',
-                    borderBottomLeftRadius: '0px',
-                    borderTopRightRadius: '8px',
-                    borderBottomRightRadius: '8px',
-                    border: '1px solid #444',
-                  }}
-                  onClick={async () => {
-                    const symbol = selectedPair;
-                    try {
-                      const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
-                      const data = await res.json();
-                      const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
-                      const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
-                      if (bestBid && bestAsk) {
-                        const mid = ((bestBid + bestAsk) / 2).toFixed(1);
-                        setPrice(mid);
-                      }
-                    } catch (err) {
-                      console.error('Failed to fetch orderbook for mid price:', err);
-                    }
-                  }}
-                >
-                  Mid
-                </Button>
-              </Space.Compact>
-
-            </div>
+            <InputWithButton
+              value={price === null || price === undefined ? "" : price}
+              onChange={e => setPrice(e.target.value)}
+              placeholder="0.0"
+              buttonLabel="Mid"
+              onButtonClick={async () => {
+                const symbol = selectedPair;
+                try {
+                  const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
+                  const data = await res.json();
+                  const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
+                  const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
+                  if (bestBid && bestAsk) {
+                    const mid = ((bestBid + bestAsk) / 2).toFixed(1);
+                    setPrice(mid);
+                  }
+                } catch (err) {
+                  console.error('Failed to fetch orderbook for mid price:', err);
+                }
+              }}
+            />
           </>
         )}
 
@@ -363,29 +346,17 @@ function LimitOrderForm({ onCurrencyChange }) {
         {market !== '' && (
           <>
             <label className="pt-2 pl-1 text-white">Size</label>
-            <div className="w-full relative flex items-center">
-              <Space.Compact className="w-full h-[28px]">
-                <Input
-                  type="number"
-                  placeholder="0.0"
-                  value={amount === null || amount === undefined ? "" : amount}
-                  onChange={handleAmountChange}
-                />
-                <Select
-                  value={selectedCurrency}
-                  onChange={(val) => setSelectedCurrency(val)}
-                  options={[
-                    { value: pairDetails.base, label: pairDetails.base },
-                    { value: pairDetails.quote, label: pairDetails.quote }
-                  ]}
-                  style={{
-                    minWidth: 90,
-                  }}
-                  className="currencyselector h-[28px]"
-                />
-              </Space.Compact>
-            </div>
-
+            <InputWithDropDown
+              value={amount === null || amount === undefined ? "" : amount}
+              onChange={handleAmountChange}
+              placeholder="0.0"
+              options={[
+                { value: pairDetails.base, label: pairDetails.base },
+                { value: pairDetails.quote, label: pairDetails.quote }
+              ]}
+              selectedOption={selectedCurrency}
+              onOptionChange={setSelectedCurrency}
+            />
           </>
         )}
       </div>
