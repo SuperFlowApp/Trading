@@ -1,14 +1,22 @@
 import { useState, useEffect } from 'react';
-import { marketsData, useAuthKeyStore } from './Zustandstore/panelStore.js';
+import { marketsData } from './Zustandstore/panelStore.js';
 import useUserInputStore from './Zustandstore/userInputStore.js';
+import { getAuthKey } from './utils/authKeyStorage.js';
 
 export default function DebeggerPanel() {
     const useUserInputStoreState = useUserInputStore();
-    // Always use the hook selector for Zustand
-    const authKey = useAuthKeyStore(state => state.authKey);
     const allMarketData = marketsData(state => state.allMarketData);
 
+    // Fetch authKey from native storage
+    const [authKey, setAuthKey] = useState(getAuthKey());
     const [modalOpen, setModalOpen] = useState(false);
+
+    useEffect(() => {
+        // Update authKey on storage change (for multi-tab support)
+        const handler = () => setAuthKey(getAuthKey());
+        window.addEventListener("storage", handler);
+        return () => window.removeEventListener("storage", handler);
+    }, []);
 
     useEffect(() => {
         if (!allMarketData || allMarketData.length === 0) {

@@ -5,14 +5,6 @@ const useAuthKeyStore = create((set) => ({
   setauthKey: (authKey) => set({ authKey }),
 }));
 
-// Log authKey value whenever it changes and dispatch a custom event
-useAuthKeyStore.subscribe((state) => {
-  console.log("Zustand AuthKey:", state.authKey);
-  // Dispatch custom event for debugger panel
-  window.dispatchEvent(
-    new CustomEvent("authKeyChanged", { detail: state.authKey })
-  );
-});
 
 const marketsData = create((set) => ({
   allMarketData: [],
