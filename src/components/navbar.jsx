@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Modal } from 'antd';
-import 'antd/dist/reset.css'; // or 'antd/dist/antd.css' for older versions
+import 'antd/dist/reset.css';
 import LoginPanel from "./Login/LoginPanel";
-import { useAuthKeyStore } from "../Zustandstore/panelStore";
+import { getAuthKey } from "../utils/authKeyStorage";
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -20,10 +20,9 @@ const initialSettings = {
   showAllWarnings: false,
 };
 
-
 function Navbar() {
-  // Zustand selector INSIDE the component:
-  const accessToken = useAuthKeyStore(state => state.authKey);
+  // Fetch authKey from native storage instead of Zustand
+  const [accessToken, setAccessToken] = useState(getAuthKey());
 
   const [showLogin, setShowLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -36,6 +35,12 @@ function Navbar() {
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
 
+  // Listen for authKey changes (multi-tab support)
+  useEffect(() => {
+    const handler = () => setAccessToken(getAuthKey());
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
 
   // Listen for clicks outside dropdown to close it
   useEffect(() => {
@@ -55,7 +60,6 @@ function Navbar() {
     };
   }, [dropdownOpen]);
 
-  // Listen for clicks outside settings to close it
   useEffect(() => {
     function handleClickOutside(event) {
       if (settingsRef.current && !settingsRef.current.contains(event.target)) {
@@ -70,9 +74,10 @@ function Navbar() {
     };
   }, [settingsOpen]);
 
-  // Callback for AuthPanel to close modal on login
+  // Callback for AuthPanel to close modal on login and update accessToken
   const handleLoginSuccess = () => {
     setShowLogin(false);
+    setAccessToken(getAuthKey());
   };
 
   const handleSettingChange = (key) => {
@@ -89,6 +94,12 @@ function Navbar() {
     } else {
       window.location.href = "/options-trading";
     }
+  };
+
+  const handleDisconnect = () => {
+    localStorage.removeItem("authKey");
+    setAccessToken(null);
+    setDropdownOpen(false);
   };
 
   return (
@@ -133,7 +144,6 @@ function Navbar() {
               Options Trading
             </li>
           </div>
-
         </div>
 
         {/* Right Side */}
@@ -167,10 +177,7 @@ function Navbar() {
                 >
                   <button
                     className="block w-full text-left px-4 py-2 hover:bg-opacity-80"
-                    onClick={() => {
-                      authKey.getState().setauthKey(null); // Logout: clear token
-                      setDropdownOpen(false);
-                    }}
+                    onClick={handleDisconnect}
                   >
                     Disconnect
                   </button>
@@ -232,7 +239,6 @@ function Navbar() {
           onLoginSuccess={handleLoginSuccess}
         />
       </Modal>
-
     </>
   );
 }
