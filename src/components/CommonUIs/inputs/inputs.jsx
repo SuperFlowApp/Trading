@@ -11,27 +11,38 @@ export const InputWithButton = ({
   disabled = false,
   inputProps = {},
   buttonProps = {},
-}) => (
-  <div className="custom-input-wrapper">
-    <input
-      type="text"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className="custom-input"
-      {...inputProps}
-    />
-    <button
-      type="button"
-      className="custom-input-btn"
-      onClick={onButtonClick}
-      disabled={disabled}
-      {...buttonProps}
-    >
-      {buttonLabel}
-    </button>
-  </div>
-);
+  label = "",
+}) => {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div className="custom-input-wrapper floating-label-wrapper">
+      <input
+        type="text"
+        value={value}
+        onChange={onChange}
+        placeholder={""}
+        className="custom-input"
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        {...inputProps}
+      />
+      <button
+        type="button"
+        className="custom-input-btn"
+        onClick={onButtonClick}
+        disabled={disabled}
+        {...buttonProps}
+      >
+        {buttonLabel}
+      </button>
+      <label
+        className={`floating-label${focused || value ? " floating-label--active" : ""}`}
+      >
+        {label || placeholder}
+      </label>
+    </div>
+  );
+};
 
 // Input with dropdown (for Size selector)
 export const InputWithDropDown = ({
@@ -43,30 +54,41 @@ export const InputWithDropDown = ({
   onOptionChange,
   inputProps = {},
   dropdownProps = {},
-}) => (
-  <div className="custom-input-wrapper">
-    <input
-      type="number"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className="custom-input"
-      {...inputProps}
-    />
-    <select
-      value={selectedOption}
-      onChange={e => onOptionChange(e.target.value)}
-      className="custom-input-dropdown"
-      {...dropdownProps}
-    >
-      {options.map(opt => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
+  label = "",
+}) => {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div className="custom-input-wrapper floating-label-wrapper">
+      <input
+        type="number"
+        value={value}
+        onChange={onChange}
+        placeholder={""}
+        className="custom-input"
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        {...inputProps}
+      />
+      <select
+        value={selectedOption}
+        onChange={e => onOptionChange(e.target.value)}
+        className="custom-input-dropdown"
+        {...dropdownProps}
+      >
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+      <label
+        className={`floating-label${focused || value ? " floating-label--active" : ""}`}
+      >
+        {label || placeholder}
+      </label>
+    </div>
+  );
+};
 
 // Username Input
 export const UsernameInput = ({ value, onChange, placeholder = "Username" }) => (

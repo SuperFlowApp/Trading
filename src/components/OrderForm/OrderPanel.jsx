@@ -311,52 +311,46 @@ function LimitOrderForm({ onCurrencyChange }) {
       </div>
 
       {/* Conditionally render the Price field */}
-      <div className=" flex flex-col text-sm">
+      <div className=" flex flex-col text-sm pt-8 gap-4">
         {market !== 'market' && (
-          <>
-            <label className="text-liquidwhite pt-2">Price</label>
-            <InputWithButton
-              value={price === null || price === undefined ? "" : price}
-              onChange={e => setPrice(e.target.value)}
-              placeholder="0.0"
-              buttonLabel="Mid"
-              onButtonClick={async () => {
-                const symbol = selectedPair;
-                try {
-                  const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
-                  const data = await res.json();
-                  const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
-                  const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
-                  if (bestBid && bestAsk) {
-                    const mid = ((bestBid + bestAsk) / 2).toFixed(1);
-                    setPrice(mid);
-                  }
-                } catch (err) {
-                  console.error('Failed to fetch orderbook for mid price:', err);
+          <InputWithButton
+            value={price === null || price === undefined ? "" : price}
+            onChange={e => setPrice(e.target.value)}
+            label="Price"
+            buttonLabel="Mid"
+            onButtonClick={async () => {
+              const symbol = selectedPair;
+              try {
+                const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
+                const data = await res.json();
+                const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
+                const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
+                if (bestBid && bestAsk) {
+                  const mid = ((bestBid + bestAsk) / 2).toFixed(1);
+                  setPrice(mid);
                 }
-              }}
-            />
-          </>
+              } catch (err) {
+                console.error('Failed to fetch orderbook for mid price:', err);
+              }
+            }}
+          />
         )}
 
 
         {/* Conditionally render the Amount field */}
 
         {market !== '' && (
-          <>
-            <label className="pt-2 pl-1 text-white">Size</label>
-            <InputWithDropDown
-              value={amount === null || amount === undefined ? "" : amount}
-              onChange={handleAmountChange}
-              placeholder="0.0"
-              options={[
-                { value: pairDetails.base, label: pairDetails.base },
-                { value: pairDetails.quote, label: pairDetails.quote }
-              ]}
-              selectedOption={selectedCurrency || ""}
-              onOptionChange={setSelectedCurrency}
-            />
-          </>
+          <InputWithDropDown
+            value={amount === null || amount === undefined ? "" : amount}
+            onChange={handleAmountChange}
+            label="Size"
+            options={[
+              { value: pairDetails.base, label: pairDetails.base },
+              { value: pairDetails.quote, label: pairDetails.quote }
+            ]}
+            selectedOption={selectedCurrency || ""}
+            onOptionChange={setSelectedCurrency}
+          />
         )}
       </div>
 

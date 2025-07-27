@@ -8,6 +8,7 @@
 }
 
 .custom-input {
+
   width: 100%;
   height: 40px;
   padding: 0px 18px;
@@ -66,4 +67,30 @@
 .custom-input-dropdown:focus, .custom-input-dropdown:hover {
   border-color: var(--color-primary2active);
   background: var(--color-backgroundlighthover);
+}
+
+.floating-label-wrapper {
+  position: relative;
+}
+
+.floating-label {
+  position: absolute;
+  left: 18px;
+  top: 10px;
+  color: var(--color-liquidwhite);
+  font-size: 15px;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  background: transparent;
+  z-index: 2;
+}
+
+/* Only move label up and shrink font, no color or background change */
+.custom-input:focus ~ .custom-input-btn + .floating-label,
+.custom-input:not(:placeholder-shown) ~ .custom-input-btn + .floating-label,
+.floating-label--active {
+  top: -20px;         /* Move further up */
+  left: 8px;
+  color: var(--color-liquidwhite);
+  padding: 0 4px;
 }
