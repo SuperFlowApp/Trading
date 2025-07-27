@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Input, Select, Space, Button } from 'antd';
 
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import userInputStore from '../../Zustandstore/userInputStore.js';
@@ -14,7 +13,7 @@ import OrderButton from './OrderButton';
 import SideSelectorButton from './SideSelectorButton';
 import TifSelector from './TifSelector';
 import BalanceFetch from './BalanceFetch';
-import { InputWithButton, InputWithDropDown } from '../CommonUIs/inputs/inputs.jsx';
+import { InputWithButton, InputWithDropDown, PercentageInput } from '../CommonUIs/inputs/inputs.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
@@ -393,16 +392,10 @@ function LimitOrderForm({ onCurrencyChange }) {
 
 
         <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
-          <Input
-            type="number"
-            min={0}
-            max={100}
-            step={1}
+          <PercentageInput
             value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
             onChange={handleInputChange}
-            className="h-[28px]"
           />
-          <span>%</span>
         </div>
       </div>
 

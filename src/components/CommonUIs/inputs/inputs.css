@@ -12,7 +12,7 @@
   width: 100%;
   height: 40px;
   padding: 0px 18px;
-  border-radius: 8px 0px 0px 8px;
+  border-radius: 8px;
   border: 1.5px solid var(--color-backgroundlight);
   background: var(--color-backgroundlight);
   color: var(--color-liquidwhite);
@@ -21,6 +21,12 @@
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(15,21,41,0.08);
+}
+.left-round{
+  border-radius: 8px 0px 0px 8px;
+}
+.right-round{
+  border-radius: 0px 8px 8px 0px;
 }
 
 .custom-input:focus {
@@ -42,7 +48,6 @@
   font-size: 15px;
   padding: 0 24px;
   height: 40px;
-  border-radius: 0px 8px 8px 0px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
 }
@@ -52,9 +57,8 @@
   background: var(--color-backgroundlighthover);
 }
 
-.custom-input-dropdown {
+.custom-insidebox-dropdown {
   min-width: 90px;
-  border-radius: 0px 8px 8px 0px;
   border: 1.5px solid var(--color-backgroundmidhover);
   background: var(--color-backgroundlight);
   color: var(--color-liquidwhite);
@@ -62,6 +66,25 @@
   height: 40px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
+  border-radius: 8px;
+  border-radius: 0px 8px 8px 0px;
+}
+
+.custom-insidebox-dropdown:focus, .custom-input-dropdown:hover {
+  border-color: var(--color-primary2active);
+  background: var(--color-backgroundlighthover);
+}
+
+.custom-input-dropdown {
+  min-width: 90px;
+  border: 1.5px solid var(--color-backgroundmidhover);
+  background: var(--color-backgroundlight);
+  color: var(--color-liquidwhite);
+  font-size: 15px;
+  height: 40px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  border-radius: 8px;
 }
 
 .custom-input-dropdown:focus, .custom-input-dropdown:hover {
@@ -93,4 +116,26 @@
   left: 8px;
   color: var(--color-liquidwhite);
   padding: 0 4px;
+}
+
+.percentage-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 80px;
+}
+
+.percentage-input {
+  padding-right: 24px !important;
+  text-align: right;
+}
+
+.percentage-symbol {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-liquidwhite);
+  font-size: 15px;
+  pointer-events: none;
 }

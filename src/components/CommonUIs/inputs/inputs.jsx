@@ -21,14 +21,14 @@ export const InputWithButton = ({
         value={value}
         onChange={onChange}
         placeholder={""}
-        className="custom-input"
+        className="custom-input left-round"
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         {...inputProps}
       />
       <button
         type="button"
-        className="custom-input-btn"
+        className="custom-input-btn right-round"
         onClick={onButtonClick}
         disabled={disabled}
         {...buttonProps}
@@ -64,7 +64,7 @@ export const InputWithDropDown = ({
         value={value}
         onChange={onChange}
         placeholder={""}
-        className="custom-input"
+        className="custom-input left-round"
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         {...inputProps}
@@ -72,7 +72,7 @@ export const InputWithDropDown = ({
       <select
         value={selectedOption}
         onChange={e => onOptionChange(e.target.value)}
-        className="custom-input-dropdown"
+        className="custom-insidebox-dropdown right-round"
         {...dropdownProps}
       >
         {options.map(opt => (
@@ -182,6 +182,33 @@ export const PasswordInput = ({ value, onChange, placeholder = "Password" }) => 
           </svg>
         )}
       </button>
+    </div>
+  );
+};
+
+// Native percentage input for slider value
+export const PercentageInput = ({
+  value,
+  onChange,
+  min = 0,
+  max = 100,
+  step = 1,
+  inputProps = {},
+}) => {
+  return (
+    <div className="percentage-input-wrapper" style={{ position: "relative", maxWidth: 80 }}>
+      <input
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={onChange}
+        className="custom-input percentage-input"
+        style={{ paddingRight: 24 }}
+        {...inputProps}
+      />
+      <span className="percentage-symbol">%</span>
     </div>
   );
 };
