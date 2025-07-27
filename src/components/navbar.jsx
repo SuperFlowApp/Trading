@@ -101,10 +101,11 @@ function Navbar() {
   };
 
   const handleDisconnect = () => {
-    localStorage.clear(); // Clear all localStorage, not just authKey
+    localStorage.clear();
     setAccessToken(null);
     setDropdownOpen(false);
-    message.info("Disconnected"); // Show top notification
+    message.info("Disconnected");
+    window.dispatchEvent(new Event("authKeyChanged")); // <-- Add this line
   };
 
   return (

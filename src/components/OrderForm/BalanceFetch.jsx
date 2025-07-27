@@ -30,6 +30,17 @@ const BalanceFetch = ({ onBalance }) => {
     return () => clearInterval(pollAuthKey);
   }, []);
 
+  // Listen to authKeyChanged event
+  useEffect(() => {
+    const handleAuthKeyChange = () => {
+      const currentToken = getAuthKey();
+      tokenRef.current = currentToken;
+      setToken(currentToken);
+    };
+    window.addEventListener("authKeyChanged", handleAuthKeyChange);
+    return () => window.removeEventListener("authKeyChanged", handleAuthKeyChange);
+  }, []);
+
   // Fetch balance when token changes or every 5s if valid
   useEffect(() => {
     let intervalId;
