@@ -13,7 +13,7 @@ function isTokenValid(token) {
 }
 
 const BalanceFetch = ({ onBalance }) => {
-  const [balance, setBalance] = useState("--");
+  const [balance, setBalance] = useState(0.0);
   const [token, setToken] = useState(getAuthKey());
   const tokenRef = useRef(token);
 
@@ -36,8 +36,8 @@ const BalanceFetch = ({ onBalance }) => {
 
     const fetchBalance = () => {
       if (!token || !isTokenValid(token)) {
-        setBalance("--");
-        onBalance && onBalance("--");
+        setBalance(0.0);
+        onBalance && onBalance(0.0);
         return;
       }
       fetch('https://fastify-serverless-function-rimj.onrender.com/api/balance', {
@@ -58,14 +58,14 @@ const BalanceFetch = ({ onBalance }) => {
             setBalance(data.balances.USDT.free);
             onBalance && onBalance(data.balances.USDT.free);
           } else {
-            setBalance("--");
-            onBalance && onBalance("--");
+            setBalance(0.0);
+            onBalance && onBalance(0.0);
             console.error("Balance response schema error:", data);
           }
         })
         .catch(err => {
-          setBalance("--");
-          onBalance && onBalance("--");
+          setBalance(0.0);
+          onBalance && onBalance(0.0);
           console.error("Balance fetch error:", err);
         });
     };
@@ -79,7 +79,7 @@ const BalanceFetch = ({ onBalance }) => {
   return (
 <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs">
       Balance: {<span className="text-white font-semibold text-xs gap-4">
-        {balance !== "--" ? parseFloat(balance).toFixed(1) : "--"} USDT
+        {parseFloat(balance).toFixed(1)} USDT
       </span>}
     </span>
   );
