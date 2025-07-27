@@ -3,7 +3,6 @@ import { Input, Select, Space, Button } from 'antd';
 
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import userInputStore from '../../Zustandstore/userInputStore.js';
-import { getAuthKey } from '../../utils/authKeyStorage';
 
 import LeveragePanel from './Leverage';
 import MarginMode from './MarginMode';

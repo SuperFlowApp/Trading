@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { marketsData } from './Zustandstore/panelStore.js';
 import useUserInputStore from './Zustandstore/userInputStore.js';
-import { getAuthKey } from './utils/authKeyStorage.js';
+import { getAuthKey } from './utils/authKeyStorage.jsx';
 
-export default function DebeggerPanel() {
+export default function DebuggerPanel() {
     const useUserInputStoreState = useUserInputStore();
     const allMarketData = marketsData(state => state.allMarketData);
 

@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp';
 import Navbar from './components/navbar';
 import CommingSoon from './components/CommonUIs/CommingSoon';
-import DebeggerPanel from './debugger';
 import AdminPanel from './admin';
 
 import './components/index.css';
@@ -32,12 +31,6 @@ function RootApp() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Routing logic for debug panel
-  if (window.location.pathname.startsWith('/debugger')) {
-    return (
-      <DebeggerPanel />
-    );
-  }
   // Routing logic for admin panel
   if (window.location.pathname.startsWith('/admin')) {
     return (

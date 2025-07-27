@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Modal, notification, message } from 'antd';
+import { notification, message } from 'antd';
 import 'antd/dist/reset.css';
 import LoginPanel from "./Login/LoginPanel";
 import { getAuthKey } from "../utils/authKeyStorage";
 import Button from "./CommonUIs/Button"; // <-- Add this import
+import Modal from "./CommonUIs/modal/modal"; // Use your native modal
+import DebuggerPanel from "../debugger"; // Add this import
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -33,6 +35,7 @@ function Navbar() {
     if (window.location.pathname.includes("options-trading")) return "options";
     return "futures";
   });
+  const [showDebugger, setShowDebugger] = useState(false);
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
 
@@ -112,6 +115,14 @@ function Navbar() {
           <div className="flex items-end gap-2">
             <img src="/assets/Logo.svg" alt="Logo" className="h-8 w-auto" />
             <img src="/assets/Bysymmio.svg" alt="Logo" className="h-4 w-auto" />
+            {/* Debugger small text link */}
+            <span
+              className="ml-2 text-xs text-primary2 cursor-pointer hover:underline"
+              onClick={() => setShowDebugger(true)}
+              style={{ userSelect: "none" }}
+            >
+              Debugger
+            </span>
           </div>
           <div className="flex items-center gap-14">
 
@@ -224,6 +235,17 @@ function Navbar() {
           onClose={() => setShowLogin(false)}
           onLoginSuccess={handleLoginSuccess}
         />
+      )}
+
+      {/* Debugger Modal using native modal */}
+      {showDebugger && (
+        <Modal
+          open={showDebugger}
+          onClose={() => setShowDebugger(false)}
+          width={600}
+        >
+          <DebuggerPanel />
+        </Modal>
       )}
     </>
   );
