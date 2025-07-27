@@ -24,7 +24,8 @@
 }
 
 .button-secondary:hover {
-  background: var(--color-primary2active, #00B7C9);;
+  background: var(--color-primary2active, #00B7C9);
+  ;
 }
 
 .button-danger {
@@ -47,4 +48,36 @@
 
 .button-block {
   width: 100%;
+}
+
+
+
+.button-nav {
+  background: var(--color-backgroundlight, #00B7C9);
+  color: #000;
+}
+
+.button-nav:hover {
+  background: var(--color-primary2deactive, #00B7C9);
+  ;
+}
+
+.button-navconnected {
+  background: var(--color-primary2, #00B7C9);
+  color: #000;
+}
+
+.button-navconnected:hover {
+  background: var(--color-primary2active, #00B7C9);
+  ;
+}
+
+.button-navdisconnected {
+  background: var(--color-backgroundlight, #00B7C9);
+  color: white;
+}
+
+.button-navdisconnected:hover {
+  background: var(--color-primary2deactive, #00B7C9);
+  color: white;
 }

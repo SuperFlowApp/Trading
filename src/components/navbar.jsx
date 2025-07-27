@@ -164,7 +164,7 @@ function Navbar() {
           {/* Login/User Button */}
           {!accessToken ? (
             <Button
-              type="primary"
+              type="navdisconnected"
               onClick={() => setShowLogin(true)}
             >
               Connect
@@ -177,7 +177,7 @@ function Navbar() {
               onMouseLeave={() => setDropdownOpen(false)}
             >
               <Button
-                type="secondary"
+                type="navconnected"
               >
                 Connected
               </Button>

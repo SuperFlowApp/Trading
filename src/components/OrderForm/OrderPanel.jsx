@@ -367,7 +367,7 @@ function LimitOrderForm({ onCurrencyChange }) {
         onClose={() => setLoginOpen(false)}
         onLoginSuccess={() => {
           setLoginOpen(false);
-          // Optionally refresh authKey here
+          window.dispatchEvent(new Event("storage")); // Force navbar to update
         }}
       />
 
