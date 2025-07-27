@@ -14,6 +14,9 @@ import SideSelectorButton from './SideSelectorButton';
 import TifSelector from './TifSelector';
 import BalanceFetch from './BalanceFetch';
 import { InputWithButton, InputWithDropDown, PercentageInput } from '../CommonUIs/inputs/inputs.jsx';
+import { useOrderPlacer } from './OrderPlacer';
+import { getAuthKey } from '../../utils/authKeyStorage.jsx';
+import LoginPanel from '../Login/LoginPanel'; // Import the login modal
 
 function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
@@ -39,19 +42,15 @@ function LimitOrderForm({ onCurrencyChange }) {
   const [side, setSide] = useState('buy');
   const [market, setMarket] = useState('limit');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
   const [sliderValue, setSliderValue] = useState(0);
   const [blinkClass, setBlinkClass] = useState("");
   const [inputSource, setInputSource] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isSliderHovered, setIsSliderHovered] = useState(false); // <-- Add this
   const [timeInForce, setTimeInForce] = useState('GTC');
 
   const marginMode = useZustandStore(s => s.marginMode);
   const setMarginModePanelOpen = useZustandStore(s => s.setMarginModePanelOpen);
   const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
-  const setShowLoginPanel = useZustandStore(s => s.setShowLoginPanel); // ADD THIS
   const setOrderFormState = userInputStore(s => s.setOrderFormState);
 
   // Update price when OrderBookClickedPrice changes
@@ -62,85 +61,17 @@ function LimitOrderForm({ onCurrencyChange }) {
   }, [OrderBookClickedPrice]);
 
 
-  const placeOrder = async () => {
+  const token = ""; // <-- Replace with your actual token logic
 
-    if (!selectedPair || !amount) {
-      setError('Please fill all fields.');
-      setBlinkClass("blink-error");
-      setTimeout(() => setBlinkClass(""), 400);
-      return;
-    }
-
-    // Automatically set price to priceMidpoint if in "market" tab
-    const finalPrice = market === 'market' ? priceMidpoint?.toFixed(1) : price;
-
-    if (!finalPrice) {
-      setError('Price is required.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
-    const requestBody = {
-      symbol: selectedPair,
-      type: market.toUpperCase(),
-      side: side.toUpperCase(),
-      positionSide: 'BOTH',
-      quantity: parseFloat(amount),
-      price: parseFloat(finalPrice),
-      timeInForce: 'GTC',
-      orderRespType: 'ACK',
-      params: {
-        additionalProp1: {},
-      },
-    };
-
-    try {
-      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      // Try to parse the error response before checking if response is ok
-      let errorData;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        errorData = await response.json();
-      } else {
-        errorData = await response.text();
-      }
-
-      if (!response.ok) {
-        // Use error message from response if available
-        const errorMessage = errorData && typeof errorData === 'object' && errorData.message
-          ? errorData.message
-          : typeof errorData === 'string' ? errorData : 'Failed to place order';
-
-        throw new Error(errorMessage);
-      }
-
-      const data = typeof errorData === 'object' ? errorData : { orderId: 'unknown' };
-      setSuccess(`Order placed! Order ID: ${data.orderId}`);
-      setAmount('');
-      setSliderValue(0);
-      setBlinkClass("blink-success");
-      setTimeout(() => setBlinkClass(""), 400);
-    } catch (err) {
-      console.error('Order error:', err);
-      setError(err.message || 'Failed to place order');
-      setBlinkClass("blink-error");
-      setTimeout(() => setBlinkClass(""), 400);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use the custom hook
+  const {
+    placeOrder,
+    loading: orderLoading,
+    error: orderError,
+    success: orderSuccess,
+    setError,
+    setSuccess
+  } = useOrderPlacer(token);
 
   // Set price to priceMidpoint when switching to Limit or Scale, unless user typed manually
   useEffect(() => {
@@ -153,11 +84,15 @@ function LimitOrderForm({ onCurrencyChange }) {
   }, [market, priceMidpoint]);
 
 
+  const handleSliderChange = (_, value) => {
+    setSliderValue(value);
+    setInputSource('slider');
+  };
+
   // Update on input change
   const handleInputChange = (e) => {
     let value = e.target.value.replace(/[^0-9.]/g, '');
-    if (value === '') value = '';
-    else value = Math.max(0, Math.min(100, Number(value)));
+    value = value === '' ? '' : Math.max(0, Math.min(100, Number(value)));
     setSliderValue(value);
     setInputSource('slider');
   };
@@ -167,27 +102,22 @@ function LimitOrderForm({ onCurrencyChange }) {
     let value = e.target.value.replace(/[^0-9.]/g, '');
     setAmount(value);
     setInputSource('input');
-
-    // Still calculate the slider position, but don't set input source to 'slider'
+    // Calculate sliderValue from amount
     const numericValue = parseFloat(value);
     const numericBalance = parseFloat(balanceFree);
     if (!isNaN(numericValue) && numericBalance > 0) {
       let percent = (numericValue / numericBalance) * 100;
-      if (percent < 0) percent = 0;
-      if (percent > 100) percent = 100;
+      percent = Math.max(0, Math.min(100, percent));
       setSliderValue(percent);
     } else {
       setSliderValue(0);
     }
   };
 
-  // Update the amount field whenever sliderValue changes or balance changes
+  // Update amount when sliderValue changes
   useEffect(() => {
-    // Only update amount from slider when inputSource is 'slider'
     if (inputSource === 'slider' && sliderValue >= 0) {
-      // Calculate based on selected currency
       if (selectedCurrency === pairDetails.base) {
-        // Convert balanceFree (in quote currency) to base currency
         const currentPrice = parseFloat(price) || priceMidpoint;
         if (currentPrice && !isNaN(currentPrice) && !isNaN(parseFloat(balanceFree))) {
           const baseEquivalent = parseFloat(balanceFree) / currentPrice;
@@ -195,27 +125,24 @@ function LimitOrderForm({ onCurrencyChange }) {
           setAmount(calculatedAmount.toFixed(6));
         }
       } else {
-        // quote currency, balanceFree directly
         const calculatedAmount = (sliderValue / 100) * parseFloat(balanceFree);
         setAmount(calculatedAmount.toFixed(2));
       }
-
-      // Reset input source after processing
       setInputSource(null);
     }
   }, [sliderValue, balanceFree, selectedCurrency, price, priceMidpoint, inputSource]);
 
   // Auto-hide error and success messages after 3 seconds
   useEffect(() => {
-    if (error) {
+    if (orderError) {
       const timer = setTimeout(() => setError(''), 3000);
       return () => clearTimeout(timer);
     }
-    if (success) {
+    if (orderSuccess) {
       const timer = setTimeout(() => setSuccess(''), 3000);
       return () => clearTimeout(timer);
     }
-  }, [error, success]);
+  }, [orderError, orderSuccess, setError, setSuccess]);
 
   // Notify parent when currency changes
   useEffect(() => {
@@ -265,6 +192,15 @@ function LimitOrderForm({ onCurrencyChange }) {
       params: {},
     });
   }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormState]);
+
+  const authKey = getAuthKey();
+  const orderButtonText = !authKey
+    ? 'connect'
+    : side === 'buy'
+      ? 'Place buy order'
+      : 'Place sell order';
+
+  const [loginOpen, setLoginOpen] = useState(false); // Add state for login modal
 
   return (
     <div className="p-2 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
@@ -363,30 +299,10 @@ function LimitOrderForm({ onCurrencyChange }) {
           max={100}
           step={1}
           value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
-          onChange={(_, value) => {
-            setSliderValue(value);
-            setInputSource('slider');
-          }}
+          onChange={handleSliderChange}
           style={{ width: '100%' }}
-          filledColor={
-            isDragging
-              ? 'var(--color-primary2deactiveactive)' // color while dragging
-              : isSliderHovered
-                ? 'var(--color-primary2deactiveactive)' // color on hover
-                : 'var(--color-primary2deactive)' // normal color
-          }
-          unfilledColor={
-            isSliderHovered
-              ? 'var(--color-backgroundlighthover)' // hover color for unfilled
-              : 'var(--color-backgroundlight)' // normal color
-          }
-          onMouseDown={() => setIsDragging(true)}
-          onMouseUp={() => setIsDragging(false)}
-          onMouseLeave={() => { setIsDragging(false); setIsSliderHovered(false); }}
-          onTouchStart={() => setIsDragging(true)}
-          onTouchEnd={() => setIsDragging(false)}
-          onMouseEnter={() => setIsSliderHovered(true)} // <-- Add this
-          onMouseOut={() => setIsSliderHovered(false)} // <-- Add this
+          filledColor={'var(--color-primary2deactive)'}
+          unfilledColor={'var(--color-backgroundlight)'}
         />
 
 
@@ -410,34 +326,54 @@ function LimitOrderForm({ onCurrencyChange }) {
       {/* Place Order Button */}
       <OrderButton
         type={
-          error
-            ? 'danger'
-            : success
-              ? 'success'
-              : side === 'buy'
-                ? 'primary'
-                : 'secondary'
+          !authKey
+            ? 'orderdisconnect'
+            : orderError
+              ? 'danger'
+              : orderSuccess
+                ? 'success'
+                : side === 'buy'
+                  ? 'primary'
+                  : 'secondary'
         }
         className={` mt-8 text-lg transition-colors border-2 border-transparent ${blinkClass}`}
         block
         onClick={() => {
-          placeOrder();
+          if (!authKey) {
+            setLoginOpen(true); // Open login modal if not connected
+            return;
+          }
+          placeOrder({
+            selectedPair,
+            market,
+            side,
+            amount,
+            price,
+            priceMidpoint,
+            timeInForce,
+            resetAmount: setAmount,
+            resetSlider: setSliderValue,
+            setBlinkClass,
+          });
         }}
-        disabled={loading}
+        disabled={loading || orderLoading}
       >
-        {/*!token
-          ? "Connect"
-          : loading
-            ? "Placing..."
-            : side === 'buy'
-              ? 'Place buy order'
-              : 'Place sell order'*/}
-        {'place order'}
+        {orderButtonText}
       </OrderButton>
 
+      {/* Login Modal */}
+      <LoginPanel
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onLoginSuccess={() => {
+          setLoginOpen(false);
+          // Optionally refresh authKey here
+        }}
+      />
+
       <div className='px-4' style={{ minHeight: '16px' }}>
-        {error && <div className="text-red-400 text-xs">{error}</div>}
-        {success && <div className="text-green-400 text-xs">{success}</div>}
+        {orderError && <div className="text-red-400 text-xs">{orderError}</div>}
+        {orderSuccess && <div className="text-green-400 text-xs">{orderSuccess}</div>}
       </div>
 
       {/* Order Information */}
