@@ -246,7 +246,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       </div>
 
       {/* Conditionally render the Price field */}
-      <div className=" flex flex-col text-sm pt-8 gap-4">
+      <div className=" flex flex-col text-sm pt-6 gap-2">
         {market !== 'market' && (
           <InputWithButton
             value={price === null || price === undefined ? "" : price}
@@ -290,7 +290,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       </div>
 
       {/* --- AmountSlider UI --- */}
-      <div className="flex items-center gap-3 my-1 ">
+      <div className="flex items-center gap-2 my-1 ">
 
 
 
