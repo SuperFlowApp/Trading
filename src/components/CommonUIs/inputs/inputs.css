@@ -12,9 +12,9 @@
   height: 40px;
   padding: 0px 18px;
   border-radius: 8px 0px 0px 8px;
-  border: 1.5px solid #23263a;
-  background: #23263a;
-  color: #fff;
+  border: 1.5px solid var(--color-backgroundlight);
+  background: var(--color-backgroundlight);
+  color: var(--color-liquidwhite);
   font-size: 17px;
   font-family: inherit;
   outline: none;
@@ -23,20 +23,20 @@
 }
 
 .custom-input:focus {
-  border-color: #3a6cf4;
-  box-shadow: 0 0 0 2px rgba(58,108,244,0.15);
+  border-color: var(--color-primary2active);
+  box-shadow: 0 0 0 2px rgba(0,234,255,0.15);
 }
 
 .custom-input::placeholder {
-  color: #6c7a89;
-  opacity: 1;
+  color: var(--color-liquidwhite);
+  opacity: 0.7;
   font-size: 15px;
 }
 
 .custom-input-btn {
-  border: 1.5px solid #23263a;
-  background: #23263a;
-  color: #fff;
+  border: 1.5px solid var(--color-backgroundlight);
+  background: var(--color-backgroundlight);
+  color: var(--color-liquidwhite);
   font-weight: 600;
   font-size: 15px;
   padding: 0 24px;
@@ -47,16 +47,16 @@
 }
 
 .custom-input-btn:hover, .custom-input-btn:focus {
-  border-color: #3a6cf4;
-  background: #2a2d4a;
+  border-color: var(--color-primary2active);
+  background: var(--color-backgroundlighthover);
 }
 
 .custom-input-dropdown {
   min-width: 90px;
   border-radius: 0px 8px 8px 0px;
-  border: 1.5px solid #23263a;
-  background: #23263a;
-  color: #fff;
+  border: 1.5px solid var(--color-backgroundmidhover);
+  background: var(--color-backgroundlight);
+  color: var(--color-liquidwhite);
   font-size: 15px;
   height: 40px;
   cursor: pointer;
@@ -64,6 +64,6 @@
 }
 
 .custom-input-dropdown:focus, .custom-input-dropdown:hover {
-  border-color: #3a6cf4;
-  background: #2a2d4a;
+  border-color: var(--color-primary2active);
+  background: var(--color-backgroundlighthover);
 }

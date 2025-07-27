@@ -354,7 +354,7 @@ function LimitOrderForm({ onCurrencyChange }) {
                 { value: pairDetails.base, label: pairDetails.base },
                 { value: pairDetails.quote, label: pairDetails.quote }
               ]}
-              selectedOption={selectedCurrency}
+              selectedOption={selectedCurrency || ""}
               onOptionChange={setSelectedCurrency}
             />
           </>
