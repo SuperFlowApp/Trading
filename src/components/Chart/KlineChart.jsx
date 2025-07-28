@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import  useUserInputStore  from '../../Zustandstore/userInputStore'
+import useUserInputStore from '../../Zustandstore/userInputStore'
 import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
 

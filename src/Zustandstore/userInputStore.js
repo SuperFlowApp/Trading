@@ -13,7 +13,6 @@ const DEFAULT_ORDER_FORM_STATE = {
   params: {},
 };
 
-
 const useUserInputStore = create((set) => ({
   selectedPair: "BTC",
   setSelectedPair: (pair) => set({ selectedPair: pair }),
