@@ -1,5 +1,5 @@
 import { useZustandStore } from '../../../Zustandstore/panelStore.js';
-import { Modal } from 'antd';
+import Modal from '../../CommonUIs/modal/modal.jsx'; // Use native modal
 import Button from '../../CommonUIs/Button';
 import NativeSlider from '../../CommonUIs/slider';
 import '../../../components/CommonUIs/slider.css';
@@ -16,22 +16,18 @@ export default function LeveragePanel() {
   return (
     <Modal
       open={isOpen}
-      onCancel={() => setOpen(false)}
-      footer={null}
-      closable={false}
-      centered
-      styles={{
-        body: {
+      onClose={() => setOpen(false)}
+      width={380}
+    >
+      <div
+        className="flex flex-col items-center gap-4"
+        style={{
           background: 'var(--color-backgroundmid)',
           borderRadius: '0.5rem',
           padding: '1.5rem',
           minWidth: 320,
-        }
-      }}
-      width={380}
-      title={null}
-    >
-      <div className="flex flex-col items-center gap-4">
+        }}
+      >
         <div className="w-full flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold text-white">Set Leverage</h2>
         </div>

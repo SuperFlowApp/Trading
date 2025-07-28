@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { useZustandStore,marketsData } from '../../../Zustandstore/panelStore.js';
-import { Modal } from 'antd';
+import { useZustandStore, marketsData } from '../../../Zustandstore/panelStore.js';
+// import { Modal } from 'antd';
+import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button.jsx';
 
 export default function MarginMode() {
@@ -36,22 +37,18 @@ export default function MarginMode() {
     return (
         <Modal
             open={isOpen}
-            onCancel={() => setOpen(false)}
-            footer={null}
-            closable={false}
-            centered
-            styles={{
-                body: {
+            onClose={() => setOpen(false)}
+            width={340}
+        >
+            <div
+                style={{
                     background: 'var(--color-backgroundmid)',
                     borderRadius: '0.5rem',
                     padding: '1.5rem',
                     minWidth: 260,
-                }
-            }}
-            width={340}
-            title={null}
-        >
-            <div className="flex flex-col gap-4">
+                }}
+                className="flex flex-col gap-4"
+            >
                 <h2 className="text-lg font-bold text-white mb-2">Select Margin Mode</h2>
                 {availableModes.length === 0 && (
                     <div className="text-red-400">No margin modes available for this pair.</div>

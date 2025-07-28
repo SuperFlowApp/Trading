@@ -1,5 +1,5 @@
 import { useZustandStore } from '../../../Zustandstore/panelStore';
-import { Modal } from 'antd';
+import Modal from '../../CommonUIs/modal/modal'; // Use native modal
 import Button from '../../CommonUIs/Button';
 
 export default function PositionMode() {
@@ -10,22 +10,18 @@ export default function PositionMode() {
   return (
     <Modal
       open={isOpen}
-      onCancel={() => setOpen(false)}
-      footer={null}
-      closable={false}
-      centered
-      styles={{
-        body: {
+      onClose={() => setOpen(false)}
+      width={380}
+    >
+      <div
+        className="flex flex-col gap-4"
+        style={{
           background: 'var(--color-backgroundmid)',
           borderRadius: '0.5rem',
           padding: '1.5rem',
           minWidth: 320,
-        }
-      }}
-      width={380}
-      title={null}
-    >
-      <div className="flex flex-col gap-4">
+        }}
+      >
         <h2 className="text-lg font-bold text-white mb-2">
           {selectedPair ? `${selectedPair}-USD Position Mode` : 'Position Mode'}
         </h2>
