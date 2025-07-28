@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
+import useUserInputStore from '../../Zustandstore/userInputStore.js'; // <-- import your user input store
 
 // Custom hook for localhost SSE order book
-const useUnifiedOrderBook = (symbol = 'btcusdt') => {
+const useUnifiedOrderBook = (symbol) => {
   const [bids, setBids] = useState([]);
   const [asks, setAsks] = useState([]);
   const [wsConnected, setWsConnected] = useState(false);
@@ -39,7 +40,7 @@ const useUnifiedOrderBook = (symbol = 'btcusdt') => {
     let active = true;
     setError(null);
 
-    const eventSource = new EventSource(` http://localhost:3002/stream/orderbook?symbol=${symbol.toUpperCase()}`);
+    const eventSource = new EventSource(`http://localhost:3002/stream/orderbook?symbol=${symbol.toUpperCase()}`);
 
     eventSource.onopen = () => {
       if (!active) return;
@@ -81,7 +82,7 @@ const useUnifiedOrderBook = (symbol = 'btcusdt') => {
 };
 
 // Memoized Row for per-row update
-const Row = memo(({ size, price, total, progress, color, onSelect, isNew, selectedCurrency, fontStyle, textAlign }) => {
+const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontStyle, textAlign }) => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -124,16 +125,12 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
           {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
         {/* Size */}
-        <div className={`text-[15px] w-1/4 ${textAlign === "right" ? "text-right" : "text-left"}`}>
-          {selectedCurrency === 'BTC'
-            ? size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })
-            : (price * size).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+        <div className={`text-[15px] w-1/4 ${alignClass}`}>
+          {size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
         </div>
         {/* Total */}
-        <div className={`text-[15px] w-1/4 ${textAlign === "right" ? "text-right" : "text-left"}`}>
-          {selectedCurrency === 'BTC'
-            ? total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })
-            : (price * total).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+        <div className={`text-[15px] w-1/4 ${alignClass}`}>
+          {total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
         </div>
       </div>
     </li>
@@ -141,10 +138,12 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
 });
 
 const OrderBook = () => {
-  const selectedPairBase = useZustandStore(s => s.selectedPair);
-  const selectedPair = selectedPairBase ? `${selectedPairBase}usdt` : 'btcusdt';
+  // Fetch selectedPair from user input store
+  const selectedPair = useUserInputStore(s => s.selectedPair);
+  // Compose symbol for API (e.g., BTCUSDT)
+  const symbol = selectedPair ? `${selectedPair}USDT` : 'BTCUSDT';
 
-  const { asks, bids, wsConnected, error } = useUnifiedOrderBook(selectedPair);
+  const { asks, bids, wsConnected, error } = useUnifiedOrderBook(symbol);
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
@@ -222,14 +221,12 @@ const OrderBook = () => {
     setOrderBookClickedPrice(price); // <-- Write to Zustand
   };
 
-  const selectedCurrency = useZustandStore(s => s.selectedCurrency); // <-- Zustand global state
-
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
       <div className="font-normal flex justify-between text-liquidwhite px-2 pb-3 font-semibold text-xs">
         <div className="text-left w-1/4">Price</div>
-        <div className="text-right w-1/4">Size ({selectedCurrency})</div>
-        <div className="text-right w-1/4">Total ({selectedCurrency})</div>
+        <div className="text-right w-1/4">Size</div>
+        <div className="text-right w-1/4">Total</div>
       </div>
 
       {/* Ask Section */}
@@ -241,7 +238,6 @@ const OrderBook = () => {
             color="red"
             key={`ask-${row.price}`}
             onSelect={handleRowSelect}
-            selectedCurrency={selectedCurrency}
             fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
             textAlign="right"
           />
@@ -266,7 +262,6 @@ const OrderBook = () => {
             color="green"
             key={`bid-${row.price}`}
             onSelect={handleRowSelect}
-            selectedCurrency={selectedCurrency}
             fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
             textAlign="right"
           />
