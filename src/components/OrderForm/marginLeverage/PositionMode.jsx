@@ -1,6 +1,6 @@
-import { useZustandStore } from '../../Zustandstore/panelStore';
+import { useZustandStore } from '../../../Zustandstore/panelStore';
 import { Modal } from 'antd';
-import Button from '../CommonUIs/Button';
+import Button from '../../CommonUIs/Button';
 
 export default function PositionMode() {
   const isOpen = useZustandStore(s => s.isPositionModePanelOpen);

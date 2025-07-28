@@ -3,20 +3,21 @@ import { useState, useEffect } from 'react';
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
 import userInputStore from '../../Zustandstore/userInputStore.js';
 
-import LeveragePanel from './Leverage';
-import MarginMode from './MarginMode';
-import PositionMode from './PositionMode';
+import LeveragePanel from './marginLeverage/Leverage.jsx';
+import MarginMode from './marginLeverage/MarginMode.jsx';
+import PositionMode from './marginLeverage/PositionMode';
 import Tab from '../CommonUIs/tab';
 import ModalModButton from '../CommonUIs/modalmodbutton';
 import NativeSlider from '../CommonUIs/slider';
-import OrderButton from './OrderButton';
-import SideSelectorButton from './SideSelectorButton';
-import TifSelector from './TifSelector';
+import OrderButton from './Ui/OrderButton.jsx';
+import SideSelectorButton from './Ui/SideSelectorButton.jsx';
+import TifSelector from './Ui/TifSelector.jsx';
 import BalanceFetch from './BalanceFetch';
 import { InputWithButton, InputWithDropDown, PercentageInput } from '../CommonUIs/inputs/inputs.jsx';
 import { useOrderPlacer } from './OrderPlacer';
 import { getAuthKey } from '../../utils/authKeyStorage.jsx';
 import LoginPanel from '../Login/LoginPanel'; // Import the login modal
+import ScaleInputs from './Ui/ScaleInputs.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
@@ -202,6 +203,10 @@ function LimitOrderForm({ onCurrencyChange }) {
 
   const [loginOpen, setLoginOpen] = useState(false); // Add state for login modal
 
+  // Add state for scale input fields
+  const [scaleValue1, setScaleValue1] = useState('');
+  const [scaleValue2, setScaleValue2] = useState('');
+
   return (
     <div className="p-2 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
 
@@ -315,7 +320,16 @@ function LimitOrderForm({ onCurrencyChange }) {
         </div>
       </div>
 
-
+      {/* Show ScaleInputs only in Scale tab */}
+      {market === 'scale' && (
+        <ScaleInputs
+          scaleValue1={scaleValue1}
+          setScaleValue1={setScaleValue1}
+          scaleValue2={scaleValue2}
+          setScaleValue2={setScaleValue2}
+          isScaleTab={market === 'scale'}
+        />
+      )}
 
       <div className='w-full flex flex-row items-center justify-end gap-4'>
         <span>TIF</span>

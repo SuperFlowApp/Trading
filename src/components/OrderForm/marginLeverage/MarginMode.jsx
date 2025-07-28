@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { useZustandStore,marketsData } from '../../Zustandstore/panelStore.js';
+import { useZustandStore,marketsData } from '../../../Zustandstore/panelStore.js';
 import { Modal } from 'antd';
-import Button from '../CommonUIs/Button';
+import Button from '../../CommonUIs/Button.jsx';
 
 export default function MarginMode() {
     const isOpen = useZustandStore(s => s.isMarginModePanelOpen);

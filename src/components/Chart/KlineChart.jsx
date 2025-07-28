@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import useUserInputStore from '../../Zustandstore/userInputStore.js'; 
+import useUserInputStore from '../../Zustandstore/userInputStore.js';
 import { KLineChartPro } from "@klinecharts/pro";
 import './klinecharts-pro.min.css';
 
 const REST_URL = (pair, interval) =>
-  `https://api.binance.com/api/v3/klines?symbol=${pair.toUpperCase()}USDT&interval=${interval}&limit=500`;
+  `https://api.binance.com/api/v3/klines?symbol=${pair.toUpperCase()}USDT&interval=${interval}&limit=1000`;
 const WS_URL = (pair, interval) =>
   `wss://stream.binance.com:9443/ws/${pair.toLowerCase()}usdt@kline_${interval}`;
 
@@ -56,16 +56,8 @@ class BinanceFeed {
 
       // Update local history
       const h = this.history;
-      if (h.length && h[h.length - 1].timestamp === bar.timestamp) {
-        h[h.length - 1] = bar;
-      } else {
-        h.push(bar);
-        if (h.length > 500) h.shift();
-      }
-      // Only call function subscribers
-      this.subscribers.forEach(cb => {
-        if (typeof cb === 'function') cb(bar, false);
-      });
+      h[h.length - 1] = bar;
+
     };
 
     this.ws.onclose = () => {
@@ -140,7 +132,7 @@ export default function KlineChartProPanel({ interval = '5m' }) {
 
       // Suppress KLineChartPro welcome message
       const originalConsoleLog = console.log;
-      console.log = function () {};
+      console.log = function () { };
 
       chartInstanceRef.current = new KLineChartPro({
         container: chartRef.current,
@@ -173,8 +165,8 @@ export default function KlineChartProPanel({ interval = '5m' }) {
         styles: {
           grid: {
             show: true,
-            horizontal: { show: true, size: 1, color: '#555', style: 'dashed', dashedValue: [2, 2] },
-            vertical: { show: true, size: 1, color: '#555', style: 'dashed', dashedValue: [2, 2] },
+            vertical: { show: true, size: 1, color: '#565A9366', style: 'dashed', dashedValue: [3, 3] },
+            horizontal: { show: true, size: 1, color: '#00505caa', style: 'dashed', dashedValue: [2, 2] },
           },
         },
         indicators: [{ name: 'MA' }],
