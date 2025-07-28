@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import useUserInputStore from '../../Zustandstore/userInputStore'
+import  useUserInputStore  from '../../Zustandstore/userInputStore'
 import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
 
@@ -104,9 +104,8 @@ class BinanceFeed {
     this.destroy();
   }
 }
-export default function KlineChartProPanel() {
+export default function KlineChartProPanel({ interval }) {
   const selectedPairBase = useUserInputStore(s => s.selectedPair);
-  const [interval] = useState('5m');
   const [pair, setPair] = useState(selectedPairBase);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
@@ -122,7 +121,7 @@ export default function KlineChartProPanel() {
 
     const symbol = `${pair.toUpperCase()}USDT`;
 
-    feed.getHistoryKLineData(symbol, { text: interval }).then(() => {
+    feed.getHistoryKLineData(symbol, interval).then(() => {
       if (!isMounted) return;
 
       // Clear the chart container before creating a new chart
@@ -144,20 +143,20 @@ export default function KlineChartProPanel() {
         periods: [
           { multiplier: 1, timespan: 'minute', text: '1m' },
           { multiplier: 5, timespan: 'minute', text: '5m' },
-          //{ multiplier: 15, timespan: 'minute', text: '15m' },
+          { multiplier: 15, timespan: 'minute', text: '15m' },
           { multiplier: 30, timespan: 'minute', text: '30m' },
           { multiplier: 1, timespan: 'hour', text: '1h' },
-          //{ multiplier: 2, timespan: 'hour', text: '2h' },
+          { multiplier: 2, timespan: 'hour', text: '2h' },
           { multiplier: 4, timespan: 'hour', text: '4h' },
-          //{ multiplier: 6, timespan: 'hour', text: '6h' },
+          { multiplier: 6, timespan: 'hour', text: '6h' },
           { multiplier: 8, timespan: 'hour', text: '8h' },
-          //{ multiplier: 12, timespan: 'hour', text: '12h' },
-          //{ multiplier: 1, timespan: 'day', text: '1d' },
-          //{ multiplier: 3, timespan: 'day', text: '3d' },
-          //{ multiplier: 1, timespan: 'week', text: '1w' },
+          { multiplier: 12, timespan: 'hour', text: '12h' },
+          { multiplier: 1, timespan: 'day', text: '1d' },
+          { multiplier: 3, timespan: 'day', text: '3d' },
+          { multiplier: 1, timespan: 'week', text: '1w' },
           { multiplier: 1, timespan: 'month', text: '1M' },
         ],
-        period: { multiplier: 5, timespan: 'minute', text: '5m' }, // default selection
+        period: interval, // Use the selected interval object
         datafeed: feed,
         symbol: {
           shortName: `${pair.toUpperCase()}/USDT`,
