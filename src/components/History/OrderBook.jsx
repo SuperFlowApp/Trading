@@ -21,7 +21,7 @@ const useUnifiedOrderBook = (symbol) => {
     let active = true;
     setError(null);
 
-    fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=50`)
+    fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
       .then(res => res.json())
       .then(data => {
         if (!active) return;
@@ -60,7 +60,7 @@ const useUnifiedOrderBook = (symbol) => {
 
     eventSource.onerror = () => {
       setWsConnected(false);
-      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=50`)
+      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
         .then(res => res.json())
         .then(data => {
           if (!active) return;
@@ -192,9 +192,10 @@ const OrderBook = () => {
 
   const calculatePriceMidpoint = () => {
     if (bids.length === 0 || asks.length === 0) return null;
-    const averageBids = bids.reduce((sum, bid) => sum + bid.price, 0) / bids.length;
-    const averageAsks = asks.reduce((sum, ask) => sum + ask.price, 0) / asks.length;
-    return (averageBids + averageAsks) / 2;
+    const sumBids = bids.reduce((sum, bid) => sum + bid.price, 0);
+    const sumAsks = asks.reduce((sum, ask) => sum + ask.price, 0);
+    const totalCount = bids.length + asks.length;
+    return (sumBids + sumAsks) / totalCount;
   };
 
   useEffect(() => {

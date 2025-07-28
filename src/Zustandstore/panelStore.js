@@ -32,7 +32,7 @@ const useZustandStore = create((set, get) => ({
   setActiveTab: (tab) => set({ activeTab: tab }),
 
   // price midpoint settings
-  priceMidpoint: null,
+  priceMidpoint: "0.0",
   setPriceMidpoint: (value) => set({ priceMidpoint: value }),
 
   // selected price settings

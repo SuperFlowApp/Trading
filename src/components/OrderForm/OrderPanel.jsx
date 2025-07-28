@@ -59,6 +59,12 @@ function LimitOrderForm({ onCurrencyChange }) {
       setPrice(OrderBookClickedPrice);
     }
   }, [OrderBookClickedPrice]);
+  
+  // Reset price and amount when selectedPair changes (new pair detected/selected)
+  useEffect(() => {
+    setPrice('');
+    setAmount('');
+  }, [selectedPairBase]);
 
 
   const token = ""; // <-- Replace with your actual token logic
@@ -73,15 +79,21 @@ function LimitOrderForm({ onCurrencyChange }) {
     setSuccess
   } = useOrderPlacer(token);
 
-  // Set price to priceMidpoint when switching to Limit or Scale, unless user typed manually
-  useEffect(() => {
-    if ((market === 'limit' || market === 'scale') && !price) {
-      if (priceMidpoint) setPrice(priceMidpoint.toFixed(1));
-    }
-    if (market === 'market') {
+  // switching tabs:
+  const handleTabChange = (tab) => {
+    setMarket(tab);
+    if (tab === 'market') {
       setPrice('');
     }
-  }, [market, priceMidpoint]);
+  };
+
+  // When orderbook price is clicked, switch to Limit and set price
+  useEffect(() => {
+    if (OrderBookClickedPrice) {
+      setMarket('limit');
+      setPrice(OrderBookClickedPrice);
+    }
+  }, [OrderBookClickedPrice]);
 
 
   const handleSliderChange = (_, value) => {
@@ -207,9 +219,9 @@ function LimitOrderForm({ onCurrencyChange }) {
 
       {/* Head Tabs */}
       <Tab
-        tabs={['market', 'limit']} // <-- Only show 'market' and 'limit'
+        tabs={['market', 'limit']}
         active={market}
-        onChange={setMarket}
+        onChange={handleTabChange} // <-- use new handler
       />
 
 
@@ -253,19 +265,9 @@ function LimitOrderForm({ onCurrencyChange }) {
             onChange={e => setPrice(e.target.value)}
             label="Price"
             buttonLabel="Mid"
-            onButtonClick={async () => {
-              const symbol = selectedPair;
-              try {
-                const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5`);
-                const data = await res.json();
-                const bestBid = data.bids?.[0]?.[0] ? parseFloat(data.bids[0][0]) : null;
-                const bestAsk = data.asks?.[0]?.[0] ? parseFloat(data.asks[0][0]) : null;
-                if (bestBid && bestAsk) {
-                  const mid = ((bestBid + bestAsk) / 2).toFixed(1);
-                  setPrice(mid);
-                }
-              } catch (err) {
-                console.error('Failed to fetch orderbook for mid price:', err);
+            onButtonClick={() => {
+              if (priceMidpoint) {
+                setPrice(priceMidpoint);
               }
             }}
           />
