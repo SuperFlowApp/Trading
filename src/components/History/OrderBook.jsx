@@ -222,7 +222,7 @@ const OrderBook = () => {
 
   return (
     <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
-      <div className="font-normal flex justify-between text-liquidwhite px-2 pb-3 font-semibold text-xs">
+      <div className="flex justify-between text-liquidwhite px-2 pb-2 pt-[3px] text-xs">
         <div className="text-left w-1/4">Price</div>
         <div className="text-right w-1/4">Size</div>
         <div className="text-right w-1/4">Total</div>
