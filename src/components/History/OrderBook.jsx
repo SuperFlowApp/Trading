@@ -2,85 +2,82 @@ import React, { useEffect, useRef, useState, memo } from 'react';
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
 
 // Custom hook for localhost SSE order book
-const useLocalhostOrderBook = (symbol = 'btcusdt') => {
+const useUnifiedOrderBook = (symbol = 'btcusdt') => {
   const [bids, setBids] = useState([]);
   const [asks, setAsks] = useState([]);
-  const [wsFps, setWsFps] = useState(0);
-  const eventSourceRef = useRef(null);
-  const updatesRef = useRef(0);
+  const [wsConnected, setWsConnected] = useState(false);
+  const [error, setError] = useState(null);
 
+  // Helper to format orderbook arrays
+  const formatBook = (arr) =>
+    arr.map(([price, size]) => ({
+      price: parseFloat(price),
+      size: parseFloat(size),
+    }));
+
+  // Initial REST fetch
   useEffect(() => {
     let active = true;
-    let localBids = [];
-    let localAsks = [];
+    setError(null);
 
-    // FPS counter
-    updatesRef.current = 0;
-    let fpsInterval = setInterval(() => {
-      setWsFps(updatesRef.current);
-      updatesRef.current = 0;
-    }, 1000);
+    fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=50`)
+      .then(res => res.json())
+      .then(data => {
+        if (!active) return;
+        if (data.bids && data.asks) {
+          setBids(formatBook(data.bids));
+          setAsks(formatBook(data.asks));
+        }
+      })
+      .catch(() => setError('REST orderbook fetch failed'));
 
-    // Connect to SSE endpoint
-    const eventSource = new EventSource('https://websocketserver-am3y.onrender.com/stream/orderbook');
-    eventSourceRef.current = eventSource;
+    return () => { active = false; };
+  }, [symbol]);
+
+  // SSE live updates
+  useEffect(() => {
+    let active = true;
+    setError(null);
+
+    const eventSource = new EventSource(` http://localhost:3002/stream/orderbook?symbol=${symbol.toUpperCase()}`);
+
+    eventSource.onopen = () => {
+      if (!active) return;
+      setWsConnected(true);
+    };
 
     eventSource.onmessage = (event) => {
       if (!active) return;
-
       try {
         const data = JSON.parse(event.data);
-
-        // Check if this is orderbook data
         if (data.e === 'ORDERBOOK' && data.s === symbol.toUpperCase()) {
-          // Convert bids and asks arrays to the expected format
-          const newBids = data.b.map(([price, size]) => ({
-            price: parseFloat(price),
-            size: parseFloat(size)
-          }));
-          const newAsks = data.a.map(([price, size]) => ({
-            price: parseFloat(price),
-            size: parseFloat(size)
-          }));
-
-          // Sort and limit the data
-          localBids = newBids
-            .sort((a, b) => b.price - a.price) // bids descending
-            .slice(0, 50);
-          localAsks = newAsks
-            .sort((a, b) => a.price - b.price) // asks ascending  
-            .slice(0, 50);
-
-          setBids(localBids);
-          setAsks(localAsks);
-          updatesRef.current += 1; // Count update
+          setBids(formatBook(data.b));
+          setAsks(formatBook(data.a));
         }
-      } catch (error) {
-        console.error('Error parsing SSE data:', error);
-      }
+      } catch {}
     };
 
-    eventSource.onerror = (error) => {
-      console.error('SSE connection error:', error);
-      if (eventSource.readyState === EventSource.CLOSED) {
-        console.log('SSE connection closed');
-      }
-    };
-
-    eventSource.onopen = () => {
-      console.log('SSE connection opened');
+    eventSource.onerror = () => {
+      setWsConnected(false);
+      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=50`)
+        .then(res => res.json())
+        .then(data => {
+          if (!active) return;
+          if (data.bids && data.asks) {
+            setBids(formatBook(data.bids));
+            setAsks(formatBook(data.asks));
+          }
+        });
+      eventSource.close();
     };
 
     return () => {
       active = false;
-      if (eventSource) {
-        eventSource.close();
-      }
-      clearInterval(fpsInterval);
+      eventSource.close();
     };
   }, [symbol]);
 
-  return { bids, asks, wsFps };
+  return { bids, asks, wsConnected, error };
 };
 
 // Memoized Row for per-row update
@@ -144,11 +141,10 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, select
 });
 
 const OrderBook = () => {
-  // Remove useParams and all routing logic
   const selectedPairBase = useZustandStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}usdt` : 'btcusdt';
 
-  const { asks, bids, wsFps } = useLocalhostOrderBook(selectedPair);
+  const { asks, bids, wsConnected, error } = useUnifiedOrderBook(selectedPair);
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
@@ -277,10 +273,25 @@ const OrderBook = () => {
         ))}
       </ul>
 
-      <div className="flex justify-between items-center text-sm font-semibold">
-        <div className=" text-lg"></div>
-        <div className="text-white text-[10px]">Updates/sec: {wsFps}</div>
+      <div className="flex justify-end items-center text-sm font-semibold mt-2">
+        {/* WebSocket status LED */}
+        <span
+          style={{
+            display: 'inline-block',
+            width: 10,
+            height: 10,
+            borderRadius: '50%',
+            background: wsConnected ? '#22c55e' : '#6b7280', // green or gray
+            marginRight: 6,
+            border: '1.5px solid #222'
+          }}
+          title={wsConnected ? "Live connection" : "Disconnected"}
+        />
+        <span className="text-xs text-white">{wsConnected ? "Live" : "Offline"}</span>
       </div>
+
+      {/* Optionally show error */}
+      {error && <div className="text-red-500">{error}</div>}
     </div>
   );
 };
