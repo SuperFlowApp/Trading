@@ -17,7 +17,7 @@ function PositionsPanel() {
   };
 
   return (
-    <div className="mt-[21px] flex flex-col w-full bg-backgroundmid rounded-md">
+    <div className=" flex flex-col w-full bg-backgroundmid rounded-md">
       {/* Tab Headers */}
       <Tab
         tabs={tabKeys}

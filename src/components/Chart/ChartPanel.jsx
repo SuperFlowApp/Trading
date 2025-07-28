@@ -15,7 +15,7 @@ export default function ChartPanel() {
   const [interval, setInterval] = useState('5m');
 
   return (
-    <div className="w-full h-[520px] bg-backgroundmid rounded-md flex flex-col">
+    <div className="w-full min-h-[520px] bg-backgroundmid rounded-md flex flex-col">
       {/* Tools Panel */}
       <div className="w-full px-2 py-1 border-b border-backgroundlight flex items-center">
         {/* Custom interval dropdown */}

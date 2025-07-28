@@ -50,19 +50,19 @@ const Trades = () => {
                                     className={`rounded-md ${side === 'BUY' ? 'text-primary2 bg-primary2/20' : 'text-primary1 bg-primary1/20'}`}
                                 >
                                     {/* Remove Side column */}
-                                    <td className="text-sm text-left pl-4">
+                                    <td className="text-sm text-left pl-2">
                                         {parseFloat(trade.price).toLocaleString(undefined, {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
                                         })}
                                     </td>
-                                    <td className="text-sm pr-4">
+                                    <td className="text-sm pr-2">
                                         {parseFloat(trade.quantity).toLocaleString(undefined, {
                                             minimumFractionDigits: 4,
                                             maximumFractionDigits: 4,
                                         })}
                                     </td>
-                                    <td className="text-xs text-gray-400 pr-4">
+                                    <td className="text-xs text-gray-400 pr-2">
                                         {new Date(trade.timestamp).toLocaleTimeString()}
                                     </td>
                                 </tr>

@@ -7,7 +7,7 @@ export default function TradesPanel() {
   const [activeTab, setActiveTab] = useState('OrderBook');
 
   return (
-    <div className="p-2 flex flex-col bg-backgroundmid rounded-md overflow-hidden w-[400px]">
+    <div className="p-2 flex flex-col bg-backgroundmid rounded-md overflow-hidden min-w-[400px] max-h-[640px]">
       {/* Tab Selector */}
       <Tab
         tabs={['OrderBook', 'Trades']}

@@ -110,7 +110,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSt
     } ${isSelected ? 'border border-[#FFF]' : 'border border-transparent'}`;
 
   return (
-    <li className="relative w-full mb-1" onClick={handleSelect}>
+    <li className="relative w-full mb-[3px]" onClick={handleSelect}>
       <div
         className="absolute top-0 left-0 h-full"
         style={{
