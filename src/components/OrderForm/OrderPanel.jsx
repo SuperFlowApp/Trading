@@ -17,7 +17,6 @@ import { InputWithButton, InputWithDropDown, PercentageInput } from '../CommonUI
 import { useOrderPlacer } from './OrderPlacer';
 import { getAuthKey } from '../../utils/authKeyStorage.jsx';
 import LoginPanel from '../Login/LoginPanel'; // Import the login modal
-import ScaleInputs from './Ui/ScaleInputs.jsx';
 
 function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
@@ -41,7 +40,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   const [price, setPrice] = useState(priceMidpoint);
   const [amount, setAmount] = useState('');
   const [side, setSide] = useState('buy');
-  const [market, setMarket] = useState('limit');
+  const [market, setMarket] = useState('limit'); // Default to 'limit', only 'market' and 'limit' allowed
   const [loading, setLoading] = useState(false);
 
   const [sliderValue, setSliderValue] = useState(0);
@@ -203,16 +202,12 @@ function LimitOrderForm({ onCurrencyChange }) {
 
   const [loginOpen, setLoginOpen] = useState(false); // Add state for login modal
 
-  // Add state for scale input fields
-  const [scaleValue1, setScaleValue1] = useState('');
-  const [scaleValue2, setScaleValue2] = useState('');
-
   return (
     <div className="p-2 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
 
       {/* Head Tabs */}
       <Tab
-        tabs={['market', 'limit', 'scale']}
+        tabs={['market', 'limit']} // <-- Only show 'market' and 'limit'
         active={market}
         onChange={setMarket}
       />
@@ -319,17 +314,6 @@ function LimitOrderForm({ onCurrencyChange }) {
           />
         </div>
       </div>
-
-      {/* Show ScaleInputs only in Scale tab */}
-      {market === 'scale' && (
-        <ScaleInputs
-          scaleValue1={scaleValue1}
-          setScaleValue1={setScaleValue1}
-          scaleValue2={scaleValue2}
-          setScaleValue2={setScaleValue2}
-          isScaleTab={market === 'scale'}
-        />
-      )}
 
       <div className='w-full flex flex-row items-center justify-end gap-4'>
         <span>TIF</span>
