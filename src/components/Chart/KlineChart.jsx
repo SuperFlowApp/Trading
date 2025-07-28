@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import useUserInputStore from '../../Zustandstore/userInputStore.js';
-import { KLineChartPro } from "@klinecharts/pro";
+import  useUserInputStore  from '../../Zustandstore/userInputStore'
+import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
 
 const REST_URL = (pair, interval) =>
-  `https://api.binance.com/api/v3/klines?symbol=${pair.toUpperCase()}USDT&interval=${interval}&limit=1000`;
+  `https://api.binance.com/api/v3/klines?symbol=${pair.toUpperCase()}USDT&interval=${interval}&limit=500`;
 const WS_URL = (pair, interval) =>
   `wss://stream.binance.com:9443/ws/${pair.toLowerCase()}usdt@kline_${interval}`;
 
@@ -34,10 +34,7 @@ class BinanceFeed {
   initWs(interval) {
     if (this.ws) {
       this.ws.onclose = null;
-      // Only close if already OPEN
-      if (this.ws.readyState === 1) {
-        this.ws.close();
-      }
+      this.ws.close();
     }
     this.shouldReconnect = true;
     this.ws = new WebSocket(WS_URL(this.pair, interval));
@@ -56,8 +53,16 @@ class BinanceFeed {
 
       // Update local history
       const h = this.history;
-      h[h.length - 1] = bar;
-
+      if (h.length && h[h.length - 1].timestamp === bar.timestamp) {
+        h[h.length - 1] = bar;
+      } else {
+        h.push(bar);
+        if (h.length > 500) h.shift();
+      }
+      // Only call function subscribers
+      this.subscribers.forEach(cb => {
+        if (typeof cb === 'function') cb(bar, false);
+      });
     };
 
     this.ws.onclose = () => {
@@ -65,12 +70,7 @@ class BinanceFeed {
         setTimeout(() => this.initWs(interval), 1000);
       }
     };
-    this.ws.onerror = () => {
-      // Only close if already OPEN
-      if (this.ws.readyState === 1) {
-        this.ws.close();
-      }
-    };
+    this.ws.onerror = () => this.ws.close();
   }
 
   async getHistoryKLineData(symbol, period, from, to) {
@@ -104,9 +104,9 @@ class BinanceFeed {
     this.destroy();
   }
 }
-
-export default function KlineChartProPanel({ interval = '5m' }) {
+export default function KlineChartProPanel() {
   const selectedPairBase = useUserInputStore(s => s.selectedPair);
+  const [interval] = useState('5m');
   const [pair, setPair] = useState(selectedPairBase);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
@@ -130,10 +130,6 @@ export default function KlineChartProPanel({ interval = '5m' }) {
         chartRef.current.innerHTML = '';
       }
 
-      // Suppress KLineChartPro welcome message
-      const originalConsoleLog = console.log;
-      console.log = function () { };
-
       chartInstanceRef.current = new KLineChartPro({
         container: chartRef.current,
         locale: 'en-US',
@@ -148,13 +144,20 @@ export default function KlineChartProPanel({ interval = '5m' }) {
         periods: [
           { multiplier: 1, timespan: 'minute', text: '1m' },
           { multiplier: 5, timespan: 'minute', text: '5m' },
+          //{ multiplier: 15, timespan: 'minute', text: '15m' },
           { multiplier: 30, timespan: 'minute', text: '30m' },
           { multiplier: 1, timespan: 'hour', text: '1h' },
+          //{ multiplier: 2, timespan: 'hour', text: '2h' },
           { multiplier: 4, timespan: 'hour', text: '4h' },
+          //{ multiplier: 6, timespan: 'hour', text: '6h' },
           { multiplier: 8, timespan: 'hour', text: '8h' },
+          //{ multiplier: 12, timespan: 'hour', text: '12h' },
+          //{ multiplier: 1, timespan: 'day', text: '1d' },
+          //{ multiplier: 3, timespan: 'day', text: '3d' },
+          //{ multiplier: 1, timespan: 'week', text: '1w' },
           { multiplier: 1, timespan: 'month', text: '1M' },
         ],
-        period: { text: interval }, // use prop
+        period: { multiplier: 5, timespan: 'minute', text: '5m' }, // default selection
         datafeed: feed,
         symbol: {
           shortName: `${pair.toUpperCase()}/USDT`,
@@ -165,15 +168,12 @@ export default function KlineChartProPanel({ interval = '5m' }) {
         styles: {
           grid: {
             show: true,
-            vertical: { show: true, size: 1, color: '#565A9366', style: 'dashed', dashedValue: [3, 3] },
-            horizontal: { show: true, size: 1, color: '#00505caa', style: 'dashed', dashedValue: [2, 2] },
+            horizontal: { show: true, size: 1, color: '#555', style: 'dashed', dashedValue: [2, 2] },
+            vertical: { show: true, size: 1, color: '#555', style: 'dashed', dashedValue: [2, 2] },
           },
         },
         indicators: [{ name: 'MA' }],
       });
-
-      // Restore console.log
-      console.log = originalConsoleLog;
     });
 
     // No need to subscribe to live updates for lastPrice
