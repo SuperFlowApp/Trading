@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { getAuthKey } from "../../utils/authKeyStorage";
+import { formatPrice } from '../../utils/priceFormater';
 
 function isTokenValid(token) {
   // Example: JWT expiration check
@@ -91,12 +92,12 @@ const BalanceFetch = ({ onBalance }) => {
     <div>
       <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs">
         Avilable to trade: {<span className="text-white font-semibold text-xs gap-4">
-          {parseFloat(balance).toFixed(1)} USDT
+          {formatPrice(balance)} USDT
         </span>}
       </span>
       <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs">
         Current position: {<span className="text-white font-semibold text-xs gap-4">
-          {parseFloat(balance).toFixed(1)} ETH
+          {formatPrice(balance)} ETH
         </span>}
       </span>
     </div>

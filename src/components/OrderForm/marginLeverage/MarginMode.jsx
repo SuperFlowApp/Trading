@@ -72,7 +72,8 @@ export default function MarginMode() {
                                 onChange={() => setMarginMode(mode)}
                                 className="check-box"
                                 style={{
-                                    backgroundImage: "none"
+                                    backgroundImage: "none",
+                                    backgroundColor: marginMode === mode ? undefined : "var(--color-backgroundmid)"
                                 }}
                             />
                             <span className="text-white">{mode}</span>

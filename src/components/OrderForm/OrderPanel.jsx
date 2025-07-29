@@ -158,9 +158,9 @@ function LimitOrderForm({ onCurrencyChange }) {
     }
   }, [selectedCurrency, onCurrencyChange]);
 
-  // Reset to the first currency when selectedPair (base in URL) changes
+  // Reset to the quote currency when selectedPair (base in URL) changes
   useEffect(() => {
-    setSelectedCurrency(pairDetails.base);
+    setSelectedCurrency(pairDetails.quote);
   }, [pairDetails.base, setSelectedCurrency]);
 
   // Add this useEffect to handle currency switching and maintain equivalent values
@@ -262,8 +262,8 @@ function LimitOrderForm({ onCurrencyChange }) {
             onChange={handleAmountChange}
             label="Size"
             options={[
-              { value: pairDetails.base, label: pairDetails.base },
-              { value: pairDetails.quote, label: pairDetails.quote }
+              { value: pairDetails.quote, label: pairDetails.quote }, // USDT first
+              { value: pairDetails.base, label: pairDetails.base }    // Base second
             ]}
             selectedOption={selectedCurrency || ""}
             onOptionChange={setSelectedCurrency}
