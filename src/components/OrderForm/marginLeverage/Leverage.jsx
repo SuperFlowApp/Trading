@@ -4,6 +4,7 @@ import Button from '../../CommonUIs/Button';
 import NativeSlider from '../../CommonUIs/slider';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import '../../../components/CommonUIs/slider.css';
+import { getAuthKey } from '../../../utils/authKeyStorage.jsx';
 
 // Import Zustand stores
 import { useZustandStore } from '../../../Zustandstore/useStore';
@@ -13,6 +14,9 @@ import { marketsData } from '../../../Zustandstore/marketsDataStore';
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
   const [leverage, setLeverage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [blink, setBlink] = useState(""); // "success" | "error" | ""
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Zustand selectors
   const currentNotional = useZustandStore(s => s.currentNotional);
@@ -54,6 +58,56 @@ export default function LeveragePanel() {
     });
   }, [maxLeverage]);
 
+  const authKey = getAuthKey();
+
+  // Modal content style if not connected
+  const modalStyle = !authKey
+    ? { opacity: 0.5, pointerEvents: "none", filter: "grayscale(1)" }
+    : {};
+
+  // Handle confirm/connect button
+  const handleConfirm = async () => {
+    setErrorMsg("");
+    if (!authKey) {
+      setOpen(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const payload = {
+        symbol: selectedSymbol,
+        leverage: leverage,
+      };
+      const res = await fetch("https://fastify-serverless-function-rimj.onrender.com/api/leverage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      console.log("Leverage API response:", res.status, data); // <-- print response body
+      if (res.status === 200) {
+        setBlink("success");
+        setTimeout(() => {
+          setBlink("");
+          setOpen(false);
+        }, 400);
+      } else {
+        setBlink("error");
+        setErrorMsg(data?.message || "Failed to set leverage");
+        setTimeout(() => setBlink(""), 400);
+      }
+    } catch (e) {
+      setBlink("error");
+      setErrorMsg("Network error");
+      setTimeout(() => setBlink(""), 400);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <ModalModButton onClick={() => setOpen(true)}>
@@ -71,6 +125,7 @@ export default function LeveragePanel() {
             borderRadius: '0.5rem',
             padding: '1.5rem',
             minWidth: 320,
+            ...modalStyle,
           }}
         >
           <div className="w-full flex justify-between items-center mb-4">
@@ -82,32 +137,21 @@ export default function LeveragePanel() {
             step={1}
             value={leverage}
             onChange={e => setLeverage(Number(e.target.value))}
+            disabled={!authKey}
           />
           <div className="text-2xl font-bold text-primary2">{leverage}X</div>
           <Button
             type="primary"
-            className="mt-2"
-            onClick={() => setOpen(false)}
+            className={`mt-2 flex-1 py-2 transition-all ${blink === "success" ? "blink-success" : ""} ${blink === "error" ? "blink-error" : ""}`}
+            onClick={handleConfirm}
             block
+            disabled={loading}
           >
-            Confirm
+            {!authKey ? "Connect" : loading ? "..." : "Confirm"}
           </Button>
-          {/* Debug Info 
-          <div style={{
-            marginTop: 16,
-            fontSize: 12,
-            color: '#aaa',
-            background: '#222',
-            borderRadius: 4,
-            padding: 8,
-            width: '100%',
-            wordBreak: 'break-all'
-          }}>
-            <div>Notional: <b>{currentNotional ?? 'N/A'}</b></div>
-            <div>Selected Pair: <b>{selectedSymbol ?? 'N/A'}</b></div>
-            <div>{tierMsg || 'No valid margin tier found.'}</div>
-          </div>
-          */}
+          {blink === "error" && errorMsg && (
+            <div className="text-xs text-red-400 text-center mt-1">{errorMsg}</div>
+          )}
         </div>
       </Modal>
     </>
