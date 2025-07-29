@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-import { useZustandStore } from '../../Zustandstore/panelStore.js';
-import{ selectedPairStore ,orderFormStore } from '../../Zustandstore/userInputStore.js';
+import { useZustandStore } from '../../Zustandstore/useStore.js';
+import{ selectedPairStore ,orderFormStore } from '../../Zustandstore/userOrderStore.js';
 
 import LeveragePanel from './marginLeverage/Leverage.jsx';
 import MarginMode from './marginLeverage/MarginMode.jsx';

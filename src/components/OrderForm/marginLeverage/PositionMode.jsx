@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Modal from '../../CommonUIs/modal/modal';
 import Button from '../../CommonUIs/Button';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
-import {selectedPairStore} from '../../../Zustandstore/userInputStore.js'
+import {selectedPairStore} from '../../../Zustandstore/userOrderStore.js'
 
 export default function PositionMode() {
   const [open, setOpen] = useState(false);

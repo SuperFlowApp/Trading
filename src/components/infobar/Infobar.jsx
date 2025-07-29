@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {selectedPairStore} from '../../Zustandstore/userInputStore.js';
+import {selectedPairStore} from '../../Zustandstore/userOrderStore.js';
 import PairSelector from './PairSelector';
 import { formatPrice } from '../../utils/priceFormater.js';
 

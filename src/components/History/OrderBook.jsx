@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
-import { useZustandStore } from '../../Zustandstore/panelStore.js';
-import {selectedPairStore} from '../../Zustandstore/userInputStore.js'; // <-- import your user input store
+import { useZustandStore } from '../../Zustandstore/useStore.js';
+import {selectedPairStore} from '../../Zustandstore/userOrderStore.js'; // <-- import your user input store
 
 // Custom hook for localhost SSE order book
 const useUnifiedOrderBook = (symbol) => {

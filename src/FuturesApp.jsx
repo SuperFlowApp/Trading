@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import ChartPanel from './components/Chart/ChartPanel';
 import LimitOrderForm from './components/OrderForm/OrderPanel';
 import Infobar from './components/infobar/Infobar';
@@ -5,12 +6,10 @@ import NotificationBar from './components/notificationBar';
 import PositionsPanel from './components/UserInfoPanels/PositionsPanel';
 import AccountInfoPanel from './components/UserInfoPanels/AccountInfoPanel';
 import AuthPanel from './components/Login/LoginPanel';
-import { useZustandStore } from './Zustandstore/panelStore';
 import TradesPanel from './components/History/TradesPanel';
 
 function FuturesApp() {
-  const showLoginPanel = useZustandStore(s => s.showLoginPanel);
-  const setShowLoginPanel = useZustandStore(s => s.setShowLoginPanel);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   return (
     <div className="relative w-screen h-auto overflow-visible">
@@ -30,10 +29,14 @@ function FuturesApp() {
         <div className="flex flex-col w-[360px] gap-1">
           <LimitOrderForm />
           <AccountInfoPanel />
+          <button
+            className="mt-2 px-4 py-2 bg-primary2 text-black rounded font-semibold"
+            onClick={() => setLoginOpen(true)}
+          >
+            Login
+          </button>
         </div>
-        {showLoginPanel && (
-          <AuthPanel onClose={() => setShowLoginPanel(false)} />
-        )}
+        <AuthPanel open={loginOpen} onClose={() => setLoginOpen(false)} />
       </div>
     </div>
   );

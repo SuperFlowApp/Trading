@@ -1,15 +1,5 @@
 import { create } from "zustand";
 
-const useAuthKeyStore = create((set) => ({
-  authKey: null,
-  setauthKey: (authKey) => set({ authKey }),
-}));
-
-const marketsData = create((set) => ({
-  allMarketData: [],
-  setAllMarketData: (markets) => set({ allMarketData: markets }),
-}));
-
 const useZustandStore = create((set, get) => ({
   // Leverage settings
   leverage: 5,
@@ -19,13 +9,8 @@ const useZustandStore = create((set, get) => ({
 
   // Margin mode settings
   marginMode: "Cross",
-  isMarginModePanelOpen: false,
   setMarginMode: (mode) => set({ marginMode: mode }),
   setMarginModePanelOpen: (open) => set({ isMarginModePanelOpen: open }),
-
-  // Position mode settings
-  isPositionModePanelOpen: false,
-  setPositionModePanelOpen: (open) => set({ isPositionModePanelOpen: open }),
 
   // active tab settings
   activeTab: null,
@@ -43,10 +28,10 @@ const useZustandStore = create((set, get) => ({
   selectedCurrency: null,
   setSelectedCurrency: (currency) => set({ selectedCurrency: currency }),
 
-  // login panel settings
-  showLoginPanel: false,
-  setShowLoginPanel: (show) => set({ showLoginPanel: show }),
 }));
+ 
+
+
 
 // --- Sync Zustand stores with localStorage across tabs ---
 function syncZustandStore(store, storageKey) {
@@ -74,7 +59,5 @@ function syncZustandStore(store, storageKey) {
 
 // Apply syncing to all stores
 syncZustandStore(useZustandStore, "zustand-store-state");
-syncZustandStore(marketsData, "markets-data-state");
-syncZustandStore(useAuthKeyStore, "auth-key-state");
 
-export { useZustandStore, marketsData, useAuthKeyStore };
+export { useZustandStore };

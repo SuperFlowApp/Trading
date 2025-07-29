@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useZustandStore } from '../../../Zustandstore/panelStore.js';
+import { useZustandStore } from '../../../Zustandstore/useStore.js';
 import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button';
 import NativeSlider from '../../CommonUIs/slider';

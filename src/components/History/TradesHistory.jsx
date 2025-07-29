@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {selectedPairStore} from '../../Zustandstore/userInputStore'; // Import the store
+import {selectedPairStore} from '../../Zustandstore/userOrderStore.js'; // Import the store
 
 const Trades = () => {
     const [trades, setTrades] = useState([]);

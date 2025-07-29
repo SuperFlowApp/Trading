@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
-import { marketsData } from '../../Zustandstore/panelStore';
-import {selectedPairStore} from '../../Zustandstore/userInputStore';
+import { marketsData } from '../../Zustandstore/marketsDataStore';
+import {selectedPairStore} from '../../Zustandstore/userOrderStore.js';
 import { formatPrice } from '../../utils/priceFormater.js';
 
 function PairSelector({
@@ -12,7 +12,7 @@ function PairSelector({
   const MARKET_TYPE = 'futures';
   const dropdownRef = useRef(null);
 
-  // Use userInputStore for selectedPair
+  // Use userOrderStore.js for selectedPair
   const selectedPair = selectedPairStore(s => s.selectedPair);
   const setSelectedPair = selectedPairStore(s => s.setSelectedPair);
 

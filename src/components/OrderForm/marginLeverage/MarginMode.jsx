@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useZustandStore, marketsData } from '../../../Zustandstore/panelStore.js';
+import { marketsData } from '../../../Zustandstore/marketsDataStore.js';
+import { useZustandStore } from '../../../Zustandstore/useStore.js';
+
 import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button.jsx';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
-import {selectedPairStore} from '../../../Zustandstore/userInputStore.js'
+import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js'
 
 
 export default function MarginMode() {

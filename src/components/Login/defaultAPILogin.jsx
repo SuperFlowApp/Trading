@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { message } from "antd";
-import { useAuthKeyStore } from "../../Zustandstore/panelStore";
 import { getAuthKey, setAuthKey } from "../../utils/authKeyStorage";
 import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
@@ -13,16 +12,11 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [loading, setLoading] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false); // <-- signup modal state
 
-  // Get the setter from Zustand
-  const setauthKey = useAuthKeyStore((state) => state.setauthKey);
-
-  // On mount, check localStorage for authKey and set it to Zustand store
+  // On mount, check localStorage for authKey (optional, can be removed if not needed)
   useEffect(() => {
-    const storedToken = getAuthKey();
-    if (storedToken) {
-      setauthKey(storedToken);
-    }
-  }, [setauthKey]);
+    // You can remove this effect if you don't need to do anything with the auth key on mount
+    getAuthKey();
+  }, []);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -44,8 +38,7 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
 
       if (data.access_token) {
         message.success("Login successful!");
-        setauthKey(data.access_token);
-        setAuthKey(data.access_token);
+        setAuthKey(data.access_token); // Only use setAuthKey
         onLoginSuccess && onLoginSuccess(username, data.access_token);
         onClose();
       } else {

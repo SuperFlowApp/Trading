@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { marketsData } from './Zustandstore/panelStore.js';
-import {selectedPairStore} from './Zustandstore/userInputStore.js';
+import { marketsData } from './Zustandstore/marketsDataStore.js';
+import {selectedPairStore} from './Zustandstore/userOrderStore.js';
 import { getAuthKey } from './utils/authKeyStorage.jsx';
 
 export default function DebuggerPanel() {
@@ -65,7 +65,7 @@ export default function DebuggerPanel() {
                     : 'Not authorized'}
             </div>
 
-            <h2 style={{ fontSize: 20, marginBottom: 8 }}>userInputStore.js</h2>
+            <h2 style={{ fontSize: 20, marginBottom: 8 }}>userOrderStore.js</h2>
             <pre
                 style={{
                     background: '#23272f',
