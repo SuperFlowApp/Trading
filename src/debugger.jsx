@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { marketsData } from './Zustandstore/marketsDataStore.js';
-import {selectedPairStore} from './Zustandstore/userOrderStore.js';
+import { selectedPairStore, orderFormStore } from './Zustandstore/userOrderStore.js';
+
 import { getAuthKey } from './utils/authKeyStorage.jsx';
 
 export default function DebuggerPanel() {
     const selectedPairStoreState = selectedPairStore();
+    const userCurrentOrder = orderFormStore();
     const allMarketData = marketsData(state => state.allMarketData);
 
     // Fetch authKey from native storage
@@ -65,7 +67,23 @@ export default function DebuggerPanel() {
                     : 'Not authorized'}
             </div>
 
-            <h2 style={{ fontSize: 20, marginBottom: 8 }}>userOrderStore.js</h2>
+            <h2 style={{ fontSize: 20, marginBottom: 8 }}>userOrderStore.js/orderFormStore</h2>
+            <pre
+                style={{
+                    background: '#23272f',
+                    color: '#d1d5db',
+                    padding: 16,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    overflowX: 'auto',
+                    maxHeight: 400,
+                }}
+            >
+                {JSON.stringify({ ...userCurrentOrder }, null, 2)}
+            </pre>
+
+            
+            <h2 style={{ fontSize: 20, marginBottom: 8 }}>userOrderStore.js/selectedPairStore</h2>
             <pre
                 style={{
                     background: '#23272f',
@@ -80,19 +98,6 @@ export default function DebuggerPanel() {
                 {JSON.stringify({ ...selectedPairStoreState }, null, 2)}
             </pre>
 
-            <pre
-                style={{
-                    background: '#23272f',
-                    color: '#d1d5db',
-                    padding: 16,
-                    borderRadius: 8,
-                    fontSize: 14,
-                    overflowX: 'auto',
-                    maxHeight: 400,
-                }}
-            >
-                {JSON.stringify({ authKey }, null, 2)}
-            </pre>
             <button
                 style={{
                     marginTop: 16,

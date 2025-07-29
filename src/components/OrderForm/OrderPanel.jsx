@@ -48,8 +48,6 @@ function LimitOrderForm({ onCurrencyChange }) {
   const [inputSource, setInputSource] = useState(null);
   const [timeInForce, setTimeInForce] = useState('GTC');
 
-  const marginMode = useZustandStore(s => s.marginMode);
-  const setMarginModePanelOpen = useZustandStore(s => s.setMarginModePanelOpen);
   const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
   const setOrderFormStore = orderFormStore(s => s.setOrderFormState);
 

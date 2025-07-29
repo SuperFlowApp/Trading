@@ -70,7 +70,9 @@ class BinanceFeed {
         setTimeout(() => this.initWs(interval), 1000);
       }
     };
-    this.ws.onerror = () => this.ws.close();
+    this.ws.onerror = () => {
+      if (this.ws) this.ws.close();
+    };
   }
 
   async getHistoryKLineData(symbol, period, from, to) {

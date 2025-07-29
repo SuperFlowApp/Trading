@@ -6,18 +6,13 @@ import NativeSlider from '../../CommonUIs/slider';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import '../../../components/CommonUIs/slider.css';
 
-const MIN_SLIDER = 1;
-const MAX_SLIDER = 20;
-
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
-  const leverage = useZustandStore(s => s.leverage);
-  const setLeverage = useZustandStore(s => s.setLeverage);
 
   return (
     <>
       <ModalModButton onClick={() => setOpen(true)}>
-        {leverage}X
+        X
       </ModalModButton>
       <Modal
         open={open}
@@ -37,13 +32,12 @@ export default function LeveragePanel() {
             <h2 className="text-lg font-bold text-white">Set Leverage</h2>
           </div>
           <NativeSlider
-            min={MIN_SLIDER}
-            max={MAX_SLIDER}
+            min={1}
+            max={20}
             step={1}
-            value={leverage}
-            onChange={(_, value) => setLeverage(Number(value))}
+            value={10}
           />
-          <div className="text-2xl font-bold text-primary2">{leverage}X</div>
+          <div className="text-2xl font-bold text-primary2">X</div>
           <Button
             type="primary"
             className="mt-2"

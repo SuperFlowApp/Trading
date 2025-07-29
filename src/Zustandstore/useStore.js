@@ -1,21 +1,6 @@
 import { create } from "zustand";
 
 const useZustandStore = create((set, get) => ({
-  // Leverage settings
-  leverage: 5,
-  isLeveragePanelOpen: false,
-  setLeverage: (leverage) => set({ leverage }),
-  setLeveragePanelOpen: (open) => set({ isLeveragePanelOpen: open }),
-
-  // Margin mode settings
-  marginMode: "Cross",
-  setMarginMode: (mode) => set({ marginMode: mode }),
-  setMarginModePanelOpen: (open) => set({ isMarginModePanelOpen: open }),
-
-  // active tab settings
-  activeTab: null,
-  setActiveTab: (tab) => set({ activeTab: tab }),
-
   // price midpoint settings
   priceMidpoint: "0.0",
   setPriceMidpoint: (value) => set({ priceMidpoint: value }),
@@ -27,11 +12,7 @@ const useZustandStore = create((set, get) => ({
   // selected price settings
   selectedCurrency: null,
   setSelectedCurrency: (currency) => set({ selectedCurrency: currency }),
-
 }));
- 
-
-
 
 // --- Sync Zustand stores with localStorage across tabs ---
 function syncZustandStore(store, storageKey) {

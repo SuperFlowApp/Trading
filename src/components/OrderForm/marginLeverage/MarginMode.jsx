@@ -1,17 +1,15 @@
 import { useEffect, useState } from 'react';
 import { marketsData } from '../../../Zustandstore/marketsDataStore.js';
-import { useZustandStore } from '../../../Zustandstore/useStore.js';
-
 import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button.jsx';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
-import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js'
+import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js';
 
 
 export default function MarginMode() {
     const [open, setOpen] = useState(false);
-    const marginMode = useZustandStore(s => s.marginMode);
-    const setMarginMode = useZustandStore(s => s.setMarginMode);
+
+    // Fetch all market data and selected pair from their respective stores
     const allMarketData = marketsData(s => s.allMarketData);
     const selectedPair = selectedPairStore(s => s.selectedPair);
 
@@ -20,10 +18,13 @@ export default function MarginMode() {
         mkt => mkt.base === selectedPair && mkt.type === "futures"
     );
 
-    // Determine available margin modes
+    // Extract available margin modes for the selected pair
     const availableModes = [];
     if (currentMarket?.marginModes?.cross) availableModes.push("Cross");
     if (currentMarket?.marginModes?.isolated) availableModes.push("Isolated");
+
+    // Local state for margin mode selection
+    const [marginMode, setMarginMode] = useState(availableModes[0] || '');
 
     // Auto-select margin mode if only one is available or current is not available
     useEffect(() => {
@@ -35,7 +36,7 @@ export default function MarginMode() {
         ) {
             setMarginMode(availableModes[0]);
         }
-    }, [selectedPair, availableModes.join(','), setMarginMode, marginMode]);
+    }, [selectedPair, availableModes.join(','), marginMode]);
 
     return (
         <>
