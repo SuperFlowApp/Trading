@@ -7,7 +7,7 @@ import '../../../components/CommonUIs/slider.css';
 
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
-  const [leverage, setLeverage] = useState(10);
+  const [leverage, setLeverage] = useState(10); // Add leverage state
 
   return (
     <>
@@ -36,18 +36,16 @@ export default function LeveragePanel() {
             max={20}
             step={1}
             value={leverage}
-            onChange={(_, value) => setLeverage(value)}
+            onChange={e => setLeverage(Number(e.target.value))} // Fix: extract value
           />
-          <div className="text-2xl font-bold text-primary2">
-            {leverage}X
-          </div>
+          <div className="text-2xl font-bold text-primary2">{leverage}X</div>
           <Button
             type="primary"
             className="mt-2"
             onClick={() => setOpen(false)}
             block
           >
-            Confirm {leverage}X
+            Confirm
           </Button>
         </div>
       </Modal>
