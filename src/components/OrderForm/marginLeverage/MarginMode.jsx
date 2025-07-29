@@ -24,7 +24,7 @@ export default function MarginMode() {
     if (currentMarket?.marginModes?.isolated) availableModes.push("Isolated");
 
     // Local state for margin mode selection
-    const [marginMode, setMarginMode] = useState(availableModes[0] || '');
+    const [marginMode, setMarginMode] = useState(availableModes[0] || 'Cross');
 
     // Auto-select margin mode if only one is available or current is not available
     useEffect(() => {
