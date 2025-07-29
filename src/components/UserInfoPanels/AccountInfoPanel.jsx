@@ -15,7 +15,7 @@ function AccountInfoPanel() {
             }
             setAccountInfoError('');
             try {
-                const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
+                const res = await fetch('http://localhost:3001/api/account-information', {
                     headers: {
                         'Authorization': `Bearer ${authKey}`,
                         'accept': 'application/json'
