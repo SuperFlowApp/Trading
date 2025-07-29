@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useZustandStore } from '../../../Zustandstore/useStore.js';
 import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button';
 import NativeSlider from '../../CommonUIs/slider';
@@ -8,11 +7,12 @@ import '../../../components/CommonUIs/slider.css';
 
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
+  const [leverage, setLeverage] = useState(10);
 
   return (
     <>
       <ModalModButton onClick={() => setOpen(true)}>
-        X
+        {leverage}X
       </ModalModButton>
       <Modal
         open={open}
@@ -35,16 +35,19 @@ export default function LeveragePanel() {
             min={1}
             max={20}
             step={1}
-            value={10}
+            value={leverage}
+            onChange={(_, value) => setLeverage(value)}
           />
-          <div className="text-2xl font-bold text-primary2">X</div>
+          <div className="text-2xl font-bold text-primary2">
+            {leverage}X
+          </div>
           <Button
             type="primary"
             className="mt-2"
             onClick={() => setOpen(false)}
             block
           >
-            Confirm
+            Confirm {leverage}X
           </Button>
         </div>
       </Modal>

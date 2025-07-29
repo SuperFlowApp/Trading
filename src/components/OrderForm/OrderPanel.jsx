@@ -7,7 +7,6 @@ import LeveragePanel from './marginLeverage/Leverage.jsx';
 import MarginMode from './marginLeverage/MarginMode.jsx';
 import PositionMode from './marginLeverage/PositionMode';
 import Tab from '../CommonUIs/tab';
-import ModalModButton from '../CommonUIs/modalmodbutton';
 import NativeSlider from '../CommonUIs/slider';
 import OrderButton from './Ui/OrderButton.jsx';
 import SideSelectorButton from './Ui/SideSelectorButton.jsx';
@@ -25,9 +24,6 @@ function LimitOrderForm({ onCurrencyChange }) {
   const selectedPairBase = selectedPairStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
   const pairDetails = { base: selectedPairBase, quote: 'USDT' };
-  const leverage = useZustandStore(s => s.leverage);
-  const setLeveragePanelOpen = useZustandStore(s => s.setLeveragePanelOpen);
-  const setPositionModePanelOpen = useZustandStore(s => s.setPositionModePanelOpen);
 
   // Use Zustand for selectedCurrency
   const selectedCurrency = useZustandStore(s => s.selectedCurrency);
@@ -50,6 +46,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
   const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
   const setOrderFormStore = orderFormStore(s => s.setOrderFormState);
+  const setNotional = useZustandStore(s => s.setNotional);
 
   // Update price when OrderBookClickedPrice changes
   useEffect(() => {
@@ -365,20 +362,20 @@ function LimitOrderForm({ onCurrencyChange }) {
           <span className="w-full flex justify-between text-white font-semibold">
             Order Value
             <span>
-              {amount && (price || priceMidpoint)
+              {amount && price
                 ? `$${(() => {
                   const numAmount = parseFloat(amount);
-                  // Use price if available (Limit/Scale mode), otherwise use priceMidpoint (Market mode)
-                  const numPrice = parseFloat(price) || priceMidpoint;
+                  const numPrice = parseFloat(price);
 
-                  // If we're in quote currency mode (USDT), the amount IS the order value
+                  let notional;
                   if (selectedCurrency === pairDetails.quote) {
-                    return numAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    notional = numAmount;
+                  } else {
+                    notional = numAmount * numPrice;
                   }
-                  // If we're in base currency mode (BTC), multiply by price to get order value
-                  else {
-                    return (numAmount * numPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                  }
+                  setNotional(notional); // <-- Store in Zustand
+
+                  return notional.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 })()}`
                 : "--"}
             </span>

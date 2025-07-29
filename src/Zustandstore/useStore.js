@@ -12,6 +12,10 @@ const useZustandStore = create((set, get) => ({
   // selected price settings
   selectedCurrency: null,
   setSelectedCurrency: (currency) => set({ selectedCurrency: currency }),
+
+  // Notional settings
+  currentNotional: null,
+  setNotional: (Notional) => set({ currentNotional: Notional }),
 }));
 
 // --- Sync Zustand stores with localStorage across tabs ---
