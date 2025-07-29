@@ -1,16 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useZustandStore, marketsData } from '../../../Zustandstore/panelStore.js';
-// import { Modal } from 'antd';
 import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button.jsx';
+import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
+import {selectedPairStore} from '../../../Zustandstore/userInputStore.js'
+
 
 export default function MarginMode() {
-    const isOpen = useZustandStore(s => s.isMarginModePanelOpen);
-    const setOpen = useZustandStore(s => s.setMarginModePanelOpen);
+    const [open, setOpen] = useState(false);
     const marginMode = useZustandStore(s => s.marginMode);
     const setMarginMode = useZustandStore(s => s.setMarginMode);
     const allMarketData = marketsData(s => s.allMarketData);
-    const selectedPair = useZustandStore(s => s.selectedPair);
+    const selectedPair = selectedPairStore(s => s.selectedPair);
 
     // Find the current market object for the selected pair
     const currentMarket = allMarketData.find(
@@ -35,52 +36,57 @@ export default function MarginMode() {
     }, [selectedPair, availableModes.join(','), setMarginMode, marginMode]);
 
     return (
-        <Modal
-            open={isOpen}
-            onClose={() => setOpen(false)}
-            width={340}
-        >
-            <div
-                style={{
-                    background: 'var(--color-backgroundmid)',
-                    borderRadius: '0.5rem',
-                    padding: '1.5rem',
-                    minWidth: 260,
-                }}
-                className="flex flex-col gap-4"
+        <>
+            <ModalModButton onClick={() => setOpen(true)}>
+                {marginMode}
+            </ModalModButton>
+            <Modal
+                open={open}
+                onClose={() => setOpen(false)}
+                width={340}
             >
-                <h2 className="text-lg font-bold text-white mb-2">Select Margin Mode</h2>
-                {availableModes.length === 0 && (
-                    <div className="text-red-400">No margin modes available for this pair.</div>
-                )}
-                {availableModes.map(mode => (
-                    <label
-                        key={mode}
-                        className={`flex items-center gap-2 py-2 px-4 rounded-md font-semibold cursor-pointer transition-colors`}
-                    >
-                        <input
-                            type="checkbox"
-                            checked={marginMode === mode}
-                            onChange={() => setMarginMode(mode)}
-                            className="check-box"
-                            style={{
-                                backgroundImage: "none"
-                            }}
-                        />
-                        <span className="text-white">{mode}</span>
-                    </label>
-                ))}
-                <div className="flex gap-2 mt-4">
-                    <Button
-                        type="primary"
-                        className="flex-1 py-2"
-                        onClick={() => setOpen(false)}
-                        block
-                    >
-                        Confirm
-                    </Button>
+                <div
+                    style={{
+                        background: 'var(--color-backgroundmid)',
+                        borderRadius: '0.5rem',
+                        padding: '1.5rem',
+                        minWidth: 260,
+                    }}
+                    className="flex flex-col gap-4"
+                >
+                    <h2 className="text-lg font-bold text-white mb-2">Select Margin Mode</h2>
+                    {availableModes.length === 0 && (
+                        <div className="text-red-400">No margin modes available for this pair.</div>
+                    )}
+                    {availableModes.map(mode => (
+                        <label
+                            key={mode}
+                            className={`flex items-center gap-2 py-2 px-4 rounded-md font-semibold cursor-pointer transition-colors`}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={marginMode === mode}
+                                onChange={() => setMarginMode(mode)}
+                                className="check-box"
+                                style={{
+                                    backgroundImage: "none"
+                                }}
+                            />
+                            <span className="text-white">{mode}</span>
+                        </label>
+                    ))}
+                    <div className="flex gap-2 mt-4">
+                        <Button
+                            type="primary"
+                            className="flex-1 py-2"
+                            onClick={() => setOpen(false)}
+                            block
+                        >
+                            Confirm
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </Modal>
+            </Modal>
+        </>
     );
 }

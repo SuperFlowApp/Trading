@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
-import userInputStore from '../../Zustandstore/userInputStore.js';
+import{ selectedPairStore ,orderFormStore } from '../../Zustandstore/userInputStore.js';
 
 import LeveragePanel from './marginLeverage/Leverage.jsx';
 import MarginMode from './marginLeverage/MarginMode.jsx';
@@ -22,7 +22,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
   const [balanceFree, setBalanceFree] = useState("--");
 
-  const selectedPairBase = userInputStore(s => s.selectedPair);
+  const selectedPairBase = selectedPairStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
   const pairDetails = { base: selectedPairBase, quote: 'USDT' };
   const leverage = useZustandStore(s => s.leverage);
@@ -51,7 +51,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   const marginMode = useZustandStore(s => s.marginMode);
   const setMarginModePanelOpen = useZustandStore(s => s.setMarginModePanelOpen);
   const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
-  const setOrderFormState = userInputStore(s => s.setOrderFormState);
+  const setOrderFormStore = orderFormStore(s => s.setOrderFormState);
 
   // Update price when OrderBookClickedPrice changes
   useEffect(() => {
@@ -192,7 +192,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
   // Update order form state on relevant changes
   useEffect(() => {
-    setOrderFormState({
+    setOrderFormStore({
       symbol: selectedPair,
       type: market.toUpperCase(),
       side: side.toUpperCase(),
@@ -203,7 +203,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       orderRespType: 'ACK',
       params: {},
     });
-  }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormState]);
+  }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormStore]);
 
   const authKey = getAuthKey();
   const orderButtonText = !authKey
@@ -227,24 +227,9 @@ function LimitOrderForm({ onCurrencyChange }) {
 
       {/* Margin Mode - Leverage - Position Mode */}
       <div className="flex justify-between items-center text-sm font-semibold py-2 gap-2">
-
-
         <MarginMode />
-        <ModalModButton onClick={() => setMarginModePanelOpen(true)}>
-          {marginMode}
-        </ModalModButton>
-
         <LeveragePanel />
-        <ModalModButton onClick={() => setLeveragePanelOpen(true)}>
-          {leverage}X
-        </ModalModButton>
-
         <PositionMode />
-        <ModalModButton onClick={() => setPositionModePanelOpen(true)}>
-          One-way
-        </ModalModButton>
-
-
       </div>
 
 

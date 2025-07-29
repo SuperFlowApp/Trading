@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import useUserInputStore from '../../Zustandstore/userInputStore'; // Import the store
+import {selectedPairStore} from '../../Zustandstore/userInputStore'; // Import the store
 
 const Trades = () => {
     const [trades, setTrades] = useState([]);
-    const selectedPair = useUserInputStore((state) => state.selectedPair); // Get selectedPair from store
+    const selectedPair = selectedPairStore((state) => state.selectedPair); // Get selectedPair from store
 
     useEffect(() => {
         const fetchTrades = async () => {

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import KlineChartProPanel from './KlineChart';
 
-// Use the same dropdown style as TifSelector
 const intervals = [
   { key: '1', label: '1m', value: '1m', multiplier: 1, timespan: 'minute', text: '1m' },
   { key: '2', label: '5m', value: '5m', multiplier: 5, timespan: 'minute', text: '5m' },
@@ -27,7 +26,6 @@ export default function ChartPanel() {
     <div className="w-full min-h-[520px] bg-backgroundmid rounded-md flex flex-col">
       {/* Tools Panel */}
       <div className="w-full px-2 py-1 border-b border-backgroundlight flex items-center">
-        {/* Stylized interval dropdown (same as TIF) */}
         <select
           className="custom-input-dropdown"
           value={intervalValue}

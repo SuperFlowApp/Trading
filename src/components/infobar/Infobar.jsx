@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import userInputStore from '../../Zustandstore/userInputStore.js';
+import {selectedPairStore} from '../../Zustandstore/userInputStore.js';
 import PairSelector from './PairSelector';
 import { formatPrice } from '../../utils/priceFormater.js';
 
 function Infobar() {
   const [ticker, setTicker] = useState({});
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const selectedPair = userInputStore((s) => s.selectedPair);
+  const selectedPair = selectedPairStore((s) => s.selectedPair);
 
   useEffect(() => {
     if (!selectedPair) return;

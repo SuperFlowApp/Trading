@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { marketsData } from './Zustandstore/panelStore.js';
-import useUserInputStore from './Zustandstore/userInputStore.js';
+import {selectedPairStore} from './Zustandstore/userInputStore.js';
 import { getAuthKey } from './utils/authKeyStorage.jsx';
 
 export default function DebuggerPanel() {
-    const useUserInputStoreState = useUserInputStore();
+    const selectedPairStoreState = selectedPairStore();
     const allMarketData = marketsData(state => state.allMarketData);
 
     // Fetch authKey from native storage
@@ -77,7 +77,7 @@ export default function DebuggerPanel() {
                     maxHeight: 400,
                 }}
             >
-                {JSON.stringify({ ...useUserInputStoreState }, null, 2)}
+                {JSON.stringify({ ...selectedPairStoreState }, null, 2)}
             </pre>
 
             <pre

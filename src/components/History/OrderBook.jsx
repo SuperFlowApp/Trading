@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { useZustandStore } from '../../Zustandstore/panelStore.js';
-import useUserInputStore from '../../Zustandstore/userInputStore.js'; // <-- import your user input store
+import {selectedPairStore} from '../../Zustandstore/userInputStore.js'; // <-- import your user input store
 
 // Custom hook for localhost SSE order book
 const useUnifiedOrderBook = (symbol) => {
@@ -139,7 +139,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSt
 
 const OrderBook = () => {
   // Fetch selectedPair from user input store
-  const selectedPair = useUserInputStore(s => s.selectedPair);
+  const selectedPair = selectedPairStore(s => s.selectedPair);
   // Compose symbol for API (e.g., BTCUSDT)
   const symbol = selectedPair ? `${selectedPair}USDT` : 'BTCUSDT';
 
