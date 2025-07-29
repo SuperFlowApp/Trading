@@ -33,7 +33,7 @@ function PairSelector({
           let base = mkt.base;
           let quote = mkt.quote;
           if (!base || !quote) {
-            const match = mkt.symbol.match(/^([A-Z]+)(USDT|USD|BTC|ETH|BNB|EUR|TRY|USDC)$/);
+            const match = mkt.symbol.match(/^([A-Z]+)(USDT)$/);
             if (match) {
               base = match[1];
               quote = match[2];
