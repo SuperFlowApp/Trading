@@ -1,13 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button';
 import NativeSlider from '../../CommonUIs/slider';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import '../../../components/CommonUIs/slider.css';
 
+// Import Zustand stores
+import { useZustandStore } from '../../../Zustandstore/useStore';
+import { orderFormStore } from '../../../Zustandstore/userOrderStore';
+import { marketsData } from '../../../Zustandstore/marketsDataStore';
+
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
-  const [leverage, setLeverage] = useState(10); // Add leverage state
+  const [leverage, setLeverage] = useState(10);
+
+  // Zustand selectors
+  const currentNotional = useZustandStore(s => s.currentNotional);
+  const selectedSymbol = orderFormStore(s => s.OrderFormState.symbol); // e.g. "BTCUSDT"
+  const allMarketData = marketsData(s => s.allMarketData);
+
+  // Find market for selected symbol
+  const market = allMarketData?.find(m => m.symbol === selectedSymbol);
+
+  // Find margin tier for current notional
+  let maxLeverage = 1;
+  let tierMsg = '';
+  if (market && Array.isArray(market.marginTiers)) {
+    const notional = Number(currentNotional) || 0;
+    const tier = market.marginTiers.find(
+      t => notional >= Number(t.minNotional) && notional < Number(t.maxNotional)
+    );
+    if (tier) {
+      maxLeverage = tier.maxLeverage;
+      tierMsg = `Tier: [${tier.minNotional} - ${tier.maxNotional}), Max Leverage: ${tier.maxLeverage}`;
+    } else {
+      // If notional is above all tiers, use last tier
+      const lastTier = market.marginTiers[market.marginTiers.length - 1];
+      if (lastTier && notional >= Number(lastTier.minNotional)) {
+        maxLeverage = lastTier.maxLeverage;
+        tierMsg = `Tier: [${lastTier.minNotional} - ${lastTier.maxNotional}), Max Leverage: ${lastTier.maxLeverage}`;
+      }
+    }
+  }
+
+  // --- Add this effect to sync leverage with maxLeverage ---
+  // If leverage is above new maxLeverage, reset it to maxLeverage
+  // If leverage is below 1, reset to 1
+  useEffect(() => {
+    setLeverage(prev => {
+      if (prev > maxLeverage) return maxLeverage;
+      if (prev < 1) return 1;
+      return prev;
+    });
+  }, [maxLeverage]);
 
   return (
     <>
@@ -33,10 +78,10 @@ export default function LeveragePanel() {
           </div>
           <NativeSlider
             min={1}
-            max={20}
+            max={maxLeverage}
             step={1}
             value={leverage}
-            onChange={e => setLeverage(Number(e.target.value))} // Fix: extract value
+            onChange={e => setLeverage(Number(e.target.value))}
           />
           <div className="text-2xl font-bold text-primary2">{leverage}X</div>
           <Button
@@ -47,6 +92,22 @@ export default function LeveragePanel() {
           >
             Confirm
           </Button>
+          {/* Debug Info 
+          <div style={{
+            marginTop: 16,
+            fontSize: 12,
+            color: '#aaa',
+            background: '#222',
+            borderRadius: 4,
+            padding: 8,
+            width: '100%',
+            wordBreak: 'break-all'
+          }}>
+            <div>Notional: <b>{currentNotional ?? 'N/A'}</b></div>
+            <div>Selected Pair: <b>{selectedSymbol ?? 'N/A'}</b></div>
+            <div>{tierMsg || 'No valid margin tier found.'}</div>
+          </div>
+          */}
         </div>
       </Modal>
     </>
