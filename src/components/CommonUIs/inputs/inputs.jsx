@@ -92,16 +92,8 @@ export const InputWithDropDown = ({
 
 // Username Input
 export const UsernameInput = ({ value, onChange, placeholder = "Username" }) => (
-  <div className="custom-input-wrapper">
-    <input
-      type="text"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className="custom-input"
-      autoComplete="username"
-    />
-    <span className="custom-input-icon">
+  <div className="custom-input-wrapper input-icon-inside input-icon-inside--left">
+    <span className="custom-input-icon-inside">
       <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="4" stroke="#6c7a89" strokeWidth="2" />
         <path
@@ -112,6 +104,15 @@ export const UsernameInput = ({ value, onChange, placeholder = "Username" }) => 
         />
       </svg>
     </span>
+    <input
+      type="text"
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="custom-input input-with-icon"
+      autoComplete="username"
+      style={{ paddingLeft: 36 }}
+    />
   </div>
 );
 
@@ -120,17 +121,8 @@ export const PasswordInput = ({ value, onChange, placeholder = "Password" }) => 
   const [show, setShow] = useState(false);
 
   return (
-    <div className="custom-input-wrapper">
-      <input
-        type={show ? "text" : "password"}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="custom-input"
-        autoComplete="current-password"
-      />
-      {/* Password icon on the left */}
-      <span className="custom-input-icon">
+    <div className="custom-input-wrapper input-icon-inside input-icon-inside--left">
+      <span className="custom-input-icon-inside">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
           <rect
             x="6"
@@ -150,7 +142,15 @@ export const PasswordInput = ({ value, onChange, placeholder = "Password" }) => 
           <circle cx="12" cy="14" r="1.5" fill="#6c7a89" />
         </svg>
       </span>
-      {/* Eye icon on the right */}
+      <input
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="custom-input input-with-icon"
+        autoComplete="current-password"
+        style={{ paddingLeft: 36, paddingRight: 36 }}
+      />
       <button
         type="button"
         className="custom-input-eye"

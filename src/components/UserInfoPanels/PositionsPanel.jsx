@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import Positions from './PositionsOpen';
+import Positions from './PositionsTab';
+import OpenOrdersTab from './OpenOrdersTab'; // <-- Import the OpenOrdersTab
 import Tab from '../CommonUIs/tab'; // Import the Tab component
 
 function PositionsPanel() {
-  const [activeTab, setActiveTab] = useState('balances');
+  const [activeTab, setActiveTab] = useState('positions');
 
   const tabKeys = [
     'balances',
@@ -43,13 +44,13 @@ function PositionsPanel() {
         </div>
       </div>
       {/* Tab Content */}
-      <div className="p-4">
+      <div className="">
         {activeTab === 'balances' && <div>Balances will be shown here.</div>}
         {activeTab === 'positions' &&
-          <section className="text-white p-4">
+          <section className="text-white py-4">
             <Positions />
           </section>}
-        {activeTab === 'orders' && <div>Open orders will be listed here.</div>}
+        {activeTab === 'orders' && <OpenOrdersTab />}
         {activeTab === 'twap' && <div>TWAP orders will be shown here.</div>}
         {activeTab === 'tradeHistory' && <div>Trade history will be shown here.</div>}
         {activeTab === 'fundingHistory' && <div>Funding history will be shown here.</div>}
