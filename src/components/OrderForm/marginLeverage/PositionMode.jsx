@@ -11,6 +11,7 @@ export default function PositionMode() {
   const [blink, setBlink] = useState(""); // "success" | "error" | ""
   const [errorMsg, setErrorMsg] = useState("");
   const [positionMode, setPositionMode] = useState("ONE_WAY_MODE");
+  const [confirmedPositionMode, setConfirmedPositionMode] = useState("ONE_WAY_MODE"); // <-- new state
 
   const selectedPair = selectedPairStore(s => s.selectedPair);
   const authKey = getAuthKey();
@@ -42,6 +43,7 @@ export default function PositionMode() {
       });
       const data = await res.json();
       if (res.status === 200) {
+        setConfirmedPositionMode(positionMode); // <-- update only on success
         setOpen(false);
       } else {
         setBlink("error");
@@ -60,7 +62,7 @@ export default function PositionMode() {
   return (
     <>
       <ModalModButton onClick={() => setOpen(true)}>
-        {positionMode === "ONE_WAY_MODE" ? "One-way" : "Hedge"}
+        {confirmedPositionMode === "ONE_WAY_MODE" ? "One-way" : "Hedge"}
       </ModalModButton>
       <Modal
         open={open}

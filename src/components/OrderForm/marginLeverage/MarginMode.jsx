@@ -29,6 +29,7 @@ export default function MarginMode() {
 
     // Local state for margin mode selection
     const [marginMode, setMarginMode] = useState(availableModes[0] || 'Cross');
+    const [confirmedMarginMode, setConfirmedMarginMode] = useState(availableModes[0] || 'Cross'); // <-- new state
 
     // Auto-select margin mode if only one is available or current is not available
     useEffect(() => {
@@ -39,6 +40,10 @@ export default function MarginMode() {
             !availableModes.includes(marginMode)
         ) {
             setMarginMode(availableModes[0]);
+        }
+        // Also update confirmedMarginMode if availableModes changes and confirmed is not valid
+        if (availableModes.length > 0 && !availableModes.includes(confirmedMarginMode)) {
+            setConfirmedMarginMode(availableModes[0]);
         }
     }, [selectedPair, availableModes.join(','), marginMode]);
 
@@ -67,6 +72,7 @@ export default function MarginMode() {
             console.log("Received response:", res.status, data);
 
             if (res.status === 200) {
+                setConfirmedMarginMode(marginMode); // <-- update only on success
                 setOpen(false);
             } else {
                 setBlink("error");
@@ -90,7 +96,7 @@ export default function MarginMode() {
     return (
         <>
             <ModalModButton onClick={() => setOpen(true)}>
-                {marginMode}
+                {confirmedMarginMode}
             </ModalModButton>
             <Modal
                 open={open}

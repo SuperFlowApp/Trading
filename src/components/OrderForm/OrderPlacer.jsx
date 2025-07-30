@@ -73,7 +73,7 @@ export function useOrderPlacer(token) {
       if (!response.ok) {
         const errorMessage = errorData && typeof errorData === 'object' && errorData.message
           ? errorData.message
-          : typeof errorData === 'string' ? errorData : 'Failed to place order';
+          : (typeof errorData === 'string' ? errorData : '');
         throw new Error(errorMessage);
       }
 
@@ -85,7 +85,7 @@ export function useOrderPlacer(token) {
       setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
       onSuccess && onSuccess(data);
     } catch (err) {
-      setError(err.message || 'Failed to place order');
+      setError(err.message); // No fallback to 'Failed to place order'
       setBlinkClass && setBlinkClass("blink-error");
       setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
       onError && onError(err);

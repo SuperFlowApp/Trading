@@ -14,6 +14,7 @@ import { marketsData } from '../../../Zustandstore/marketsDataStore';
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
   const [leverage, setLeverage] = useState(10);
+  const [confirmedLeverage, setConfirmedLeverage] = useState(10); // <-- new state
   const [loading, setLoading] = useState(false);
   const [blink, setBlink] = useState(""); // "success" | "error" | ""
   const [errorMsg, setErrorMsg] = useState("");
@@ -90,6 +91,7 @@ export default function LeveragePanel() {
       console.log("Leverage API response:", res.status, data); // <-- print response body
       if (res.status === 200) {
         setBlink("success");
+        setConfirmedLeverage(leverage); // <-- update only on success
         setTimeout(() => {
           setBlink("");
           setOpen(false);
@@ -111,7 +113,7 @@ export default function LeveragePanel() {
   return (
     <>
       <ModalModButton onClick={() => setOpen(true)}>
-        {leverage}X
+        {confirmedLeverage}X {/* <-- only update after success */}
       </ModalModButton>
       <Modal
         open={open}

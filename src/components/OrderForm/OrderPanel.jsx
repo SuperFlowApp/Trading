@@ -47,6 +47,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
   const setOrderFormStore = orderFormStore(s => s.setOrderFormState);
   const setNotional = useZustandStore(s => s.setNotional);
+  const currentNotional = useZustandStore(s => s.currentNotional);
 
   // Update price when OrderBookClickedPrice changes
   useEffect(() => {
@@ -61,6 +62,24 @@ function LimitOrderForm({ onCurrencyChange }) {
     setAmount('');
   }, [selectedPairBase]);
 
+  // Update notional whenever price, amount, or selectedCurrency changes
+  useEffect(() => {
+    if (!amount || !price) {
+      setNotional(null);
+      return;
+    }
+    const numAmount = parseFloat(amount);
+    const numPrice = parseFloat(price);
+
+    if (isNaN(numAmount) || isNaN(numPrice)) {
+      setNotional(null);
+      return;
+    }
+
+    // Always calculate notional as price * size (amount)
+    const notional = numAmount * numPrice;
+    setNotional(notional);
+  }, [amount, price, setNotional]);
 
   const token = ""; // <-- Replace with your actual token logic
 
@@ -362,21 +381,8 @@ function LimitOrderForm({ onCurrencyChange }) {
           <span className="w-full flex justify-between text-white font-semibold">
             Order Value
             <span>
-              {amount && price
-                ? `$${(() => {
-                  const numAmount = parseFloat(amount);
-                  const numPrice = parseFloat(price);
-
-                  let notional;
-                  if (selectedCurrency === pairDetails.quote) {
-                    notional = numAmount;
-                  } else {
-                    notional = numAmount * numPrice;
-                  }
-                  setNotional(notional); // <-- Store in Zustand
-
-                  return notional.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                })()}`
+              {currentNotional !== null && !isNaN(currentNotional)
+                ? `$${currentNotional.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 : "--"}
             </span>
           </span>
