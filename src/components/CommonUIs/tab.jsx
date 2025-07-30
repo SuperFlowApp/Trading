@@ -13,10 +13,7 @@ const Tab = ({ tabs, active, onChange, renderLabel, className = "" }) => {
   const idx = tabs.indexOf(active);
   return (
     <div
-      className={` relative flex justify-between items-center text-sm ${className}`}
-      style={{
-        borderBottom: "2px solid #00B7C940", // --color-primary2 at 50% opacity
-      }}
+      className={`border-b-[2px] border-primary2deactive relative flex justify-between items-center text-sm ${className}`}
     >
       {tabs.map((tab, i) => (
         <button
