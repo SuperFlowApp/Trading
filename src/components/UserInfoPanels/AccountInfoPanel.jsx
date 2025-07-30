@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAuthKey } from '../../utils/authKeyStorage.jsx';
+import { formatPrice } from '../../utils/priceFormater.js';
 
 // Helper to convert "0E-8", "0E-16", etc. to "0"
 function normalizeZero(val) {
@@ -10,12 +11,37 @@ function normalizeZero(val) {
 function AccountInfoPanel() {
     const [accountInfoError, setAccountInfoError] = useState('');
     const [accountInfo, setAccountInfo] = useState(null);
+    const [token, setToken] = useState(getAuthKey());
+    const tokenRef = useRef(token);
 
+    // Poll for authKey changes in localStorage
+    useEffect(() => {
+        const pollAuthKey = setInterval(() => {
+            const currentToken = getAuthKey();
+            if (currentToken !== tokenRef.current) {
+                tokenRef.current = currentToken;
+                setToken(currentToken);
+            }
+        }, 1000); // Check every second
+
+        return () => clearInterval(pollAuthKey);
+    }, []);
+
+    // Listen to authKeyChanged event
+    useEffect(() => {
+        const handleAuthKeyChange = () => {
+            const currentToken = getAuthKey();
+            tokenRef.current = currentToken;
+            setToken(currentToken);
+        };
+        window.addEventListener("authKeyChanged", handleAuthKeyChange);
+        return () => window.removeEventListener("authKeyChanged", handleAuthKeyChange);
+    }, []);
+
+    // Fetch account info when token changes
     useEffect(() => {
         const fetchAccountInfo = async () => {
-            const authKey = getAuthKey();
-            if (!authKey) {
-                setAccountInfoError('Not logged in');
+            if (!token) {
                 setAccountInfo(null);
                 return;
             }
@@ -23,13 +49,13 @@ function AccountInfoPanel() {
             try {
                 const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
                     headers: {
-                        'Authorization': `Bearer ${authKey}`,
+                        'Authorization': `Bearer ${token}`,
                         'accept': 'application/json'
                     }
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    setAccountInfoError(data?.error || 'Failed to fetch account info');
+                    setAccountInfoError(data?.error );
                     setAccountInfo(null);
                 } else {
                     setAccountInfo(data);
@@ -40,7 +66,7 @@ function AccountInfoPanel() {
             }
         };
         fetchAccountInfo();
-    }, []);
+    }, [token]);
 
     // Helper: get first position (if any)
     const position = accountInfo?.positions?.[0];
@@ -75,7 +101,7 @@ function AccountInfoPanel() {
 
     return (
         <>
-            <div className="flex flex-col bg-backgroundmid rounded-md p-2 min-w-0 overflow-hidden">
+            <div className="flex flex-col bg-backgroundmid rounded-md p-2 w-[100%] overflow-hidden">
                 {accountInfoError && (
                     <div className="text-red-400 text-xs">{accountInfoError}</div>
                 )}
@@ -84,73 +110,92 @@ function AccountInfoPanel() {
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Liquidation Price</span>
                         <span className="text-white font-semibold">
-                            {normalizeZero(position?.liquidationPrice) ?? '—'}
+                            {position?.liquidationPrice != null
+                                ? formatPrice(normalizeZero(position.liquidationPrice))
+                                : '—'}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Order Value</span>
                         <span className="text-white font-semibold">
-                            {orderValue ?? '—'}
+                            {orderValue !== ''
+                                ? formatPrice(orderValue)
+                                : '—'}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Margin Required</span>
                         <span className="text-white font-semibold">
-                            {marginRequired ?? '—'}
+                            {marginRequired !== ''
+                                ? formatPrice(marginRequired)
+                                : '—'}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Fees Paid</span>
                         <span className="text-white font-semibold">
-                            {normalizeZero(accountInfo?.paidFee) ?? '—'}
+                            {accountInfo?.paidFee != null
+                                ? formatPrice(normalizeZero(accountInfo.paidFee))
+                                : '—'}
                         </span>
                     </div>
                     {/* Perps Overview */}
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Account Equity (Perps)</span>
                         <span className="text-white font-semibold">
-                            {normalizeZero(accountInfo?.marginBalance) ?? '—'}
+                            {accountInfo?.marginBalance != null
+                                ? formatPrice(normalizeZero(accountInfo.marginBalance))
+                                : '—'}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Balance</span>
                         <span className="text-white font-semibold">
-                            {normalizeZero(accountInfo?.walletBalance) ?? '—'}
+                            {accountInfo?.walletBalance != null
+                                ? formatPrice(normalizeZero(accountInfo.walletBalance))
+                                : '—'}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Unrealized PNL</span>
                         <span className="text-white font-semibold">
-                            {normalizeZero(accountInfo?.upnl) ?? normalizeZero(position?.upnl) ?? '—'}
+                            {accountInfo?.upnl != null
+                                ? formatPrice(normalizeZero(accountInfo.upnl))
+                                : (position?.upnl != null
+                                    ? formatPrice(normalizeZero(position.upnl))
+                                    : '—')}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Cross Margin Ratio</span>
                         <span className="text-white font-semibold">
-                            {crossMarginRatio ?? '—'}
+                            {crossMarginRatio !== undefined && crossMarginRatio !== null && crossMarginRatio !== ''
+                                ? formatPrice(crossMarginRatio)
+                                : '—'}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Maintenance Margin</span>
                         <span className="text-white font-semibold">
-                            {normalizeZero(accountInfo?.crossMaintenanceMargin) ?? normalizeZero(position?.maintenanceMargin) ?? '—'}
+                            {accountInfo?.crossMaintenanceMargin != null
+                                ? formatPrice(normalizeZero(accountInfo.crossMaintenanceMargin))
+                                : (position?.maintenanceMargin != null
+                                    ? formatPrice(normalizeZero(position.maintenanceMargin))
+                                    : '—')}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Cross Account Leverage</span>
                         <span className="text-white font-semibold">
-                            {normalizeZero(position?.leverage) ?? crossLeverage ?? '—'}
+                            {position?.leverage != null
+                                ? formatPrice(normalizeZero(position.leverage))
+                                : (crossLeverage !== ''
+                                    ? formatPrice(crossLeverage)
+                                    : '—')}
                         </span>
                     </div>
                 </div>
             </div>
-            {/* Debug panel 
-            {accountInfo && (
-                <pre className="bg-backgroundlighthover text-xs text-white mt-2 p-2 rounded max-h-48 overflow-auto">
-                    {JSON.stringify(accountInfo, null, 2)}
-                </pre>
-            )}
-            */}
         </>
     );
 }

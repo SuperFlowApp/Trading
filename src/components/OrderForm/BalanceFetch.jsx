@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { getAuthKey } from "../../utils/authKeyStorage";
+import { getAuthKey, setAuthKey } from "../../utils/authKeyStorage";
 import { formatPrice } from '../../utils/priceFormater';
 
 function isTokenValid(token) {
@@ -59,8 +59,15 @@ const BalanceFetch = ({ onBalance }) => {
           Authorization: `Bearer ${token}`,
         },
       })
-        .then(res => res.json())
-        .then(data => {
+        .then(async res => {
+          if (res.status === 401) {
+            // Token invalid, clear it
+            setAuthKey(null);
+            setBalance(0.0);
+            onBalance && onBalance(0.0);
+            return;
+          }
+          const data = await res.json();
           if (
             data &&
             data.balances &&
