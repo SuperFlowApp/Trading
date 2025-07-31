@@ -13,8 +13,8 @@ import { marketsData } from '../../../Zustandstore/marketsDataStore';
 
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
-  const [leverage, setLeverage] = useState(10);
-  const [confirmedLeverage, setConfirmedLeverage] = useState(10); // <-- new state
+  const [leverage, setLeverage] = useState(1);
+  const [confirmedLeverage, setConfirmedLeverage] = useState(1); // <-- new state
   const [loading, setLoading] = useState(false);
   const [blink, setBlink] = useState(""); // "success" | "error" | ""
   const [errorMsg, setErrorMsg] = useState("");
