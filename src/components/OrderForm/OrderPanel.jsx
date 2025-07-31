@@ -13,13 +13,13 @@ import SideSelectorButton from './Ui/SideSelectorButton.jsx';
 import TifSelector from './Ui/TifSelector.jsx';
 import BalanceFetch from './BalanceFetch';
 import { InputWithButton, InputWithDropDown, PercentageInput } from '../CommonUIs/inputs/inputs.jsx';
-import { useOrderPlacer } from './OrderPlacer';
 import LoginPanel from '../Login/LoginPanel'; // Import the login modal
 import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
 
 function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
   const [balanceFree, setBalanceFree] = useState("--");
+  const { authKey } = useAuthKey();
 
   const selectedPairBase = selectedPairStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
@@ -88,17 +88,101 @@ function LimitOrderForm({ onCurrencyChange }) {
     setNotional(notional);
   }, [amount, price, selectedCurrency, setNotional, pairDetails.base]);
 
-  const token = ""; // <-- Replace with your actual token logic
+  // --- OrderPlacer logic moved here ---
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [orderError, setOrderError] = useState('');
+  const [orderSuccess, setOrderSuccess] = useState('');
 
-  // Use the custom hook
-  const {
-    placeOrder,
-    loading: orderLoading,
-    error: orderError,
-    success: orderSuccess,
-    setError,
-    setSuccess
-  } = useOrderPlacer(token);
+  const placeOrder = async ({
+    selectedPair,
+    market,
+    side,
+    amount,
+    price,
+    priceMidpoint,
+    timeInForce = 'GTC',
+    onSuccess,
+    onError,
+    resetAmount,
+    resetSlider,
+    setBlinkClass,
+  }) => {
+    if (!selectedPair || !amount) {
+      setOrderError('Please fill all fields.');
+      setBlinkClass && setBlinkClass("blink-error");
+      setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
+      return;
+    }
+
+    const finalPrice = market === 'market' ? priceMidpoint?.toFixed(1) : price;
+
+    if (!finalPrice) {
+      setOrderError('Price is required.');
+      return;
+    }
+
+    setOrderLoading(true);
+    setOrderError('');
+    setOrderSuccess('');
+
+    const requestBody = {
+      symbol: selectedPair,
+      type: market.toUpperCase(),
+      side: side.toUpperCase(),
+      positionSide: 'BOTH',
+      quantity: parseFloat(amount),
+      price: parseFloat(finalPrice),
+      timeInForce,
+      orderRespType: 'ACK',
+      params: {
+        additionalProp1: {},
+      },
+    };
+
+    try {
+      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authKey}`, // <-- use authKey here
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      let errorData;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        errorData = await response.json();
+      } else {
+        errorData = await response.text();
+      }
+
+      if (!response.ok) {
+        const errorMessage = errorData && typeof errorData === 'object' && errorData.message
+          ? errorData.message
+          : (typeof errorData === 'string' ? errorData : '');
+        throw new Error(errorMessage);
+      }
+
+      const data = typeof errorData === 'object' ? errorData : { orderId: 'unknown' };
+      setOrderSuccess(`Order placed! Order ID: ${data.orderId}`);
+      resetAmount && resetAmount('');
+      resetSlider && resetSlider(0);
+      setBlinkClass && setBlinkClass("blink-success");
+      setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
+      onSuccess && onSuccess(data);
+    } catch (err) {
+      setOrderError(err.message);
+      setBlinkClass && setBlinkClass("blink-error");
+      setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
+      onError && onError(err);
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
+  // --- End OrderPlacer logic ---
 
   // switching tabs:
   const handleTabChange = (tab) => {
@@ -168,14 +252,14 @@ function LimitOrderForm({ onCurrencyChange }) {
   // Auto-hide error and success messages after 3 seconds
   useEffect(() => {
     if (orderError) {
-      const timer = setTimeout(() => setError(''), 3000);
+      const timer = setTimeout(() => setOrderError(''), 3000);
       return () => clearTimeout(timer);
     }
     if (orderSuccess) {
-      const timer = setTimeout(() => setSuccess(''), 3000);
+      const timer = setTimeout(() => setOrderSuccess(''), 3000);
       return () => clearTimeout(timer);
     }
-  }, [orderError, orderSuccess, setError, setSuccess]);
+  }, [orderError, orderSuccess]);
 
   // Notify parent when currency changes
   useEffect(() => {
@@ -226,7 +310,6 @@ function LimitOrderForm({ onCurrencyChange }) {
     });
   }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormStore]);
 
-  const { authKey } = useAuthKey(); // <-- get authKey from context
 
   const orderButtonText = !authKey
     ? 'connect'
