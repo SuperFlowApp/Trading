@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getAuthKey } from '../../utils/authKeyStorage.jsx';
-import { formatPrice } from '../../utils/priceFormater.js';
+import { formatPrice } from '../../utils/priceFormater';
+import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context
 
 // Helper to convert "0E-8", "0E-16", etc. to "0"
 function normalizeZero(val) {
@@ -11,25 +11,24 @@ function normalizeZero(val) {
 function AccountInfoPanel() {
     const [accountInfoError, setAccountInfoError] = useState('');
     const [accountInfo, setAccountInfo] = useState(null);
-    const [token, setToken] = useState(getAuthKey());
+    const { authKey } = useAuthKey();
 
     // Listen for authKey changes (multi-tab support)
     useEffect(() => {
         const handler = () => {
-            const newToken = getAuthKey();
-            setToken(newToken);
-            if (!newToken) {
+            // No need to manually fetch authKey, context will update
+            if (!authKey) {
                 setAccountInfo(null);
                 setAccountInfoError('');
             }
         };
         window.addEventListener("authKeyChanged", handler);
         return () => window.removeEventListener("authKeyChanged", handler);
-    }, []);
+    }, [authKey]);
 
-    // Fetch account info when token changes and token is present
+    // Fetch account info when authKey changes and authKey is present
     useEffect(() => {
-        if (!token) {
+        if (!authKey) {
             setAccountInfo(null);
             setAccountInfoError('');
             return;
@@ -39,13 +38,13 @@ function AccountInfoPanel() {
             try {
                 const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${authKey}`,
                         'accept': 'application/json'
                     }
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    setAccountInfoError(data?.error );
+                    setAccountInfoError(data?.error);
                     setAccountInfo(null);
                 } else {
                     setAccountInfo(data);
@@ -56,7 +55,7 @@ function AccountInfoPanel() {
             }
         };
         fetchAccountInfo();
-    }, [token]);
+    }, [authKey]);
 
     // Helper: get first position (if any)
     const position = accountInfo?.positions?.[0];

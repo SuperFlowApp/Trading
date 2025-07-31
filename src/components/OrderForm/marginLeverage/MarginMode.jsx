@@ -4,7 +4,7 @@ import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button.jsx';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js';
-import { getAuthKey } from '../../../utils/authKeyStorage.jsx';
+import { useAuthKey } from '../../../contexts/AuthKeyContext'; // <-- use context
 
 export default function MarginMode() {
     const [open, setOpen] = useState(false);
@@ -15,7 +15,7 @@ export default function MarginMode() {
     // Fetch all market data and selected pair from their respective stores
     const allMarketData = marketsData(s => s.allMarketData);
     const selectedPair = selectedPairStore(s => s.selectedPair);
-    const authKey = getAuthKey();
+    const { authKey } = useAuthKey(); // <-- get authKey from context
 
     // Find the current market object for the selected pair
     const currentMarket = allMarketData.find(

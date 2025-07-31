@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { message } from "antd";
-import { getAuthKey, setAuthKey } from "../../utils/authKeyStorage";
+import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- import context hook
 import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
 import Modal from "../CommonUIs/modal/modal";
@@ -12,11 +12,7 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [loading, setLoading] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false); // <-- signup modal state
 
-  // On mount, check localStorage for authKey (optional, can be removed if not needed)
-  useEffect(() => {
-    // You can remove this effect if you don't need to do anything with the auth key on mount
-    getAuthKey();
-  }, []);
+  const { setAuthKey } = useAuthKey(); // <-- get setter from context
 
   const handleLogin = async () => {
     setLoading(true);
@@ -38,7 +34,7 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
 
       if (data.access_token) {
         message.success("Login successful!");
-        setAuthKey(data.access_token); // Only use setAuthKey
+        setAuthKey(data.access_token); // <-- update context only
         onLoginSuccess && onLoginSuccess(username, data.access_token);
         onClose();
       } else {

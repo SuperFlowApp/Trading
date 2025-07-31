@@ -7,7 +7,6 @@ import AccountInfoPanel from './components/UserInfoPanels/AccountInfoPanel';
 import TradesPanel from './components/History/TradesPanel';
 
 function FuturesApp() {
-
   return (
     <div className="relative min-w-0 w-[100%] h-auto overflow-visible">
       <div className="flex min-w-0 flex-1 p-1 gap-1">

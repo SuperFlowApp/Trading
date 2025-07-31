@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import 'antd/dist/reset.css';
 import LoginPanel from "./Login/LoginPanel";
-import { getAuthKey } from "../utils/authKeyStorage";
+import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import context
 import Button from "./CommonUIs/Button";
 import Modal from "./CommonUIs/modal/modal"; 
 import DebuggerPanel from "../debugger";
-import { logout } from "../utils/logout"; 
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -24,9 +23,7 @@ const initialSettings = {
 };
 
 function Navbar() {
-  // Fetch authKey from native storage instead of Zustand
-  const [accessToken, setAccessToken] = useState(getAuthKey());
-
+  const { authKey, setAuthKey } = useAuthKey(); // <-- use context
   const [showLogin, setShowLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -38,13 +35,6 @@ function Navbar() {
   const [showDebugger, setShowDebugger] = useState(false);
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
-
-  // Listen for authKey changes (multi-tab support)
-  useEffect(() => {
-    const handler = () => setAccessToken(getAuthKey());
-    window.addEventListener("authKeyChanged", handler);
-    return () => window.removeEventListener("authKeyChanged", handler);
-  }, []);
 
   // Listen for clicks outside dropdown to close it
   useEffect(() => {
@@ -81,7 +71,8 @@ function Navbar() {
   // Callback for AuthPanel to close modal on login and update accessToken
   const handleLoginSuccess = () => {
     setShowLogin(false);
-    setAccessToken(getAuthKey());
+    setDropdownOpen(false); // <-- close dropdown after login
+    // setAuthKey is already called in login, nothing else needed
   };
 
   const handleSettingChange = (key) => {
@@ -101,11 +92,7 @@ function Navbar() {
   };
 
   const handleDisconnect = () => {
-    logout({
-      onLogout: () => {
-        setDropdownOpen(false);
-      }
-    });
+    setAuthKey(null); // <-- clear token in context
   };
 
   return (
@@ -163,7 +150,7 @@ function Navbar() {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           {/* Login/User Button */}
-          {!accessToken ? (
+          {!authKey ? (
             <Button
               type="navdisconnected"
               onClick={() => setShowLogin(true)}

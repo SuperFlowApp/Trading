@@ -2,23 +2,15 @@ import { useState, useEffect } from 'react';
 import { marketsData } from './Zustandstore/marketsDataStore.js';
 import { selectedPairStore, orderFormStore } from './Zustandstore/userOrderStore.js';
 
-import { getAuthKey } from './utils/authKeyStorage.jsx';
+import { useAuthKey } from './contexts/AuthKeyContext'; // <-- use context
 
 export default function DebuggerPanel() {
     const selectedPairStoreState = selectedPairStore();
     const userCurrentOrder = orderFormStore();
     const allMarketData = marketsData(state => state.allMarketData);
 
-    // Fetch authKey from native storage
-    const [authKey, setAuthKey] = useState(getAuthKey());
+    const { authKey } = useAuthKey(); // <-- get authKey from context
     const [modalOpen, setModalOpen] = useState(false);
-
-    useEffect(() => {
-        // Update authKey on storage change (for multi-tab support)
-        const handler = () => setAuthKey(getAuthKey());
-        window.addEventListener("storage", handler);
-        return () => window.removeEventListener("storage", handler);
-    }, []);
 
     useEffect(() => {
         if (!allMarketData || allMarketData.length === 0) {

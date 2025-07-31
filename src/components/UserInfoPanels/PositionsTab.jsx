@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { getAuthKey } from "../../utils/authKeyStorage";
+import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context
 
 const Positions = () => {
+  const { authKey } = useAuthKey(); // <-- get authKey from context
   const [rawPositions, setRawPositions] = useState([]);
-  const [token, setToken] = useState(getAuthKey());
 
-  // Poll for authKey changes in localStorage (optional, for live updates)
+  // Fetch open positions from server when authKey changes
   useEffect(() => {
-    const pollAuthKey = setInterval(() => {
-      const currentToken = getAuthKey();
-      if (currentToken !== token) setToken(currentToken);
-    }, 1000);
-    return () => clearInterval(pollAuthKey);
-  }, [token]);
-
-  // Fetch open positions from server
-  useEffect(() => {
-    if (!token) {
+    if (!authKey) {
       setRawPositions([]);
       return;
     }
@@ -24,7 +15,7 @@ const Positions = () => {
       method: "GET",
       headers: {
         accept: "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authKey}`,
       },
     })
       .then(async (res) => {
@@ -34,7 +25,7 @@ const Positions = () => {
       .catch(() => {
         setRawPositions([]);
       });
-  }, [token]);
+  }, [authKey]);
 
   // Helper to format numbers and handle nulls
   const fmt = (v, digits = 4) => {
@@ -76,69 +67,65 @@ const Positions = () => {
             </tr>
           </thead>
           <tbody>
-            {rawPositions && rawPositions.length > 0 ? (
-              rawPositions.map((pos, idx) => (
-                <tr
-                  key={pos.symbol + pos.positionSide + idx}
-                  className={idx % 2 ? "bg-liquidwhite/10" : "bg-liquidwhite/20"}
-                >
-                  <td className="px-2 py-1">{fmtTime(pos.timestamp)}</td>
-                  <td className="px-2 py-1 font-semibold">{pos.symbol}</td>
-                  <td className="px-2 py-1">
-                    {pos.positionSide === "BOTH"
-                      ? Number(pos.positionAmt) >= 0
-                        ? "LONG"
-                        : "SHORT"
-                      : pos.positionSide}
-                  </td>
-                  <td className="px-2 py-1">{fmt(pos.positionAmt, 4)}</td>
-                  <td className="px-2 py-1">{fmt(pos.entryPrice, 4)}</td>
-                  <td className="px-2 py-1">{fmt(pos.markPrice, 4)}</td>
-                  <td className="px-2 py-1">{fmt(pos.notional, 4)}</td>
-                  <td className="px-2 py-1">{pos.leverage}</td>
-                  <td className={`px-2 py-1 ${Number(pos.upnl) >= 0 ? 'text-primary2' : 'text-warningcolor'}`}>
-                    {fmt(pos.upnl, 4)}
-                  </td>
-                  <td className="px-2 py-1">{fmt(pos.realizedPnl, 4)}</td>
-                  <td className="px-2 py-1">{fmt(pos.isolatedMarginBalance, 4)}</td>
-                  <td className="px-2 py-1">{fmt(pos.maintenanceMargin, 4)}</td>
-                  <td className="px-2 py-1">{pos.liquidationPrice === null ? "-" : fmt(pos.liquidationPrice, 4)}</td>
-                  <td className="px-2 py-1">
-                    {pos.marginMode || (pos.cross === true ? "Cross" : pos.cross === false ? "Isolated" : "-")}
-                  </td>
-                  <td className="px-2 py-1">{fmtTime(pos.updateTime)}</td>
-                  <td className="px-2 py-1">
-                    <div className="flex gap-1">
-                      <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
-                      <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
-                      <button className="border border-primary2 hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
-                      <button className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Close</button>
-                    </div>
+            {authKey ? (
+              rawPositions && rawPositions.length > 0 ? (
+                rawPositions.map((pos, idx) => (
+                  <tr
+                    key={pos.symbol + pos.positionSide + idx}
+                    className={idx % 2 ? "bg-liquidwhite/10" : "bg-liquidwhite/20"}
+                  >
+                    <td className="px-2 py-1">{fmtTime(pos.timestamp)}</td>
+                    <td className="px-2 py-1 font-semibold">{pos.symbol}</td>
+                    <td className="px-2 py-1">
+                      {pos.positionSide === "BOTH"
+                        ? Number(pos.positionAmt) >= 0
+                          ? "LONG"
+                          : "SHORT"
+                        : pos.positionSide}
+                    </td>
+                    <td className="px-2 py-1">{fmt(pos.positionAmt, 4)}</td>
+                    <td className="px-2 py-1">{fmt(pos.entryPrice, 4)}</td>
+                    <td className="px-2 py-1">{fmt(pos.markPrice, 4)}</td>
+                    <td className="px-2 py-1">{fmt(pos.notional, 4)}</td>
+                    <td className="px-2 py-1">{pos.leverage}</td>
+                    <td className={`px-2 py-1 ${Number(pos.upnl) >= 0 ? 'text-primary2' : 'text-warningcolor'}`}>
+                      {fmt(pos.upnl, 4)}
+                    </td>
+                    <td className="px-2 py-1">{fmt(pos.realizedPnl, 4)}</td>
+                    <td className="px-2 py-1">{fmt(pos.isolatedMarginBalance, 4)}</td>
+                    <td className="px-2 py-1">{fmt(pos.maintenanceMargin, 4)}</td>
+                    <td className="px-2 py-1">{pos.liquidationPrice === null ? "-" : fmt(pos.liquidationPrice, 4)}</td>
+                    <td className="px-2 py-1">
+                      {pos.marginMode || (pos.cross === true ? "Cross" : pos.cross === false ? "Isolated" : "-")}
+                    </td>
+                    <td className="px-2 py-1">{fmtTime(pos.updateTime)}</td>
+                    <td className="px-2 py-1">
+                      <div className="flex gap-1">
+                        <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
+                        <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
+                        <button className="border border-primary2 hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
+                        <button className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Close</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={16} className="text-center py-8 text-gray-400">
+                    No positions.
                   </td>
                 </tr>
-              ))
+              )
             ) : (
               <tr>
                 <td colSpan={16} className="text-center py-8 text-gray-400">
-                  No positions.
+                  Please log in to view your positions.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      {/* Show raw data from server or logged out message 
-      <div className="mt-4 bg-black/60 text-xs text-green-300 p-2 rounded">
-        <div className="mb-1 font-bold">
-          {token ? "Raw positions data from server:" : "Debugger"}
-        </div>
-        <pre className="whitespace-pre-wrap break-all">
-          {token
-            ? (rawPositions ? JSON.stringify(rawPositions, null, 2) : "Loading...")
-            : "logged out"}
-        </pre>
-      </div>
-      */}
     </div>
   );
 };

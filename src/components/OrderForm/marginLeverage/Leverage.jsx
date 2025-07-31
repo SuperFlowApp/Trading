@@ -4,7 +4,9 @@ import Button from '../../CommonUIs/Button';
 import NativeSlider from '../../CommonUIs/slider';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import '../../../components/CommonUIs/slider.css';
-import { getAuthKey } from '../../../utils/authKeyStorage.jsx';
+
+// Import AuthKey context hook
+import { useAuthKey } from '../../../contexts/AuthKeyContext';
 
 // Import Zustand stores
 import { useZustandStore } from '../../../Zustandstore/useStore';
@@ -14,14 +16,14 @@ import { marketsData } from '../../../Zustandstore/marketsDataStore';
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
   const [leverage, setLeverage] = useState(1);
-  const [confirmedLeverage, setConfirmedLeverage] = useState(1); // <-- new state
+  const [confirmedLeverage, setConfirmedLeverage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [blink, setBlink] = useState(""); // "success" | "error" | ""
+  const [blink, setBlink] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
   // Zustand selectors
   const currentNotional = useZustandStore(s => s.currentNotional);
-  const selectedSymbol = orderFormStore(s => s.OrderFormState.symbol); // e.g. "BTCUSDT"
+  const selectedSymbol = orderFormStore(s => s.OrderFormState.symbol);
   const allMarketData = marketsData(s => s.allMarketData);
 
   // Find market for selected symbol
@@ -59,7 +61,8 @@ export default function LeveragePanel() {
     });
   }, [maxLeverage]);
 
-  const authKey = getAuthKey();
+  // Use authKey from context
+  const { authKey } = useAuthKey();
 
   // Modal content style if not connected
   const modalStyle = !authKey

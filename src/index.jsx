@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp';
 import Navbar from './components/navbar';
 import CommingSoon from './components/CommonUIs/CommingSoon';
+import { AuthKeyProvider } from './contexts/AuthKeyContext'; // <-- use provider
 
 import './components/index.css';
 import './components/ant-overrides.css';
@@ -20,8 +21,10 @@ function CurrentPage() {
 function RootApp() {
   return (
     <StrictMode>
-      <Navbar />
-      <CurrentPage />
+      <AuthKeyProvider>
+        <Navbar />
+        <CurrentPage />
+      </AuthKeyProvider>
     </StrictMode>
   );
 }

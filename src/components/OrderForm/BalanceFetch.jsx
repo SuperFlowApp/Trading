@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
-import { getAuthKey, setAuthKey } from "../../utils/authKeyStorage";
+import React, { useEffect, useState } from "react";
+import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context
 import { formatPrice } from '../../utils/priceFormater';
 import { selectedPairStore } from "../../Zustandstore/userOrderStore";
 
 function isTokenValid(token) {
-  // Example: JWT expiration check
   if (!token) return false;
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -15,47 +14,31 @@ function isTokenValid(token) {
 }
 
 const BalanceFetch = ({ onBalance }) => {
+  const { authKey } = useAuthKey(); // <-- get authKey from context
   const [balance, setBalance] = useState(0.0);
   const [currentPosition, setCurrentPosition] = useState(0.0);
-  const [token, setToken] = useState(getAuthKey());
-  const [positionNotFound, setPositionNotFound] = useState(false); // NEW
-  const tokenRef = useRef(token);
+  const [positionNotFound, setPositionNotFound] = useState(false);
 
   // Zustand store for selected pair
   const selectedPair = selectedPairStore((state) => state.selectedPair);
 
-  // Poll for authKey changes in localStorage
-  useEffect(() => {
-    const pollAuthKey = setInterval(() => {
-      const currentToken = getAuthKey();
-      if (currentToken !== tokenRef.current) {
-        tokenRef.current = currentToken;
-        setToken(currentToken);
-      }
-    }, 1000); // Check every second
-
-    return () => clearInterval(pollAuthKey);
-  }, []);
-
-  // Listen to authKeyChanged event
-  useEffect(() => {
-    const handleAuthKeyChange = () => {
-      const currentToken = getAuthKey();
-      tokenRef.current = currentToken;
-      setToken(currentToken);
-    };
-    window.addEventListener("authKeyChanged", handleAuthKeyChange);
-    return () => window.removeEventListener("authKeyChanged", handleAuthKeyChange);
-  }, []);
-
-  // Fetch balance and current position when token or selectedPair changes or every 5s if valid
+  // Fetch balance and current position when authKey or selectedPair changes or every 5s if valid
   useEffect(() => {
     let intervalId;
 
-    const fetchBalanceAndPosition = () => {
-      if (positionNotFound) return; // NEW: Stop if 404 previously received
+    // Reset state on logout
+    if (!authKey) {
+      setBalance(0.0);
+      setCurrentPosition(0.0);
+      setPositionNotFound(false);
+      onBalance && onBalance(0.0);
+      return;
+    }
 
-      if (!token || !isTokenValid(token)) {
+    const fetchBalanceAndPosition = () => {
+      if (positionNotFound) return;
+
+      if (!authKey || !isTokenValid(authKey)) {
         setBalance(0.0);
         setCurrentPosition(0.0);
         onBalance && onBalance(0.0);
@@ -67,12 +50,11 @@ const BalanceFetch = ({ onBalance }) => {
         method: 'GET',
         headers: {
           accept: 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authKey}`,
         },
       })
         .then(async res => {
           if (res.status === 401) {
-            setAuthKey(null);
             setBalance(0.0);
             onBalance && onBalance(0.0);
             return;
@@ -104,45 +86,38 @@ const BalanceFetch = ({ onBalance }) => {
         method: 'GET',
         headers: {
           accept: 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authKey}`,
         },
       })
         .then(async res => {
           if (res.status === 401) {
-            setAuthKey(null);
             setCurrentPosition(0.0);
             return;
           }
           if (res.status === 404) {
             setCurrentPosition(0.0);
-            setPositionNotFound(true); // NEW: Stop future fetches
+            setPositionNotFound(true);
             return;
           }
           const data = await res.json();
-          // Try to extract position amount from API response
-          // Adjust this logic if your API returns a different schema
           if (data && typeof data.positionAmt !== "undefined") {
             setCurrentPosition(Number(data.positionAmt));
           } else if (data && data.position && typeof data.position.amount !== "undefined") {
             setCurrentPosition(Number(data.position.amount));
           } else {
             setCurrentPosition(0.0);
-            // Optionally log schema error
-            // console.error("Current position response schema error:", data);
           }
         })
         .catch(err => {
           setCurrentPosition(0.0);
-          // Optionally log error
-          // console.error("Current position fetch error:", err);
         });
     };
 
     fetchBalanceAndPosition(); // Initial fetch
-    intervalId = setInterval(fetchBalanceAndPosition, 5000); // Poll every 5 seconds
+    intervalId = setInterval(fetchBalanceAndPosition, 5000);
 
     return () => clearInterval(intervalId);
-  }, [token, onBalance, selectedPair, positionNotFound]); // Add positionNotFound to deps
+  }, [authKey, onBalance, selectedPair, positionNotFound]);
 
   return (
     <div>

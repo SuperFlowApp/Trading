@@ -3,7 +3,7 @@ import Modal from '../../CommonUIs/modal/modal';
 import Button from '../../CommonUIs/Button';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js';
-import { getAuthKey } from '../../../utils/authKeyStorage.jsx';
+import { useAuthKey } from '../../../contexts/AuthKeyContext';
 
 export default function PositionMode() {
   const [open, setOpen] = useState(false);
@@ -14,7 +14,7 @@ export default function PositionMode() {
   const [confirmedPositionMode, setConfirmedPositionMode] = useState("ONE_WAY_MODE"); // <-- new state
 
   const selectedPair = selectedPairStore(s => s.selectedPair);
-  const authKey = getAuthKey();
+  const { authKey } = useAuthKey();
 
   // Modal content style if not connected
   const modalStyle = !authKey

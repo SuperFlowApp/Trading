@@ -14,8 +14,8 @@ import TifSelector from './Ui/TifSelector.jsx';
 import BalanceFetch from './BalanceFetch';
 import { InputWithButton, InputWithDropDown, PercentageInput } from '../CommonUIs/inputs/inputs.jsx';
 import { useOrderPlacer } from './OrderPlacer';
-import { getAuthKey } from '../../utils/authKeyStorage.jsx';
 import LoginPanel from '../Login/LoginPanel'; // Import the login modal
+import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
 
 function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
@@ -226,7 +226,8 @@ function LimitOrderForm({ onCurrencyChange }) {
     });
   }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormStore]);
 
-  const authKey = getAuthKey();
+  const { authKey } = useAuthKey(); // <-- get authKey from context
+
   const orderButtonText = !authKey
     ? 'connect'
     : side === 'buy'

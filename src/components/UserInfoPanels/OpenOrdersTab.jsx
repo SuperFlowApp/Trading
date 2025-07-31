@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { getAuthKey, setAuthKey } from "../../utils/authKeyStorage";
+import React, { useEffect, useState } from "react";
+import { useAuthKey } from "../../contexts/AuthKeyContext";
 
 function isTokenValid(token) {
   if (!token) return false;
@@ -12,52 +12,28 @@ function isTokenValid(token) {
 }
 
 const OpenOrdersTab = () => {
+  const { authKey } = useAuthKey(); // Use context
   const [orders, setOrders] = useState([]);
-  const [token, setToken] = useState(getAuthKey());
-  const tokenRef = useRef(token);
 
-  // Poll for authKey changes in localStorage
+  // Fetch open orders when authKey changes or every 5s if valid
   useEffect(() => {
-    const pollAuthKey = setInterval(() => {
-      const currentToken = getAuthKey();
-      if (currentToken !== tokenRef.current) {
-        tokenRef.current = currentToken;
-        setToken(currentToken);
-      }
-    }, 1000);
-    return () => clearInterval(pollAuthKey);
-  }, []);
+    if (!authKey || !isTokenValid(authKey)) {
+      setOrders([]);
+      return;
+    }
 
-  // Listen to authKeyChanged event
-  useEffect(() => {
-    const handleAuthKeyChange = () => {
-      const currentToken = getAuthKey();
-      tokenRef.current = currentToken;
-      setToken(currentToken);
-    };
-    window.addEventListener("authKeyChanged", handleAuthKeyChange);
-    return () => window.removeEventListener("authKeyChanged", handleAuthKeyChange);
-  }, []);
-
-  // Fetch open orders when token changes or every 5s if valid
-  useEffect(() => {
     let intervalId;
 
     const fetchOrders = () => {
-      if (!token || !isTokenValid(token)) {
-        setOrders([]);
-        return;
-      }
       fetch('https://fastify-serverless-function-rimj.onrender.com/api/open-orders', {
         method: 'GET',
         headers: {
           accept: 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authKey}`,
         },
       })
         .then(async res => {
           if (res.status === 401) {
-            setAuthKey(null);
             setOrders([]);
             return;
           }
@@ -74,7 +50,18 @@ const OpenOrdersTab = () => {
     intervalId = setInterval(fetchOrders, 5000); // Poll every 5 seconds
 
     return () => clearInterval(intervalId);
-  }, [token]);
+  }, [authKey]);
+
+  // Show login state
+  if (!authKey || !isTokenValid(authKey)) {
+    return (
+      <div>
+        <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs mb-2">
+          Please log in to view open orders.
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div>
