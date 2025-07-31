@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { getAuthKey } from '../../utils/authKeyStorage.jsx';
 import { formatPrice } from '../../utils/priceFormater.js';
 
@@ -12,39 +12,29 @@ function AccountInfoPanel() {
     const [accountInfoError, setAccountInfoError] = useState('');
     const [accountInfo, setAccountInfo] = useState(null);
     const [token, setToken] = useState(getAuthKey());
-    const tokenRef = useRef(token);
 
-    // Poll for authKey changes in localStorage
+    // Listen for authKey changes (multi-tab support)
     useEffect(() => {
-        const pollAuthKey = setInterval(() => {
-            const currentToken = getAuthKey();
-            if (currentToken !== tokenRef.current) {
-                tokenRef.current = currentToken;
-                setToken(currentToken);
-            }
-        }, 1000); // Check every second
-
-        return () => clearInterval(pollAuthKey);
-    }, []);
-
-    // Listen to authKeyChanged event
-    useEffect(() => {
-        const handleAuthKeyChange = () => {
-            const currentToken = getAuthKey();
-            tokenRef.current = currentToken;
-            setToken(currentToken);
-        };
-        window.addEventListener("authKeyChanged", handleAuthKeyChange);
-        return () => window.removeEventListener("authKeyChanged", handleAuthKeyChange);
-    }, []);
-
-    // Fetch account info when token changes
-    useEffect(() => {
-        const fetchAccountInfo = async () => {
-            if (!token) {
+        const handler = () => {
+            const newToken = getAuthKey();
+            setToken(newToken);
+            if (!newToken) {
                 setAccountInfo(null);
-                return;
+                setAccountInfoError('');
             }
+        };
+        window.addEventListener("authKeyChanged", handler);
+        return () => window.removeEventListener("authKeyChanged", handler);
+    }, []);
+
+    // Fetch account info when token changes and token is present
+    useEffect(() => {
+        if (!token) {
+            setAccountInfo(null);
+            setAccountInfoError('');
+            return;
+        }
+        const fetchAccountInfo = async () => {
             setAccountInfoError('');
             try {
                 const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { notification, message } from 'antd';
 import 'antd/dist/reset.css';
 import LoginPanel from "./Login/LoginPanel";
 import { getAuthKey } from "../utils/authKeyStorage";
-import Button from "./CommonUIs/Button"; // <-- Add this import
-import Modal from "./CommonUIs/modal/modal"; // Use your native modal
-import DebuggerPanel from "../debugger"; // Add this import
+import Button from "./CommonUIs/Button";
+import Modal from "./CommonUIs/modal/modal"; 
+import DebuggerPanel from "../debugger";
+import { logout } from "../utils/logout"; 
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -42,8 +42,8 @@ function Navbar() {
   // Listen for authKey changes (multi-tab support)
   useEffect(() => {
     const handler = () => setAccessToken(getAuthKey());
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    window.addEventListener("authKeyChanged", handler);
+    return () => window.removeEventListener("authKeyChanged", handler);
   }, []);
 
   // Listen for clicks outside dropdown to close it
@@ -101,11 +101,11 @@ function Navbar() {
   };
 
   const handleDisconnect = () => {
-    localStorage.clear();
-    setAccessToken(null);
-    setDropdownOpen(false);
-    message.info("Disconnected");
-    window.dispatchEvent(new Event("authKeyChanged")); // <-- Add this line
+    logout({
+      onLogout: () => {
+        setDropdownOpen(false);
+      }
+    });
   };
 
   return (

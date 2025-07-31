@@ -18,6 +18,7 @@ const BalanceFetch = ({ onBalance }) => {
   const [balance, setBalance] = useState(0.0);
   const [currentPosition, setCurrentPosition] = useState(0.0);
   const [token, setToken] = useState(getAuthKey());
+  const [positionNotFound, setPositionNotFound] = useState(false); // NEW
   const tokenRef = useRef(token);
 
   // Zustand store for selected pair
@@ -52,6 +53,8 @@ const BalanceFetch = ({ onBalance }) => {
     let intervalId;
 
     const fetchBalanceAndPosition = () => {
+      if (positionNotFound) return; // NEW: Stop if 404 previously received
+
       if (!token || !isTokenValid(token)) {
         setBalance(0.0);
         setCurrentPosition(0.0);
@@ -110,6 +113,11 @@ const BalanceFetch = ({ onBalance }) => {
             setCurrentPosition(0.0);
             return;
           }
+          if (res.status === 404) {
+            setCurrentPosition(0.0);
+            setPositionNotFound(true); // NEW: Stop future fetches
+            return;
+          }
           const data = await res.json();
           // Try to extract position amount from API response
           // Adjust this logic if your API returns a different schema
@@ -134,7 +142,7 @@ const BalanceFetch = ({ onBalance }) => {
     intervalId = setInterval(fetchBalanceAndPosition, 5000); // Poll every 5 seconds
 
     return () => clearInterval(intervalId);
-  }, [token, onBalance, selectedPair]);
+  }, [token, onBalance, selectedPair, positionNotFound]); // Add positionNotFound to deps
 
   return (
     <div>
