@@ -1,6 +1,7 @@
 export function formatPrice(value) {
   if (value == null || isNaN(value)) return '';
   const num = Number(value);
+  if (num === 0) return '0.0';
   let decimals = 0;
   if (num < 1) decimals = 4;
   else if (num < 10) decimals = 3;

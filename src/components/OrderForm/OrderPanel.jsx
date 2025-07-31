@@ -76,10 +76,17 @@ function LimitOrderForm({ onCurrencyChange }) {
       return;
     }
 
-    // Always calculate notional as price * size (amount)
-    const notional = numAmount * numPrice;
+    let baseSize;
+    if (selectedCurrency === pairDetails.base) {
+      baseSize = numAmount;
+    } else {
+      // If amount is in quote, convert to base
+      baseSize = numAmount / numPrice;
+    }
+
+    const notional = numPrice * baseSize;
     setNotional(notional);
-  }, [amount, price, setNotional]);
+  }, [amount, price, selectedCurrency, setNotional, pairDetails.base]);
 
   const token = ""; // <-- Replace with your actual token logic
 
