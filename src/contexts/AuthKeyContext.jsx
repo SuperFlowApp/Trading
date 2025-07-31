@@ -1,9 +1,19 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 export const AuthKeyContext = createContext();
 
 export function AuthKeyProvider({ children }) {
-  const [authKey, setAuthKey] = useState(null); // Default value
+  // Initialize from localStorage if available
+  const [authKey, setAuthKey] = useState(() => localStorage.getItem("authKey") || null);
+
+  // Save authKey to localStorage whenever it changes
+  useEffect(() => {
+    if (authKey) {
+      localStorage.setItem("authKey", authKey);
+    } else {
+      localStorage.removeItem("authKey");
+    }
+  }, [authKey]);
 
   return (
     <AuthKeyContext.Provider value={{ authKey, setAuthKey }}>
