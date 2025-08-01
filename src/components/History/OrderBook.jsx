@@ -164,8 +164,12 @@ const OrderBook = () => {
 
   // Helper to mark new prices and calculate cumulative totals
   const addTotals = (rows, reverse = false, prevPricesSet = new Set()) => {
-    // Sort rows: bids descending, asks ascending
-    const sortedRows = reverse ? [...rows].sort((a, b) => b.price - a.price) : [...rows].sort((a, b) => a.price - b.price);
+    // For asks (sell), always sort ascending (cheapest first)
+    // For bids (buy), always sort descending (highest first)
+    const sortedRows = reverse
+      ? [...rows].sort((a, b) => b.price - a.price) // bids: highest first
+      : [...rows].sort((a, b) => a.price - b.price); // asks: cheapest first
+
     // Only show top 10
     const limitedRows = sortedRows.slice(0, 10);
     // Find max size for progress bar
@@ -176,7 +180,7 @@ const OrderBook = () => {
       const isNew = !prevPricesSet.has(r.price);
       return {
         ...r,
-        total: r.price * r.size, // <-- Total is Price * Size
+        total: r.price * r.size,
         progress,
         isNew,
       };
