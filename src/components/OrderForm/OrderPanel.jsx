@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { useZustandStore } from '../../Zustandstore/useStore.js';
-import{ selectedPairStore ,orderFormStore } from '../../Zustandstore/userOrderStore.js';
+import { selectedPairStore, orderFormStore } from '../../Zustandstore/userOrderStore.js';
 
 import LeveragePanel from './marginLeverage/Leverage.jsx';
 import MarginMode from './marginLeverage/MarginMode.jsx';
@@ -45,6 +45,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   const [timeInForce, setTimeInForce] = useState('GTC');
 
   const OrderBookClickedPrice = useZustandStore(s => s.OrderBookClickedPrice); // <-- Read from Zustand
+  const OrderFormState = orderFormStore(s => s.OrderFormState);
   const setOrderFormStore = orderFormStore(s => s.setOrderFormState);
   const setNotional = useZustandStore(s => s.setNotional);
   const currentNotional = useZustandStore(s => s.currentNotional);
@@ -55,7 +56,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       setPrice(OrderBookClickedPrice);
     }
   }, [OrderBookClickedPrice]);
-  
+
   // Reset price and amount when selectedPair changes (new pair detected/selected)
   useEffect(() => {
     setPrice('');
@@ -98,20 +99,8 @@ function LimitOrderForm({ onCurrencyChange }) {
     setOrderError('');
     setOrderSuccess('');
 
-    // Static order body
-    const requestBody = {
-      symbol: "BTCUSDT",
-      type: "LIMIT",
-      side: "BUY",
-      positionSide: "BOTH",
-      quantity: 0.1,
-      price: 111903,
-      timeInForce: "GTC",
-      orderRespType: "ACK",
-      params: {
-        additionalProp1: {},
-      },
-    };
+    // Use Zustand store for request body
+    const requestBody = { ...OrderFormState };
 
     try {
       const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
@@ -267,18 +256,31 @@ function LimitOrderForm({ onCurrencyChange }) {
 
   // Update order form state on relevant changes
   useEffect(() => {
+    let baseQuantity = 0;
+    const amt = parseFloat(amount);
+    const prc = parseFloat(price) || priceMidpoint;
+
+    if (selectedCurrency === pairDetails.base) {
+      baseQuantity = isNaN(amt) ? 0 : amt;
+    } else {
+      baseQuantity = (isNaN(amt) || !prc || isNaN(prc)) ? 0 : amt / prc;
+    }
+
+    // Round to 5 decimals
+    baseQuantity = Number(baseQuantity.toFixed(5));
+
     setOrderFormStore({
       symbol: selectedPair,
       type: market.toUpperCase(),
       side: side.toUpperCase(),
       positionSide: 'BOTH',
-      quantity: parseFloat(amount) || 0,
+      quantity: baseQuantity, // always base, rounded to 5 decimals
       price: parseFloat(price) || 0,
       timeInForce,
       orderRespType: 'ACK',
       params: {},
     });
-  }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormStore]);
+  }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormStore, selectedCurrency, priceMidpoint]);
 
 
   const orderButtonText = !authKey
