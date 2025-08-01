@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Positions from './PositionsTab';
-import OpenOrdersTab from './OpenOrdersTab'; // <-- Import the OpenOrdersTab
+import OpenOrdersTab from './OpenOrders/OpenOrdersTab'; // <-- Import the OpenOrdersTab
 import Tab from '../CommonUIs/tab'; // Import the Tab component
 
 function PositionsPanel() {

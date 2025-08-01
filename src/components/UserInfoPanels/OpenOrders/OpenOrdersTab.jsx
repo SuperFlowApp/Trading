@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useAuthKey } from "../../contexts/AuthKeyContext";
-import { formatPrice } from "../../utils/priceFormater";
+import { useAuthKey } from "../../../contexts/AuthKeyContext";
+import { formatPrice } from "../../../utils/priceFormater";
 
 const priceKeys = ["price", "notional", "quantity", "filled", "remaining"];
 
@@ -120,7 +120,34 @@ const OpenOrdersTab = () => {
                       <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
                       <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
                       <button className="border border-primary2 hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
-                      <button className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Close</button>
+                      <button
+                        className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs"
+                        onClick={async () => {
+                          const id = order.orderId;
+                          const symbol = order.symbol;
+                          console.log("Cancel request:", { id, symbol });
+                          try {
+                            const res = await fetch(
+                              `https://fastify-serverless-function-rimj.onrender.com/api/cancel-order?id=${id}&symbol=${symbol}`,
+                              {
+                                method: "DELETE",
+                                headers: {
+                                  accept: "application/json",
+                                  Authorization: `Bearer ${authKey}`,
+                                },
+                              }
+                            );
+                            const data = await res.json();
+                            console.log("Cancel response:", data);
+                            // Optionally refresh orders after cancel
+                            setOrders(orders => orders.filter(o => o.orderId !== id));
+                          } catch (err) {
+                            console.error("Cancel order error:", err);
+                          }
+                        }}
+                      >
+                        Cancel
+                      </button>
                     </div>
                   </td>
                 </tr>

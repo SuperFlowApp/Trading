@@ -45,7 +45,6 @@ function AccountInfoPanel() {
                 const data = await res.json();
                 if (res.status === 401) {
                     setAuthKey(null); // <-- log out on 401
-                    setAccountInfoError('Session expired. Please log in again.');
                     setAccountInfo(null);
                 } else if (!res.ok) {
                     setAccountInfoError(data?.error);
