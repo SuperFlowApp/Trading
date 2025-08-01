@@ -28,6 +28,7 @@
     "react": "^18.3.1",
     "react-apexcharts": "^1.7.0",
     "react-dom": "^18.3.1",
+    "react-draggable": "^4.5.0",
     "react-modal": "^3.16.3",
     "react-sparklines": "^1.7.0",
     "reconnecting-websocket": "^4.4.0",

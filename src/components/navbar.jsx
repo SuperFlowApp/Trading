@@ -3,8 +3,8 @@ import 'antd/dist/reset.css';
 import LoginPanel from "./Login/LoginPanel";
 import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import context
 import Button from "./CommonUIs/Button";
-import Modal from "./CommonUIs/modal/modal"; 
 import DebuggerPanel from "../debugger";
+import Draggable from "react-draggable"; // <-- add this import
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -225,15 +225,28 @@ function Navbar() {
         />
       )}
 
-      {/* Debugger Modal using native modal */}
+      {/* Debugger Panel as draggable */}
       {showDebugger && (
-        <Modal
-          open={showDebugger}
-          onClose={() => setShowDebugger(false)}
-          width={600}
-        >
-          <DebuggerPanel />
-        </Modal>
+        <Draggable handle=".debugger-drag-handle">
+          <div
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] bg-backgrounddark text-white rounded-lg shadow-2xl border border-primary2 w-[600px] max-w-[95vw] max-h-[80vh] flex flex-col"
+            style={{ minHeight: "400px" }}
+          >
+            {/* Drag handle */}
+            <div className="debugger-drag-handle cursor-move bg-primary2 px-4 py-2 rounded-t-lg flex items-center justify-between">
+              <span className="font-bold text-lg">Debugger</span>
+              <button
+                className="text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded transition"
+                onClick={() => setShowDebugger(false)}
+              >
+                Close
+              </button>
+            </div>
+            <div className="overflow-auto p-4 flex-1">
+              <DebuggerPanel />
+            </div>
+          </div>
+        </Draggable>
       )}
     </>
   );
