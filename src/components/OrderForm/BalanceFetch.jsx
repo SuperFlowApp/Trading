@@ -66,8 +66,11 @@ const BalanceFetch = ({ onBalance }) => {
             data.balances.USDT &&
             typeof data.balances.USDT.free !== 'undefined'
           ) {
-            setBalance(data.balances.USDT.free);
-            onBalance && onBalance(data.balances.USDT.free);
+            // Only update and notify parent if balance changed
+            if (data.balances.USDT.free !== balance) {
+              setBalance(data.balances.USDT.free);
+              onBalance && onBalance(data.balances.USDT.free);
+            }
           } else {
             setBalance(0.0);
             onBalance && onBalance(0.0);
