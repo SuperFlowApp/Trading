@@ -11,7 +11,7 @@ function normalizeZero(val) {
 function AccountInfoPanel() {
     const [accountInfoError, setAccountInfoError] = useState('');
     const [accountInfo, setAccountInfo] = useState(null);
-    const { authKey, setAuthKey } = useAuthKey(); // <-- get setAuthKey
+    const { authKey, setAuthKey } = useAuthKey();
 
     // Listen for authKey changes (multi-tab support)
     useEffect(() => {
@@ -44,21 +44,21 @@ function AccountInfoPanel() {
                 });
                 const data = await res.json();
                 if (res.status === 401) {
-                    setAuthKey(null); // <-- log out on 401
+                    setAuthKey(null);
                     setAccountInfo(null);
                 } else if (!res.ok) {
-                    setAccountInfoError(data?.error);
                     setAccountInfo(null);
+                    // Do not set error message for server/network errors
                 } else {
                     setAccountInfo(data);
                 }
             } catch (e) {
-                setAccountInfoError('Network error');
                 setAccountInfo(null);
+                // Do not set error message for network errors
             }
         };
         fetchAccountInfo();
-    }, [authKey, setAuthKey]); // <-- add setAuthKey to deps
+    }, [authKey, setAuthKey]);
 
     // Helper: get first position (if any)
     const position = accountInfo?.positions?.[0];
@@ -94,9 +94,10 @@ function AccountInfoPanel() {
     return (
         <>
             <div className="flex flex-col bg-backgroundmid rounded-md p-2 w-[100%] overflow-hidden">
-                {accountInfoError && (
+                {/* Do not show error messages */}
+                {/* {accountInfoError && (
                     <div className="text-red-400 text-xs">{accountInfoError}</div>
-                )}
+                )} */}
                 <div className="text-xs flex flex-col gap-2">
                     {/* Top Section */}
                     <div className="flex justify-between">
