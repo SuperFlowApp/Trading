@@ -76,24 +76,10 @@ const OpenOrdersTab = () => {
     return () => clearInterval(intervalId);
   }, [authKey]);
 
-  // Show login state
-  if (!authKey || !isTokenValid(authKey)) {
-    return (
-      <div>
-        <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs mb-2">
-          Please log in to view open orders.
-        </span>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs mb-2">
-        Open Orders
-      </span>
-      <div className="overflow-x-auto rounded bg-gray-900">
-        <table className="min-w-full text-xs text-white">
+    <div className="w-full">
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-xs text-liquidwhite">
           <thead>
             <tr>
               {columns.map(col => (
@@ -105,9 +91,15 @@ const OpenOrdersTab = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.length === 0 ? (
+            {!authKey || !isTokenValid(authKey) ? (
               <tr>
-                <td colSpan={columns.length + 1} className="text-center py-4 text-gray-400">
+                <td colSpan={columns.length + 1} className="text-center py-8 text-gray-400">
+                  Please log in to view open orders.
+                </td>
+              </tr>
+            ) : orders.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length + 1} className="text-center py-8 text-gray-400">
                   No open orders.
                 </td>
               </tr>
