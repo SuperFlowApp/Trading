@@ -93,59 +93,33 @@ function LimitOrderForm({ onCurrencyChange }) {
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState('');
 
-  const placeOrder = async ({
-    selectedPair,
-    market,
-    side,
-    amount,
-    price,
-    priceMidpoint,
-    timeInForce = 'GTC',
-    onSuccess,
-    onError,
-    resetAmount,
-    resetSlider,
-    setBlinkClass,
-  }) => {
-    if (!selectedPair || !amount) {
-      setOrderError('Please fill all fields.');
-      setBlinkClass && setBlinkClass("blink-error");
-      setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
-      return;
-    }
-
-    const finalPrice = market === 'market' ? priceMidpoint?.toFixed(1) : price;
-
-    if (!finalPrice) {
-      setOrderError('Price is required.');
-      return;
-    }
-
+  const placeOrder = async () => {
     setOrderLoading(true);
     setOrderError('');
     setOrderSuccess('');
 
+    // Static order body
     const requestBody = {
-      symbol: selectedPair,
-      type: market.toUpperCase(),
-      side: side.toUpperCase(),
-      positionSide: 'BOTH',
-      quantity: parseFloat(amount),
-      price: parseFloat(finalPrice),
-      timeInForce,
-      orderRespType: 'ACK',
+      symbol: "BTCUSDT",
+      type: "LIMIT",
+      side: "BUY",
+      positionSide: "BOTH",
+      quantity: 0.1,
+      price: 111903,
+      timeInForce: "GTC",
+      orderRespType: "ACK",
       params: {
         additionalProp1: {},
       },
     };
 
     try {
-      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
+      const response = await fetch('http://localhost:3001/api/order', {
         method: 'POST',
         headers: {
           accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${authKey}`, // <-- use authKey here
+          Authorization: `Bearer ${authKey}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -167,16 +141,12 @@ function LimitOrderForm({ onCurrencyChange }) {
 
       const data = typeof errorData === 'object' ? errorData : { orderId: 'unknown' };
       setOrderSuccess(`Order placed! Order ID: ${data.orderId}`);
-      resetAmount && resetAmount('');
-      resetSlider && resetSlider(0);
       setBlinkClass && setBlinkClass("blink-success");
       setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
-      onSuccess && onSuccess(data);
     } catch (err) {
       setOrderError(err.message);
       setBlinkClass && setBlinkClass("blink-error");
       setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
-      onError && onError(err);
     } finally {
       setOrderLoading(false);
     }
@@ -430,21 +400,10 @@ function LimitOrderForm({ onCurrencyChange }) {
         block
         onClick={() => {
           if (!authKey) {
-            setLoginOpen(true); // Open login modal if not connected
+            setLoginOpen(true);
             return;
           }
-          placeOrder({
-            selectedPair,
-            market,
-            side,
-            amount,
-            price,
-            priceMidpoint,
-            timeInForce,
-            resetAmount: setAmount,
-            resetSlider: setSliderValue,
-            setBlinkClass,
-          });
+          placeOrder(); // No arguments needed
         }}
         disabled={loading || orderLoading}
       >

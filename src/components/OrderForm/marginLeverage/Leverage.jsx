@@ -13,6 +13,30 @@ import { useZustandStore } from '../../../Zustandstore/useStore';
 import { orderFormStore } from '../../../Zustandstore/userOrderStore';
 import { marketsData } from '../../../Zustandstore/marketsDataStore';
 
+// Store leverage per symbol in localStorage
+function getStoredLeverage(symbol) {
+  if (!symbol) return 1;
+  try {
+    const data = JSON.parse(localStorage.getItem("symbolLeverage") || "{}");
+    return data[symbol] || 1;
+  } catch {
+    return 1;
+  }
+}
+
+function setStoredLeverage(symbol, value) {
+  if (!symbol) return;
+  try {
+    const data = JSON.parse(localStorage.getItem("symbolLeverage") || "{}");
+    data[symbol] = value;
+    localStorage.setItem("symbolLeverage", JSON.stringify(data));
+  } catch {}
+}
+
+function clearStoredLeverage() {
+  localStorage.removeItem("symbolLeverage");
+}
+
 export default function LeveragePanel() {
   const [open, setOpen] = useState(false);
   const [leverage, setLeverage] = useState(1);
@@ -61,15 +85,37 @@ export default function LeveragePanel() {
     });
   }, [maxLeverage]);
 
+  // Reset leverage and confirmedLeverage to 1X when selectedSymbol changes
+  useEffect(() => {
+    setLeverage(1);
+    setConfirmedLeverage(1);
+  }, [selectedSymbol]);
+
   // Use authKey from context
   const { authKey } = useAuthKey();
+
+  // Clear leverage store if logged out
+  useEffect(() => {
+    if (!authKey) {
+      clearStoredLeverage();
+      setLeverage(1);
+      setConfirmedLeverage(1);
+    }
+  }, [authKey]);
+
+  // On selectedSymbol change, load stored leverage or default to 1
+  useEffect(() => {
+    const stored = getStoredLeverage(selectedSymbol);
+    setLeverage(stored);
+    setConfirmedLeverage(stored);
+  }, [selectedSymbol]);
 
   // Modal content style if not connected
   const modalStyle = !authKey
     ? { opacity: 0.5, pointerEvents: "none", filter: "grayscale(1)" }
     : {};
 
-  // Handle confirm/connect button
+  // When user confirms leverage, store it for the symbol
   const handleConfirm = async () => {
     setErrorMsg("");
     if (!authKey) {
@@ -95,6 +141,7 @@ export default function LeveragePanel() {
       if (res.status === 200) {
         setBlink("success");
         setConfirmedLeverage(leverage); // <-- update only on success
+        setStoredLeverage(selectedSymbol, leverage); // <-- store leverage
         setTimeout(() => {
           setBlink("");
           setOpen(false);

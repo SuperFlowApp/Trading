@@ -11,7 +11,7 @@ function normalizeZero(val) {
 function AccountInfoPanel() {
     const [accountInfoError, setAccountInfoError] = useState('');
     const [accountInfo, setAccountInfo] = useState(null);
-    const { authKey } = useAuthKey();
+    const { authKey, setAuthKey } = useAuthKey(); // <-- get setAuthKey
 
     // Listen for authKey changes (multi-tab support)
     useEffect(() => {
@@ -43,7 +43,11 @@ function AccountInfoPanel() {
                     }
                 });
                 const data = await res.json();
-                if (!res.ok) {
+                if (res.status === 401) {
+                    setAuthKey(null); // <-- log out on 401
+                    setAccountInfoError('Session expired. Please log in again.');
+                    setAccountInfo(null);
+                } else if (!res.ok) {
                     setAccountInfoError(data?.error);
                     setAccountInfo(null);
                 } else {
@@ -55,7 +59,7 @@ function AccountInfoPanel() {
             }
         };
         fetchAccountInfo();
-    }, [authKey]);
+    }, [authKey, setAuthKey]); // <-- add setAuthKey to deps
 
     // Helper: get first position (if any)
     const position = accountInfo?.positions?.[0];

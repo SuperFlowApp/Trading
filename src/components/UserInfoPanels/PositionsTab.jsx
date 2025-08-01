@@ -100,12 +100,7 @@ const Positions = () => {
                     </td>
                     <td className="px-2 py-1">{fmtTime(pos.updateTime)}</td>
                     <td className="px-2 py-1">
-                      <div className="flex gap-1">
-                        <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
-                        <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
-                        <button className="border border-primary2 hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
-                        <button className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Close</button>
-                      </div>
+                      {/* Remove the button group from here */}
                     </td>
                   </tr>
                 ))

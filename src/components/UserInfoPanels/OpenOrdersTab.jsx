@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useAuthKey } from "../../contexts/AuthKeyContext";
+import { formatPrice } from "../../utils/priceFormater";
+
+const priceKeys = ["price", "notional", "quantity", "filled", "remaining"];
 
 function isTokenValid(token) {
   if (!token) return false;
@@ -11,8 +14,29 @@ function isTokenValid(token) {
   }
 }
 
+const columns = [
+  { key: "orderId", label: "Order ID" },
+  { key: "symbol", label: "Symbol" },
+  { key: "side", label: "Side" },
+  { key: "type", label: "Type" },
+  { key: "status", label: "Status" },
+  { key: "price", label: "Price" },
+  { key: "quantity", label: "Qty" },
+  { key: "filled", label: "Filled" },
+  { key: "remaining", label: "Remaining" },
+  { key: "notional", label: "Notional" },
+  { key: "timeInForce", label: "TIF" },
+  { key: "timestamp", label: "Created" },
+];
+
+function formatDate(ts) {
+  if (!ts) return "-";
+  const d = new Date(ts);
+  return d.toLocaleString();
+}
+
 const OpenOrdersTab = () => {
-  const { authKey } = useAuthKey(); // Use context
+  const { authKey } = useAuthKey();
   const [orders, setOrders] = useState([]);
 
   // Fetch open orders when authKey changes or every 5s if valid
@@ -66,11 +90,53 @@ const OpenOrdersTab = () => {
   return (
     <div>
       <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs mb-2">
-        Raw Open Orders Data:
+        Open Orders
       </span>
-      <pre className="bg-gray-900 text-white text-xs p-2 rounded overflow-x-auto max-h-96">
-        {JSON.stringify(orders, null, 2)}
-      </pre>
+      <div className="overflow-x-auto rounded bg-gray-900">
+        <table className="min-w-full text-xs text-white">
+          <thead>
+            <tr>
+              {columns.map(col => (
+                <th key={col.key} className="px-2 py-2 border-b border-gray-700 font-semibold text-left">
+                  {col.label}
+                </th>
+              ))}
+              <th className="px-2 py-2 border-b border-gray-700"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length + 1} className="text-center py-4 text-gray-400">
+                  No open orders.
+                </td>
+              </tr>
+            ) : (
+              orders.map(order => (
+                <tr key={order.orderId} className="border-b border-gray-800 hover:bg-gray-800">
+                  {columns.map(col => (
+                    <td key={col.key} className="px-2 py-1">
+                      {col.key === "timestamp"
+                        ? formatDate(order[col.key])
+                        : priceKeys.includes(col.key)
+                          ? formatPrice(order[col.key])
+                          : order[col.key] ?? "-"}
+                    </td>
+                  ))}
+                  <td className="px-2 py-1">
+                    <div className="flex gap-1">
+                      <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
+                      <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
+                      <button className="border border-primary2 hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
+                      <button className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Close</button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
