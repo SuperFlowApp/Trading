@@ -114,7 +114,7 @@ function LimitOrderForm({ onCurrencyChange }) {
     };
 
     try {
-      const response = await fetch('http://localhost:3001/api/order', {
+      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
         method: 'POST',
         headers: {
           accept: 'application/json',

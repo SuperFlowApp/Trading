@@ -16,23 +16,32 @@ const useUnifiedOrderBook = (symbol) => {
       size: parseFloat(size),
     }));
 
-  // Initial REST fetch
+  // Initial REST fetch with polling
   useEffect(() => {
     let active = true;
     setError(null);
 
-    fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
-      .then(res => res.json())
-      .then(data => {
-        if (!active) return;
-        if (data.bids && data.asks) {
-          setBids(formatBook(data.bids));
-          setAsks(formatBook(data.asks));
-        }
-      })
-      .catch(() => setError('REST orderbook fetch failed'));
+    // Polling interval (e.g., every 1500ms)
+    const fetchOrderBook = () => {
+      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
+        .then(res => res.json())
+        .then(data => {
+          if (!active) return;
+          if (data.bids && data.asks) {
+            setBids(formatBook(data.bids));
+            setAsks(formatBook(data.asks));
+          }
+        })
+        .catch(() => setError('REST orderbook fetch failed'));
+    };
 
-    return () => { active = false; };
+    fetchOrderBook(); // Initial fetch
+    const intervalId = setInterval(fetchOrderBook, 1500); // Poll every 1.5s
+
+    return () => {
+      active = false;
+      clearInterval(intervalId);
+    };
   }, [symbol]);
 
   // SSE live updates
