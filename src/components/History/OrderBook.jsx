@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { useZustandStore } from '../../Zustandstore/useStore.js';
 import {selectedPairStore} from '../../Zustandstore/userOrderStore.js'; // <-- import your user input store
+import { formatPrice } from '../../utils/priceFormater.js';
 
 // Custom hook for localhost SSE order book
 const useUnifiedOrderBook = (symbol) => {
@@ -200,7 +201,7 @@ const OrderBook = () => {
     const spreadValue = lowestAsk - highestBid;
     const midpoint = (highestBid + lowestAsk) / 2;
     const spreadPercentage = (spreadValue / midpoint) * 100;
-    return { value: spreadValue, percentage: spreadPercentage };
+    return { value: formatPrice(spreadValue), percentage: spreadPercentage };
   };
 
   const calculatePriceMidpoint = () => {
@@ -259,7 +260,7 @@ const OrderBook = () => {
       {/* Spread Section */}
       <div className="font-bold text-[18px] flex justify-between border border-liquidwhite/50 rounded-lg items-center py-1 px-2 mt-2 mb-3 text-sm font-semibold">
         <div className="text-md">Spread</div>
-        <span className="">{spreadValue !== null ? spreadValue.toFixed(5) : '—'}</span>
+        <span className="">{spreadValue !== null ? spreadValue : '—'}</span>
         <span className="text-xs">
           {spreadPercentage !== null ? `${spreadPercentage.toFixed(5)}%` : '—'}
         </span>
