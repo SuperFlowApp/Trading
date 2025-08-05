@@ -60,6 +60,50 @@ function AccountInfoPanel() {
         fetchAccountInfo();
     }, [authKey, setAuthKey]);
 
+    // Poll for account info every 10 seconds if authKey is present
+    useEffect(() => {
+        if (!authKey) {
+            setAccountInfo(null);
+            setAccountInfoError('');
+            return;
+        }
+
+        let isMounted = true;
+
+        const fetchAccountInfo = async () => {
+            setAccountInfoError('');
+            try {
+                const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
+                    headers: {
+                        'Authorization': `Bearer ${authKey}`,
+                        'accept': 'application/json'
+                    }
+                });
+                const data = await res.json();
+                if (!isMounted) return;
+                if (res.status === 401) {
+                    setAuthKey(null);
+                    setAccountInfo(null);
+                } else if (!res.ok) {
+                    setAccountInfo(null);
+                } else {
+                    setAccountInfo(data);
+                }
+            } catch (e) {
+                if (isMounted) setAccountInfo(null);
+            }
+        };
+
+        fetchAccountInfo(); // initial fetch
+
+        const interval = setInterval(fetchAccountInfo, 2000);
+
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, [authKey, setAuthKey]);
+
     // Helper: get first position (if any)
     const position = accountInfo?.positions?.[0];
 

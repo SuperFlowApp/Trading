@@ -117,7 +117,7 @@ const BalanceFetch = ({ onBalance }) => {
     };
 
     fetchBalanceAndPosition(); // Initial fetch
-    intervalId = setInterval(fetchBalanceAndPosition, 5000);
+    intervalId = setInterval(fetchBalanceAndPosition, 2000);
 
     return () => clearInterval(intervalId);
   }, [authKey, onBalance, selectedPair, positionNotFound]);

@@ -71,7 +71,7 @@ const OpenOrdersTab = () => {
     };
 
     fetchOrders(); // Initial fetch
-    intervalId = setInterval(fetchOrders, 5000); // Poll every 5 seconds
+    intervalId = setInterval(fetchOrders, 2000);
 
     return () => clearInterval(intervalId);
   }, [authKey]);

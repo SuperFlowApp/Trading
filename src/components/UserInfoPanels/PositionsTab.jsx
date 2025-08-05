@@ -11,20 +11,27 @@ const Positions = () => {
       setRawPositions([]);
       return;
     }
-    fetch("https://fastify-serverless-function-rimj.onrender.com/api/positions", {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer ${authKey}`,
-      },
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        setRawPositions(Array.isArray(data) ? data : []);
+    const fetchPositions = () => {
+      fetch("https://fastify-serverless-function-rimj.onrender.com/api/positions", {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${authKey}`,
+        },
       })
-      .catch(() => {
-        setRawPositions([]);
-      });
+        .then(async (res) => {
+          const data = await res.json();
+          setRawPositions(Array.isArray(data) ? data : []);
+        })
+        .catch(() => {
+          setRawPositions([]);
+        });
+    };
+
+    fetchPositions(); // Initial fetch
+    const interval = setInterval(fetchPositions, 2000);
+
+    return () => clearInterval(interval); // Cleanup on unmount or authKey change
   }, [authKey]);
 
   // Helper to format numbers and handle nulls

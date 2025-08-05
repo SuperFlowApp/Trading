@@ -3,8 +3,8 @@ import 'antd/dist/reset.css';
 import LoginPanel from "./Login/LoginPanel";
 import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import context
 import Button from "./CommonUIs/Button";
-import DebuggerPanel from "../debugger";
-import Draggable from "react-draggable"; // <-- add this import
+//import DebuggerPanel from "../debugger";
+//import Draggable from "react-draggable"; // <-- add this import
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -32,7 +32,7 @@ function Navbar() {
     if (window.location.pathname.includes("options-trading")) return "options";
     return "futures";
   });
-  const [showDebugger, setShowDebugger] = useState(false);
+  //const [showDebugger, setShowDebugger] = useState(false);
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
 
@@ -103,7 +103,7 @@ function Navbar() {
           <div className="flex items-end gap-2">
             <img src="/assets/Logo.svg" alt="Logo" className="h-8 w-auto" />
             <img src="/assets/Bysymmio.svg" alt="Logo" className="h-4 w-auto" />
-            {/* Debugger small text link */}
+            {/* Debugger small text link 
             <span
               className="ml-2 text-xs text-primary2 cursor-pointer hover:underline"
               onClick={() => setShowDebugger(true)}
@@ -111,6 +111,7 @@ function Navbar() {
             >
               Debugger
             </span>
+            */}
           </div>
           <div className="flex items-center gap-14">
 
@@ -225,14 +226,13 @@ function Navbar() {
         />
       )}
 
-      {/* Debugger Panel as draggable */}
+      {/* Debugger Panel as draggable 
       {showDebugger && (
         <Draggable handle=".debugger-drag-handle">
           <div
             className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] bg-backgrounddark text-white rounded-lg shadow-2xl border border-primary2 w-[600px] max-w-[95vw] max-h-[80vh] flex flex-col"
             style={{ minHeight: "400px" }}
           >
-            {/* Drag handle */}
             <div className="debugger-drag-handle cursor-move bg-primary2 px-4 py-2 rounded-t-lg flex items-center justify-between">
               <span className="font-bold text-lg">Debugger</span>
               <button
@@ -247,7 +247,7 @@ function Navbar() {
             </div>
           </div>
         </Draggable>
-      )}
+      )}*/}
     </>
   );
 }
