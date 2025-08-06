@@ -275,7 +275,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       side: side.toUpperCase(),
       positionSide: 'BOTH',
       quantity: baseQuantity, // always base, rounded to 5 decimals
-      price: parseFloat(price) || 0,
+      price: market === 'market' ? "" : (parseFloat(price) || 0), // <-- updated line
       timeInForce,
       orderRespType: 'ACK',
       params: {},
