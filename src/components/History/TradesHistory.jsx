@@ -47,7 +47,7 @@ const Trades = () => {
                             return (
                                 <tr
                                     key={trade.id}
-                                    className={`rounded-md ${side === 'BUY' ? 'text-primary2 bg-primary2/20' : 'text-primary1 bg-primary1/20'}`}
+                                    className={`rounded-md ${side === 'BUY' ? 'text-green bg-green/20' : 'text-red bg-red/20'}`}
                                 >
                                     {/* Remove Side column */}
                                     <td className="text-sm text-left pl-2">

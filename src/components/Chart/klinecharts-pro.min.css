@@ -457,6 +457,7 @@
     width: 100%;
     box-sizing: border-box;
     border: none;
+    border-bottom: 1px solid var(--klinecharts-pro-border-color);
 }
 
 .klinecharts-pro-period-bar .menu-container {
@@ -551,6 +552,9 @@
     stroke: var(--klinecharts-pro-text-second-color)
 }
 
+.item.tools{
+    border: none !important;
+}
 .klinecharts-pro-drawing-bar .item .icon-overlay {
     width: 32px;
     height: 32px;

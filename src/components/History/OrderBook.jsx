@@ -110,12 +110,12 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSt
     onSelect(price);
   };
 
-  const textColor = color === 'green' ? 'text-primary2' : 'text-primary1';
+  const textColor = color === 'green' ? 'text-green' : 'text-red';
   const alignClass = textAlign === "right" ? "text-right" : "text-left";
   const rowClasses = `relative flex justify-between w-full py-[2px] px-2 text-xs transition-colors cursor-pointer ${isBlinking
     ? color === 'red'
-      ? 'bg-primary1/40'
-      : 'bg-primary2/40'
+      ? 'bg-red/40'
+      : 'bg-green/40'
     : 'bg-transparent'
     } ${isSelected ? 'border border-[#FFF]' : 'border border-transparent'}`;
 

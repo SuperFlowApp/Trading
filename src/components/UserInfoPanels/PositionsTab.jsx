@@ -95,7 +95,7 @@ const Positions = () => {
                     <td className="px-2 py-1">{fmt(pos.markPrice, 4)}</td>
                     <td className="px-2 py-1">{fmt(pos.notional, 4)}</td>
                     <td className="px-2 py-1">{pos.leverage}</td>
-                    <td className={`px-2 py-1 ${Number(pos.upnl) >= 0 ? 'text-primary2' : 'text-warningcolor'}`}>
+                    <td className={`px-2 py-1 ${Number(pos.upnl) >= 0 ? 'text-green' : 'text-red'}`}>
                       {fmt(pos.upnl, 4)}
                     </td>
                     <td className="px-2 py-1">{fmt(pos.realizedPnl, 4)}</td>

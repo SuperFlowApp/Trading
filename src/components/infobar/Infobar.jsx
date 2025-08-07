@@ -66,9 +66,9 @@ function Infobar() {
               style={{
                 color:
                   ticker.change > 0
-                    ? 'var(--color-primary2)'
+                    ? 'var(--color-green)'
                     : ticker.change < 0
-                    ? 'var(--color-primary1)'
+                    ? 'var(--color-red)'
                     : undefined,
               }}
             >

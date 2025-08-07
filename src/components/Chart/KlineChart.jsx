@@ -167,12 +167,26 @@ export default function KlineChartProPanel({ interval }) {
           type: 'spot',
         },
         styles: {
-          grid: {
-            show: true,
-            horizontal: { show: true, size: 1, color: '#555', style: 'dashed', dashedValue: [2, 2] },
-            vertical: { show: true, size: 1, color: '#555', style: 'dashed', dashedValue: [2, 2] },
-          },
-        },
+  grid: {
+    show: true,
+    horizontal: {
+      show: true,
+      size: 1,
+      color: '#555',
+      style: 'dashed',
+      dashedValue: [2, 2]
+    },
+    vertical: {
+      show: true,
+      size: 1,
+      color: '#555',
+      style: '',
+      dashedValue: [2, 2]
+    }
+  },
+  
+}
+,
         indicators: [{ name: 'MA' }],
       });
     });

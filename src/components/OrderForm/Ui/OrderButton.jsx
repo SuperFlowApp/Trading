@@ -13,9 +13,9 @@ export default function OrderButton({
         'transition-colors font-semibold rounded focus:outline-none focus:ring-2 focus:ring-primary2';
     const types = {
         primary:
-            '!bg-primary2 !text-black hover:!bg-primary2/80',
+            '!bg-green !text-black hover:!bg-green/80',
         secondary:
-            '!bg-primary1 !text-black hover:!bg-primary1/80',
+            '!bg-red !text-black hover:!bg-red/80',
         danger:
             '!bg-red-500 !text-white hover:!bg-red-600',
         success:

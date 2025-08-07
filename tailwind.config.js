@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary1: '#ED7088',
+        primary1: '#F59DEF',
         primary2: '#00B7C9',
         primary2active: '#00eaff',
         primary2deactive: '#00505c',
@@ -19,6 +19,8 @@ export default {
         backgroundmid:'#0f1529ee',
         backgrounddark: '#02001Bdd',
         warningcolor: '#a44b4b',
+        red: '#ff4d73',
+        green: '#67d8b2',
       },
     },
   },
