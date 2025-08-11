@@ -262,7 +262,7 @@ const OrderBook = () => {
       </ul>
 
       {/* Spread Section */}
-      <div className="font-bold text-[18px] flex justify-between border border-liquidwhite/50 rounded-lg items-center py-1 px-2 mt-2 mb-3 text-sm font-semibold">
+      <div className="font-bold text-[18px] flex justify-between bg-backgroundlight rounded-lg items-center py-1 px-2 mt-2 mb-3 text-sm font-semibold">
         <div className="text-md">Spread</div>
         <span className="text-xs">
           {spreadValue !== null ? `${spreadValue}$` : '—'}
