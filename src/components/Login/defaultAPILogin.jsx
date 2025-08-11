@@ -1,39 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { message } from "antd";
-import { useAuthKey } from "../../contexts/AuthKeyContext";
+import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- import context hook
 import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
 import Modal from "../CommonUIs/modal/modal";
-import DefaultAPISignup from "./defaultAPISignup";
+import DefaultAPISignup from "./defaultAPISignup"; // <-- import signup modal
 
 const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [signupOpen, setSignupOpen] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false); // <-- signup modal state
 
-  const { setAuthKey } = useAuthKey();
+  const { setAuthKey } = useAuthKey(); // <-- get setter from context
 
   const handleLogin = async () => {
     setLoading(true);
     try {
-      // Direct API call to Superflow exchange
-      const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
-      
-      const response = await fetch("https://superflow.exchange/token", {
+      const params = new URLSearchParams({
+        username,
+        password,
+      }).toString();
+
+      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/token?${params}`, {
         method: "POST",
         headers: {
+          accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
-          "accept": "application/json",
         },
-        body,
       });
 
       const data = await response.json();
 
       if (data.access_token) {
         message.success("Login successful!");
-        setAuthKey(data.access_token);
+        setAuthKey(data.access_token); // <-- update context only
         onLoginSuccess && onLoginSuccess(username, data.access_token);
         onClose();
       } else {
@@ -51,7 +52,7 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   };
 
   const handleSignUp = () => {
-    setSignupOpen(true);
+    setSignupOpen(true); // <-- open signup modal
   };
 
   const handleSignupSuccess = (username) => {
