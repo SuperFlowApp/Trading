@@ -92,7 +92,7 @@ const useUnifiedOrderBook = (symbol) => {
 };
 
 // Memoized Row for per-row update
-const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontStyle, textAlign }) => {
+const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSizeClass = "text-[14px]", fontWeightClass = "font-medium", textAlign }) => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -112,7 +112,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSt
 
   const textColor = color === 'green' ? 'text-green' : 'text-red';
   const alignClass = textAlign === "right" ? "text-right" : "text-left";
-  const rowClasses = `relative flex justify-between w-full py-[2px] px-2 text-xs transition-colors cursor-pointer ${isBlinking
+  const rowClasses = `relative flex justify-between w-full py-[1px] px-1 text-xs transition-colors cursor-pointer ${isBlinking
     ? color === 'red'
       ? 'bg-red/40'
       : 'bg-green/40'
@@ -129,17 +129,17 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSt
           opacity: 0.3,
         }}
       />
-      <div className={rowClasses} style={fontStyle}>
+      <div className={rowClasses}>
         {/* Price */}
-        <div className={`font-medium text-[14px] w-1/4 ${textColor} text-left`}>
+        <div className={`${fontWeightClass} ${fontSizeClass} w-1/4 ${textColor} text-left`}>
           {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
         {/* Size */}
-        <div className={`text-[15px] w-1/4 ${alignClass}`}>
+        <div className={`${fontSizeClass} w-1/4 ${alignClass}`}>
           {size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
         </div>
         {/* Total */}
-        <div className={`text-[15px] w-1/4 ${alignClass}`}>
+        <div className={`${fontSizeClass} w-1/4 ${alignClass}`}>
           {total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
         </div>
       </div>
@@ -238,56 +238,237 @@ const OrderBook = () => {
     setOrderBookClickedPrice(price); // <-- Write to Zustand
   };
 
+  const [hoveredAskIndex, setHoveredAskIndex] = useState(null);
+  const [hoveredBidIndex, setHoveredBidIndex] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  // Calculate cumulative sum for hovered asks (from bottom up)
+  const hoveredAskSum = hoveredAskIndex !== null
+    ? addTotals(asks, false)
+        .slice(-10)
+        .slice(hoveredAskIndex)
+        .reduce((sum, row) => sum + row.size, 0)
+    : null;
+
+  // Calculate cumulative sum for hovered bids (from top down)
+  const hoveredBidSum = hoveredBidIndex !== null
+    ? addTotals(bids, true)
+        .slice(0, hoveredBidIndex + 1)
+        .reduce((sum, row) => sum + row.size, 0)
+    : null;
+
+  // Calculate stats for hovered asks (from bottom up)
+  const hoveredAskStats = (() => {
+    if (hoveredAskIndex === null) return null;
+    const rows = addTotals(asks, false).slice(-10).slice(hoveredAskIndex);
+    if (!rows.length) return null;
+    const totalSize = rows.reduce((sum, row) => sum + row.size, 0);
+    const totalUSDT = rows.reduce((sum, row) => sum + row.size * row.price, 0);
+    const avgPrice = totalUSDT / totalSize;
+    return {
+      avgPrice,
+      totalSize,
+      totalUSDT,
+    };
+  })();
+
+  // Calculate stats for hovered bids (from top down)
+  const hoveredBidStats = (() => {
+    if (hoveredBidIndex === null) return null;
+    const rows = addTotals(bids, true).slice(0, hoveredBidIndex + 1);
+    if (!rows.length) return null;
+    const totalSize = rows.reduce((sum, row) => sum + row.size, 0);
+    const totalUSDT = rows.reduce((sum, row) => sum + row.size * row.price, 0);
+    const avgPrice = totalUSDT / totalSize;
+    return {
+      avgPrice,
+      totalSize,
+      totalUSDT,
+    };
+  })();
+
+  // Mouse event handlers for asks
+  const handleAskMouseEnter = (index) => (e) => {
+    setHoveredAskIndex(index);
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+  const handleAskMouseMove = (e) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+  const handleAskMouseLeave = () => {
+    setHoveredAskIndex(null);
+  };
+
+  // Mouse event handlers for bids
+  const handleBidMouseEnter = (index) => (e) => {
+    setHoveredBidIndex(index);
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+  const handleBidMouseMove = (e) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+  const handleBidMouseLeave = () => {
+    setHoveredBidIndex(null);
+  };
+
   return (
-    <div className="flex flex-col h-full w-full text-xs overflow-x-hidden">
-      <div className="flex justify-between text-liquidwhite px-2 pb-2 pt-[3px] text-xs">
+    <div className="flex flex-col h-full w-full  overflow-x-hidden" style={{ position: 'relative' }}>
+      <div className="flex justify-between text-liquidwhite pb-2 pt-[3px] text-[12px]">
         <div className="text-left w-1/4">Price</div>
         <div className="text-right w-1/4">Size</div>
         <div className="text-right w-1/4">USDT Total</div>
       </div>
 
+
+
       {/* Ask Section */}
-      <ul className="flex flex-col w-full">
-        {addTotals(asks, false).map((row, i) => (
-          <Row
-            {...row}
-            progress={row.progress}
-            color="red"
-            key={`ask-${row.price}`}
-            onSelect={handleRowSelect}
-            fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
-            textAlign="right"
-          />
-        ))}
+      <ul
+        className="flex flex-col w-full "
+        onMouseLeave={handleAskMouseLeave}
+      >
+        {addTotals(asks, false).map((row, i, arr) => {
+          // Highlight from bottom up to hovered index
+          const highlight =
+            hoveredAskIndex !== null && i >= hoveredAskIndex;
+          return (
+            <div
+              key={`ask-wrap-${row.price}`}
+              onMouseEnter={handleAskMouseEnter(i)}
+              onMouseMove={handleAskMouseMove}
+              style={{
+                background: highlight ? 'rgba(245, 157, 239, 0.15)' : 'transparent',
+                borderRadius: highlight && i === hoveredAskIndex ? '4px 4px 0 0' : undefined,
+              }}
+            >
+              <Row
+                {...row}
+                progress={row.progress}
+                color="red"
+                onSelect={handleRowSelect}
+                fontSizeClass="font-[400]"
+                fontWeightClass="font-normal"
+                textAlign="right"
+              />
+            </div>
+          );
+        })}
       </ul>
 
+      {/* Floating sum message for asks */}
+      {hoveredAskStats && (
+        <div
+          style={{
+            position: 'fixed',
+            left: mousePos.x + 16,
+            top: mousePos.y + 8,
+            pointerEvents: 'none',
+            background: 'var(--color-backgroundmid)',
+            color: 'var(--color-liquidwhite)',
+            border: '1px solid var(--color-red)',
+            borderRadius: 6,
+            padding: '6px 12px',
+            fontSize: 13,
+            fontWeight: 500,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            zIndex: 9999,
+            minWidth: 170,
+          }}
+        >
+          <div>
+            <span style={{ fontWeight: 600 }}>Avg Price:</span>{" "}
+            {hoveredAskStats.avgPrice?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+          </div>
+          <div>
+            <span style={{ fontWeight: 600 }}>Sum Size:</span>{" "}
+            {hoveredAskStats.totalSize?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+          </div>
+          <div>
+            <span style={{ fontWeight: 600 }}>Sum USDT:</span>{" "}
+            {hoveredAskStats.totalUSDT?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </div>
+        </div>
+      )}
+
       {/* Spread Section */}
-      <div className="font-bold text-[18px] flex justify-between bg-backgroundlight rounded-lg items-center py-1 px-2 mt-2 mb-3 text-sm font-semibold">
+      <div className="font-[400] text-[12px] flex justify-center gap-[60px] bg-backgroundlight rounded-[4px] items-center py-[1px] my-1">
         <div className="text-md">Spread</div>
-        <span className="text-xs">
+        <span className="">
           {spreadValue !== null ? `${spreadValue}$` : '—'}
         </span>
-        <span className="text-xs">
+        <span className="">
           {spreadPercentage !== null ? `${spreadPercentage.toFixed(4)}%` : '—'}
         </span>
       </div>
 
       {/* Bid Section */}
-      <ul className="flex flex-col w-full">
-        {addTotals(bids, true).map((row, i) => (
-          <Row
-            {...row}
-            progress={row.progress}
-            color="green"
-            key={`bid-${row.price}`}
-            onSelect={handleRowSelect}
-            fontStyle={{ fontWeight: 'normal', fontSize: '12px' }}
-            textAlign="right"
-          />
-        ))}
+      <ul
+        className="flex flex-col w-full "
+        onMouseLeave={handleBidMouseLeave}
+      >
+        {addTotals(bids, true).map((row, i) => {
+          // Highlight from top down to hovered index
+          const highlight =
+            hoveredBidIndex !== null && i <= hoveredBidIndex;
+          return (
+            <div
+              key={`bid-wrap-${row.price}`}
+              onMouseEnter={handleBidMouseEnter(i)}
+              onMouseMove={handleBidMouseMove}
+              style={{
+                background: highlight ? 'rgba(0, 183, 201, 0.15)' : 'transparent',
+                borderRadius: highlight && i === hoveredBidIndex ? '0 0 4px 4px' : undefined,
+              }}
+            >
+              <Row
+                {...row}
+                progress={row.progress}
+                color="green"
+                onSelect={handleRowSelect}
+                textAlign="right"
+                fontSizeClass="text-[12px]"
+                fontWeightClass="font-[400]"
+              />
+            </div>
+          );
+        })}
       </ul>
 
-      <div className="flex justify-end items-center text-sm font-semibold mt-2">
+      {/* Floating sum message for bids */}
+      {hoveredBidStats && (
+        <div
+          style={{
+            position: 'fixed',
+            left: mousePos.x + 16,
+            top: mousePos.y + 8,
+            pointerEvents: 'none',
+            background: 'var(--color-backgroundmid)',
+            color: 'var(--color-liquidwhite)',
+            border: '1px solid var(--color-green)',
+            borderRadius: 6,
+            padding: '6px 12px',
+            fontSize: 13,
+            fontWeight: 500,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            zIndex: 9999,
+            minWidth: 170,
+          }}
+        >
+          <div>
+            <span style={{ fontWeight: 600 }}>Avg Price:</span>{" "}
+            {hoveredBidStats.avgPrice?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+          </div>
+          <div>
+            <span style={{ fontWeight: 600 }}>Sum Size:</span>{" "}
+            {hoveredBidStats.totalSize?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+          </div>
+          <div>
+            <span style={{ fontWeight: 600 }}>Sum USDT:</span>{" "}
+            {hoveredBidStats.totalUSDT?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end">
         {/* WebSocket status LED */}
         <span
           style={{
@@ -301,7 +482,6 @@ const OrderBook = () => {
           }}
           title={wsConnected ? "Live connection" : "Disconnected"}
         />
-        <span className="text-xs text-white">{wsConnected ? "Live" : "Offline"}</span>
       </div>
 
       {/* Optionally show error */}

@@ -15,7 +15,7 @@ export default {
         backgroundlighthover:'#1d2c3c',
         liquidwhite: '#8AABB2',
         secondary2: '#565A93',
-        backgroundlight: '#1d243b',
+        backgroundlight: '#202534',
         backgroundmid:'#121622',
         backgrounddark: '#02001B',
         warningcolor: '#a44b4b',
