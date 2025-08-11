@@ -1,8 +1,7 @@
 /* Add to your global CSS */
 .native-slider {
-  height: 16px;
+  height: 2px;
   border-radius: 8px;
-  /* background: linear-gradient(90deg, var(--color-primary2) 0%, var(--color-primary2) 100%); */
   outline: none;
   -webkit-appearance: none;
   -moz-appearance: none;

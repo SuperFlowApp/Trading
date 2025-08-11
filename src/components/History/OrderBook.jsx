@@ -168,8 +168,14 @@ const OrderBook = () => {
     // Always sort descending (cheapest last)
     const sortedRows = [...rows].sort((a, b) => b.price - a.price);
 
-    // Only show top 10
-    const limitedRows = sortedRows.slice(0, 10);
+    let limitedRows;
+    if (reverse) {
+      // For bids: top 10 most expensive (already sorted descending)
+      limitedRows = sortedRows.slice(0, 10);
+    } else {
+      // For asks: top 10 cheapest (last 10 in descending order)
+      limitedRows = sortedRows.slice(-10);
+    }
     // Find max size for progress bar
     const maxSize = Math.max(...limitedRows.map((r) => r.size), 1);
 
@@ -258,9 +264,11 @@ const OrderBook = () => {
       {/* Spread Section */}
       <div className="font-bold text-[18px] flex justify-between border border-liquidwhite/50 rounded-lg items-center py-1 px-2 mt-2 mb-3 text-sm font-semibold">
         <div className="text-md">Spread</div>
-        <span className="">{spreadValue !== null ? spreadValue : '—'}</span>
         <span className="text-xs">
-          {spreadPercentage !== null ? `${spreadPercentage.toFixed(5)}%` : '—'}
+          {spreadValue !== null ? `${spreadValue}$` : '—'}
+        </span>
+        <span className="text-xs">
+          {spreadPercentage !== null ? `${spreadPercentage.toFixed(4)}%` : '—'}
         </span>
       </div>
 
