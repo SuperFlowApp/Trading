@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { useZustandStore } from '../../Zustandstore/useStore.js';
-import {selectedPairStore} from '../../Zustandstore/userOrderStore.js'; // <-- import your user input store
+import { selectedPairStore } from '../../Zustandstore/userOrderStore.js'; // <-- import your user input store
 import { formatPrice } from '../../utils/priceFormater.js';
 
 // Custom hook for localhost SSE order book
@@ -65,7 +65,7 @@ const useUnifiedOrderBook = (symbol) => {
           setBids(formatBook(data.b));
           setAsks(formatBook(data.a));
         }
-      } catch {}
+      } catch { }
     };
 
     eventSource.onerror = () => {
@@ -165,11 +165,8 @@ const OrderBook = () => {
 
   // Helper to mark new prices and calculate cumulative totals
   const addTotals = (rows, reverse = false, prevPricesSet = new Set()) => {
-    // For asks (sell), always sort ascending (cheapest first)
-    // For bids (buy), always sort descending (highest first)
-    const sortedRows = reverse
-      ? [...rows].sort((a, b) => b.price - a.price) // bids: highest first
-      : [...rows].sort((a, b) => a.price - b.price); // asks: cheapest first
+    // Always sort descending (cheapest last)
+    const sortedRows = [...rows].sort((a, b) => b.price - a.price);
 
     // Only show top 10
     const limitedRows = sortedRows.slice(0, 10);
@@ -209,7 +206,8 @@ const OrderBook = () => {
     const sumBids = bids.reduce((sum, bid) => sum + bid.price, 0);
     const sumAsks = asks.reduce((sum, ask) => sum + ask.price, 0);
     const totalCount = bids.length + asks.length;
-    return (sumBids + sumAsks) / totalCount;
+    const midpoint = (sumBids + sumAsks) / totalCount;
+    return Number(midpoint).toFixed(4);
   };
 
   useEffect(() => {
@@ -239,7 +237,7 @@ const OrderBook = () => {
       <div className="flex justify-between text-liquidwhite px-2 pb-2 pt-[3px] text-xs">
         <div className="text-left w-1/4">Price</div>
         <div className="text-right w-1/4">Size</div>
-        <div className="text-right w-1/4">Total</div>
+        <div className="text-right w-1/4">USDT Total</div>
       </div>
 
       {/* Ask Section */}

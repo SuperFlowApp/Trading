@@ -63,7 +63,7 @@ const Positions = () => {
               <th className="px-2 py-1">Mark Price</th>
               <th className="px-2 py-1">Notional</th>
               <th className="px-2 py-1">Leverage</th>
-              <th className="px-2 py-1">Unrealized PnL</th>
+              <th className="px-2 py-1">Unrealized PNL</th>
               <th className="px-2 py-1">Realized PnL</th>
               <th className="px-2 py-1">Margin Used</th>
               <th className="px-2 py-1">Maint. Margin</th>
@@ -95,8 +95,15 @@ const Positions = () => {
                     <td className="px-2 py-1">{fmt(pos.markPrice, 4)}</td>
                     <td className="px-2 py-1">{fmt(pos.notional, 4)}</td>
                     <td className="px-2 py-1">{pos.leverage}</td>
-                    <td className={`px-2 py-1 ${Number(pos.upnl) >= 0 ? 'text-green' : 'text-red'}`}>
-                      {fmt(pos.upnl, 4)}
+                    <td
+                      className={`px-2 py-1 ${Number(pos.upnl) === 0
+                          ? 'text-gray-400'
+                          : Number(pos.upnl) > 0
+                            ? 'text-green'
+                            : 'text-red'
+                        }`}
+                    >
+                      {fmt(pos.upnl, 4) + "%"}
                     </td>
                     <td className="px-2 py-1">{fmt(pos.realizedPnl, 4)}</td>
                     <td className="px-2 py-1">{fmt(pos.isolatedMarginBalance, 4)}</td>
