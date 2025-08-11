@@ -182,6 +182,7 @@ function Navbar() {
               )}
             </div>
           )}
+
           <div className="relative" ref={settingsRef}>
             <button
               className="px-2 py-2 bg-backgroundlight rounded-md text-sm font-semibold hover:bg-primary2deactive transition"
@@ -225,6 +226,7 @@ function Navbar() {
           onLoginSuccess={handleLoginSuccess}
         />
       )}
+      
 
       {/* Debugger Panel as draggable 
       {showDebugger && (

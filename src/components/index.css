@@ -6,7 +6,7 @@
   line-height: 120%;
   font-weight: 400;
   color-scheme: light dark;
-  background-color: theme('colors.backgroundlight');
+  background-color: #171d30;
   /* Use Tailwind's theme function */
   letter-spacing: .06em;
   font-synthesis: none;
@@ -23,16 +23,12 @@
   --color-liquidwhite: #8AABB2;
   --color-secondary2: #565A93;
   --color-backgrounddark: #02001B;
-  --color-backgroundmid: #0f1529;
-  --color-backgroundlight: #1b2937;
+  --color-backgroundmid: #121622;
+  --color-backgroundlight: #1d243b;
   --color-backgroundlighthover: #1d2c3c;
   --color-warncolor: #d83d3d;
   --color-red: #ff4d73;
   --color-green: #67d8b2;
-}
-
-.modal-container {
-  @apply bg-backgrounddark rounded-lg overflow-hidden;
 }
 
 .check-box {
