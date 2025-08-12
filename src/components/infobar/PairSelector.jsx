@@ -22,7 +22,7 @@ function PairSelector({
 
     async function fetchPairs() {
       try {
-        const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets');
+        const res = await fetch('https://superflow.exchange/markets');
         const data = await res.json();
 
         // Filter for active and correct type
