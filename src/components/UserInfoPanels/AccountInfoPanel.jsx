@@ -36,7 +36,7 @@ function AccountInfoPanel() {
         const fetchAccountInfo = async () => {
             setAccountInfoError('');
             try {
-                const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
+                const res = await fetch('/api/account-information', {
                     headers: {
                         'Authorization': `Bearer ${authKey}`,
                         'accept': 'application/json'
@@ -73,7 +73,7 @@ function AccountInfoPanel() {
         const fetchAccountInfo = async () => {
             setAccountInfoError('');
             try {
-                const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
+                const res = await fetch('/api/account-information', {
                     headers: {
                         'Authorization': `Bearer ${authKey}`,
                         'accept': 'application/json'
