@@ -22,12 +22,13 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
         password,
       }).toString();
 
-      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/token?${params}`, {
+      const response = await fetch(`/api/token`, {
         method: "POST",
         headers: {
           accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
         },
+        body: params,
       });
 
       const data = await response.json();
