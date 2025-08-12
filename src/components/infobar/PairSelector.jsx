@@ -22,7 +22,9 @@ function PairSelector({
 
     async function fetchPairs() {
       try {
-        const res = await fetch('https://superflow.exchange/markets');
+        // CHANGE THIS LINE:
+        // const res = await fetch('https://superflow.exchange/markets');
+        const res = await fetch('/api/markets'); // <-- Use your Vercel serverless function
         const data = await res.json();
 
         // Filter for active and correct type
