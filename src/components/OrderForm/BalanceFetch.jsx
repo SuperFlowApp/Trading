@@ -46,7 +46,7 @@ const BalanceFetch = ({ onBalance }) => {
       }
 
       // Fetch balance
-      fetch('/api/balance', {
+      fetch('https://fastify-serverless-function-rimj.onrender.com/api/balance', {
         method: 'GET',
         headers: {
           accept: 'application/json',

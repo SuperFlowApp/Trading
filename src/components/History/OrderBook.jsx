@@ -24,7 +24,7 @@ const useUnifiedOrderBook = (symbol) => {
 
     // Polling interval (e.g., every 1500ms)
     const fetchOrderBook = () => {
-      fetch(`/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
+      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
         .then(res => res.json())
         .then(data => {
           if (!active) return;
@@ -70,7 +70,7 @@ const useUnifiedOrderBook = (symbol) => {
 
     eventSource.onerror = () => {
       setWsConnected(false);
-      fetch(`/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
+      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
         .then(res => res.json())
         .then(data => {
           if (!active) return;
