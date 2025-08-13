@@ -183,6 +183,47 @@
   padding: 0 4px;
 }
 
+.percentage-box {
+  width: 100%;
+  height: 30px;
+  padding: 0px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-primary2deactive);
+  background: none;
+  color: var(--color-liquidwhite);
+  font-size: 17px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(15, 21, 41, 0.08);
+}
+
+
+.percentage-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 80px;
+}
+
+.percentage-input-wrapper:hover .percentage-symbol,
+.percentage-input-wrapper:focus-within .percentage-symbol {
+  color: var(--color-primary2);
+}
+
+.percentage-input-wrapper:focus-within .percentage-symbol {
+  color: var(--color-primary2);
+}
+
+
+.percentage-input-wrapper:hover .percentage-input-wrapper,
+.percentage-input-wrapper:focus-within .percentage-input {
+  color: var(--color-primary2);
+}
+
+.percentage-input-wrapper:focus-within .percentage-input {
+  color: var(--color-primary2);
+}
 .percentage-input-wrapper {
   position: relative;
   display: flex;
@@ -198,17 +239,35 @@
 }
 
 .percentage-input {
+  width: 100%;
+  height: 30px;
+  padding: 0px 8px;
+  border-radius: 8px;
+  background: none;
+  color: var(--color-liquidwhite);
+  border: 1px solid transparent;
+  font-size: 17px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(15, 21, 41, 0.08);
   padding-right: 24px !important;
   text-align: left !important;
-  /* <-- force left alignment */
 }
+.percentage-input:hover {
+  color: var(--color-primary2deactiveactive);
+  border: 1px solid var(--color-primary2deactive);
 
+}
+.percentage-input:focus {
+  border: 1px solid var(--color-primary2active);
+}
 .percentage-symbol {
   position: absolute;
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-liquidwhite);
+  color: inherit;
   font-size: 15px;
   pointer-events: none;
 }

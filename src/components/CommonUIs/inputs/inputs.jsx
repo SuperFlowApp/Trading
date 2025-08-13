@@ -204,7 +204,7 @@ export const PercentageInput = ({
         step={step}
         value={value}
         onChange={onChange}
-        className="custom-input percentage-input"
+        className="percentage-input"
         style={{ paddingRight: 24 }}
         {...inputProps}
       />

@@ -73,15 +73,15 @@ function PairSelector({
           // Binance Futures API endpoints
           const symbol = mkt.symbol;
           // 24h ticker
-          const tickerRes = await fetch(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${symbol}`);
+          const tickerRes = await fetch(``);
           const ticker = await tickerRes.json();
 
           // Funding rate (8hr)
-          const fundingRes = await fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`);
+          const fundingRes = await fetch(``);
           const funding = await fundingRes.json();
 
           // Open Interest
-          const oiRes = await fetch(`https://fapi.binance.com/fapi/v1/openInterest?symbol=${symbol}`);
+          const oiRes = await fetch(``);
           const openInterest = await oiRes.json();
 
           stats[symbol] = {

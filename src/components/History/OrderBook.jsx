@@ -50,7 +50,7 @@ const useUnifiedOrderBook = (symbol) => {
     let active = true;
     setError(null);
 
-    const eventSource = new EventSource(`http://localhost:3002/stream/orderbook?symbol=${symbol.toUpperCase()}`);
+    const eventSource = new EventSource(`https://websocketserver-am3y.onrender.com/stream/orderbook?symbol=${symbol.toUpperCase()}`);
 
     eventSource.onopen = () => {
       if (!active) return;

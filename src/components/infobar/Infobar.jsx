@@ -11,7 +11,7 @@ function Infobar() {
   useEffect(() => {
     if (!selectedPair) return;
     const symbol = `${selectedPair}USDT`.toUpperCase();
-    const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`;
+    const url = ``;
     let ignore = false;
 
     async function fetchTicker() {
