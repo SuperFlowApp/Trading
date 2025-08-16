@@ -174,7 +174,7 @@ export default function LeveragePanel() {
           className="flex flex-col items-center gap-4"
           style={{
             background: 'var(--color-backgroundmid)',
-            borderRadius: '0.5rem',
+            borderRadius: '4',
             padding: '1.5rem',
             minWidth: 320,
             ...modalStyle,
@@ -191,7 +191,7 @@ export default function LeveragePanel() {
             onChange={e => setLeverage(Number(e.target.value))}
             disabled={!authKey}
           />
-          <div className="text-2xl font-bold text-primary2">{leverage}X</div>
+          <div className="text-2xl font-bold text-primary2normal">{leverage}X</div>
           <Button
             type="primary"
             className={`mt-2 flex-1 py-2 transition-all ${blink === "success" ? "blink-success" : ""} ${blink === "error" ? "blink-error" : ""}`}

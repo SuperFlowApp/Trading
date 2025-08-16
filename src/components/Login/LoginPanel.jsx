@@ -19,7 +19,7 @@ const LoginPanel = ({ onClose, open, onLoginSuccess }) => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          borderRadius: 12,
+          borderRadius: 4,
           padding: 0
         }}>
           <span style={{ color: "#fff", marginBottom: 24 }}>

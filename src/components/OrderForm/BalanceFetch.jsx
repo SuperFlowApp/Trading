@@ -124,13 +124,13 @@ const BalanceFetch = ({ onBalance }) => {
 
   return (
     <div>
-      <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs">
-        Avilable to trade: {<span className="text-white font-semibold text-xs gap-4">
+      <span className="flex w-full justify-between text-liquidlightergray  ">
+        Avilable to trade: {<span className="text-white">
           {formatPrice(balance)} USDT
         </span>}
       </span>
-      <span className="flex w-full justify-between text-liquidwhite font-semibold text-xs">
-        Current position: {<span className="text-white font-semibold text-xs gap-4">
+      <span className="flex w-full justify-between text-liquidlightergray">
+        Current position: {<span className="text-white">
           {formatPrice(currentPosition)} {`${selectedPair}`}
         </span>}
       </span>

@@ -14,32 +14,36 @@ export const InputWithButton = ({
   label = "",
 }) => {
   const [focused, setFocused] = useState(false);
+
   return (
-    <div className="custom-input-wrapper floating-label-wrapper">
+    <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] overflow-hidden">
+      {/* fixed prefix (price/label) with vertical separator */}
+      <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
+        {label || placeholder}
+      </div>
+
+      <div className="w-px h-5 bg-[var(--color-liquiddarkgray)]" />
+
       <input
         type="text"
         value={value}
         onChange={onChange}
         placeholder={""}
-        className="custom-input left-round"
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        className="flex-1 bg-transparent outline-none text-body h-full px-2 text-[var(--color-liquidwhite)]"
         {...inputProps}
       />
+
       <button
         type="button"
-        className="custom-input-btn right-round"
+        className="h-full px-3 text-body font-semibold border-l border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] hover:bg-[var(--color-backgroundlighthover)]"
         onClick={onButtonClick}
         disabled={disabled}
         {...buttonProps}
       >
         {buttonLabel}
       </button>
-      <label
-        className={`floating-label${focused || value ? " floating-label--active" : ""}`}
-      >
-        {label || placeholder}
-      </label>
     </div>
   );
 };
@@ -57,22 +61,31 @@ export const InputWithDropDown = ({
   label = "",
 }) => {
   const [focused, setFocused] = useState(false);
+
   return (
-    <div className="custom-input-wrapper floating-label-wrapper">
+    <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] overflow-hidden">
+      {/* fixed prefix (size label) */}
+      <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
+        {label || placeholder}
+      </div>
+
+      <div className="w-px h-5 bg-[var(--color-liquiddarkgray)]" />
+
       <input
         type="number"
         value={value}
         onChange={onChange}
         placeholder={""}
-        className="custom-input left-round"
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        className="flex-1 bg-transparent outline-none text-body h-full px-2 text-[var(--color-liquidwhite)]"
         {...inputProps}
       />
+
       <select
         value={selectedOption}
         onChange={e => onOptionChange(e.target.value)}
-        className="custom-insidebox-dropdown right-round"
+        className="h-full bg-transparent text-body px-2 border-l border-[var(--color-liquiddarkgray)] outline-none"
         {...dropdownProps}
       >
         {options.map(opt => (
@@ -81,11 +94,6 @@ export const InputWithDropDown = ({
           </option>
         ))}
       </select>
-      <label
-        className={`floating-label${focused || value ? " floating-label--active" : ""}`}
-      >
-        {label || placeholder}
-      </label>
     </div>
   );
 };

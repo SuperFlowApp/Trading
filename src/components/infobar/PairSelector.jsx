@@ -61,7 +61,7 @@ function PairSelector({
     return () => clearInterval(intervalId);
   }, []);
 
-  // Fetch stats for each market from Binance every 5 seconds
+  /*/ Fetch stats for each market from Binance every 5 seconds
   useEffect(() => {
     if (markets.length === 0) return;
     let statsInterval;
@@ -104,7 +104,7 @@ function PairSelector({
 
     return () => clearInterval(statsInterval);
   }, [markets]);
-
+*/
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
@@ -158,7 +158,7 @@ function PairSelector({
         <img src="/assets/arrow.svg" alt="icon" className="w-3.5 h-[10px]" />
       </div>
       {dropdownOpen && (
-        <div className="absolute z-50 left-0 top-full mt-2 bg-backgrounddark border border-secondary2 rounded-lg shadow-lg w-[900px] max-h-[350px] overflow-auto">
+        <div className="absolute z-50 left-0 top-full mt-2 bg-backgrounddark border border-secondary2 rounded-md shadow-lg w-[900px] max-h-[350px] overflow-auto">
           <table className="min-w-full text-xs text-left">
             <thead>
               <tr className="bg-backgroundlight text-white">
@@ -185,7 +185,7 @@ function PairSelector({
                 return (
                   <tr
                     key={mkt.id}
-                    className={`cursor-pointer border border-transparent hover:bg-primary2deactiveactive ${`${selectedPair}USDT` === mkt.symbol ? 'bg-primary2deactive' : ''}`}
+                    className={`cursor-pointer border border-transparent hover:bg-primary2dark ${`${selectedPair}USDT` === mkt.symbol ? 'bg-primary2darker' : ''}`}
                     onClick={e => {
                       e.stopPropagation();
                       setDropdownOpen(false);
@@ -196,7 +196,7 @@ function PairSelector({
                     <td className="px-2 py-1 font-bold text-white">
                       {mkt.base} / {mkt.quote}
                       {maxLeverage !== '-' && (
-                        <span className="ml-1 text-primary2">[{maxLeverage}x]</span>
+                        <span className="ml-1 text-primary2normal">[{maxLeverage}x]</span>
                       )}
                     </td>
                     <td className="px-2 py-1">{stats.lastPrice ? formatPrice(stats.lastPrice) : "-"}</td>

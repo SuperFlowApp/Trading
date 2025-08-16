@@ -1,45 +1,45 @@
-/* Add to your global CSS */
 .native-slider {
-  height: 2px;
-  border-radius: 8px;
+  height: 1px;
   outline: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   cursor: grab;
 }
+
 .native-slider::-webkit-slider-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%; 
-  background: var(--color-primary2);
-  border: 1px solid var(--color-primary2);
+  width: 14px;
+  height: 14px;
+  border-radius: 20%;
+  background: var(--color-backgroundmid);
+  border: 1px solid var(--color-primary2normal);
   -webkit-appearance: none;
-  margin-top: -4px; /* Adjust as needed to center the thumb */
+  margin-top: -3px;
 }
+
 .native-slider:active::-webkit-slider-thumb {
-  background: var(--color-primary2);
-  background: var(--color-primary2active);
-  border-color: white;
   cursor: grabbing;
 }
+
 .native-slider:hover::-webkit-slider-thumb {
-  background: var(--color-primary2active);
+  border-color: var(--color-primary2light);;
 }
+
 .native-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--color-primary2);
-  border: 2px solid var(--color-primary2);
+  background: var(--color-primary2normal);
+  border: 2px solid var(--color-primary2normal);
   cursor: pointer;
 }
+
 .native-slider::-ms-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--color-primary2);
-  border: 2px solid var(--color-primary2);
+  background: var(--color-primary2normal);
+  border: 2px solid var(--color-primary2normal);
   cursor: pointer;
 }
 

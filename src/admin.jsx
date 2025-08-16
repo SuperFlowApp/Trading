@@ -24,7 +24,7 @@ export default function AdminPanel() {
         style={{
           background: '#23272f',
           padding: 14,
-          borderRadius: 8,
+          borderRadius: 4,
           marginBottom: 24,
           maxWidth: 600,
         }}

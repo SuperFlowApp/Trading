@@ -30,16 +30,16 @@ function PositionsPanel() {
   };
 
   return (
-    <div className=" flex flex-col w-full bg-backgroundmid rounded-md px-2">
+    <div className=" flex flex-col w-full bg-backgroundmid rounded-md p-1">
       {/* Tab Headers */}
-      <div className="border-b-[2px] border-primary2deactive">
+      <div className="border-b-[1px] border-primary2darker">
         <div className=" flex flex-col max-w-[1000px] bg-backgroundmid rounded-md">
           <Tab
             tabs={tabKeys}
             active={activeTab}
             onChange={setActiveTab}
             renderLabel={renderLabel}
-            className="mb-[-2px]"
+            className="mb-[-1px]"
           />
         </div>
       </div>

@@ -106,7 +106,7 @@ export default function MarginMode() {
                 <div
                     style={{
                         background: 'var(--color-backgroundmid)',
-                        borderRadius: '0.5rem',
+                        borderRadius: '4',
                         padding: '1.5rem',
                         minWidth: 260,
                         ...modalStyle,

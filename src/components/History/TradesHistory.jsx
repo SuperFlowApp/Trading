@@ -30,11 +30,11 @@ const Trades = () => {
     }, [selectedPair]); // Re-run effect when selectedPair changes
 
     return (
-        <div className="w-full rounded-lg text-white text-right">
+        <div className="w-full rounded-md text-white text-right">
             <div className="overflow-y-auto max-h-[570px]">
                 <table className="w-full">
                     <thead>
-                        <tr className="bg-backgroundmid text-[12px] text-liquidwhite">
+                        <tr className="bg-backgroundmid text-body text-liquidwhite">
                             {/* <th className="py-2 px-4 text-left">Side</th> */}
                             <th className="pb-2 pl-2 font-normal text-left">Price</th>
                             <th className="pb-2 pr-2 font-normal">Size</th>
@@ -50,13 +50,13 @@ const Trades = () => {
                                     className={`rounded-md ${side === 'BUY' ? 'text-green bg-green/20' : 'text-red bg-red/20'}`}
                                 >
                                     {/* Remove Side column */}
-                                    <td className="text-sm text-left pl-2">
+                                    <td className="text-body text-left pl-2">
                                         {parseFloat(trade.price).toLocaleString(undefined, {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
                                         })}
                                     </td>
-                                    <td className="text-sm pr-2">
+                                    <td className="text-body pr-2">
                                         {parseFloat(trade.quantity).toLocaleString(undefined, {
                                             minimumFractionDigits: 4,
                                             maximumFractionDigits: 4,

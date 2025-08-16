@@ -33,7 +33,6 @@ const useUnifiedOrderBook = (symbol) => {
             setAsks(formatBook(data.asks));
           }
         })
-        .catch(() => setError('REST orderbook fetch failed'));
     };
 
     fetchOrderBook(); // Initial fetch
@@ -240,21 +239,30 @@ const OrderBook = () => {
 
   const [hoveredAskIndex, setHoveredAskIndex] = useState(null);
   const [hoveredBidIndex, setHoveredBidIndex] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  // mousePos removed — tooltip will be positioned relative to the row
+
+  // Refs for measuring rows and container so the tooltip can be placed OUTSIDE the book on the left
+  const containerRef = useRef(null);
+  const askRowRefs = useRef([]);
+  const bidRowRefs = useRef([]);
+
+  // Tooltip state: position is viewport coords (fixed) so it won't be clipped by container
+  const [tooltip, setTooltip] = useState({ visible: false, top: 0, left: 0, content: null, color: 'red' });
+  const TOOLTIP_WIDTH = 140; // used to place the box fully outside
 
   // Calculate cumulative sum for hovered asks (from bottom up)
   const hoveredAskSum = hoveredAskIndex !== null
     ? addTotals(asks, false)
-        .slice(-10)
-        .slice(hoveredAskIndex)
-        .reduce((sum, row) => sum + row.size, 0)
+      .slice(-10)
+      .slice(hoveredAskIndex)
+      .reduce((sum, row) => sum + row.size, 0)
     : null;
 
   // Calculate cumulative sum for hovered bids (from top down)
   const hoveredBidSum = hoveredBidIndex !== null
     ? addTotals(bids, true)
-        .slice(0, hoveredBidIndex + 1)
-        .reduce((sum, row) => sum + row.size, 0)
+      .slice(0, hoveredBidIndex + 1)
+      .reduce((sum, row) => sum + row.size, 0)
     : null;
 
   // Calculate stats for hovered asks (from bottom up)
@@ -290,30 +298,72 @@ const OrderBook = () => {
   // Mouse event handlers for asks
   const handleAskMouseEnter = (index) => (e) => {
     setHoveredAskIndex(index);
-    setMousePos({ x: e.clientX, y: e.clientY });
-  };
-  const handleAskMouseMove = (e) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
+    setHoveredBidIndex(null);
+    const rowEl = askRowRefs.current[index];
+    if (rowEl) {
+      const rowRect = rowEl.getBoundingClientRect();
+      // viewport coordinates so tooltip is fixed and won't be clipped
+      const top = rowRect.top + rowRect.height / 2;
+      const left = rowRect.left - TOOLTIP_WIDTH - 8;
+
+      // compute stats immediately (don't rely on hoveredAskStats state which may not update synchronously)
+      const rows = addTotals(asks, false).slice(-10).slice(index);
+      if (rows.length) {
+        const totalSize = rows.reduce((sum, row) => sum + row.size, 0);
+        const totalUSDT = rows.reduce((sum, row) => sum + row.size * row.price, 0);
+        const avgPrice = totalUSDT / totalSize;
+        setTooltip({
+          visible: true,
+          top,
+          left,
+          content: { avgPrice, totalSize, totalUSDT },
+          color: 'red',
+        });
+      } else {
+        setTooltip(t => ({ ...t, visible: false }));
+      }
+    }
   };
   const handleAskMouseLeave = () => {
     setHoveredAskIndex(null);
+    setTooltip(t => ({ ...t, visible: false }));
   };
 
   // Mouse event handlers for bids
   const handleBidMouseEnter = (index) => (e) => {
     setHoveredBidIndex(index);
-    setMousePos({ x: e.clientX, y: e.clientY });
-  };
-  const handleBidMouseMove = (e) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
+    setHoveredAskIndex(null);
+    const rowEl = bidRowRefs.current[index];
+    if (rowEl) {
+      const rowRect = rowEl.getBoundingClientRect();
+      const top = rowRect.top + rowRect.height / 2;
+      const left = rowRect.left - TOOLTIP_WIDTH - 8;
+
+      const rows = addTotals(bids, true).slice(0, index + 1);
+      if (rows.length) {
+        const totalSize = rows.reduce((sum, row) => sum + row.size, 0);
+        const totalUSDT = rows.reduce((sum, row) => sum + row.size * row.price, 0);
+        const avgPrice = totalUSDT / totalSize;
+        setTooltip({
+          visible: true,
+          top,
+          left,
+          content: { avgPrice, totalSize, totalUSDT },
+          color: 'green',
+        });
+      } else {
+        setTooltip(t => ({ ...t, visible: false }));
+      }
+    }
   };
   const handleBidMouseLeave = () => {
     setHoveredBidIndex(null);
+    setTooltip(t => ({ ...t, visible: false }));
   };
 
   return (
-    <div className="flex flex-col h-full w-full  overflow-x-hidden" style={{ position: 'relative' }}>
-      <div className="flex justify-between text-liquidwhite pb-2 pt-[3px] text-[12px]">
+    <div ref={containerRef} className="flex flex-col h-full w-full  overflow-x-hidden" style={{ position: 'relative' }}>
+      <div className="flex justify-between text-liquidwhite pb-2 pt-[3px] text-body">
         <div className="text-left w-1/4">Price</div>
         <div className="text-right w-1/4">Size</div>
         <div className="text-right w-1/4">USDT Total</div>
@@ -332,11 +382,13 @@ const OrderBook = () => {
             hoveredAskIndex !== null && i >= hoveredAskIndex;
           return (
             <div
+              ref={el => askRowRefs.current[i] = el}
               key={`ask-wrap-${row.price}`}
               onMouseEnter={handleAskMouseEnter(i)}
-              onMouseMove={handleAskMouseMove}
+              onMouseLeave={handleAskMouseLeave}
               style={{
-                background: highlight ? 'rgba(245, 157, 239, 0.15)' : 'transparent',
+                position: 'relative',
+                background: highlight ? 'var(--color-backgroundlight)' : 'transparent',
                 borderRadius: highlight && i === hoveredAskIndex ? '4px 4px 0 0' : undefined,
               }}
             >
@@ -349,48 +401,14 @@ const OrderBook = () => {
                 fontWeightClass="font-normal"
                 textAlign="right"
               />
+
             </div>
           );
         })}
       </ul>
 
-      {/* Floating sum message for asks */}
-      {hoveredAskStats && (
-        <div
-          style={{
-            position: 'fixed',
-            left: mousePos.x + 16,
-            top: mousePos.y + 8,
-            pointerEvents: 'none',
-            background: 'var(--color-backgroundmid)',
-            color: 'var(--color-liquidwhite)',
-            border: '1px solid var(--color-red)',
-            borderRadius: 6,
-            padding: '6px 12px',
-            fontSize: 13,
-            fontWeight: 500,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            zIndex: 9999,
-            minWidth: 170,
-          }}
-        >
-          <div>
-            <span style={{ fontWeight: 600 }}>Avg Price:</span>{" "}
-            {hoveredAskStats.avgPrice?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
-          </div>
-          <div>
-            <span style={{ fontWeight: 600 }}>Sum Size:</span>{" "}
-            {hoveredAskStats.totalSize?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
-          </div>
-          <div>
-            <span style={{ fontWeight: 600 }}>Sum USDT:</span>{" "}
-            {hoveredAskStats.totalUSDT?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-          </div>
-        </div>
-      )}
-
       {/* Spread Section */}
-      <div className="font-[400] text-[12px] flex justify-center gap-[60px] bg-backgroundlight rounded-[4px] items-center py-[1px] my-1">
+      <div className="text-body flex justify-center gap-[60px] bg-backgroundlight rounded-[4px] items-center py-[1px] my-1">
         <div className="text-md">Spread</div>
         <span className="">
           {spreadValue !== null ? `${spreadValue}$` : '—'}
@@ -411,11 +429,13 @@ const OrderBook = () => {
             hoveredBidIndex !== null && i <= hoveredBidIndex;
           return (
             <div
+              ref={el => bidRowRefs.current[i] = el}
               key={`bid-wrap-${row.price}`}
               onMouseEnter={handleBidMouseEnter(i)}
-              onMouseMove={handleBidMouseMove}
+              onMouseLeave={handleBidMouseLeave}
               style={{
-                background: highlight ? 'rgba(0, 183, 201, 0.15)' : 'transparent',
+                position: 'relative',
+                background: highlight ? 'var(--color-backgroundlight)' : 'transparent',
                 borderRadius: highlight && i === hoveredBidIndex ? '0 0 4px 4px' : undefined,
               }}
             >
@@ -428,43 +448,39 @@ const OrderBook = () => {
                 fontSizeClass="text-[12px]"
                 fontWeightClass="font-[400]"
               />
+
             </div>
           );
         })}
       </ul>
 
-      {/* Floating sum message for bids */}
-      {hoveredBidStats && (
+      {/* Outside tooltip placed using fixed coords so it's outside the orderbook and won't be clipped */}
+      {tooltip.visible && tooltip.content && (
         <div
-          style={{
-            position: 'fixed',
-            left: mousePos.x + 16,
-            top: mousePos.y + 8,
-            pointerEvents: 'none',
-            background: 'var(--color-backgroundmid)',
-            color: 'var(--color-liquidwhite)',
-            border: '1px solid var(--color-green)',
-            borderRadius: 6,
-            padding: '6px 12px',
-            fontSize: 13,
-            fontWeight: 500,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            zIndex: 9999,
-            minWidth: 170,
-          }}
+          // keep left/top in style because they are dynamic viewport coords
+          style={{ left: tooltip.left, top: tooltip.top }}
+          className={`fixed text-body pointer-events-none w-[140px] -translate-y-1/2 rounded-lg p-1 shadow-md z-[10000] bg-[var(--color-liquiddarkgray)] text-[var(--color-liquidwhite)] }`}
+          aria-hidden="true"
         >
-          <div>
-            <span style={{ fontWeight: 600 }}>Avg Price:</span>{" "}
-            {hoveredBidStats.avgPrice?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
-          </div>
-          <div>
-            <span style={{ fontWeight: 600 }}>Sum Size:</span>{" "}
-            {hoveredBidStats.totalSize?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
-          </div>
-          <div>
-            <span style={{ fontWeight: 600 }}>Sum USDT:</span>{" "}
-            {hoveredBidStats.totalUSDT?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-          </div>
+          <div><span>Avg Price:</span>{" "}{tooltip.content.avgPrice?.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
+          <div><span>Sum Size:</span>{" "}{tooltip.content.totalSize?.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
+          <div><span>Sum USDT:</span>{" "}{tooltip.content.totalUSDT?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+
+          {/* right-side triangle using SVG (inner polygon scaled 2x) */}
+          <svg
+            aria-hidden="true"
+            className="absolute -right-[25px] top-1/2 -translate-y-1/2 w-12 h-16 pointer-events-none -z-1"
+            viewBox="0 0 48 64"
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            focusable="false"
+          >
+            {/* centered triangle -> tip at middle (30,32), base from (8,8) to (8,56) */}
+            <polygon
+              points="30,32 8,8 8,56"
+              fill="var(--color-liquiddarkgray)"
+            />
+          </svg>
         </div>
       )}
 

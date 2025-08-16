@@ -10,7 +10,8 @@ export default function OrderButton({
 }) {
     // Basic style presets
     const base =
-        'transition-colors font-semibold rounded focus:outline-none focus:ring-2 focus:ring-primary2';
+       
+        'transition-colors font-title  py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-primary2normal ';
     const types = {
         primary:
             '!bg-green !text-black hover:!bg-green/80',
@@ -32,14 +33,10 @@ export default function OrderButton({
         ${types[type] || ''}
         ${block ? 'w-full' : ''}
         ${className}
-        px-6 py-2
       `}
             style={{
-                background: type === 'primary' ? 'var(--color-primary2)' : undefined,
+                background: type === 'primary' ? 'var(--color-primary2normal)' : undefined,
                 color: type === 'primary' ? 'black' : undefined,
-                border: 'none',
-                fontWeight: 600,
-                borderRadius: 8,
                 ...style,
             }}
             onClick={onClick}

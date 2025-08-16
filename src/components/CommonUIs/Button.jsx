@@ -1,4 +1,3 @@
-import "./button.css";
 
 export default function Button({
     children,
@@ -10,13 +9,24 @@ export default function Button({
     disabled = false,
     ...props
 }) {
+    // Define style maps for each button type
+    const typeClasses = {
+        primary: "bg-[var(--color-backgroundlight,#1b2937)] text-white hover:bg-[var(--color-primary2darker)]",
+        secondary: "bg-[var(--color-primary2normal,#00B7C9)] text-black hover:bg-[var(--color-primary2light,#00B7C9)]",
+        danger: "bg-red-500 text-white hover:bg-red-700",
+        success: "bg-green-500 text-white hover:bg-green-700",
+        nav: "bg-[var(--color-backgroundlight,#00B7C9)] text-black hover:bg-[var(--color-primary2darker,#00B7C9)]",
+        navconnected: "bg-[var(--color-primary2normal,#00B7C9)] text-black hover:bg-[var(--color-primary2light,#00B7C9)]",
+        navdisconnected: "bg-[var(--color-backgroundlight,#00B7C9)] text-white hover:bg-[var(--color-primary2darker,#00B7C9)] hover:text-white",
+    };
+
     return (
         <button
             type="button"
             className={`
-                button-base
-                button-${type}
-                ${block ? 'button-block' : ''}
+                transition-colors duration-200 font-semibold rounded-md outline-none border-none px-6 py-1.5 text-base cursor-pointer
+                ${typeClasses[type] || typeClasses.primary}
+                ${block ? 'w-full' : ''}
                 ${className}
             `}
             style={style}

@@ -23,7 +23,9 @@ function RootApp() {
     <StrictMode>
       <AuthKeyProvider>
         <Navbar />
-        <CurrentPage />
+        <div className="flex justify-center items-center min-h-[80vh]">
+          <CurrentPage />
+        </div>
       </AuthKeyProvider>
     </StrictMode>
   );

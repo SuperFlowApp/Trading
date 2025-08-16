@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import  {selectedPairStore}  from '../../Zustandstore/userOrderStore'
+import { selectedPairStore } from '../../Zustandstore/userOrderStore'
 import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
 
@@ -119,92 +119,235 @@ export default function KlineChartProPanel({ interval }) {
 
   useEffect(() => {
     let isMounted = true;
-    const feed = new BinanceFeed(pair);
 
-    const symbol = `${pair.toUpperCase()}USDT`;
-
-    feed.getHistoryKLineData(symbol, interval).then(() => {
-      if (!isMounted) return;
-
-      // Clear the chart container before creating a new chart
-      if (chartRef.current) {
-        chartRef.current.innerHTML = '';
+    (async () => {
+      // 1. Wait for your font to be loaded before creating the chart
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
       }
 
-      chartInstanceRef.current = new KLineChartPro({
-        container: chartRef.current,
-        locale: 'en-US',
-        formatter: {
-          formatDate: (timestamp, format, type) => {
-            const options = (type === 'time')
-              ? { hour: '2-digit', minute: '2-digit', hour12: false }
-              : { year: 'numeric', month: '2-digit', day: '2-digit' };
-            return new Date(timestamp).toLocaleString('en-US', options);
-          }
-        },
-        periods: [
-          { multiplier: 1, timespan: 'minute', text: '1m' },
-          { multiplier: 5, timespan: 'minute', text: '5m' },
-          { multiplier: 15, timespan: 'minute', text: '15m' },
-          { multiplier: 30, timespan: 'minute', text: '30m' },
-          { multiplier: 1, timespan: 'hour', text: '1h' },
-          { multiplier: 2, timespan: 'hour', text: '2h' },
-          { multiplier: 4, timespan: 'hour', text: '4h' },
-          { multiplier: 6, timespan: 'hour', text: '6h' },
-          { multiplier: 8, timespan: 'hour', text: '8h' },
-          { multiplier: 12, timespan: 'hour', text: '12h' },
-          { multiplier: 1, timespan: 'day', text: '1d' },
-          { multiplier: 3, timespan: 'day', text: '3d' },
-          { multiplier: 1, timespan: 'week', text: '1w' },
-          { multiplier: 1, timespan: 'month', text: '1M' },
-        ],
-        period: interval, // Use the selected interval object
-        datafeed: feed,
-        symbol: {
-          shortName: `${pair.toUpperCase()}/USDT`,
-          ticker: symbol,
-          priceCurrency: 'USDT',
-          type: 'spot',
-        },
-        styles: {
-  grid: {
-    show: true,
-    horizontal: {
-      show: true,
-      size: 1,
-      color: '#555',
-      style: 'dashed',
-      dashedValue: [2, 2]
-    },
-    vertical: {
-      show: true,
-      size: 1,
-      color: '#555',
-      style: '',
-      dashedValue: [2, 2]
-    }
-  },
-  
-}
-,
-        indicators: [{ name: 'MA' }],
+      const feed = new BinanceFeed(pair);
+      const symbol = `${pair.toUpperCase()}USDT`;
+
+      feed.getHistoryKLineData(symbol, interval).then(() => {
+        if (!isMounted) return;
+
+        if (chartRef.current) {
+          chartRef.current.innerHTML = '';
+        }
+
+        chartInstanceRef.current = new KLineChartPro({
+          container: chartRef.current,
+          locale: 'en-US',
+          formatter: {
+            formatDate: (timestamp, format, type) => {
+              const options = (type === 'time')
+                ? { hour: '2-digit', minute: '2-digit', hour12: false }
+                : { year: 'numeric', month: '2-digit', day: '2-digit' };
+              return new Date(timestamp).toLocaleString('en-US', options);
+            }
+          },
+          periods: [
+            { multiplier: 1, timespan: 'minute', text: '1m' },
+            { multiplier: 5, timespan: 'minute', text: '5m' },
+            { multiplier: 15, timespan: 'minute', text: '15m' },
+            { multiplier: 30, timespan: 'minute', text: '30m' },
+            { multiplier: 1, timespan: 'hour', text: '1h' },
+            { multiplier: 2, timespan: 'hour', text: '2h' },
+            { multiplier: 4, timespan: 'hour', text: '4h' },
+            { multiplier: 6, timespan: 'hour', text: '6h' },
+            { multiplier: 8, timespan: 'hour', text: '8h' },
+            { multiplier: 12, timespan: 'hour', text: '12h' },
+            { multiplier: 1, timespan: 'day', text: '1d' },
+            { multiplier: 3, timespan: 'day', text: '3d' },
+            { multiplier: 1, timespan: 'week', text: '1w' },
+            { multiplier: 1, timespan: 'month', text: '1M' },
+          ],
+          period: interval, // Use the selected interval object
+          datafeed: feed,
+          symbol: {
+            shortName: `${pair.toUpperCase()}/USDT`,
+            ticker: symbol,
+            priceCurrency: 'USDT',
+            type: 'spot',
+          },
+          styles: {
+            grid: {
+              show: true,
+              horizontal: {
+                show: true,
+                size: 1,
+                color: '#555',
+                style: 'dashed',
+                dashedValue: [2, 2]
+              },
+              vertical: {
+                show: true,
+                size: 1,
+                color: '#555',
+                style: '',
+                dashedValue: [2, 2]
+              }
+            },
+            candle: {
+              type: 'candle_solid', // or your preferred type
+              bar: {
+                // Choose your rule: 'current_open' or 'previous_close'
+                compareRule: 'current_open',
+
+                // Set your desired colors:
+                upColor: '#00B7C9',            // Bullish (green fill)
+                downColor: '#F59DEF',          // Bearish (red fill)
+                noChangeColor: '#888888',      // When no change
+
+                upBorderColor: '#00B7C9',      // Bullish border
+                downBorderColor: '#F59DEF',    // Bearish border
+                noChangeBorderColor: '#888888',
+
+                upWickColor: '#00B7C9',        // Bullish wick
+                downWickColor: '#F59DEF',      // Bearish wick
+                noChangeWickColor: '#888888',
+              },
+              priceMark: {
+                last: {
+                  line: {
+                    size: 1,                // line thickness
+                    style: 'dashed',         // line style: 'solid', 'dashed', etc.
+                  },
+                  text: {
+                    color: '#374151',
+                    fontFamily: "'Sofia Sans Condensed', Arial, sans-serif",
+                  }
+                }
+              },
+
+            },
+            fontFamily: "'Sofia Sans Condensed', Arial, sans-serif",
+          },
+          // disable default indicators (remove MA on load)
+          mainIndicators: [],   // nothing on the main candle pane
+          subIndicators: [],    // no sub-pane indicators
+          // Only one indicators line if you want MA
+          // indicators: [{ name: 'MA' }],
+        });
+
+        // 2. Immediately set canvas text fonts (including price mark)
+        const chart = chartInstanceRef.current;
+        const s = chart.getStyles();              // 1) start from current styles
+        const FONT = "'Sofia Sans Condensed', Arial, sans-serif";
+
+        /* x/y axis */
+        // Hide axis baseline lines (styles)
+        s.xAxis = {
+          ...(s.xAxis ?? {}),
+          axisLine: { ...(s.xAxis?.axisLine ?? {}), show: false }, // v9/v10
+          line: { ...(s.xAxis?.line ?? {}), show: false }, // fallback for some builds
+          tickLine: { ...(s.xAxis?.tickLine ?? {}), show: false }, // optional
+        };
+
+        s.yAxis = {
+          ...(s.yAxis ?? {}),
+          axisLine: { ...(s.yAxis?.axisLine ?? {}), show: false },
+          line: { ...(s.yAxis?.line ?? {}), show: false },
+          tickLine: { ...(s.yAxis?.tickLine ?? {}), show: false }, // optional
+        };
+
+        /* axis tick label fonts (date & value) */
+        s.xAxis = s.xAxis ?? {};
+        s.xAxis.tickText = {
+          ...(s.xAxis.tickText ?? {}),
+          family: FONT,
+          size: 12,
+          color: '#D1D5DB',
+        };
+
+        s.yAxis = s.yAxis ?? {};
+        s.yAxis.tickText = {
+          ...(s.yAxis.tickText ?? {}),
+          family: FONT,
+          size: 12,
+          color: '#D1D5DB',
+        };
+        /* crosshair */
+        s.crosshair = s.crosshair ?? {};
+        s.crosshair.horizontal = {
+          ...(s.crosshair.horizontal ?? {}),
+          text: { ...(s.crosshair.horizontal?.text ?? {}), family: FONT, size: 12 }
+        };
+        s.crosshair.vertical = {
+          ...(s.crosshair.vertical ?? {}),
+          text: { ...(s.crosshair.vertical?.text ?? {}), family: FONT, size: 12 }
+        };
+
+        /* candle.priceMark (keep dashed line + font) */
+        s.candle = s.candle ?? {};
+        s.candle.priceMark = {
+          ...(s.candle.priceMark ?? {}),
+          last: {
+            ...(s.candle.priceMark?.last ?? {}),
+            line: { ...(s.candle.priceMark?.last?.line ?? {}), style: 'dashed', size: 1 },
+            text: {
+              ...(s.candle.priceMark?.last?.text ?? {}),
+              family: FONT,
+              size: 12,
+              color: '#374151',
+              weight: 800, // Set the font weight to bold
+            },
+          },
+        };
+
+        /* candle.tooltip (the “Time / Open / High / Low / Close / Volume” row) */
+        s.candle.tooltip = {
+          ...(s.candle.tooltip ?? {}),
+          showRule: 'always',
+          showType: 'standard',
+          // v10+:
+          title: { ...(s.candle.tooltip?.title ?? {}), family: FONT, size: 13, color: '#9CA3AF' },
+          legend: {
+            ...(s.candle.tooltip?.legend ?? {}),
+            family: FONT, size: 12, color: '#E5E7EB',
+            template: [
+              { title: { text: 'Time', color: '#9CA3AF' }, value: { text: '{time}', color: '#F3F4F6' } },
+              { title: { text: 'Open', color: '#9CA3AF' }, value: { text: '{open}', color: '#F3F4F6' } },
+              { title: { text: 'High', color: '#9CA3AF' }, value: { text: '{high}', color: '#34D399' } },
+              { title: { text: 'Low', color: '#9CA3AF' }, value: { text: '{low}', color: '#F87171' } },
+              { title: { text: 'Close', color: '#9CA3AF' }, value: { text: '{close}', color: '#F3F4F6' } },
+              { title: { text: 'Vol', color: '#9CA3AF' }, value: { text: '{volume}', color: '#F3F4F6' } },
+            ],
+          },
+          // v9 fallback (ignored by v10+; harmless to include):
+          text: { ...(s.candle.tooltip?.text ?? {}), family: FONT, size: 12, color: '#E5E7EB' },
+        };
+
+        /* (optional) indicator tooltip if your build renders OHLC through it */
+        s.indicator = s.indicator ?? {};
+        s.indicator.tooltip = {
+          ...(s.indicator.tooltip ?? {}),
+          title: { ...(s.indicator.tooltip?.title ?? {}), family: FONT, size: 12, color: '#9CA3AF' },
+          legend: { ...(s.indicator.tooltip?.legend ?? {}), family: FONT, size: 12, color: '#E5E7EB' },
+          text: { ...(s.indicator.tooltip?.text ?? {}), family: FONT, size: 12, color: '#E5E7EB' },
+        };
+
+        /* finally apply once */
+        chart.setStyles(s);
+
       });
-    });
 
-    // No need to subscribe to live updates for lastPrice
-    feed.subscribe(() => { });
+      feed.subscribe(() => { });
 
-    return () => {
-      isMounted = false;
-      if (
-        chartInstanceRef.current &&
-        typeof chartInstanceRef.current.dispose === 'function'
-      ) {
-        chartInstanceRef.current.dispose();
-        chartInstanceRef.current = null;
-      }
-      feed.destroy();
-    };
+      return () => {
+        isMounted = false;
+        if (
+          chartInstanceRef.current &&
+          typeof chartInstanceRef.current.dispose === 'function'
+        ) {
+          chartInstanceRef.current.dispose();
+          chartInstanceRef.current = null;
+        }
+        feed.destroy();
+      };
+    })();
+
   }, [interval, pair]);
 
   return (

@@ -9,8 +9,8 @@ export default function NativeSlider({
   onChange,
   style = {},
   className = '',
-  filledColor = 'var(--color-primary2active)',
-  unfilledColor = 'var(--color-primary2deactive)',
+  filledColor = 'var(--color-liquidlightergray)',
+  unfilledColor = 'var(--color-primary2darker)',
   ...props
 }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -25,14 +25,8 @@ export default function NativeSlider({
   const percent = ((value - min) * 100) / (max - min);
 
   // Dynamic colors based on state
-  const filled = isDragging
-    ? 'var(--color-primary2active)'
-    : isSliderHovered
-      ? 'var(--color-primary2active)'
-      : 'var(--color-primary2active)';
-  const unfilled = isSliderHovered
-    ? 'var(--color-primary2deactiveactive)'
-    : 'var(--color-primary2deactive)';
+  const filled = 'var(--color-primary2normal)';
+  const unfilled = 'var(--color-liquidlightergray)';
 
   return (
     <input

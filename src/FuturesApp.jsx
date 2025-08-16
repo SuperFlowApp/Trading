@@ -8,7 +8,7 @@ import TradesPanel from './components/History/TradesPanel';
 
 function FuturesApp() {
   return (
-    <div className="relative min-w-0 w-[100%] h-auto overflow-visible">
+    <div className="relative min-w-0 w-[100%] h-auto overflow-visible max-w-[1800px]">
       <div className="flex min-w-0 flex-1 p-1 gap-1">
         {/* TradingViewChart/Infobar */}
         <div className="flex min-w-0 flex-col gap-1 w-full ">

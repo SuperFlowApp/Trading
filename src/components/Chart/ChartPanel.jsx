@@ -25,12 +25,11 @@ export default function ChartPanel() {
   return (
     <div className="w-full min-h-[520px] bg-backgroundmid rounded-md flex flex-col">
       {/* Tools Panel */}
-      <div className="w-full px-2 py-1 border-b border-backgroundlight flex items-center">
+      <div className="flex justify-end">
         <select
-          className="custom-input-dropdown"
+          className="time-dropdown text-body"
           value={intervalValue}
           onChange={e => setIntervalValue(e.target.value)}
-          style={{ height: 28, width: 80 }}
         >
           {intervals.map(opt => (
             <option key={opt.key} value={opt.value}>

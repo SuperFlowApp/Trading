@@ -1,5 +1,5 @@
 const SideSelectorButton = ({ side, setSide }) => (
-  <div className="relative flex w-full bg-backgroundlight rounded-lg overflow-hidden" style={{ minHeight: 40 }}>
+  <div className="relative flex w-full bg-backgroundlight rounded-md overflow-hidden" style={{ minHeight: 30 }}>
     {/* Sliding background */}
     <div
       className={`
@@ -12,7 +12,7 @@ const SideSelectorButton = ({ side, setSide }) => (
       }}
     />
     <button
-      className={`w-1/2 py-1 rounded-md font-bold z-10 transition-colors duration-200 ${
+      className={`w-1/2  rounded-md font-title z-10 transition-colors duration-200 ${
         side === 'buy' ? 'text-black' : 'text-white hover:bg-green'
       }`}
       onClick={() => setSide('buy')}
@@ -22,7 +22,7 @@ const SideSelectorButton = ({ side, setSide }) => (
       Buy
     </button>
     <button
-      className={`w-1/2 py-1 rounded-md font-bold z-10 transition-colors duration-200 ${
+      className={`w-1/2  rounded-md font-title z-10 transition-colors duration-200 ${
         side === 'sell' ? 'text-black' : 'text-white hover:bg-red/30'
       }`}
       onClick={() => setSide('sell')}
