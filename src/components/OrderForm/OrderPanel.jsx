@@ -284,7 +284,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
 
   const orderButtonText = !authKey
-    ? 'connect'
+    ? 'Connect'
     : side === 'buy'
       ? 'Place buy order'
       : 'Place sell order';
@@ -303,7 +303,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
 
       {/* Margin Mode - Leverage - Position Mode */}
-      <div className="flex justify-between items-center text-sm font-semibold py-2 gap-2">
+      <div className="flex justify-between items-center text-body gap-2 my-1">
         <MarginMode />
         <LeveragePanel />
         <PositionMode />
@@ -315,17 +315,17 @@ function LimitOrderForm({ onCurrencyChange }) {
         <SideSelectorButton side={side} setSide={setSide} />
       </div>
       {/* Balance Row - replaced with BalanceFetch */}
-      <div className="font-semibold text-[12px]">
+      <div className="text-body">
         <BalanceFetch onBalance={setBalanceFree} />
       </div>
 
       {/* Conditionally render the Price field */}
-      <div className=" flex flex-col text-sm pt-6 gap-2">
+      <div className=" flex flex-col text-body gap-2">
         {market !== 'market' && (
           <InputWithButton
             value={price === null || price === undefined ? "" : price}
             onChange={e => setPrice(e.target.value)}
-            label="Price"
+            label="Price (USD)"
             buttonLabel="Mid"
             onButtonClick={() => {
               if (priceMidpoint) {
@@ -371,7 +371,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
 
 
-        <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
+        <div className="min-w-[60px] flex items-center gap-1 text-right text-body text-gray-400">
           <PercentageInput
             value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
             onChange={handleInputChange}
@@ -379,7 +379,7 @@ function LimitOrderForm({ onCurrencyChange }) {
         </div>
       </div>
 
-      <div className='w-full flex flex-row items-center justify-end gap-4'>
+      <div className='text-body w-full flex flex-row items-center justify-end gap-4'>
         <span>TIF</span>
         <TifSelector value={timeInForce} onChange={setTimeInForce} />
       </div>
@@ -398,7 +398,7 @@ function LimitOrderForm({ onCurrencyChange }) {
                   ? 'primary'
                   : 'secondary'
         }
-        className={` mt-8 text-lg transition-colors border-2 border-transparent ${blinkClass}`}
+        className={` mt-2  transition-colors border-2 border-transparent ${blinkClass}`}
         block
         onClick={() => {
           if (!authKey) {
@@ -422,15 +422,15 @@ function LimitOrderForm({ onCurrencyChange }) {
         }}
       />
 
-      <div className='px-4' style={{ minHeight: '16px' }}>
-        {orderError && <div className="text-red-400 text-xs">{orderError}</div>}
-        {orderSuccess && <div className="text-green-400 text-xs">{orderSuccess}</div>}
+      <div className='' style={{ minHeight: '16px' }}>
+        {orderError && <div className="text-red-400 text-body">{orderError}</div>}
+        {orderSuccess && <div className="text-green-400 text-body">{orderSuccess}</div>}
       </div>
 
       {/* Order Information */}
-      <div className="px-2 mt-4">
-        <div className="border-t border-liquidwhite py-3 text-xs flex flex-col gap-2">
-          <span className="w-full flex justify-between text-white font-semibold">
+      <div >
+        <div className="pt-2 border-t border-liquidwhite text-body flex flex-col">
+          <span className="w-full flex justify-between text-white ">
             Order Value
             <span>
               {currentNotional !== null && !isNaN(currentNotional)
@@ -438,7 +438,7 @@ function LimitOrderForm({ onCurrencyChange }) {
                 : "--"}
             </span>
           </span>
-          <span className="w-full flex justify-between text-white font-semibold">
+          <span className="w-full flex justify-between text-white ">
             Fees
             <span>0.0700% / 0.0400%</span>
           </span>

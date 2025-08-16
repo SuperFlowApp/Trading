@@ -8,14 +8,14 @@ function TifSelector({ value, onChange }) {
     const selected = value || TIF_OPTIONS[0].label;
 
     return (
-        <div className="my-2">
+        <div>
             <select
                 className="custom-input-dropdown"
                 value={selected}
                 onChange={e => {
                     if (onChange) onChange(e.target.value);
                 }}
-                style={{ height: 28 }}
+                style={{  width:64 }}
             >
                 {TIF_OPTIONS.map(opt => (
                     <option key={opt.key} value={opt.label}>
