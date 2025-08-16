@@ -303,7 +303,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
 
       {/* Margin Mode - Leverage - Position Mode */}
-      <div className="flex justify-between items-center text-body font-semibold py-2 gap-2">
+      <div className="flex justify-between items-center text-sm font-semibold py-2 gap-2">
         <MarginMode />
         <LeveragePanel />
         <PositionMode />
@@ -315,17 +315,17 @@ function LimitOrderForm({ onCurrencyChange }) {
         <SideSelectorButton side={side} setSide={setSide} />
       </div>
       {/* Balance Row - replaced with BalanceFetch */}
-      <div className=" text-body">
+      <div className="font-semibold text-[12px]">
         <BalanceFetch onBalance={setBalanceFree} />
       </div>
 
       {/* Conditionally render the Price field */}
-      <div className=" flex flex-col gap-2">
+      <div className=" flex flex-col text-sm pt-6 gap-2">
         {market !== 'market' && (
           <InputWithButton
             value={price === null || price === undefined ? "" : price}
             onChange={e => setPrice(e.target.value)}
-            label="Price (USD)"
+            label="Price"
             buttonLabel="Mid"
             onButtonClick={() => {
               if (priceMidpoint) {
@@ -365,11 +365,13 @@ function LimitOrderForm({ onCurrencyChange }) {
           value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
           onChange={handleSliderChange}
           style={{ width: '100%' }}
+          filledColor={'var(--color-primary2deactive)'}
+          unfilledColor={'var(--color-backgroundlight)'}
         />
 
 
 
-        <div className="min-w-[60px] flex items-center gap-1 text-right text-body text-gray-400">
+        <div className="min-w-[60px] flex items-center gap-1 text-right text-sm text-gray-400">
           <PercentageInput
             value={sliderValue === null || sliderValue === undefined ? 0 : sliderValue}
             onChange={handleInputChange}

@@ -17,7 +17,7 @@ export const InputWithButton = ({
 
   return (
     <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] overflow-hidden">
-      {/* fixed prefix (price/label) with vertical separator */}
+      {/* fixed label with vertical separator */}
       <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
         {label || placeholder}
       </div>
@@ -37,7 +37,7 @@ export const InputWithButton = ({
 
       <button
         type="button"
-        className="h-full px-3 text-body font-semibold border-l border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] hover:bg-[var(--color-backgroundlighthover)]"
+        className="h-full min-w-[60px] text-body font-semibold border-l border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] hover:bg-[var(--color-backgroundlighthover)]"
         onClick={onButtonClick}
         disabled={disabled}
         {...buttonProps}

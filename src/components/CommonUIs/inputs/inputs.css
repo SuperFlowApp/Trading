@@ -104,7 +104,7 @@
 
 .custom-input-dropdown {
   min-width: 90px;
-  border: 1px solid var(--color-primary2darker);
+  border: 1px solid var(--color-liquidlightergray);
   background: none;
   color: var(--color-liquidwhite);
   height: 30px;
