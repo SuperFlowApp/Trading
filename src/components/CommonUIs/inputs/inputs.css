@@ -1,3 +1,17 @@
+/* dropdown options Style*/
+select option {
+  background: var(--color-backgroundmid);
+  color: var(--color-liquidwhite);
+  font-size: 12px;
+  padding: 8px;
+}
+
+/* highlight selected option */
+select option:checked {
+  background: var(--color-primary2darker);
+  color: var(--color-liquidwhite);
+}
+
 .custom-input-wrapper {
   position: relative;
   width: 100%;

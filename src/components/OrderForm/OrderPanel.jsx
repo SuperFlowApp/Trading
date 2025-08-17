@@ -10,9 +10,8 @@ import Tab from '../CommonUIs/tab';
 import NativeSlider from '../CommonUIs/slider';
 import OrderButton from './Ui/OrderButton.jsx';
 import SideSelectorButton from './Ui/SideSelectorButton.jsx';
-import TifSelector from './Ui/TifSelector.jsx';
 import BalanceFetch from './BalanceFetch';
-import { InputWithButton, InputWithDropDown, PercentageInput } from '../CommonUIs/inputs/inputs.jsx';
+import { PriceFieldInput, InputWithDropDown, PercentageInput , DropDown } from '../CommonUIs/inputs/inputs.jsx';
 import DefaultAPILogin from "../Login/defaultAPILogin";
 import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
 
@@ -328,7 +327,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       <div className=" flex flex-col text-body gap-2">
         {market !== 'market' && (
           // For price input
-          <InputWithButton
+          <PriceFieldInput
             value={price === null || price === undefined ? "" : price}
             onChange={e => {
               let val = e.target.value.replace(/[^0-9.]/g, '');
@@ -413,8 +412,15 @@ function LimitOrderForm({ onCurrencyChange }) {
 
       <div className='text-body w-full flex flex-row items-center justify-end gap-4'>
         <span>TIF</span>
-        <TifSelector value={timeInForce} onChange={setTimeInForce} />
-      </div>
+        <DropDown
+          options={[
+            { value: "GTC", label: "GTC" },
+            { value: "IOC", label: "IOC" },
+            { value: "FOK", label: "FOK" }
+          ]}
+          selectedOption={timeInForce}
+          onOptionChange={setTimeInForce}
+        />      </div>
 
 
       {/* Place Order Button */}

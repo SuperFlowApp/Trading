@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./inputs.css";
 
 // Input with a button on the right (for Price + Mid)
-export const InputWithButton = ({
+export const PriceFieldInput = ({
   value,
   onChange,
   placeholder = "",
@@ -88,11 +88,22 @@ export const InputWithDropDown = ({
         className="h-full bg-transparent text-body px-2 border-l border-[var(--color-liquiddarkgray)] outline-none"
         {...dropdownProps}
       >
-        {options.map(opt => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
+        {/* Render only options that are NOT currently selected */}
+        {options
+          .filter(opt => opt.value !== selectedOption)
+          .map(opt => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        {/* Optionally, render the selected option as hidden so the value is always valid */}
+        {options
+          .filter(opt => opt.value === selectedOption)
+          .map(opt => (
+            <option key={opt.value} value={opt.value} hidden>
+              {opt.label}
+            </option>
+          ))}
       </select>
     </div>
   );
@@ -213,10 +224,42 @@ export const PercentageInput = ({
         value={value}
         onChange={onChange}
         className="percentage-input"
-        style={{ paddingRight: 24 }}
         {...inputProps}
       />
       <span className="percentage-symbol">%</span>
     </div>
   );
 };
+
+export const DropDown = ({
+  options = [],
+  selectedOption,
+  onOptionChange,
+  dropdownProps = {},
+  className = "",
+}) => (
+
+  <select
+    value={selectedOption}
+    onChange={e => onOptionChange(e.target.value)}
+    className="h-full bg-transparent text-body border p-1 rounded-md border-[var(--color-liquiddarkgray)] outline-none"
+    {...dropdownProps}
+  >
+    {/* Render only options that are NOT currently selected */}
+    {options
+      .filter(opt => opt.value !== selectedOption)
+      .map(opt => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    {/* Optionally, render the selected option as hidden so the value is always valid */}
+    {options
+      .filter(opt => opt.value === selectedOption)
+      .map(opt => (
+        <option key={opt.value} value={opt.value} hidden>
+          {opt.label}
+        </option>
+      ))}
+  </select>
+);

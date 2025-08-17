@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {selectedPairStore} from '../../Zustandstore/userOrderStore.js';
+import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
 import PairSelector from './PairSelector';
 import { formatPrice } from '../../utils/priceFormater.js';
 
@@ -56,7 +56,11 @@ function Infobar() {
         <div className="flex text-[14px] items-center gap-8 text-liquidwhite">
           <div className="flex flex-col">
             <span>Price:</span>
-            <span className="text-white">{formatPrice(ticker.last)}</span>
+            <span className="text-white">
+              {ticker.last !== undefined && ticker.last !== null
+                ? formatPrice(ticker.last)
+                : "--"}
+            </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
@@ -68,38 +72,50 @@ function Infobar() {
                   ticker.change > 0
                     ? 'var(--color-green)'
                     : ticker.change < 0
-                    ? 'var(--color-red)'
-                    : undefined,
+                      ? 'var(--color-red)'
+                      : undefined,
               }}
             >
               {ticker.change !== undefined && ticker.percentage !== undefined
                 ? `$${formatPrice(ticker.change)} (${Number(ticker.percentage).toFixed(0)}%)`
-                : ''}
+                : '--'}
             </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>24h Volume:</span>
-            <span className="text-white">{formatPrice(ticker.baseVolume)}</span>
+            <span className="text-white">
+              {ticker.baseVolume !== undefined && ticker.baseVolume !== null
+                ? formatPrice(ticker.baseVolume)
+                : "--"}
+            </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Open:</span>
-            <span className="text-white">{formatPrice(ticker.open)}</span>
+            <span className="text-white">
+              {ticker.open !== undefined && ticker.open !== null
+                ? formatPrice(ticker.open)
+                : "--"}
+            </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Bid / Ask:</span>
             <span className="text-white">
-              {ticker.bid !== undefined && ticker.ask !== undefined
+              {ticker.bid !== undefined && ticker.ask !== undefined && ticker.bid !== null && ticker.ask !== null
                 ? `${formatPrice(ticker.bid)} / ${formatPrice(ticker.ask)}`
-                : ''}
+                : "--"}
             </span>
           </div>
           <div className="w-[1.5px] h-5 bg-white/10 self-center" />
           <div className="flex flex-col">
             <span>Previous Close:</span>
-            <span className="text-white">{formatPrice(ticker.previousClose)}</span>
+            <span className="text-white">
+              {ticker.previousClose !== undefined && ticker.previousClose !== null
+                ? formatPrice(ticker.previousClose)
+                : "--"}
+            </span>
           </div>
         </div>
       </div>
