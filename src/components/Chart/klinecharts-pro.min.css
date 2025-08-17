@@ -753,16 +753,22 @@
     left: 50%;
     top: 50%;
     z-index: 1;
-    transform: translate(-50%) translateY(-50%);
-
-
-    display: none !important;
+    transform: translate(-50%, -50%);
+    display: flex !important; /* Ensure it is displayed */
+    align-items: center;
+    justify-content: center;
+    font-size: 24px; /* Adjust font size */
+    color: rgba(255, 255, 255, 0.2); /* Adjust color and transparency */
+    font-family: 'Sofia Sans Condensed', Arial, sans-serif; /* Use your preferred font */
 }
 
 .klinecharts-pro-watermark .logo {
-    width: 160px;
-    height: 184px;
-    fill: var(--klinecharts-pro-border-color)
+    width: 500px;
+    background-image: url('/assets/Watermark.svg'); /* Replace with your SVG file path */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    fill: none; /* Remove fill if using a background image */
 }
 
 .klinecharts-pro-price-unit {

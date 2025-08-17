@@ -75,11 +75,8 @@ const DefaultAPISignup = ({ open, onClose, onSignupSuccess, clickPosition }) => 
           placeholder="Repeat Password"
         />
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <Button type="primary" onClick={handleSignup} disabled={loading}>
+          <Button type="secondary" onClick={handleSignup} disabled={loading}>
             {loading ? "Signing up..." : "Sign Up"}
-          </Button>
-          <Button type="secondary" onClick={onClose}>
-            Cancel
           </Button>
         </div>
       </div>

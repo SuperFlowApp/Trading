@@ -12,9 +12,8 @@ const SideSelectorButton = ({ side, setSide }) => (
       }}
     />
     <button
-      className={`w-1/2  rounded-md font-title z-10 transition-colors duration-200 ${
-        side === 'buy' ? 'text-black' : 'text-white hover:bg-green'
-      }`}
+      className={`w-1/2  rounded-md font-title z-10 transition-colors duration-200 ${side === 'buy' ? 'text-black' : 'text-white hover:bg-green/30'
+        }`}
       onClick={() => setSide('buy')}
       type="button"
       style={{ position: 'relative' }}
@@ -22,9 +21,8 @@ const SideSelectorButton = ({ side, setSide }) => (
       Buy
     </button>
     <button
-      className={`w-1/2  rounded-md font-title z-10 transition-colors duration-200 ${
-        side === 'sell' ? 'text-black' : 'text-white hover:bg-red/30'
-      }`}
+      className={`w-1/2  rounded-md font-title z-10 transition-colors duration-200 ${side === 'sell' ? 'text-black' : 'text-white hover:bg-red/30'
+        }`}
       onClick={() => setSide('sell')}
       type="button"
       style={{ position: 'relative' }}

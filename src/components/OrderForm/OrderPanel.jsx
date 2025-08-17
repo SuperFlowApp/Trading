@@ -13,7 +13,7 @@ import SideSelectorButton from './Ui/SideSelectorButton.jsx';
 import TifSelector from './Ui/TifSelector.jsx';
 import BalanceFetch from './BalanceFetch';
 import { InputWithButton, InputWithDropDown, PercentageInput } from '../CommonUIs/inputs/inputs.jsx';
-import LoginPanel from '../Login/LoginPanel'; // Import the login modal
+import DefaultAPILogin from "../Login/defaultAPILogin";
 import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
 
 function LimitOrderForm({ onCurrencyChange }) {
@@ -33,8 +33,8 @@ function LimitOrderForm({ onCurrencyChange }) {
   const priceMidpoint = useZustandStore(s => s.priceMidpoint);
 
   // Move this check AFTER all hooks
-  const [price, setPrice] = useState(priceMidpoint);
-  const [amount, setAmount] = useState('');
+  const [price, setPrice] = useState("0.0");
+  const [amount, setAmount] = useState("0.0");
   const [side, setSide] = useState('buy');
   const [market, setMarket] = useState('limit'); // Default to 'limit', only 'market' and 'limit' allowed
   const [loading, setLoading] = useState(false);
@@ -59,8 +59,8 @@ function LimitOrderForm({ onCurrencyChange }) {
 
   // Reset price and amount when selectedPair changes (new pair detected/selected)
   useEffect(() => {
-    setPrice('');
-    setAmount('');
+    setPrice("0.0");
+    setAmount("0.0");
   }, [selectedPairBase]);
 
   // Update notional whenever price, amount, or selectedCurrency changes
@@ -289,7 +289,12 @@ function LimitOrderForm({ onCurrencyChange }) {
       ? 'Place buy order'
       : 'Place sell order';
 
-  const [loginOpen, setLoginOpen] = useState(false); // Add state for login modal
+  const [showLogin, setShowLogin] = useState(false);
+
+  const handleLoginSuccess = (username, token) => {
+    setShowLogin(false);
+    // Optionally, you can show a message or trigger a refresh here
+  };
 
   return (
     <div className="p-2 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
@@ -322,9 +327,17 @@ function LimitOrderForm({ onCurrencyChange }) {
       {/* Conditionally render the Price field */}
       <div className=" flex flex-col text-body gap-2">
         {market !== 'market' && (
+          // For price input
           <InputWithButton
             value={price === null || price === undefined ? "" : price}
-            onChange={e => setPrice(e.target.value)}
+            onChange={e => {
+              let val = e.target.value.replace(/[^0-9.]/g, '');
+              // Remove leading zeros (but keep "0" or "0.0" as valid)
+              if (val.length > 1 && val[0] === "0" && !val.startsWith("0.")) {
+                val = val.replace(/^0+/, '');
+              }
+              setPrice(val === "" ? "0.0" : val);
+            }}
             label="Price (USD)"
             buttonLabel="Mid"
             onButtonClick={() => {
@@ -339,13 +352,32 @@ function LimitOrderForm({ onCurrencyChange }) {
         {/* Conditionally render the Amount field */}
 
         {market !== '' && (
+          // For amount (size) input
           <InputWithDropDown
             value={amount === null || amount === undefined ? "" : amount}
-            onChange={handleAmountChange}
+            onChange={e => {
+              let val = e.target.value.replace(/[^0-9.]/g, '');
+              // Remove leading zeros (but keep "0" or "0.0" as valid)
+              if (val.length > 1 && val[0] === "0" && !val.startsWith("0.")) {
+                val = val.replace(/^0+/, '');
+              }
+              setAmount(val === "" ? "0.0" : val);
+              setInputSource('input');
+              // Calculate sliderValue from amount
+              const numericValue = parseFloat(val === "" ? "0.0" : val);
+              const numericBalance = parseFloat(balanceFree);
+              if (!isNaN(numericValue) && numericBalance > 0) {
+                let percent = (numericValue / numericBalance) * 100;
+                percent = Math.max(0, Math.min(100, percent));
+                setSliderValue(percent);
+              } else {
+                setSliderValue(0);
+              }
+            }}
             label="Size"
             options={[
-              { value: pairDetails.quote, label: pairDetails.quote }, // USDT first
-              { value: pairDetails.base, label: pairDetails.base }    // Base second
+              { value: pairDetails.quote, label: pairDetails.quote },
+              { value: pairDetails.base, label: pairDetails.base }
             ]}
             selectedOption={selectedCurrency || ""}
             onOptionChange={setSelectedCurrency}
@@ -402,7 +434,7 @@ function LimitOrderForm({ onCurrencyChange }) {
         block
         onClick={() => {
           if (!authKey) {
-            setLoginOpen(true);
+            setShowLogin(true);
             return;
           }
           placeOrder(); // No arguments needed
@@ -412,15 +444,14 @@ function LimitOrderForm({ onCurrencyChange }) {
         {orderButtonText}
       </OrderButton>
 
-      {/* Login Modal */}
-      <LoginPanel
-        open={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onLoginSuccess={() => {
-          setLoginOpen(false);
-          window.dispatchEvent(new Event("storage")); // Force navbar to update
-        }}
-      />
+      {/* Login Popup Modal */}
+      {showLogin && (
+        <DefaultAPILogin
+          open={showLogin}
+          onClose={() => setShowLogin(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      )}
 
       <div className='' style={{ minHeight: '16px' }}>
         {orderError && <div className="text-red-400 text-body">{orderError}</div>}
@@ -429,18 +460,19 @@ function LimitOrderForm({ onCurrencyChange }) {
 
       {/* Order Information */}
       <div >
-        <div className="pt-2 border-t border-liquidwhite text-body flex flex-col">
-          <span className="w-full flex justify-between text-white ">
+        <div className="pt-2 border-t border-liquiddarkgray text-body text-liquidlightergray flex flex-col">
+          <span className="w-full flex justify-between  ">
             Order Value
-            <span>
+            <span className="text-liquidwhite">
               {currentNotional !== null && !isNaN(currentNotional)
                 ? `$${currentNotional.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 : "--"}
             </span>
           </span>
-          <span className="w-full flex justify-between text-white ">
+          <span className="w-full flex justify-between">
             Fees
-            <span>0.0700% / 0.0400%</span>
+            <span className="text-liquidwhite">
+              0.0700% / 0.0400%</span>
           </span>
         </div>
       </div>

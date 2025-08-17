@@ -4,15 +4,13 @@ import { useAuthKey } from "../../contexts/AuthKeyContext";
 import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
 import Modal from "../CommonUIs/modal/modal";
-import DefaultAPISignup from "./defaultAPISignup";
 
 const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [signupOpen, setSignupOpen] = useState(false); 
 
-  const { setAuthKey } = useAuthKey();
+  const { setAuthKey, setUsername: setContextUsername } = useAuthKey();
 
   const handleLogin = async () => {
     setLoading(true);
@@ -30,7 +28,8 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
 
       if (data.access_token) {
         message.success("Login successful!");
-        setAuthKey(data.access_token); 
+        setAuthKey(data.access_token);
+        setContextUsername(username); // store username in context
         onLoginSuccess && onLoginSuccess(username, data.access_token);
         onClose();
       } else {
@@ -45,15 +44,6 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSignUp = () => {
-    setSignupOpen(true);
-  };
-
-  const handleSignupSuccess = (username) => {
-    setSignupOpen(false);
-    message.success(`Account created for ${username}. You can now log in.`);
   };
 
   return (
@@ -77,18 +67,9 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
             <Button type="secondary" onClick={handleLogin} disabled={loading}>
               {loading ? "Logging in..." : "Login"}
             </Button>
-            <Button type="primary" onClick={handleSignUp}>
-              SignUp
-            </Button>
           </div>
         </div>
       </Modal>
-      <DefaultAPISignup
-        open={signupOpen}
-        onClose={() => setSignupOpen(false)}
-        onSignupSuccess={handleSignupSuccess}
-        clickPosition={clickPosition}
-      />
     </>
   );
 };

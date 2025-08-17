@@ -290,7 +290,7 @@ export default function KlineChartProPanel({ interval }) {
               ...(s.candle.priceMark?.last?.text ?? {}),
               family: FONT,
               size: 12,
-              color: '#374151',
+              color: '#000000',
               weight: 800, // Set the font weight to bold
             },
           },
@@ -331,6 +331,66 @@ export default function KlineChartProPanel({ interval }) {
         /* finally apply once */
         chart.setStyles(s);
 
+        // GRID lines across the pane
+        chart.setStyles({
+          grid: {
+            show: true,
+            horizontal: {
+              show: true,
+              size: 1,                            // Line thickness
+              style: 'solid',                    // 'solid' | 'dashed'
+              dashedValue: [3, 3],                // Dash pattern when dashed
+              color: '#00505c50',      // Horizontal grid line color
+            },
+            vertical: {
+              show: true,
+              size: 1,
+              style: 'solid',
+              dashedValue: [2, 2],
+              color: '00505c50',      // Vertical grid line color
+            },
+          },
+        });
+
+        // CROSSHAIR lines (mouse-follow)
+        chart.setStyles({
+          crosshair: {
+            horizontal: {
+              line: {
+                color: '#ffffff3d',                 // Horizontal crosshair line color
+                size: 1,                          // Line thickness
+                style: 'dashed',                  // 'solid' | 'dashed'
+                dashedValue: [2, 2],              // Dash pattern
+              },
+              // Optional: Small price label box
+              text: {
+                color: '#E5E7EB',
+                family: "'Sofia Sans Condensed', Arial, sans-serif",
+                size: 12,
+                paddingLeft: 6, paddingRight: 6, paddingTop: 3, paddingBottom: 3,
+                borderRadius: 4, borderSize: 1, borderColor: '#1F2937',
+                backgroundColor: 'rgba(2,0,27,0.85)',
+              },
+            },
+            vertical: {
+              line: {
+                color: '#ffffff3d',                 // Vertical crosshair line color
+                size: 1,
+                style: 'dashed',
+                dashedValue: [2, 2],
+              },
+              // Optional: Small time label box
+              text: {
+                color: '#E5E7EB',
+                family: "'Sofia Sans Condensed', Arial, sans-serif",
+                size: 12,
+                paddingLeft: 6, paddingRight: 6, paddingTop: 3, paddingBottom: 3,
+                borderRadius: 4, borderSize: 1, borderColor: '#1F2937',
+                backgroundColor: 'rgba(2,0,27,0.85)',
+              },
+            },
+          },
+        });
       });
 
       feed.subscribe(() => { });

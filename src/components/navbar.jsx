@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import 'antd/dist/reset.css';
-import LoginPanel from "./Login/LoginPanel";
+import DefaultAPILogin from "./Login/defaultAPILogin";
+import DefaultAPISignup from "./Login/defaultAPISignup"; // Import the signup modal
 import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import context
 import Button from "./CommonUIs/Button";
-//import Draggable from "react-draggable"; // <-- add this import
+import { useZustandStore } from "../Zustandstore/useStore"; // Import Zustand store
+import SettingsDropdown from "./SettingsDropdown"; // Add this import
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -22,8 +24,9 @@ const initialSettings = {
 };
 
 function Navbar() {
-  const { authKey, setAuthKey } = useAuthKey(); // <-- use context
+  const { authKey, setAuthKey, username } = useAuthKey(); // <-- use context username
   const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false); // State for signup modal
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(initialSettings);
@@ -66,9 +69,15 @@ function Navbar() {
     };
   }, [settingsOpen]);
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (username, token) => {
     setShowLogin(false);
-    setDropdownOpen(false); 
+    setDropdownOpen(false);
+    console.log(`User ${username} logged in successfully with token: ${token}`);
+  };
+
+  const handleSignupSuccess = (username) => {
+    setShowSignup(false);
+    console.log(`User ${username} signed up successfully!`);
   };
 
   const handleSettingChange = (key) => {
@@ -93,128 +102,120 @@ function Navbar() {
 
   return (
     <>
-      <nav className="pl-[20px] pr-[30px] w-full flex items-center justify-between px-4 py-2 bg-backgroundmid text-white text-body">
-        {/* Left Side */}
-        <div className="flex items-center gap-14">
-          <div className="flex items-end gap-2">
-            <img src="/assets/Logo.svg" alt="Logo" className="h-[30px] w-auto" />
-            <img src="/assets/Bysymmio.svg" alt="Logo" className="h-4 w-auto" />
-
-          </div>
+      <nav className=" w-full flex items-center justify-between px-4 py-3 bg-backgroundmid text-white text-body">
+        <div className="flex items-center justify-between self-center max-w-[1900px] mx-auto w-full">
+          {/* Left Side */}
           <div className="flex items-center gap-14">
+            <div className="flex items-end gap-2">
+              <img src="/assets/Logo.svg" alt="Logo" className="h-[30px] w-auto" />
+              <img src="/assets/Bysymmio.svg" alt="Logo" className="h-4 w-auto" />
 
-            <li
-              className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-white" : "text-liquidwhite"
-                }`}
-              onClick={() => handleTabClick("futures")}
-            >
-              <img
-                src="/assets/chart-candlestick.svg"
-                alt="Futures"
-                className={` ${activeTab === "futures"
-                  ? "brightness-200"
-                  : "brightness-100 group-hover:brightness-200"
-                  }`}
-              />
-              Futures Trading
-            </li>
-            <li
-              className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-white" : "text-liquidwhite"
-                }`}
-              onClick={() => handleTabClick("options")}
-            >
-              <img
-                src="/assets/chart-line.svg"
-                alt="Options"
-                className={`${activeTab === "options"
-                  ? "brightness-200"
-                  : "brightness-100 group-hover:brightness-200"
-                  }`}
-              />
-              Options Trading
-            </li>
-          </div>
-        </div>
-
-        {/* Right Side */}
-        <div className="flex items-center gap-4">
-          {/* Login/User Button */}
-          {!authKey ? (
-            <Button
-              type="navdisconnected"
-              onClick={() => setShowLogin(true)}
-            >
-              Connect
-            </Button>
-          ) : (
-            <div
-              className="relative"
-              ref={dropdownRef}
-              onMouseEnter={() => setDropdownOpen(true)}
-              onMouseLeave={() => setDropdownOpen(false)}
-            >
-              <Button
-                type="navconnected"
-              >
-                Connected
-              </Button>
-              {dropdownOpen && (
-                <div className="absolute right-0 bg-backgrounddark text-liquidwhite rounded shadow-lg z-50 p-2">
-                  <Button
-                    type="button-base button-danger"
-                    onClick={handleDisconnect}
-                  >
-                    Disconnect
-                  </Button>
-                </div>
-              )}
             </div>
-          )}
+            <div className="flex items-center gap-14">
 
-          <div className="relative" ref={settingsRef}>
-            <button
-              className="px-2 py-2 bg-backgroundlight rounded-md font-semibold hover:bg-primary2darker transition"
-              onClick={() => setSettingsOpen((v) => !v)}
-            >
-              <img src="/assets/settings-icon.svg" alt="Settings" className="w-5 h-5" />
-            </button>
-            {settingsOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-backgrounddark text-white rounded shadow-lg z-50 p-4">
-                <div className="flex flex-col gap-2">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={settings.skipOpenOrderConfirmation}
-                      onChange={() => handleSettingChange('skipOpenOrderConfirmation')}
-                      className="hidden peer"
-                    />
-                    <span className="w-4 h-4 rounded border border-secondary2 flex items-center justify-center peer-checked:bg-primary2normal transition-colors"></span>
-                    Skip Open Order Confirmation
-                  </label>
-                  {/* Rest of settings UI remains the same */}
-                  {/* ... */}
-                  <button
-                    className="w-full py-2 bg-secondary2 rounded hover:bg-secondary2/80 transition mt-2"
-                    onClick={() => setSettings(initialSettings)}
-                  >
-                    Reset layout
-                  </button>
-                </div>
+              <li
+                className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
+                  }`}
+                onClick={() => handleTabClick("futures")}
+              >
+                <img
+                  src="/assets/chart-candlestick.svg"
+                  alt="Futures"
+                  className={` ${activeTab === "futures"
+                    ? "brightness-200"
+                    : "brightness-100 group-hover:brightness-200"
+                    }`}
+                />
+                Futures Trading
+              </li>
+              <li
+                className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
+                  }`}
+                onClick={() => handleTabClick("options")}
+              >
+                <img
+                  src="/assets/chart-line.svg"
+                  alt="Options"
+                  className={`${activeTab === "options"
+                    ? "brightness-200"
+                    : "brightness-100 group-hover:brightness-200"
+                    }`}
+                />
+                Options Trading
+              </li>
+            </div>
+          </div>
+
+          {/* Right Side */}
+          <div className="flex items-center gap-4">
+            {/* Login/User Button */}
+            {!authKey ? (
+              <Button
+                type="navdisconnected"
+                onClick={() => setShowLogin(true)}
+              >
+                Login
+              </Button>
+            ) : (
+              <div
+                className="relative"
+                ref={dropdownRef}
+                onMouseEnter={() => setDropdownOpen(true)}
+                onMouseLeave={() => setDropdownOpen(false)}
+              >
+                <Button type="navconnected">
+                  {username} {/* Show username if available */}
+                </Button>
+                {dropdownOpen && (
+                  <div className="absolute right-0 text-liquidwhite rounded z-50 py-2">
+                    <Button
+                      type="navdisconnection"
+                      onClick={handleDisconnect}
+                    >
+                      Logout
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
+            {/* Signup Button */}
+            {!authKey && (
+              <Button
+                type="navsignup"
+                onClick={() => setShowSignup(true)}
+              >
+                Sign Up
+              </Button>
+            )}
+            <SettingsDropdown
+              settingsOpen={settingsOpen}
+              setSettingsOpen={setSettingsOpen}
+              settings={settings}
+              setSettings={setSettings}
+              handleSettingChange={handleSettingChange}
+              settingsRef={settingsRef}
+            />
           </div>
         </div>
       </nav>
 
       {/* Login Popup Modal */}
       {showLogin && (
-        <LoginPanel
+        <DefaultAPILogin
           open={showLogin}
           onClose={() => setShowLogin(false)}
           onLoginSuccess={handleLoginSuccess}
         />
       )}
-      
+
+      {/* Signup Popup Modal */}
+      {showSignup && (
+        <DefaultAPISignup
+          open={showSignup}
+          onClose={() => setShowSignup(false)}
+          onSignupSuccess={handleSignupSuccess}
+        />
+      )}
     </>
   );
 }

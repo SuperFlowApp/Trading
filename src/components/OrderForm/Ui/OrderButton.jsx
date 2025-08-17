@@ -22,7 +22,7 @@ export default function OrderButton({
         success:
             '!bg-green-500 !text-white hover:!bg-red-600',
         orderdisconnect:
-            '!bg-gray-700 !text-white hover:!bg-gray-500',
+            '!bg-gray-700 !text-white hover:!bg-primary2darker',
     };
 
     return (
