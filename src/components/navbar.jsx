@@ -4,7 +4,6 @@ import DefaultAPILogin from "./Login/defaultAPILogin";
 import DefaultAPISignup from "./Login/defaultAPISignup"; // Import the signup modal
 import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import context
 import Button from "./CommonUIs/Button";
-import { useZustandStore } from "../Zustandstore/useStore"; // Import Zustand store
 import SettingsDropdown from "./SettingsDropdown"; // Add this import
 
 const initialSettings = {
