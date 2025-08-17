@@ -7,7 +7,7 @@ export default function TradesPanel() {
   const [activeTab, setActiveTab] = useState('OrderBook');
 
   return (
-    <div className="p-2 flex flex-col bg-backgroundmid rounded-md overflow-hidden min-w-[300px] max-h-[630px]">
+    <div className="px-2 py-1 flex flex-col bg-backgroundmid rounded-md overflow-hidden min-w-[300px] max-h-[630px]">
       {/* Tab Selector */}
       <Tab
         tabs={['OrderBook', 'Trades']}

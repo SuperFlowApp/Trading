@@ -297,7 +297,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   };
 
   return (
-    <div className="p-2 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
+    <div className="px-2 py-1 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
 
       {/* Head Tabs */}
       <Tab
