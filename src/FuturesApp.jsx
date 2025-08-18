@@ -14,7 +14,6 @@ function FuturesApp() {
         <div className="flex min-w-0 flex-col gap-1 w-full ">
           <div className="flex min-w-0 gap-1 w-full ">
             <div className="flex min-w-0 flex-col flex-1 gap-1">
-              <NotificationBar />
               <Infobar />
               <ChartPanel />
             </div>

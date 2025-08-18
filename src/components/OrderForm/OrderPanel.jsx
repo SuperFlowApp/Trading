@@ -11,7 +11,7 @@ import NativeSlider from '../CommonUIs/slider';
 import OrderButton from './Ui/OrderButton.jsx';
 import SideSelectorButton from './Ui/SideSelectorButton.jsx';
 import BalanceFetch from './BalanceFetch';
-import { PriceFieldInput, InputWithDropDown, PercentageInput , DropDown } from '../CommonUIs/inputs/inputs.jsx';
+import { PriceFieldInput, InputWithDropDown, PercentageInput, DropDown } from '../CommonUIs/inputs/inputs.jsx';
 import DefaultAPILogin from "../Login/defaultAPILogin";
 import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
 
@@ -147,6 +147,8 @@ function LimitOrderForm({ onCurrencyChange }) {
     setMarket(tab);
     if (tab === 'market') {
       setPrice('');
+    } else if (tab === 'limit') {
+      setPrice('0.0');
     }
   };
 
@@ -283,7 +285,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
 
   const orderButtonText = !authKey
-    ? 'Connect'
+    ? 'Login'
     : side === 'buy'
       ? 'Place buy order'
       : 'Place sell order';

@@ -4,6 +4,7 @@ import FuturesApp from './FuturesApp';
 import Navbar from './components/navbar';
 import CommingSoon from './components/CommonUIs/CommingSoon';
 import { AuthKeyProvider } from './contexts/AuthKeyContext'; // <-- use provider
+import NotificationBar from './components/notificationBar'; // <-- import here
 
 import './components/index.css';
 import './components/ant-overrides.css';
@@ -23,6 +24,10 @@ function RootApp() {
     <StrictMode>
       <AuthKeyProvider>
         <Navbar />
+        {/* NotificationBar right under Navbar, full width */}
+        <div className="w-full">
+          <NotificationBar />
+        </div>
         <div className="flex justify-center items-center min-h-[80vh]">
           <CurrentPage />
         </div>

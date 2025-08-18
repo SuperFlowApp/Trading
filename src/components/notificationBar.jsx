@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { CloseOutlined } from "@ant-design/icons";
 import notificationStore from "../Zustandstore/notificationStore.js";
+import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import
 
 const colorMap = {
   info: "var(--color-backgroundmid)",
@@ -12,6 +13,7 @@ const colorMap = {
 export default function NotificationBar() {
   const notification = notificationStore((s) => s.notification);
   const clearNotification = notificationStore((s) => s.clearNotification);
+  const { authKey } = useAuthKey(); // <-- get authKey
 
   useEffect(() => {
     if (notification && notification.message !== "Welcome to SuperFlow Trading app!") {
@@ -20,31 +22,24 @@ export default function NotificationBar() {
     }
   }, [notification, clearNotification]);
 
-  // Always render the bar, even for the default message
+  // Only render if connected (authKey exists)
+  if (!authKey) return null;
+
   return (
-    <div
-      className="w-full flex items-center px-4 py-2 rounded-md shadow"
-      style={{
-        background: colorMap[notification?.type] || "var(--color-backgroundmid)",
-        color: "var(--color-text)",
-        border: "1px solid var(--color-border)",
-        minHeight: 36,
-        fontWeight: 500,
-        fontSize: 15,
-        zIndex: 100,
-      }}
-    >
-      <span className="flex-1">{notification?.message}</span>
-      {notification?.message !== "Welcome to SuperFlow Trading app!" && (
-        <button
-          onClick={clearNotification}
-          className="ml-2 text-lg bg-transparent border-none cursor-pointer"
-          style={{ color: "inherit" }}
-          aria-label="Close"
-        >
-          <CloseOutlined />
-        </button>
-      )}
+    <div className="text-title w-full flex items-center bg-primary2normal rounded-md">
+      <div className="flex items-center self-center max-w-[1900px] mx-auto w-full text-black p-1">
+        <span className="flex-1">{notification?.message}</span>
+        {notification?.message !== "Welcome to SuperFlow Trading app!" && (
+          <button
+            onClick={clearNotification}
+            className="ml-2 text-lg bg-transparent border-none cursor-pointer"
+            style={{ color: "inherit" }}
+            aria-label="Close"
+          >
+            <CloseOutlined />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -136,6 +136,21 @@ export default function KlineChartProPanel({ interval }) {
           chartRef.current.innerHTML = '';
         }
 
+        const getCssVar = (name, fallback) =>
+          getComputedStyle(document.documentElement).getPropertyValue(name)?.trim() || fallback;
+
+        const upColor = getCssVar('--color-green', '#00B7C9');   // Bullish
+        const downColor = getCssVar('--color-red', '#F59DEF');       // Bearish
+        const noChangeColor = getCssVar('--color-liquidlightergray', '#888888');
+
+        const upBorderColor = upColor;
+        const downBorderColor = downColor;
+        const noChangeBorderColor = noChangeColor;
+
+        const upWickColor = upColor;
+        const downWickColor = downColor;
+        const noChangeWickColor = noChangeColor;
+
         chartInstanceRef.current = new KLineChartPro({
           container: chartRef.current,
           locale: 'en-US',
@@ -196,17 +211,17 @@ export default function KlineChartProPanel({ interval }) {
                 compareRule: 'current_open',
 
                 // Set your desired colors:
-                upColor: '#00B7C9',            // Bullish (green fill)
-                downColor: '#F59DEF',          // Bearish (red fill)
-                noChangeColor: '#888888',      // When no change
+                upColor,
+                downColor,
+                noChangeColor,
 
-                upBorderColor: '#00B7C9',      // Bullish border
-                downBorderColor: '#F59DEF',    // Bearish border
-                noChangeBorderColor: '#888888',
+                upBorderColor,
+                downBorderColor,
+                noChangeBorderColor,
 
-                upWickColor: '#00B7C9',        // Bullish wick
-                downWickColor: '#F59DEF',      // Bearish wick
-                noChangeWickColor: '#888888',
+                upWickColor,
+                downWickColor,
+                noChangeWickColor,
               },
               priceMark: {
                 last: {

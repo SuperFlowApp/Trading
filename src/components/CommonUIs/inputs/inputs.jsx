@@ -37,7 +37,7 @@ export const PriceFieldInput = ({
 
       <button
         type="button"
-        className="h-full min-w-[60px] text-body font-semibold border-l border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] hover:bg-[var(--color-backgroundlighthover)]"
+        className="h-full min-w-[60px] text-body font-semibold border-l border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] hover:bg-[var(--color-backgroundlighter)]"
         onClick={onButtonClick}
         disabled={disabled}
         {...buttonProps}

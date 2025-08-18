@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuthKey } from "../../../contexts/AuthKeyContext";
 import { formatPrice } from "../../../utils/priceFormater";
+import Modal from "../../CommonUIs/modal/modal"; // <-- Add this import
 
 const priceKeys = ["price", "notional", "quantity", "filled", "remaining"];
 
@@ -38,6 +39,8 @@ function formatDate(ts) {
 const OpenOrdersTab = () => {
   const { authKey } = useAuthKey();
   const [orders, setOrders] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false); // <-- Add
+  const [selectedOrder, setSelectedOrder] = useState(null); // <-- Add
 
   // Fetch open orders when authKey changes or every 5s if valid
   useEffect(() => {
@@ -124,28 +127,9 @@ const OpenOrdersTab = () => {
                       */}
                       <button
                         className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs"
-                        onClick={async () => {
-                          const id = order.orderId;
-                          const symbol = order.symbol;
-                          console.log("Cancel request:", { id, symbol });
-                          try {
-                            const res = await fetch(
-                              `https://fastify-serverless-function-rimj.onrender.com/api/cancel-order?id=${id}&symbol=${symbol}`,
-                              {
-                                method: "DELETE",
-                                headers: {
-                                  accept: "application/json",
-                                  Authorization: `Bearer ${authKey}`,
-                                },
-                              }
-                            );
-                            const data = await res.json();
-                            console.log("Cancel response:", data);
-                            // Optionally refresh orders after cancel
-                            setOrders(orders => orders.filter(o => o.orderId !== id));
-                          } catch (err) {
-                            console.error("Cancel order error:", err);
-                          }
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setModalOpen(true);
                         }}
                       >
                         Cancel
@@ -158,6 +142,56 @@ const OpenOrdersTab = () => {
           </tbody>
         </table>
       </div>
+      {modalOpen && selectedOrder && (
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-2">Cancel Order</h2>
+            <div className="mb-4 text-sm">
+              <div><b>Order ID:</b> {selectedOrder.orderId}</div>
+              <div><b>Symbol:</b> {selectedOrder.symbol}</div>
+              <div><b>Side:</b> {selectedOrder.side}</div>
+              <div><b>Type:</b> {selectedOrder.type}</div>
+              <div><b>Price:</b> {formatPrice(selectedOrder.price)}</div>
+              <div><b>Quantity:</b> {formatPrice(selectedOrder.quantity)}</div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 rounded bg-backgroundmid border border-gray-700 text-liquidwhite hover:bg-backgroundlighthover"
+                onClick={() => setModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-warningcolor text-white hover:bg-red-700"
+                onClick={async () => {
+                  try {
+                    const id = selectedOrder.orderId;
+                    const symbol = selectedOrder.symbol;
+                    const res = await fetch(
+                      `https://fastify-serverless-function-rimj.onrender.com/api/cancel-order?id=${id}&symbol=${symbol}`,
+                      {
+                        method: "DELETE",
+                        headers: {
+                          accept: "application/json",
+                          Authorization: `Bearer ${authKey}`,
+                        },
+                      }
+                    );
+                    const data = await res.json();
+                    setOrders(orders => orders.filter(o => o.orderId !== id));
+                    setModalOpen(false);
+                  } catch (err) {
+                    console.error("Cancel order error:", err);
+                    setModalOpen(false);
+                  }
+                }}
+              >
+                Confirm Cancel
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

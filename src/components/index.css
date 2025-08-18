@@ -15,23 +15,23 @@
   -moz-osx-font-smoothing: grayscale;
   font-family: 'Sofia Sans Condensed', sans-serif;
 
-  --color-primary1: #F59DEF;
-  --color-primary2light: #00eaff;
-  --color-primary2normal: #00B7C9;
-  --color-primary2dark: #008498;
-  --color-primary2darker: #00505c;
-  --color-liquidwhite: #ffffff; 
-  --color-liquidblack: #000000; 
-  --color-liquidlightergray: #838383; 
-  --color-liquiddarkgray: #374151; 
-  --color-secondary2: #565A93;
-  --color-backgrounddark: #02001B;
-  --color-backgroundmid: #181923;
-  --color-backgroundlight: #1e2d3a;
-  --color-backgroundlighthover: #1d2c3c;
-  --color-warncolor: #d83d3d;
-  --color-red: #ff3e68;
-  --color-green: #2DC08E;
+  --color-primary1: theme('colors.primary1');
+  --color-primary2light: theme('colors.primary2light');
+  --color-primary2normal: theme('colors.primary2normal');
+  --color-primary2dark: theme('colors.primary2dark');
+  --color-primary2darker: theme('colors.primary2darker');
+  --color-liquidwhite: theme('colors.liquidwhite');
+  --color-liquidblack: theme('colors.liquidblack');
+  --color-liquidlightergray: theme('colors.liquidlightergray');
+  --color-liquiddarkgray: theme('colors.liquiddarkgray');
+  --color-secondary2: theme('colors.secondary2');
+  --color-backgrounddark: theme('colors.backgrounddark');
+  --color-backgroundmid: theme('colors.backgroundmid');
+  --color-backgroundlight: theme('colors.backgroundlight');
+  --color-backgroundlighthover: theme('colors.backgroundlighthover');
+  --color-warningcolor: theme('colors.warningcolor');
+  --color-red: theme('colors.red');
+  --color-green: theme('colors.green');
 }
 
 .check-box {

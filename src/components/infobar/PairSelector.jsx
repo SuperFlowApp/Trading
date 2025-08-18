@@ -206,7 +206,7 @@ function PairSelector({
                           stats.priceChangePercent > 0
                             ? 'var(--color-green)'
                             : stats.priceChangePercent < 0
-                            ? 'var(--color-warncolor)'
+                            ? 'var(--color-warningcolor)'
                             : undefined,
                       }}
                     >
