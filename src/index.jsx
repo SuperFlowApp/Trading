@@ -1,35 +1,41 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp';
 import Navbar from './components/navbar';
-import CommingSoon from './components/CommonUIs/CommingSoon';
 import { AuthKeyProvider } from './contexts/AuthKeyContext'; // <-- use provider
 import NotificationBar from './components/notificationBar'; // <-- import here
+import { useZustandStore } from './Zustandstore/useStore'; // <-- import your store
 
 import './components/index.css';
-import './components/ant-overrides.css';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
-function CurrentPage() {
-  if (window.location.pathname.includes('options-trading')) {
-    return <CommingSoon />;
-  }
-  return <FuturesApp />;
+// Add a component to sync Zustand colors to CSS variables
+function CssVarSync() {
+  const red = useZustandStore((s) => s.red);
+  const green = useZustandStore((s) => s.green);
+
+  useEffect(() => {
+    if (red) document.documentElement.style.setProperty('--color-red', red);
+    if (green) document.documentElement.style.setProperty('--color-green', green);
+  }, [red, green]);
+
+  return null;
 }
 
 function RootApp() {
   return (
     <StrictMode>
       <AuthKeyProvider>
+        <CssVarSync />
         <Navbar />
         {/* NotificationBar right under Navbar, full width */}
         <div className="w-full">
           <NotificationBar />
         </div>
-        <div className="flex justify-center items-center min-h-[80vh]">
-          <CurrentPage />
+        <div className="flex justify-center items-start">
+          <FuturesApp />
         </div>
       </AuthKeyProvider>
     </StrictMode>

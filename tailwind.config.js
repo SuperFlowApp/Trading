@@ -22,8 +22,7 @@ export default {
         backgroundmid: '#181923',
         backgrounddark: '#02001B',
         warningcolor: '#a44b4b',
-        red: '#F59DEF',
-        green: '#00B7C9',
+
       },
     },
   },

@@ -1,4 +1,12 @@
 import { useRef } from "react";
+import { useZustandStore } from "../Zustandstore/useStore"; // adjust path if needed
+
+const COLOR_PACKS = [
+    { name: "Classic", red: "#F59DEF", green: "#00B7C9" },
+    { name: "TradingView", red: "#ff3e68", green: "#2DC08E" },
+    { name: "Binance", red: "#F6465D", green: "#0ECB81" },
+    { name: "Dark", red: "#d83d3d", green: "#00eaff" },
+];
 
 const SettingsDropdown = ({
     settingsOpen,
@@ -8,17 +16,17 @@ const SettingsDropdown = ({
     handleSettingChange,
     settingsRef,
 }) => {
-    // Handler for color change
-    const handleColorChange = (colorKey, value) => {
-        setSettings((prev) => ({
-            ...prev,
-            [colorKey]: value,
-        }));
-        // Update CSS variable on :root
-        document.documentElement.style.setProperty(
-            colorKey === "red" ? "--color-red" : "--color-green",
-            value
-        );
+    const red = useZustandStore((s) => s.red);
+    const green = useZustandStore((s) => s.green);
+    const setRed = useZustandStore((s) => s.setRed);
+    const setGreen = useZustandStore((s) => s.setGreen);
+
+    // Handler for color pack change
+    const handleColorPack = (pack) => {
+        setRed(pack.red);
+        setGreen(pack.green);
+        document.documentElement.style.setProperty("--color-red", pack.red);
+        document.documentElement.style.setProperty("--color-green", pack.green);
     };
 
     return (
@@ -59,31 +67,37 @@ const SettingsDropdown = ({
                                 </li>
                             ) : null
                         )}
-                        <li className="flex items-center justify-between">
-                            <span className="text-liquidlightergray text-sm">
-                                Red Color
+                        <li>
+                            <span className="text-liquidlightergray text-sm block mb-1">
+                                Color Pack
                             </span>
-                            <input
-                                type="color"
-                                value={settings.red || "#f54040"}
-                                onChange={(e) =>
-                                    handleColorChange("red", e.target.value)
-                                }
-                                className="w-8 h-8 border-none bg-transparent"
-                            />
-                        </li>
-                        <li className="flex items-center justify-between">
-                            <span className="text-liquidlightergray text-sm">
-                                Green Color
-                            </span>
-                            <input
-                                type="color"
-                                value={settings.green || "#09a22b"}
-                                onChange={(e) =>
-                                    handleColorChange("green", e.target.value)
-                                }
-                                className="w-8 h-8 border-none bg-transparent"
-                            />
+                            <div className="flex flex-wrap gap-2">
+                                {COLOR_PACKS.map((pack) => (
+                                    <button
+                                        key={pack.name}
+                                        type="button"
+                                        className={`flex items-center gap-1 px-2 py-1 rounded border ${
+                                            red === pack.red && green === pack.green
+                                                ? "border-green-500"
+                                                : "border-transparent"
+                                        } bg-backgroundlight hover:border-green-400`}
+                                        onClick={() => handleColorPack(pack)}
+                                        title={pack.name}
+                                    >
+                                        <span
+                                            className="w-4 h-4 rounded bg-red"
+                                            style={{ backgroundColor: pack.red }}
+                                        />
+                                        <span
+                                            className="w-4 h-4 rounded bg-green"
+                                            style={{ backgroundColor: pack.green }}
+                                        />
+                                        <span className="text-xs text-liquidwhite">
+                                            {pack.name}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
                         </li>
                     </ul>
                 </div>

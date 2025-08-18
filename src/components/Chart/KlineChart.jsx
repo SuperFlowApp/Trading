@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore'
 import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
+import { useZustandStore } from "../../Zustandstore/useStore"; // import your store
 
 const REST_URL = (pair, interval) =>
   `https://api.binance.com/api/v3/klines?symbol=${pair.toUpperCase()}USDT&interval=${interval}&limit=500`;
@@ -111,6 +112,8 @@ export default function KlineChartProPanel({ interval }) {
   const [pair, setPair] = useState(selectedPairBase);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
+  const red = useZustandStore((s) => s.red);
+  const green = useZustandStore((s) => s.green);
 
   // Update pair when Zustand state changes
   useEffect(() => {
@@ -423,7 +426,7 @@ export default function KlineChartProPanel({ interval }) {
       };
     })();
 
-  }, [interval, pair]);
+  }, [interval, pair, red, green]);
 
   return (
     <div className="bg-backgroundmid rounded-md ">

@@ -16,6 +16,11 @@ const useZustandStore = create((set, get) => ({
   // Notional settings
   currentNotional: null,
   setNotional: (Notional) => set({ currentNotional: Notional }),
+
+  red: "#F59DEF",
+  green: "#00B7C9",
+  setRed: (value) => set({ red: value }),
+  setGreen: (value) => set({ green: value }),
 }));
 
 // --- Sync Zustand stores with localStorage across tabs ---
