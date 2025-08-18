@@ -12,7 +12,7 @@ const REST_URL = (pair, interval, opts = {}) => {
   u.searchParams.set('interval', interval);
   u.searchParams.set('limit', String(Math.min(Math.max(limit, 1), 1000)));
   if (startTime) u.searchParams.set('startTime', String(startTime));
-  if (endTime)   u.searchParams.set('endTime',   String(endTime));
+  if (endTime) u.searchParams.set('endTime', String(endTime));
   return u.toString();
 };
 
@@ -51,7 +51,6 @@ class BinanceFeed {
     }
     this.subscribers = [];
   }
-
   async getHistoryKLineData(symbol, period, from, to) {
     const interval = period.text;
     const initialLoad = !from && !to;
@@ -63,15 +62,15 @@ class BinanceFeed {
       const need = Math.ceil((to - from) / step) + 2;
       url = REST_URL(this.pair, interval, {
         startTime: from,
-        endTime:   to - 1,
-        limit:     Math.min(1000, Math.max(need, 100)),
+        endTime: to - 1,
+        limit: Math.min(1000, Math.max(need, 100)),
       });
     } else {
       url = REST_URL(this.pair, interval, { limit: 500 });
     }
 
     this.loading = true;
-    const res  = await fetch(url);
+    const res = await fetch(url);
     const json = await res.json();
     this.loading = false;
 
@@ -83,9 +82,10 @@ class BinanceFeed {
         this.history = chunk;
       } else {
         const have = new Set(this.history.map(b => b.timestamp));
-        const add  = chunk.filter(b => !have.has(b.timestamp));
+        const add = chunk.filter(b => !have.has(b.timestamp));
         if (add.length) {
-          this.history = [...this.history, ...add].sort((a,b)=>a.timestamp-b.timestamp);
+          this.history = [...this.history, ...add].sort((a, b) => a.timestamp - b.timestamp);
+          // optional soft cap to keep memory in check
           const MAX = 10000;
           if (this.history.length > MAX) {
             this.history = this.history.slice(this.history.length - MAX);
@@ -93,7 +93,6 @@ class BinanceFeed {
         }
       }
     }
-
     // Start WS after the first page for this interval
     if (initialLoad && (!this.ws || this.currInterval !== interval)) {
       this.initWs(interval);
@@ -126,7 +125,7 @@ class BinanceFeed {
     this.ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       const k = msg?.k; if (!k) return;
-      const bar = { timestamp: k.t, open:+k.o, high:+k.h, low:+k.l, close:+k.c, volume:+k.v };
+      const bar = { timestamp: k.t, open: +k.o, high: +k.h, low: +k.l, close: +k.c, volume: +k.v };
 
       // upsert the latest bar (no 500-cap here; let history grow)
       const h = this.history;
