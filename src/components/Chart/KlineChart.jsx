@@ -4,12 +4,31 @@ import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
 import { useZustandStore } from "../../Zustandstore/useStore"; // import your store
 
-const REST_URL = (pair, interval) =>
-  `https://api.binance.com/api/v3/klines?symbol=${pair.toUpperCase()}USDT&interval=${interval}&limit=500`;
+// --- REST helper with range support ---
+const REST_URL = (pair, interval, opts = {}) => {
+  const { startTime, endTime, limit = 1000 } = opts;
+  const u = new URL('https://api.binance.com/api/v3/klines');
+  u.searchParams.set('symbol', `${pair.toUpperCase()}USDT`);
+  u.searchParams.set('interval', interval);
+  u.searchParams.set('limit', String(Math.min(Math.max(limit, 1), 1000)));
+  if (startTime) u.searchParams.set('startTime', String(startTime));
+  if (endTime)   u.searchParams.set('endTime',   String(endTime));
+  return u.toString();
+};
+
 const WS_URL = (pair, interval) =>
   `wss://stream.binance.com:9443/ws/${pair.toLowerCase()}usdt@kline_${interval}`;
 
+const INTERVAL_MS = {
+  '1m': 60_000, '5m': 300_000, '15m': 900_000, '30m': 1_800_000,
+  '1h': 3_600_000, '2h': 7_200_000, '4h': 14_400_000, '6h': 21_600_000,
+  '8h': 28_800_000, '12h': 43_200_000, '1d': 86_400_000,
+  '3d': 259_200_000, '1w': 604_800_000, '1M': 2_592_000_000,
+};
 
+const mapK = (d) => ({
+  timestamp: d[0], open: +d[1], high: +d[2], low: +d[3], close: +d[4], volume: +d[5],
+});
 
 class BinanceFeed {
   constructor(pair) {
@@ -18,8 +37,9 @@ class BinanceFeed {
     this.history = [];
     this.ws = null;
     this.shouldReconnect = true;
+    this.loading = false;
+    this.currInterval = null;
   }
-
 
   // Call this on React cleanup to stop everything
   destroy() {
@@ -32,64 +52,55 @@ class BinanceFeed {
     this.subscribers = [];
   }
 
-  initWs(interval) {
-    if (this.ws) {
-      this.ws.onclose = null;
-      this.ws.close();
-    }
-    this.shouldReconnect = true;
-    this.ws = new WebSocket(WS_URL(this.pair, interval));
-    this.ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
-      if (!msg.k) return;
-      const k = msg.k;
-      const bar = {
-        timestamp: k.t,
-        open: +k.o,
-        high: +k.h,
-        low: +k.l,
-        close: +k.c,
-        volume: +k.v
-      };
-
-      // Update local history
-      const h = this.history;
-      if (h.length && h[h.length - 1].timestamp === bar.timestamp) {
-        h[h.length - 1] = bar;
-      } else {
-        h.push(bar);
-        if (h.length > 500) h.shift();
-      }
-      // Only call function subscribers
-      this.subscribers.forEach(cb => {
-        if (typeof cb === 'function') cb(bar, false);
-      });
-    };
-
-    this.ws.onclose = () => {
-      if (this.shouldReconnect) {
-        setTimeout(() => this.initWs(interval), 1000);
-      }
-    };
-    this.ws.onerror = () => {
-      if (this.ws) this.ws.close();
-    };
-  }
-
   async getHistoryKLineData(symbol, period, from, to) {
-    const res = await fetch(REST_URL(this.pair, period.text));
-    const data = await res.json();
-    this.history = data.map(d => ({
-      timestamp: d[0],
-      open: +d[1],
-      high: +d[2],
-      low: +d[3],
-      close: +d[4],
-      volume: +d[5],
-    }));
-    this.initWs(period.text);
-    // return full bar array
-    return this.history;
+    const interval = period.text;
+    const initialLoad = !from && !to;
+    this.currInterval = interval;
+    let url;
+
+    if (from && to) {
+      const step = INTERVAL_MS[interval] || 60_000;
+      const need = Math.ceil((to - from) / step) + 2;
+      url = REST_URL(this.pair, interval, {
+        startTime: from,
+        endTime:   to - 1,
+        limit:     Math.min(1000, Math.max(need, 100)),
+      });
+    } else {
+      url = REST_URL(this.pair, interval, { limit: 500 });
+    }
+
+    this.loading = true;
+    const res  = await fetch(url);
+    const json = await res.json();
+    this.loading = false;
+
+    const chunk = Array.isArray(json) ? json.map(mapK) : [];
+
+    // Merge chunk into cache (dedupe by timestamp)
+    if (chunk.length) {
+      if (!this.history.length) {
+        this.history = chunk;
+      } else {
+        const have = new Set(this.history.map(b => b.timestamp));
+        const add  = chunk.filter(b => !have.has(b.timestamp));
+        if (add.length) {
+          this.history = [...this.history, ...add].sort((a,b)=>a.timestamp-b.timestamp);
+          const MAX = 10000;
+          if (this.history.length > MAX) {
+            this.history = this.history.slice(this.history.length - MAX);
+          }
+        }
+      }
+    }
+
+    // Start WS after the first page for this interval
+    if (initialLoad && (!this.ws || this.currInterval !== interval)) {
+      this.initWs(interval);
+    }
+
+    // Return only the chunk requested
+    return chunk;
   }
 
   // subscribe with correct signature
@@ -105,6 +116,35 @@ class BinanceFeed {
   unsubscribe(symbol, period) {
     // close WS and clear subscribers
     this.destroy();
+  }
+
+  initWs(interval) {
+    if (this.ws) { this.ws.onclose = null; this.ws.close(); }
+    this.shouldReconnect = true;
+    this.ws = new WebSocket(WS_URL(this.pair, interval));
+
+    this.ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      const k = msg?.k; if (!k) return;
+      const bar = { timestamp: k.t, open:+k.o, high:+k.h, low:+k.l, close:+k.c, volume:+k.v };
+
+      // upsert the latest bar (no 500-cap here; let history grow)
+      const h = this.history;
+      if (h.length && h[h.length - 1].timestamp === bar.timestamp) {
+        h[h.length - 1] = bar;
+      } else if (!h.length || bar.timestamp > h[h.length - 1].timestamp) {
+        h.push(bar);
+      } else {
+        // rare: out-of-order — merge by timestamp
+        const i = h.findIndex(b => b.timestamp === bar.timestamp);
+        if (i >= 0) h[i] = bar;
+      }
+
+      this.subscribers.forEach(cb => { if (typeof cb === 'function') cb(bar, false); });
+    };
+
+    this.ws.onclose = () => { if (this.shouldReconnect) setTimeout(() => this.initWs(interval), 1000); };
+    this.ws.onerror = () => { if (this.ws) this.ws.close(); };
   }
 }
 export default function KlineChartProPanel({ interval }) {

@@ -3,12 +3,6 @@ import { CloseOutlined } from "@ant-design/icons";
 import notificationStore from "../Zustandstore/notificationStore.js";
 import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import
 
-const colorMap = {
-  info: "var(--color-backgroundmid)",
-  success: "var(--color-success)",
-  error: "var(--color-danger)",
-  warning: "var(--color-warning)",
-};
 
 export default function NotificationBar() {
   const notification = notificationStore((s) => s.notification);
@@ -26,13 +20,13 @@ export default function NotificationBar() {
   if (!authKey) return null;
 
   return (
-    <div className="text-title w-full flex items-center bg-primary2normal rounded-md">
-      <div className="flex items-center self-center max-w-[1900px] mx-auto w-full text-black p-1">
+    <div className="text-title border border-[1px] border-primary2normal w-full flex items-center bg-backgroundlight rounded-md">
+      <div className="flex items-center self-center max-w-[1900px] mx-auto w-full p-1">
         <span className="flex-1">{notification?.message}</span>
         {notification?.message !== "Welcome to SuperFlow Trading app!" && (
           <button
             onClick={clearNotification}
-            className="ml-2 text-lg bg-transparent border-none cursor-pointer"
+            className="ml-2 bg-transparent border-none cursor-pointer"
             style={{ color: "inherit" }}
             aria-label="Close"
           >

@@ -15,6 +15,7 @@ const root = createRoot(container);
 function CssVarSync() {
   const red = useZustandStore((s) => s.red);
   const green = useZustandStore((s) => s.green);
+  const background = useZustandStore((s) => s.green);
 
   useEffect(() => {
     if (red) document.documentElement.style.setProperty('--color-red', red);

@@ -2,10 +2,10 @@ import { useRef } from "react";
 import { useZustandStore } from "../Zustandstore/useStore"; // adjust path if needed
 
 const COLOR_PACKS = [
-    { name: "Classic", red: "#F59DEF", green: "#00B7C9" },
-    { name: "TradingView", red: "#ff3e68", green: "#2DC08E" },
-    { name: "Binance", red: "#F6465D", green: "#0ECB81" },
-    { name: "Dark", red: "#d83d3d", green: "#00eaff" },
+    { name: "SuperFlow", red: "#F59DEF", green: "#00B7C9" },
+    { name: "Classic", red: "#F6465D", green: "#0ECB81" },
+    { name: "violet", red: "#b1509aff", green: "#0b9dbaff" },
+    { name: "Smooth", red: "#9f7070ff", green: "#74987bff" },
 ];
 
 const SettingsDropdown = ({
