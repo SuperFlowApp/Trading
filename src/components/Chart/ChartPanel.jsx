@@ -8,6 +8,7 @@ import ScreenshotIcon from '/assets/Screenshot.svg';
 import FullscreenIcon from '/assets/FullScreen.svg';
 
 import ChartSettings from './ChartSettings';
+import { useZustandStore } from '../../Zustandstore/useStore'; // or correct path
 
 const intervals = [
   { key: '1', label: '1m', value: '1m', multiplier: 1, timespan: 'minute', text: '1m' },
@@ -70,16 +71,9 @@ export default function ChartPanel() {
   // indicator settings modal
   const [showIndicatorSettings, setShowIndicatorSettings] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [settings, setSettings] = useState({
-    candle_type: 'candle_solid',
-    grid_show: true,
-    reverse_coordinate: false,
-    price_axis_type: 'normal',
-    last_price_show: true,
-    high_price_show: false,
-    low_price_show: false,
-    indicator_last_value_show: true,
-  });
+  const chartSettings = useZustandStore(s => s.chartSettings);
+  const setChartSettings = useZustandStore(s => s.setChartSettings);
+  const [candleType, setCandleType] = useState('candle_solid'); // Only for style, not in chartSettings
 
   const chartApiRef = useRef(null);
 
@@ -142,9 +136,9 @@ export default function ChartPanel() {
               {showSettings && (
                 <div className="absolute left-0 mt-2 z-30">
                   <ChartSettings
-                    open={true}
-                    settings={settings}
-                    setSettings={setSettings}
+                    open={showSettings}
+                    candleType={candleType}
+                    setCandleType={setCandleType}
                     onClose={() => setShowSettings(false)}
                     dropdown
                   />
@@ -218,8 +212,8 @@ export default function ChartPanel() {
           interval={selectedInterval}
           indicatorToggles={toggles}
           timeZone={timeZone}
-          candleType={settings.candle_type}
-          chartSettings={settings}
+          candleType={candleType}
+          chartSettings={chartSettings}
         />
       </div>
 

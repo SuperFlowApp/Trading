@@ -21,6 +21,17 @@ const useZustandStore = create((set, get) => ({
   green: "#00B7C9",
   setRed: (value) => set({ red: value }),
   setGreen: (value) => set({ green: value }),
+
+  chartSettings: {
+    grid_show: true,
+    reverse_coordinate: false,
+    price_axis_type: 'normal',
+    last_price_show: true,
+    high_price_show: false,
+    low_price_show: false,
+    indicator_last_value_show: true,
+  },
+  setChartSettings: (settings) => set({ chartSettings: { ...get().chartSettings, ...settings } }),
 }));
 
 // --- Sync Zustand stores with localStorage across tabs ---

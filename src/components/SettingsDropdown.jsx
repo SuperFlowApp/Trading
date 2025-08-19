@@ -11,15 +11,14 @@ const COLOR_PACKS = [
 const SettingsDropdown = ({
     settingsOpen,
     setSettingsOpen,
-    settings,
-    setSettings,
-    handleSettingChange,
     settingsRef,
 }) => {
     const red = useZustandStore((s) => s.red);
     const green = useZustandStore((s) => s.green);
     const setRed = useZustandStore((s) => s.setRed);
     const setGreen = useZustandStore((s) => s.setGreen);
+    const chartSettings = useZustandStore(s => s.chartSettings);
+    const setChartSettings = useZustandStore(s => s.setChartSettings);
 
     // Handler for color pack change
     const handleColorPack = (pack) => {
@@ -27,6 +26,11 @@ const SettingsDropdown = ({
         setGreen(pack.green);
         document.documentElement.style.setProperty("--color-red", pack.red);
         document.documentElement.style.setProperty("--color-green", pack.green);
+    };
+
+    // Handler for chart settings
+    const handleChartSettingChange = (key) => {
+        setChartSettings({ [key]: !chartSettings[key] });
     };
 
     return (
@@ -49,24 +53,36 @@ const SettingsDropdown = ({
                 <div className="absolute right-0 mt-2 w-64 bg-backgroundmid border border-[#23272e] rounded shadow-lg z-50 p-4">
                     <div className="font-semibold mb-2 text-liquidwhite">Settings</div>
                     <ul className="space-y-2">
-                        {Object.entries(settings).map(([key, value]) =>
+                        {/* Chart settings */}
+                        {Object.entries(chartSettings).map(([key, value]) =>
                             key !== "red" && key !== "green" ? (
-                                <li
-                                    key={key}
-                                    className="flex items-center justify-between"
-                                >
-                                    <span className="text-liquidlightergray text-sm">
-                                        {key}
-                                    </span>
-                                    <input
-                                        type="checkbox"
-                                        checked={value}
-                                        onChange={() => handleSettingChange(key)}
-                                        className="accent-primary2normal"
-                                    />
-                                </li>
+                                key === 'price_axis_type' ? (
+                                    <li key={key} className="flex items-center justify-between">
+                                        <span className="text-liquidlightergray text-sm">{key}</span>
+                                        <select
+                                            className="bg-transparent border border-[#00B7C950] rounded px-2 py-1 text-sm"
+                                            value={chartSettings.price_axis_type}
+                                            onChange={e => setChartSettings({ price_axis_type: e.target.value })}
+                                        >
+                                            <option value="normal">normal</option>
+                                            <option value="log">log</option>
+                                            <option value="percentage">percentage</option>
+                                        </select>
+                                    </li>
+                                ) : (
+                                    <li key={key} className="flex items-center justify-between">
+                                        <span className="text-liquidlightergray text-sm">{key}</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={!!chartSettings[key]}
+                                            onChange={() => handleChartSettingChange(key)}
+                                            className="accent-primary2normal"
+                                        />
+                                    </li>
+                                )
                             ) : null
                         )}
+                        {/* Color pack picker remains */}
                         <li>
                             <span className="text-liquidlightergray text-sm block mb-1">
                                 Color Pack
