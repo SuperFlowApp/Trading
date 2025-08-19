@@ -15,6 +15,7 @@ export default {
         liquidwhite: '#ffffff',
         liquidblack: '#000000',
         liquidlightergray: '#aeaeae',
+        liquidmidgray: '#8AABB2',
         liquiddarkgray: '#374151',
         secondary2: '#565A93',
         backgroundlight: '#1e2d3a',

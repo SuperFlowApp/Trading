@@ -501,9 +501,10 @@
     border: solid 1px var(--klinecharts-pro-selected-color);
 }
 
-.klinecharts-pro-period-bar .period {
-    display: none;
+.klinecharts-pro-period-bar {
+    display: none !important;
 }
+
 
 
 .klinecharts-pro-period-bar .tools {

@@ -238,21 +238,6 @@ function KlineChartProPanel({
         (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
       }
     },
-    toggleLeftMenu: (force) => {
-      const root = chartRef.current;
-      if (!root) return;
-      const left =
-        root.querySelector('[data-klinecharts-pro="left-toolbar"]') ||
-        root.querySelector('.klinecharts-pro-left-toolbar') ||
-        root.querySelector('.left-toolbar') ||
-        root.querySelector('.klinecharts-pro__toolbar--left');
-      if (!left) return;
-      if (typeof force === 'boolean') {
-        left.classList.toggle('kc-hidden', !force);
-      } else {
-        left.classList.toggle('kc-hidden');
-      }
-    },
   }));
 
   const red = useZustandStore((s) => s.red);

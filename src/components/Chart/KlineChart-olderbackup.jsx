@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore'
 import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
@@ -26,7 +26,7 @@ const INTERVAL_MS = {
   '3d': 259_200_000, '1w': 604_800_000, '1M': 2_592_000_000,
 };
 
-const mapK = d => ({
+const mapK = (d) => ({
   timestamp: d[0], open: +d[1], high: +d[2], low: +d[3], close: +d[4], volume: +d[5],
 });
 
@@ -40,6 +40,8 @@ class BinanceFeed {
     this.loading = false;
     this.currInterval = null;
   }
+
+  // Call this on React cleanup to stop everything
   destroy() {
     this.shouldReconnect = false;
     if (this.ws) {
@@ -53,8 +55,8 @@ class BinanceFeed {
     const interval = period.text;
     const initialLoad = !from && !to;
     this.currInterval = interval;
-
     let url;
+
     if (from && to) {
       const step = INTERVAL_MS[interval] || 60_000;
       const need = Math.ceil((to - from) / step) + 2;
@@ -144,117 +146,11 @@ class BinanceFeed {
     this.ws.onerror = () => { if (this.ws) this.ws.close(); };
   }
 }
-function KlineChartProPanel({
-  interval,
-  indicatorToggles,
-  timeZone,
-  candleType = 'candle_stroke',
-  chartSettings, // ← new
-}, ref) {
+export default function KlineChartProPanel({ interval }) {
   const selectedPairBase = selectedPairStore(s => s.selectedPair);
   const [pair, setPair] = useState(selectedPairBase);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
-  const tzRef = useRef(timeZone);
-
-  // expose a tiny API: screenshot + fullscreen
-  useImperativeHandle(ref, () => ({
-    screenshot: async (opts = {}) => {
-      const chart = chartInstanceRef.current;
-      if (!chart) return;
-
-      // 1) Try v10+ object signature (may return string or Promise)
-      let url;
-      if (typeof chart.getConvertPictureUrl === 'function') {
-        try {
-          url = chart.getConvertPictureUrl({
-            includeOverlay: true,
-            includeTooltip: true,
-            type: 'png',
-            backgroundColor: '#00000000',
-            pixelRatio: window.devicePixelRatio || 1,
-          });
-          if (url && typeof url.then === 'function') url = await url;
-        } catch { }
-      }
-
-      // 2) Try older positional signature (includeOverlay, type, bg)
-      if (!url && typeof chart.getConvertPictureUrl === 'function') {
-        try {
-          url = chart.getConvertPictureUrl(true, 'image/png', '#00000000');
-        } catch { }
-      }
-
-      // 3) Other historical helpers
-      if (!url && typeof chart.getImageUrl === 'function') {
-        try { url = chart.getImageUrl(); } catch { }
-      }
-      if (!url && typeof chart.getScreenshot === 'function') {
-        try { url = chart.getScreenshot(); } catch { }
-      }
-
-      // 4) DOM fallback: stitch layered canvases into one
-      if (!url) {
-        const container = chartRef.current;
-        const canvases = container?.querySelectorAll?.('canvas');
-        if (canvases && canvases.length > 0) {
-          try {
-            const mergedCanvas = document.createElement('canvas');
-            const ctx = mergedCanvas.getContext('2d');
-            if (!ctx) throw new Error('Failed to create canvas context');
-
-            // Set size
-            const { width, height } = canvases[0];
-            mergedCanvas.width = width;
-            mergedCanvas.height = height;
-
-            // Draw each canvas in order
-            canvases.forEach((canvas) => {
-              ctx.drawImage(canvas, 0, 0);
-            });
-
-            // Convert to data URL
-            url = mergedCanvas.toDataURL('image/png');
-          } catch (err) {
-            console.error('Failed to capture chart screenshot:', err);
-          }
-        }
-      }
-
-      if (!url) {
-        console.warn('Screenshot failed: no export method available on this build.');
-        return null;
-      }
-      // Instead of downloading, return the URL so the parent can preview/save
-      return url;
-    },
-    fullscreen: () => {
-      const el = chartRef.current;
-      if (!el) return;
-      const doc = document;
-      if (doc.fullscreenElement || doc.webkitFullscreenElement) {
-        (doc.exitFullscreen || doc.webkitExitFullscreen)?.();
-      } else {
-        (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
-      }
-    },
-    toggleLeftMenu: (force) => {
-      const root = chartRef.current;
-      if (!root) return;
-      const left =
-        root.querySelector('[data-klinecharts-pro="left-toolbar"]') ||
-        root.querySelector('.klinecharts-pro-left-toolbar') ||
-        root.querySelector('.left-toolbar') ||
-        root.querySelector('.klinecharts-pro__toolbar--left');
-      if (!left) return;
-      if (typeof force === 'boolean') {
-        left.classList.toggle('kc-hidden', !force);
-      } else {
-        left.classList.toggle('kc-hidden');
-      }
-    },
-  }));
-
   const red = useZustandStore((s) => s.red);
   const green = useZustandStore((s) => s.green);
 
@@ -265,14 +161,11 @@ function KlineChartProPanel({
 
   useEffect(() => {
     let isMounted = true;
+
     (async () => {
+      // 1. Wait for your font to be loaded before creating the chart
       if (document.fonts?.ready) {
         await document.fonts.ready;
-      }
-
-      // Clear chart container to force full re-mount
-      if (chartRef.current) {
-        chartRef.current.innerHTML = '';
       }
 
       const feed = new BinanceFeed(pair);
@@ -300,59 +193,16 @@ function KlineChartProPanel({
         const downWickColor = downColor;
         const noChangeWickColor = noChangeColor;
 
-        const formatWithTZ = (timestamp, type) => {
-          const tz = tzRef.current || 'UTC';
-          const options =
-            type === 'time'
-              ? { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }
-              : { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: tz };
-          return new Date(timestamp).toLocaleString('en-US', options);
-
-        };
-
-        // ✅ Build indicator arrays from all toggles
-        const mainIndicators = [];
-        if (indicatorToggles?.MAIN_MA) mainIndicators.push('MA');
-        if (indicatorToggles?.MAIN_EMA) mainIndicators.push('EMA');
-        if (indicatorToggles?.MAIN_SMA) mainIndicators.push('SMA');
-        if (indicatorToggles?.MAIN_BOLL) mainIndicators.push('BOLL');
-        if (indicatorToggles?.MAIN_SAR) mainIndicators.push('SAR');
-        if (indicatorToggles?.MAIN_BBI) mainIndicators.push('BBI');
-
-        const subIndicators = [];
-        if (indicatorToggles?.SUB_MA) subIndicators.push('MA');
-        if (indicatorToggles?.SUB_EMA) subIndicators.push('EMA');
-        if (indicatorToggles?.SUB_VOL) subIndicators.push('VOL');
-        if (indicatorToggles?.SUB_MACD) subIndicators.push('MACD');
-        if (indicatorToggles?.SUB_BOLL) subIndicators.push('BOLL');
-        if (indicatorToggles?.SUB_KDJ) subIndicators.push('KDJ');
-        if (indicatorToggles?.SUB_RSI) subIndicators.push('RSI');
-        if (indicatorToggles?.SUB_BIAS) subIndicators.push('BIAS');
-        if (indicatorToggles?.SUB_BRAR) subIndicators.push('BRAR');
-        if (indicatorToggles?.SUB_CCI) subIndicators.push('CCI');
-        if (indicatorToggles?.SUB_DMI) subIndicators.push('DMI');
-        if (indicatorToggles?.SUB_CR) subIndicators.push('CR');
-        if (indicatorToggles?.SUB_PSY) subIndicators.push('PSY');
-        if (indicatorToggles?.SUB_DMA) subIndicators.push('DMA');
-        if (indicatorToggles?.SUB_TRIX) subIndicators.push('TRIX');
-        if (indicatorToggles?.SUB_OBV) subIndicators.push('OBV');
-        if (indicatorToggles?.SUB_VR) subIndicators.push('VR');
-        if (indicatorToggles?.SUB_WR) subIndicators.push('WR');
-        if (indicatorToggles?.SUB_MTM) subIndicators.push('MTM');
-        if (indicatorToggles?.SUB_EMV) subIndicators.push('EMV');
-        if (indicatorToggles?.SUB_SAR) subIndicators.push('SAR');
-        if (indicatorToggles?.SUB_SMA) subIndicators.push('SMA');
-        if (indicatorToggles?.SUB_ROC) subIndicators.push('ROC');
-        if (indicatorToggles?.SUB_PVT) subIndicators.push('PVT');
-        if (indicatorToggles?.SUB_BBI) subIndicators.push('BBI');
-        if (indicatorToggles?.SUB_AO) subIndicators.push('AO');
-
         chartInstanceRef.current = new KLineChartPro({
           container: chartRef.current,
           locale: 'en-US',
           formatter: {
-            formatDate: (timestamp, _format, type) => formatWithTZ(timestamp, type),
-
+            formatDate: (timestamp, format, type) => {
+              const options = (type === 'time')
+                ? { hour: '2-digit', minute: '2-digit', hour12: false }
+                : { year: 'numeric', month: '2-digit', day: '2-digit' };
+              return new Date(timestamp).toLocaleString('en-US', options);
+            }
           },
           periods: [
             { multiplier: 1, timespan: 'minute', text: '1m' },
@@ -397,7 +247,7 @@ function KlineChartProPanel({
               }
             },
             candle: {
-              type: candleType, // ← set from prop on load
+              type: 'candle_solid', // or your preferred type
               bar: {
                 // Choose your rule: 'current_open' or 'previous_close'
                 compareRule: 'current_open',
@@ -431,8 +281,11 @@ function KlineChartProPanel({
             },
             fontFamily: "'Sofia Sans Condensed', Arial, sans-serif",
           },
-          mainIndicators,
-          subIndicators,
+          // disable default indicators (remove MA on load)
+          mainIndicators: [],   // nothing on the main candle pane
+          subIndicators: [],    // no sub-pane indicators
+          // Only one indicators line if you want MA
+          // indicators: [{ name: 'MA' }],
         });
 
         // 2. Immediately set canvas text fonts (including price mark)
@@ -612,63 +465,8 @@ function KlineChartProPanel({
       };
     })();
 
-  }, [interval, pair, red, green, indicatorToggles]);
-  // Apply timezone changes without rebuilding the chart
-  useEffect(() => {
-    tzRef.current = timeZone;
-    const chart = chartInstanceRef.current;
-    if (!chart) return;
-    // If your build has a native API:
-    if (typeof chart.setTimezone === 'function') {
-      chart.setTimezone(timeZone);
-      return;
-    }
-    // Otherwise, nudge a lightweight redraw so formatter runs again:
-    try {
-      const s = chart.getStyles();
-      chart.setStyles(s);
-    } catch { }
-  }, [timeZone]);
-  // Allow changing candleType without remounting the chart
-  useEffect(() => {
-    const chart = chartInstanceRef.current;
-    if (!chart) return;
-    chart.setStyles({ candle: { type: candleType } });
-  }, [candleType]);
-  useEffect(() => {
-    const chart = chartInstanceRef.current;
-    if (!chart || !chartSettings) return;
+  }, [interval, pair, red, green]);
 
-    const {
-      grid_show,
-      reverse_coordinate,
-      price_axis_type,
-      last_price_show,
-      high_price_show,
-      low_price_show,
-      indicator_last_value_show,
-    } = chartSettings;
-
-    const patch = {
-      grid: { show: !!grid_show },
-      yAxis: {
-        reverse: !!reverse_coordinate,
-        type: price_axis_type || 'normal',
-      },
-      candle: {
-        priceMark: {
-          last: { ...(chart.getStyles()?.candle?.priceMark?.last || {}), show: !!last_price_show },
-          high: { ...(chart.getStyles()?.candle?.priceMark?.high || {}), show: !!high_price_show },
-          low: { ...(chart.getStyles()?.candle?.priceMark?.low || {}), show: !!low_price_show },
-        },
-      },
-      indicator: {
-        lastValueMark: { show: !!indicator_last_value_show },
-      },
-    };
-
-    chart.setStyles(patch);
-  }, [chartSettings]);
   return (
     <div className="bg-backgroundmid rounded-md ">
       <div
@@ -682,4 +480,3 @@ function KlineChartProPanel({
     </div>
   );
 }
-export default forwardRef(KlineChartProPanel);
