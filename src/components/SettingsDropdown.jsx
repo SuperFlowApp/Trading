@@ -33,8 +33,90 @@ const SettingsDropdown = ({
         setChartSettings({ [key]: !chartSettings[key] });
     };
 
+    // Separate styling and chart settings
+    const stylingSettings = (
+        <div>
+                        <div className=" border-t border-liquiddarkgray text-body text-liquidwhite pt-2 mb-2 mt-2">Style Settings</div>
+            {/* Font size selector */}
+            <div className="flex items-center justify-between mb-3">
+                <span className="text-liquidlightergray text-body select-none">Font Size</span>
+                <select
+                    className="bg-backgroundlight border border-[#00B7C950] rounded px-2 py-1 text-body focus:outline-none"
+                    value={chartSettings.fontSize}
+                    onChange={e => setChartSettings({ fontSize: e.target.value })}
+                >
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                </select>
+            </div>
+            {/* Color pack picker */}
+            <div>
+                <span className="text-liquidlightergray text-body block mb-1 select-none">
+                    Color Pack
+                </span>
+                <div className="flex flex-wrap gap-2">
+                    {COLOR_PACKS.map((pack) => (
+                        <button
+                            key={pack.name}
+                            type="button"
+                            className={`flex items-center gap-1 px-2 py-1 rounded border transition-colors duration-100
+                                ${red === pack.red && green === pack.green
+                                    ? "border-green-500"
+                                    : "border-[#23272e]"}
+                                bg-backgroundlight hover:border-green-400`}
+                            onClick={() => handleColorPack(pack)}
+                            title={pack.name}
+                        >
+                            <span
+                                className="w-4 h-4 rounded"
+                                style={{ backgroundColor: pack.red }}
+                            />
+                            <span
+                                className="w-4 h-4 rounded"
+                                style={{ backgroundColor: pack.green }}
+                            />
+                            <span className="text-body text-liquidwhite select-none">
+                                {pack.name}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    const chartSettingsList = Object.entries(chartSettings)
+        .filter(([key]) => !["red", "green", "fontSize"].includes(key))
+        .map(([key, value]) =>
+            key === 'price_axis_type' ? (
+                <li key={key} className="flex items-center justify-between mb-2">
+                    <span className="text-liquidlightergray text-body select-none">Price Axis</span>
+                    <select
+                        className="bg-backgroundlight border border-[#00B7C950] rounded px-2 py-1 text-body focus:outline-none"
+                        value={chartSettings.price_axis_type}
+                        onChange={e => setChartSettings({ price_axis_type: e.target.value })}
+                    >
+                        <option value="normal">Normal</option>
+                        <option value="log">Log</option>
+                        <option value="percentage">Percentage</option>
+                    </select>
+                </li>
+            ) : (
+                <li key={key} className="flex items-center justify-between mb-2">
+                    <span className="text-liquidlightergray text-body select-none">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                    <input
+                        type="checkbox"
+                        checked={!!chartSettings[key]}
+                        onChange={() => handleChartSettingChange(key)}
+                        className="accent-primary2normal"
+                    />
+                </li>
+            )
+        );
+
     return (
-        <div className="relative" ref={settingsRef}>
+        <div className="relative text-body" ref={settingsRef}>
             <button
                 className={`flex items-center justify-center w-8 h-8 rounded-md active-transition
                              hover:bg-primary2darker ${settingsOpen ? "bg-primary2darker" : ""}
@@ -49,73 +131,17 @@ const SettingsDropdown = ({
                     className="w-4 h-4"
                 />
             </button>
+
+            
             {settingsOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-backgroundmid border border-[#23272e] rounded shadow-lg z-50 p-4">
-                    <div className="font-semibold mb-2 text-liquidwhite">Settings</div>
-                    <ul className="space-y-2">
-                        {/* Chart settings */}
-                        {Object.entries(chartSettings).map(([key, value]) =>
-                            key !== "red" && key !== "green" ? (
-                                key === 'price_axis_type' ? (
-                                    <li key={key} className="flex items-center justify-between">
-                                        <span className="text-liquidlightergray text-sm">{key}</span>
-                                        <select
-                                            className="bg-transparent border border-[#00B7C950] rounded px-2 py-1 text-sm"
-                                            value={chartSettings.price_axis_type}
-                                            onChange={e => setChartSettings({ price_axis_type: e.target.value })}
-                                        >
-                                            <option value="normal">normal</option>
-                                            <option value="log">log</option>
-                                            <option value="percentage">percentage</option>
-                                        </select>
-                                    </li>
-                                ) : (
-                                    <li key={key} className="flex items-center justify-between">
-                                        <span className="text-liquidlightergray text-sm">{key}</span>
-                                        <input
-                                            type="checkbox"
-                                            checked={!!chartSettings[key]}
-                                            onChange={() => handleChartSettingChange(key)}
-                                            className="accent-primary2normal"
-                                        />
-                                    </li>
-                                )
-                            ) : null
-                        )}
-                        {/* Color pack picker remains */}
-                        <li>
-                            <span className="text-liquidlightergray text-sm block mb-1">
-                                Color Pack
-                            </span>
-                            <div className="flex flex-wrap gap-2">
-                                {COLOR_PACKS.map((pack) => (
-                                    <button
-                                        key={pack.name}
-                                        type="button"
-                                        className={`flex items-center gap-1 px-2 py-1 rounded border ${
-                                            red === pack.red && green === pack.green
-                                                ? "border-green-500"
-                                                : "border-transparent"
-                                        } bg-backgroundlight hover:border-green-400`}
-                                        onClick={() => handleColorPack(pack)}
-                                        title={pack.name}
-                                    >
-                                        <span
-                                            className="w-4 h-4 rounded bg-red"
-                                            style={{ backgroundColor: pack.red }}
-                                        />
-                                        <span
-                                            className="w-4 h-4 rounded bg-green"
-                                            style={{ backgroundColor: pack.green }}
-                                        />
-                                        <span className="text-xs text-liquidwhite">
-                                            {pack.name}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </li>
-                    </ul>
+                <div className="absolute right-0 mt-2 w-72 bg-backgroundmid border border-[#23272e] rounded-xl shadow-2xl z-50 p-5 space-y-5">
+                    {stylingSettings}
+                    <div>
+                        <div className="border-t border-liquiddarkgray  text-liquidwhite pt-2 mb-2 mt-2">Chart Settings</div>
+                        <ul className="space-y-1">
+                            {chartSettingsList}
+                        </ul>
+                    </div>
                 </div>
             )}
         </div>

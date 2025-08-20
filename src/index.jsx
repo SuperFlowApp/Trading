@@ -15,12 +15,23 @@ const root = createRoot(container);
 function CssVarSync() {
   const red = useZustandStore((s) => s.red);
   const green = useZustandStore((s) => s.green);
-  const background = useZustandStore((s) => s.green);
+  const fontSize = useZustandStore((s) => s.chartSettings.fontSize);
 
   useEffect(() => {
     if (red) document.documentElement.style.setProperty('--color-red', red);
     if (green) document.documentElement.style.setProperty('--color-green', green);
-  }, [red, green]);
+    // Font size mapping
+    if (fontSize === 'small') {
+      document.documentElement.style.setProperty('--text-body-size', '12px');
+      document.documentElement.style.setProperty('--text-title-size', '15px');
+    } else if (fontSize === 'large') {
+      document.documentElement.style.setProperty('--text-body-size', '14px');
+      document.documentElement.style.setProperty('--text-title-size', '18px');
+    } else {
+      document.documentElement.style.setProperty('--text-body-size', '13px');
+      document.documentElement.style.setProperty('--text-title-size', '16px');
+    }
+  }, [red, green, fontSize]);
 
   return null;
 }

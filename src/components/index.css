@@ -105,12 +105,14 @@ input[type="number"] {
   }
 }
 .text-title {
-  @apply text-[15px] font-[300] h-8 ;
- 
+  font-size: var(--text-title-size, 16px);
+  font-weight: 300;
+  height: 2rem;
 }
 
 .text-body {
-  @apply text-[12px] font-[400] ;
+  font-size: var(--text-body-size, 13px);
+  font-weight: 400;
 }
 
 .rounded-md{

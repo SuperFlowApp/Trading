@@ -108,7 +108,7 @@ export default function ChartPanel() {
                 onClick={() => setShowIndicatorSettings(s => !s)}
                 title="Open indicator settings"
               >
-                <img src={IndicatorsIcon} alt="" className="w-4 h-4 mr-1" />
+                <img src={IndicatorsIcon} alt="" className="w-[20px] mr-1" />
                 Indicators
               </button>
               {showIndicatorSettings && (
@@ -131,7 +131,7 @@ export default function ChartPanel() {
                 onClick={() => setShowSettings(s => !s)}
                 title="Chart settings"
               >
-                <img src={SettingsIcon} alt="" className="w-4 h-4 mr-1" />
+                <img src={SettingsIcon} alt="" className="w-[20px] mr-1" />
               </button>
               {showSettings && (
                 <div className="absolute left-0 mt-2 z-30">
@@ -157,7 +157,7 @@ export default function ChartPanel() {
                 className="px-2 py-1 rounded  hover:bg-[#00B7C91a] flex items-center gap-1"
                 title="Change chart timezone"
               >
-                <img src={TimezoneIcon} alt="" className="w-4 h-4 mr-1" />
+                <img src={TimezoneIcon} alt="" className="w-[20px] mr-1" />
               </button>
               {showTZMenu && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md  bg-[#04080a] shadow-lg z-20">
@@ -189,7 +189,7 @@ export default function ChartPanel() {
               }}
               title="Save chart as image"
             >
-              <img src={ScreenshotIcon} alt="" className="w-4 h-4 mr-1" />
+              <img src={ScreenshotIcon} alt="" className="w-[20px] mr-1" />
             </button>
 
             {/* Fullscreen */}
@@ -198,7 +198,7 @@ export default function ChartPanel() {
               onClick={() => chartApiRef.current?.fullscreen?.()}
               title="Toggle fullscreen"
             >
-              <img src={FullscreenIcon} alt="" className="w-4 h-4 mr-1" />
+              <img src={FullscreenIcon} alt="" className="w-[20px] mr-1" />
             </button>
           </div>
 
