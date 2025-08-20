@@ -39,47 +39,32 @@ export const SUB_INDICATORS = [
 import React, { useEffect, useRef } from 'react';
 
 export default function IndicatorSettings({ open, onClose, toggles, onToggle, dropdown }) {
-  const modalRef = useRef(null);
-  const posRef = useRef({ x: 80, y: 80 });
-  const draggingRef = useRef(false);
-  const startRef = useRef({ mx: 0, my: 0, x: 0, y: 0 });
+  const boxRef = useRef(null);
 
+  // Close on outside click for dropdown
   useEffect(() => {
-    const onMove = (e) => {
-      if (!draggingRef.current) return;
-      const nx = startRef.current.x + (e.clientX - startRef.current.mx);
-      const ny = startRef.current.y + (e.clientY - startRef.current.my);
-      posRef.current = { x: nx, y: ny };
-      if (modalRef.current) {
-        modalRef.current.style.transform = `translate(${nx}px, ${ny}px)`;
+    if (!open || !dropdown) return;
+    function handleClick(e) {
+      if (boxRef.current && !boxRef.current.contains(e.target)) {
+        onClose();
       }
-    };
-    const onUp = () => { draggingRef.current = false; };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-  }, []);
-
-  useEffect(() => {
-    // reset translation when opened (keeps previous pos otherwise)
-    if (open && modalRef.current) {
-      modalRef.current.style.transform = `translate(${posRef.current.x}px, ${posRef.current.y}px)`;
     }
-  }, [open]);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open, onClose, dropdown]);
 
   if (!open) return null;
   if (dropdown) {
     return (
-      <div className="w-[320px] max-w-[95vw] bg-backgroundmid rounded shadow-lg p-4 border border-[#00B7C950]">
+      <div
+        ref={boxRef}
+        className="w-[320px] max-w-[95vw] bg-backgroundmid rounded shadow-lg p-4 border border-[#00B7C950]"
+      >
         <div className="flex items-center justify-between mb-2">
-          <div className="font-semibold">Indicators</div>
-          <button className="px-2 py-1 text-sm" onClick={onClose}>Close</button>
+          <div className="font-body">Indicators</div>
         </div>
-        <div className="text-sm">
-          <div className="mb-2 font-semibold">Main Indicators</div>
+        <div className="font-body">
+          <div className="mb-2 font-body">Main Indicators</div>
           <div className="flex flex-wrap gap-2">
             {MAIN_INDICATORS.map(({ key, label }) => (
               <label key={key} className="inline-flex items-center gap-2 cursor-pointer select-none">
@@ -89,11 +74,11 @@ export default function IndicatorSettings({ open, onClose, toggles, onToggle, dr
                   onChange={onToggle(key)}
                   className="accent-[#00B7C9]"
                 />
-                <span className="text-sm">{label}</span>
+                <span className="font-body">{label}</span>
               </label>
             ))}
           </div>
-          <div className="mt-4 mb-2 font-semibold">Sub Indicators</div>
+          <div className="mt-4 mb-2 font-body">Sub Indicators</div>
           <div className="flex flex-wrap gap-2">
             {SUB_INDICATORS.map(({ key, label }) => (
               <label key={key} className="inline-flex items-center gap-2 cursor-pointer select-none">
@@ -103,7 +88,7 @@ export default function IndicatorSettings({ open, onClose, toggles, onToggle, dr
                   onChange={onToggle(key)}
                   className="accent-[#00B7C9]"
                 />
-                <span className="text-sm">{label}</span>
+                <span className="font-body">{label}</span>
               </label>
             ))}
           </div>
@@ -122,25 +107,17 @@ export default function IndicatorSettings({ open, onClose, toggles, onToggle, dr
         }}
       />
       <div
-        ref={modalRef}
+        ref={boxRef}
         role="dialog"
         aria-modal="true"
         className="absolute w-[520px] max-w-[95%] bg-backgroundmid rounded shadow-lg p-4"
-        style={{ top: 0, left: 0, transform: `translate(${posRef.current.x}px, ${posRef.current.y}px)` }}
+        style={{ top: 0, left: 0, transform: `translate(80px, 80px)` }}
       >
-        <div
-          className="flex items-center justify-between cursor-move select-none"
-          onMouseDown={(e) => {
-            draggingRef.current = true;
-            startRef.current = { mx: e.clientX, my: e.clientY, x: posRef.current.x, y: posRef.current.y };
-          }}
-        >
-          <div className="font-semibold">Indicators</div>
-          <button className="px-2 py-1 text-sm" onClick={onClose}>Close</button>
+        <div className="flex items-center justify-between cursor-move select-none">
+          <div className="font-body">Indicators</div>
         </div>
-
-        <div className="mt-3 text-sm">
-          <div className="mb-2 font-semibold">Main Indicators</div>
+        <div className="mt-3 font-body">
+          <div className="mb-2 font-body">Main Indicators</div>
           <div className="flex flex-wrap gap-2">
             {MAIN_INDICATORS.map(({ key, label }) => (
               <label key={key} className="inline-flex items-center gap-2 cursor-pointer select-none">
@@ -150,12 +127,11 @@ export default function IndicatorSettings({ open, onClose, toggles, onToggle, dr
                   onChange={onToggle(key)}
                   className="accent-[#00B7C9]"
                 />
-                <span className="text-sm">{label}</span>
+                <span className="font-body">{label}</span>
               </label>
             ))}
           </div>
-
-          <div className="mt-4 mb-2 font-semibold">Sub Indicators</div>
+          <div className="mt-4 mb-2 font-body">Sub Indicators</div>
           <div className="flex flex-wrap gap-2">
             {SUB_INDICATORS.map(({ key, label }) => (
               <label key={key} className="inline-flex items-center gap-2 cursor-pointer select-none">
@@ -165,7 +141,7 @@ export default function IndicatorSettings({ open, onClose, toggles, onToggle, dr
                   onChange={onToggle(key)}
                   className="accent-[#00B7C9]"
                 />
-                <span className="text-sm">{label}</span>
+                <span className="font-body">{label}</span>
               </label>
             ))}
           </div>

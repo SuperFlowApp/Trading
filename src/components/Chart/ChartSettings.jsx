@@ -1,39 +1,60 @@
+import { useEffect, useRef } from "react";
+
 export default function ChartSettings({ open, candleType, setCandleType, onClose, dropdown }) {
+  const boxRef = useRef(null);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e) {
+      if (boxRef.current && !boxRef.current.contains(e.target)) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open, onClose]);
+
   if (!open) return null;
   const chartTypes = [
-    { value: "candle_solid", label: "Solid Candle" },
-    { value: "candle_stroke", label: "Outline Candle" },
-    { value: "ohlc", label: "OHLC" },
-    { value: "area", label: "Area" },
+    { value: "candle_solid", label: "Solid Candle", icon: "/assets/candle_solid.svg" },
+    { value: "candle_stroke", label: "Outline Candle", icon: "/assets/candle_stroke.svg" },
+    { value: "ohlc", label: "bars", icon: "/assets/ohlc.svg" },
+    { value: "area", label: "Area", icon: "/assets/area.svg" },
   ];
 
+  const handleSelect = (value) => {
+    setCandleType(value);
+    onClose(); // Close dropdown when a chart type is selected
+  };
+
   const content = (
-    <div className="w-72 rounded-md border border-primary2darker bg-backgroundmid shadow-lg z-20 p-3 space-y-2">
-      {/* Candle Type as radio buttons */}
+    <div
+      ref={boxRef}
+      className="w-72 rounded-md border border-primary2darker bg-backgroundmid shadow-lg z-20 p-3 space-y-2"
+    >
+      {/* Candle Type as vertical icon list */}
       <div>
-        <span className="text-sm block mb-1">Candle type</span>
         <div className="flex flex-col gap-1">
           {chartTypes.map(opt => (
-            <label key={opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
-                type="radio"
-                name="candleType"
-                value={opt.value}
-                checked={candleType === opt.value}
-                onChange={() => setCandleType(opt.value)}
-                className="accent-[#00B7C9]"
-              />
-              {opt.label}
-            </label>
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => handleSelect(opt.value)}
+              className={`flex items-center px-2 py-2 rounded transition border w-full
+                ${candleType === opt.value
+                  ? "border-primary2normal"
+                  : "border-transparent hover:border-[#00B7C950]"
+                }`}
+            >
+              <img src={opt.icon} alt={opt.label} className="w-6 h-6 mr-3" />
+              <span className="text-body" style={{ color: candleType === opt.value ? "var(--color-primary2liquidwhite)" : "var(--color-liquidmidgray)" }}>
+                {opt.label}
+              </span>
+            </button>
           ))}
         </div>
       </div>
-      <button
-        className="mt-2 px-2 py-1 text-xs rounded border border-[#00B7C950] hover:bg-[#00B7C91a] w-full"
-        onClick={onClose}
-      >
-        Close
-      </button>
     </div>
   );
 

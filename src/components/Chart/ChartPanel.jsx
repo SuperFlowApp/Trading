@@ -2,13 +2,18 @@ import { useState, useMemo, useRef } from 'react';
 import KlineChartProPanel from './KlineChart';
 import IndicatorSettings from './IndicatorSettings';
 import IndicatorsIcon from '/assets/Indicators.svg';
-import SettingsIcon from '/assets/Candles.svg';
 import TimezoneIcon from '/assets/TimeZone.svg';
 import ScreenshotIcon from '/assets/Screenshot.svg';
 import FullscreenIcon from '/assets/FullScreen.svg';
 
+
+// Chart settings imports
 import ChartSettings from './ChartSettings';
-import { useZustandStore } from '../../Zustandstore/useStore'; // or correct path
+import { useZustandStore } from '../../Zustandstore/useStore'; 
+import CandleSolidIcon from '/assets/candle_solid.svg';
+import CandleStrokeIcon from '/assets/candle_stroke.svg';
+import OHLCIcon from '/assets/ohlc.svg';
+import AreaIcon from '/assets/area.svg';
 
 const intervals = [
   { key: '1', label: '1m', value: '1m', multiplier: 1, timespan: 'minute', text: '1m' },
@@ -80,6 +85,14 @@ export default function ChartPanel() {
   // Screenshot preview state
   const [screenshotUrl, setScreenshotUrl] = useState(null);
 
+  // Map chart type to icon
+  const chartTypeIcons = {
+    candle_solid: CandleSolidIcon,
+    candle_stroke: CandleStrokeIcon,
+    ohlc: OHLCIcon,
+    area: AreaIcon,
+  };
+
   return (
     <div className="w-full text-body min-h-[520px] bg-backgroundmid rounded-md flex flex-col">
       {/* Tools Panel */}
@@ -127,11 +140,15 @@ export default function ChartPanel() {
             {/* Chart settings button */}
             <div className="relative">
               <button
-                className="px-2 py-1 rounded  hover:bg-[#00B7C91a] flex items-center gap-1"
+                className="px-2 py-1 rounded hover:bg-[#00B7C91a] flex items-center gap-1"
                 onClick={() => setShowSettings(s => !s)}
                 title="Chart settings"
               >
-                <img src={SettingsIcon} alt="" className="w-[20px] mr-1" />
+                <img
+                  src={chartTypeIcons[candleType] || CandleSolidIcon}
+                  alt=""
+                  className="w-[20px] mr-1"
+                />
               </button>
               {showSettings && (
                 <div className="absolute left-0 mt-2 z-30">

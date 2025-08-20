@@ -91,7 +91,7 @@ const useUnifiedOrderBook = (symbol) => {
 };
 
 // Memoized Row for per-row update
-const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSizeClass = "text-[14px]", fontWeightClass = "font-medium", textAlign }) => {
+const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSizeClass = "text-body", fontWeightClass = "font-medium", textAlign }) => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -111,7 +111,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSi
 
   const textColor = color === 'green' ? 'text-green' : 'text-red';
   const alignClass = textAlign === "right" ? "text-right" : "text-left";
-  const rowClasses = `relative flex justify-between w-full py-[1px] px-1 text-xs transition-colors cursor-pointer ${isBlinking
+  const rowClasses = `relative flex justify-between w-full py-[1px] px-1 text-body transition-colors cursor-pointer ${isBlinking
     ? color === 'red'
       ? 'bg-red/40'
       : 'bg-green/40'
@@ -409,7 +409,7 @@ const OrderBook = () => {
 
       {/* Spread Section */}
       <div className="text-body flex justify-center gap-[60px] bg-backgroundlight rounded-[4px] items-center py-[1px] my-1">
-        <div className="text-md">Spread</div>
+        <div className="text-body">Spread</div>
         <span className="">
           {spreadValue !== null ? `${spreadValue}$` : '—'}
         </span>
@@ -445,7 +445,7 @@ const OrderBook = () => {
                 color="green"
                 onSelect={handleRowSelect}
                 textAlign="right"
-                fontSizeClass="text-[12px]"
+                fontSizeClass="text-body"
                 fontWeightClass="font-[400]"
               />
 

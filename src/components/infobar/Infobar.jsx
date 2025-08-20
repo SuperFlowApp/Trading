@@ -53,7 +53,7 @@ function Infobar() {
           dropdownOpen={dropdownOpen}
           setDropdownOpen={setDropdownOpen}
         />
-        <div className="flex text-[14px] items-center gap-8 text-liquidwhite">
+        <div className="flex text-body items-center gap-8 text-liquidwhite">
           <div className="flex flex-col">
             <span>Price:</span>
             <span className="text-white">

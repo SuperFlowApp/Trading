@@ -142,7 +142,7 @@ function PairSelector({
       ref={dropdownRef}
     >
       <div className="flex flex-col text-white">
-        <div className="font-normal text-base text-[22px] flex items-center gap-2">
+        <div className="font-normal text-title flex items-center gap-2">
           {selectedMarket && COIN_ICONS[selectedMarket.base] && (
             <img
               src={COIN_ICONS[selectedMarket.base]}
