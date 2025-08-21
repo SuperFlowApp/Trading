@@ -1,28 +1,43 @@
 import { create } from "zustand";
 
+// Load initial state from localStorage
+const loadInitialState = () => {
+  try {
+    const savedState = localStorage.getItem("zustand-store-state");
+    if (savedState) {
+      return JSON.parse(savedState);
+    }
+  } catch (error) {
+    console.error("Error loading state from localStorage:", error);
+  }
+  return {};
+};
+
+const initialState = loadInitialState();
+
 const useZustandStore = create((set, get) => ({
   // price midpoint settings
-  priceMidpoint: "0.0",
+  priceMidpoint: initialState.priceMidpoint || "0.0",
   setPriceMidpoint: (value) => set({ priceMidpoint: value }),
 
   // selected price settings
-  OrderBookClickedPrice: null,
+  OrderBookClickedPrice: initialState.OrderBookClickedPrice || null,
   setOrderBookClickedPrice: (value) => set({ OrderBookClickedPrice: value }),
 
   // selected price settings
-  selectedCurrency: null,
+  selectedCurrency: initialState.selectedCurrency || null,
   setSelectedCurrency: (currency) => set({ selectedCurrency: currency }),
 
   // Notional settings
-  currentNotional: null,
+  currentNotional: initialState.currentNotional || null,
   setNotional: (Notional) => set({ currentNotional: Notional }),
 
-  red: "#F59DEF",
-  green: "#00B7C9",
+  red: initialState.red || "#F59DEF",
+  green: initialState.green || "#00B7C9",
   setRed: (value) => set({ red: value }),
   setGreen: (value) => set({ green: value }),
 
-  chartSettings: {
+  chartSettings: initialState.chartSettings || {
     grid_show: true,
     reverse_coordinate: false,
     price_axis_type: 'normal',

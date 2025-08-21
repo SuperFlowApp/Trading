@@ -3,8 +3,8 @@ import { useZustandStore } from "../Zustandstore/useStore"; // adjust path if ne
 const COLOR_PACKS = [
     { name: "SuperFlow", red: "#F59DEF", green: "#00B7C9" },
     { name: "Classic", red: "#F6465D", green: "#0ECB81" },
-    { name: "violet", red: "#b1509aff", green: "#0b9dbaff" },
-    { name: "Smooth", red: "#9f7070ff", green: "#74987bff" },
+    { name: "SuperFlow Dark", red: "#b1509aff", green: "#0b9dbaff" },
+    { name: "Classic Dark", red: "#9f7070ff", green: "#74987bff" },
 ];
 
 const SettingsDropdown = ({
@@ -76,7 +76,7 @@ const SettingsDropdown = ({
                 <span className="text-liquidlightergray text-body block mb-1 select-none">
                     Color Pack
                 </span>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2">
                     {COLOR_PACKS.map((pack) => (
                         <button
                             key={pack.name}
