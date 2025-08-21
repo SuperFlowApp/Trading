@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Modal from "../../CommonUIs/modal/modal";
 import { PriceFieldInput } from "../../CommonUIs/inputs/inputs";
+import { useAuthKey } from "../../../contexts/AuthKeyContext";
 
 const ModifyBalance = ({
   open,
@@ -9,6 +10,9 @@ const ModifyBalance = ({
 }) => {
   const [action, setAction] = useState("add"); // "add" or "remove"
   const [amount, setAmount] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const { authKey } = useAuthKey();
 
   if (!position) return null;
 
@@ -25,17 +29,45 @@ const ModifyBalance = ({
     }
   };
 
-  const handleMarginUpdate = () => {
-    // Will implement API call in next step
-    console.log(`${action === "add" ? "Adding" : "Removing"} margin for ${position?.symbol}:`, {
-      action: action === "add" ? "deposit" : "withdraw",
-      amount: amount
-    });
+  const handleMarginUpdate = async () => {
+    if (!authKey || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      return;
+    }
 
-    // Will be replaced with actual API call to:
-    // https://superflow.exchange/modify-isolated-balance?action={deposit|withdraw}
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      // Map our UI action to API action
+      const apiAction = action === "add" ? "deposit" : "withdraw";
+      
+      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/modify-isolated-balance?action=${apiAction}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authKey}`
+        },
+        body: JSON.stringify({
+          symbol: position.symbol,
+          positionSide: position.positionSide || "BOTH",
+          amount: parseFloat(amount)
+        })
+      });
 
-    onClose();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || data.message || 'Failed to modify margin');
+      }
+      
+      // Success - close modal
+      onClose();
+    } catch (err) {
+      console.error('Error modifying margin:', err);
+      setError(err.message || 'Failed to modify margin');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,8 +77,6 @@ const ModifyBalance = ({
       width={320}
     >
       <div className="p-4">
-
-
         {/* Tabs */}
         <div className="flex border-b border-liquiddarkgray mb-4">
           <button
@@ -87,13 +117,20 @@ const ModifyBalance = ({
           />
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div className="mb-3 text-red-500 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Confirm Button */}
         <button
           className="w-full py-2 px-4 bg-primary2normal hover:bg-primary2dark text-backgrounddark font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleMarginUpdate}
-          disabled={!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0}
+          disabled={isSubmitting || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0}
         >
-          Confirm
+          {isSubmitting ? "Processing..." : "Confirm"}
         </button>
       </div>
     </Modal>
