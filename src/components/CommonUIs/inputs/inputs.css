@@ -311,8 +311,6 @@ select option:checked {
   background: none;
   color: var(--color-liquidwhite);
   border: 1px solid transparent;
-  font-size: 17px;
-  font-family: inherit;
   outline: none;
   transition: border-color 0.2s;
   box-shadow: none;
@@ -336,7 +334,6 @@ select option:checked {
   top: 50%;
   transform: translateY(-50%);
   color: inherit;
-  font-size: 15px;
   pointer-events: none;
 }
 

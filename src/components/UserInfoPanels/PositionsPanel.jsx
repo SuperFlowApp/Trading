@@ -47,7 +47,7 @@ function PositionsPanel() {
       <div className="">
         {activeTab === 'balances' && <div>Balances will be shown here.</div>}
         {activeTab === 'positions' &&
-          <section className="text-white py-4">
+          <section className="text-white">
             <Positions />
           </section>}
         {activeTab === 'orders' && <OpenOrdersTab />}

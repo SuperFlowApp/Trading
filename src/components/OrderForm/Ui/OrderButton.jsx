@@ -11,7 +11,7 @@ export default function OrderButton({
     // Basic style presets
     const base =
 
-        'transition-colors font-title  py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-primary2normal ';
+        'transition-colors text-title  py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-primary2normal ';
     const types = {
         primary:
             'bg-green text-black hover:bg-green-80',

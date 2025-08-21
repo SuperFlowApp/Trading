@@ -80,7 +80,7 @@ const ModifyBalance = ({
             onButtonClick={handleMaxClick}
             inputProps={{
               type: "number",
-              placeholder: "0.00",
+              placeholder: "0",
               min: "0",
               step: "0.01",
             }}

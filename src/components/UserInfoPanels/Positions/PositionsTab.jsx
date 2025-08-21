@@ -60,32 +60,34 @@ const Positions = () => {
   return (
     <div className="w-full">
       <div className="overflow-x-auto">
-        <table className=" w-full text-xs text-liquidwhite">
-          <thead>
-            <tr className="text-left">
-              <th className="px-2 py-1">Pair</th>
-              <th className="px-2 py-1">Side</th>
-              <th className="px-2 py-1">Size</th>
-              <th className="px-2 py-1">Entry Price</th>
-              <th className="px-2 py-1">Mark Price</th>
-              <th className="px-2 py-1">Notional</th>
-              <th className="px-2 py-1">Leverage</th>
-              <th className="px-2 py-1">Unrealized PNL</th>
-              <th className="px-2 py-1">Realized PnL</th>
-              <th className="px-2 py-1">Margin</th>
-              <th className="px-2 py-1">Maint. Margin</th>
-              <th className="px-2 py-1">Liquid. Price</th>
-              <th className="px-2 py-1">Last Updated</th>
-              <th className="px-2 py-1"></th>
-            </tr>
-          </thead>
+        <table className=" w-full text-body text-liquidwhite">
+          {authKey && (
+            <thead>
+              <tr className="text-left text-liquidmidgray">
+                <th className="px-2 py-1">Pair</th>
+                <th className="px-2 py-1">Side</th>
+                <th className="px-2 py-1">Size</th>
+                <th className="px-2 py-1">Entry Price</th>
+                <th className="px-2 py-1">Mark Price</th>
+                <th className="px-2 py-1">Notional</th>
+                <th className="px-2 py-1">Leverage</th>
+                <th className="px-2 py-1">Unrealized PNL</th>
+                <th className="px-2 py-1">Realized PnL</th>
+                <th className="px-2 py-1">Margin</th>
+                <th className="px-2 py-1">Maint. Margin</th>
+                <th className="px-2 py-1">Liquid. Price</th>
+                <th className="px-2 py-1">Last Updated</th>
+                <th className="px-2 py-1"></th>
+              </tr>
+            </thead>
+          )}
           <tbody>
             {authKey ? (
               rawPositions && rawPositions.length > 0 ? (
                 rawPositions.map((pos, idx) => (
                   <tr
                     key={pos.symbol + pos.positionSide + idx}
-                    className={idx % 2 ? "bg-liquidwhite/10" : "bg-liquidwhite/20"}
+                    className={idx % 2 ? "bg-backgroundmid" : "bg-backgroundlight"}
                   >
                     <td className="px-2 py-1 font-semibold">{pos.symbol}</td>
                     <td className="px-2 py-1">
@@ -102,7 +104,7 @@ const Positions = () => {
                     <td className="px-2 py-1">{pos.leverage}</td>
                     <td
                       className={`px-2 py-1 ${Number(pos.upnl) === 0
-                          ? 'text-gray-400'
+                          ? 'text-liquidmidgray'
                           : Number(pos.upnl) > 0
                             ? 'text-green'
                             : 'text-red'
@@ -115,12 +117,12 @@ const Positions = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                           <span>{fmt(pos.isolatedMarginBalance, 4)}</span>
-                          <span className="text-body text-gray-400">
+                          <span className=" text-liquidmidgray">
                             {pos.marginMode || (pos.cross === true ? "Cross" : pos.cross === false ? "Isolated" : "-")}
                           </span>
                         </div>
                         <button 
-                          className="mr-2 p-1 bg-liquiddarkgray rounded-md text-body"
+                          className="mr-2 p-1 bg-liquiddarkgray rounded-md"
                           onClick={(e) => {
                             e.stopPropagation();
                             setActivePosition(pos);
@@ -143,14 +145,14 @@ const Positions = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={14} className="text-center py-8 text-gray-400">
+                  <td colSpan={14} className="text-center py-8 text-liquidmidgray">
                     No positions.
                   </td>
                 </tr>
               )
             ) : (
               <tr>
-                <td colSpan={14} className="text-center py-8 text-gray-400">
+                <td colSpan={14} className="text-center py-8 text-liquidmidgray">
                   Please log in to view your positions.
                 </td>
               </tr>

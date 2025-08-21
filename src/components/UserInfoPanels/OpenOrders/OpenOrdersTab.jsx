@@ -39,8 +39,8 @@ function formatDate(ts) {
 const OpenOrdersTab = () => {
   const { authKey } = useAuthKey();
   const [orders, setOrders] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false); // <-- Add
-  const [selectedOrder, setSelectedOrder] = useState(null); // <-- Add
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Fetch open orders when authKey changes or every 5s if valid
   useEffect(() => {
@@ -79,30 +79,34 @@ const OpenOrdersTab = () => {
     return () => clearInterval(intervalId);
   }, [authKey]);
 
+  const isUserLoggedIn = authKey && isTokenValid(authKey);
+
   return (
     <div className="w-full">
       <div className="overflow-x-auto">
-        <table className="min-w-full text-xs text-liquidwhite">
-          <thead>
-            <tr>
-              {columns.map(col => (
-                <th key={col.key} className="px-2 py-2 border-b border-gray-700 font-semibold text-left">
-                  {col.label}
-                </th>
-              ))}
-              <th className="px-2 py-2 border-b border-gray-700"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {!authKey || !isTokenValid(authKey) ? (
+        <table className="min-w-full text-body text-liquidwhite">
+          {isUserLoggedIn && (
+            <thead>
               <tr>
-                <td colSpan={columns.length + 1} className="text-center py-8 text-gray-400">
+                {columns.map(col => (
+                  <th key={col.key} className="px-2 py-2 border-b border-gray-700 font-semibold text-left">
+                    {col.label}
+                  </th>
+                ))}
+                <th className="px-2 py-2 border-b border-gray-700"></th>
+              </tr>
+            </thead>
+          )}
+          <tbody>
+            {!isUserLoggedIn ? (
+              <tr>
+                <td colSpan={columns.length + 1} className="text-center py-8 text-liquidmidgray">
                   Please log in to view open orders.
                 </td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={columns.length + 1} className="text-center py-8 text-gray-400">
+                <td colSpan={columns.length + 1} className="text-center py-8 text-liquidmidgray">
                   No open orders.
                 </td>
               </tr>
@@ -126,7 +130,7 @@ const OpenOrdersTab = () => {
                       <button className="border border-primary2normal hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
                       */}
                       <button
-                        className="bg-warningcolor border border-transparent hover:border-liquidwhite text-white px-2 py-1 rounded text-xs"
+                        className="bg-warningcolor border border-transparent hover:border-liquidwhite text-liquidwhite px-2 py-1 rounded text-body"
                         onClick={() => {
                           setSelectedOrder(order);
                           setModalOpen(true);
@@ -145,8 +149,8 @@ const OpenOrdersTab = () => {
       {modalOpen && selectedOrder && (
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <div className="p-4">
-            <h2 className="text-lg font-semibold mb-2">Cancel Order</h2>
-            <div className="mb-4 text-sm">
+            <h2 className="body mb-2">Cancel Order</h2>
+            <div className="mb-4 text-body">
               <div><b>Order ID:</b> {selectedOrder.orderId}</div>
               <div><b>Symbol:</b> {selectedOrder.symbol}</div>
               <div><b>Side:</b> {selectedOrder.side}</div>
@@ -162,7 +166,7 @@ const OpenOrdersTab = () => {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 rounded bg-warningcolor text-white hover:bg-red-700"
+                className="px-4 py-2 rounded bg-warningcolor text-liquidwhite hover:bg-red-700"
                 onClick={async () => {
                   try {
                     const id = selectedOrder.orderId;
