@@ -30,20 +30,47 @@ const SettingsDropdown = ({
     // Separate styling and chart settings
     const stylingSettings = (
         <div>
-            <div className=" border-t border-liquiddarkgray text-body text-liquidwhite pt-2 mb-2 mt-2">Style Settings</div>
-            {/* Font size selector */}
-            <div className="flex items-center justify-between mb-3">
-                <span className="text-liquidlightergray text-body select-none">Font Size</span>
-                <select
-                    className="bg-backgroundlight border border-[#00B7C950] rounded px-2 py-1 text-body focus:outline-none"
-                    value={chartSettings.fontSize}
-                    onChange={e => setChartSettings({ fontSize: e.target.value })}
-                >
-                    <option value="small">Small</option>
-                    <option value="medium">Medium</option>
-                    <option value="large">Large</option>
-                </select>
+            {/*<div className="border-t border-liquiddarkgray text-body text-liquidwhite pt-2 mb-2 mt-2">Style Settings</div> 
+            */}
+            {/* Font size selector - replaced dropdown with visual radio buttons */}
+            <div className="mb-3">
+                <span className="text-liquidlightergray text-body block mb-2 select-none">Font Size</span>
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setChartSettings({ fontSize: 'small' })}
+                        className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
+                            ${chartSettings.fontSize === 'small'
+                                ? "border-primary2normal bg-[#00B7C91a] text-primary2light"
+                                : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
+                    >
+                        <span style={{ fontSize: '11px' }}>Small</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setChartSettings({ fontSize: 'medium' })}
+                        className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
+                            ${chartSettings.fontSize === 'medium'
+                                ? "border-primary2normal bg-[#00B7C91a] text-primary2light"
+                                : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
+                    >
+                        <span style={{ fontSize: '13px' }}>Medium</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setChartSettings({ fontSize: 'large' })}
+                        className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
+                            ${chartSettings.fontSize === 'large'
+                                ? "border-primary2normal bg-[#00B7C91a] text-primary2light"
+                                : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
+                    >
+                        <span style={{ fontSize: '15px' }}>Large</span>
+                    </button>
+                </div>
             </div>
+
             {/* Color pack picker */}
             <div>
                 <span className="text-liquidlightergray text-body block mb-1 select-none">
