@@ -177,7 +177,7 @@ select option:checked {
 
 
 .time-dropdown {
-  min-width: 90px;
+  min-width: 40px;
   background: none;
   color: var(--color-liquidwhite);
   height: 30px;

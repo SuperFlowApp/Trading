@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import KlineChartProPanel from './KlineChart';
 import IndicatorSettings from './IndicatorSettings';
 import IndicatorsIcon from '/assets/Indicators.svg';
@@ -9,7 +9,7 @@ import FullscreenIcon from '/assets/FullScreen.svg';
 
 // Chart settings imports
 import ChartSettings from './ChartSettings';
-import { useZustandStore } from '../../Zustandstore/useStore'; 
+import { useZustandStore } from '../../Zustandstore/useStore';
 import CandleSolidIcon from '/assets/candle_solid.svg';
 import CandleStrokeIcon from '/assets/candle_stroke.svg';
 import OHLCIcon from '/assets/ohlc.svg';
@@ -55,6 +55,9 @@ export default function ChartPanel() {
     [intervalValue]
   );
 
+  // Add this line to define the missing state variable
+  const [showIntervalDropdown, setShowIntervalDropdown] = useState(false);
+
   // indicator toggles (using MAIN/SUB keys expected by the chart)
   const [toggles, setToggles] = useState({
     MAIN_MA: false,
@@ -93,26 +96,138 @@ export default function ChartPanel() {
     area: AreaIcon,
   };
 
+  // Chart options (moved from SettingsDropdown -> only chart, not style)
+  const [showChartMenu, setShowChartMenu] = useState(false);
+  const handleChartSettingChange = (key) => {
+    setChartSettings({ [key]: !chartSettings[key] });
+  };
+
+  // Close on outside click (Timezone + "..." Chart Settings)
+  const tzWrapRef = useRef(null);
+  const chartMenuWrapRef = useRef(null);
+  const intervalDropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!showTZMenu && !showChartMenu && !showIntervalDropdown) return;
+    function handleClickOutside(e) {
+      if (showTZMenu && tzWrapRef.current && !tzWrapRef.current.contains(e.target)) {
+        setShowTZMenu(false);
+      }
+      if (showChartMenu && chartMenuWrapRef.current && !chartMenuWrapRef.current.contains(e.target)) {
+        setShowChartMenu(false);
+      }
+      if (showIntervalDropdown && intervalDropdownRef.current && !intervalDropdownRef.current.contains(e.target)) {
+        setShowIntervalDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showTZMenu, showChartMenu, showIntervalDropdown]);
+
+  const chartSettingsList = useMemo(() => {
+    return Object.entries(chartSettings)
+      .filter(([key]) => !['red', 'green', 'fontSize'].includes(key))
+      .map(([key, value]) =>
+        key === 'price_axis_type' ? (
+          <li key={key} className="flex items-center justify-between mb-2">
+            <span className="text-liquidmidgray text-body select-none">Price Axis</span>
+            <select
+              className="bg-backgroundlight border border-[#00B7C950] rounded px-2 py-1 text-body focus:outline-none"
+              value={chartSettings.price_axis_type}
+              onChange={e => setChartSettings({ price_axis_type: e.target.value })}
+            >
+              <option value="normal">Normal</option>
+              <option value="log">Log</option>
+              <option value="percentage">Percentage</option>
+            </select>
+          </li>
+        ) : (
+          <li key={key} className="flex items-center justify-between mb-2">
+            <span className="text-liquidmidgray text-body select-none">
+              {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </span>
+            <input
+              type="checkbox"
+              checked={!!chartSettings[key]}
+              onChange={() => handleChartSettingChange(key)}
+              className="accent-liquidwhite"
+            />
+          </li>
+        )
+      );
+  }, [chartSettings, setChartSettings]);
+
   return (
     <div className="w-full text-body min-h-[520px] bg-backgroundmid rounded-md flex flex-col">
       {/* Tools Panel */}
       <div className="flex items-center justify-between px-3 py-2 gap-3">
         <div className="flex w-full items-center gap-3 justify-between">
-
           {/* LeftSide */}
           <div className="flex">
-            {/* Interval dropdown */}
-            <select
-              className="time-dropdown bg-transparent  rounded px-2 py-1"
-              value={intervalValue}
-              onChange={e => setIntervalValue(e.target.value)}
-            >
-              {intervals.map(opt => (
-                <option key={opt.key} value={opt.value}>
-                  {opt.label}
-                </option>
+            {/* Interval selector with 3 static + 1 dropdown */}
+            <div className="flex items-center gap-1 relative">
+              {[0, 1, 2].map(i => (
+                <button
+                  key={intervals[i].key}
+                  className={`px-2 py-1 rounded transition-colors duration-100 text-body ${
+                    intervalValue === intervals[i].value
+                      ? "text-primary2light bg-[#00B7C91a]"
+                      : "text-liquidmidgray hover:text-primary2normal"
+                  }`}
+                  onClick={() => setIntervalValue(intervals[i].value)}
+                  type="button"
+                >
+                  {intervals[i].label}
+                </button>
               ))}
-            </select>
+              {/* 4th button: dropdown for other intervals */}
+              <div className="relative" ref={intervalDropdownRef}>
+                <button
+                  className={`px-2 py-1 rounded transition-colors duration-100 text-body flex items-center gap-1 ${
+                    ![intervals[0].value, intervals[1].value, intervals[2].value].includes(intervalValue)
+                      ? "text-primary2light bg-[#00B7C91a]"
+                      : "text-liquidmidgray hover:text-primary2normal"
+                  }`}
+                  onClick={() => setShowIntervalDropdown(s => !s)}
+                  type="button"
+                  aria-label="Select interval"
+                >
+                  {/* Always show the 4th option label if a value from dropdown is selected, otherwise show "More" */}
+                  {![intervals[0].value, intervals[1].value, intervals[2].value].includes(intervalValue)
+                    ? intervals.find(i => i.value === intervalValue)?.label
+                    : "More"
+                  }
+                  <svg className="ml-1 w-3 h-3" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="2" />
+                  </svg>
+                </button>
+                {/* Dropdown menu */}
+                {showIntervalDropdown && (
+                  <div className="absolute left-0 mt-2 w-24 bg-backgroundmid rounded shadow-lg border border-[#00B7C950] z-30">
+                    <ul className="py-1">
+                      {intervals.slice(3).map(opt => (
+                        <li key={opt.key}>
+                          <button
+                            className={`w-full text-left px-3 py-2 rounded text-body ${
+                              intervalValue === opt.value
+                                ? "text-primary2light bg-[#00B7C91a]"
+                                : "text-liquidmidgray hover:text-primary2normal"
+                            }`}
+                            onClick={() => {
+                              setIntervalValue(opt.value);
+                              setShowIntervalDropdown(false);
+                            }}
+                            type="button"
+                          >
+                            {opt.label}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Indicator settings button */}
             <div className="relative">
@@ -122,7 +237,7 @@ export default function ChartPanel() {
                 title="Open indicator settings"
               >
                 <img src={IndicatorsIcon} alt="" className="w-[20px] mr-1" />
-                Indicators
+                
               </button>
               {showIndicatorSettings && (
                 <div className="absolute left-0 mt-2 z-30">
@@ -137,7 +252,7 @@ export default function ChartPanel() {
               )}
             </div>
 
-            {/* Chart settings button */}
+            {/* Chart settings button (candle type) */}
             <div className="relative">
               <button
                 className="px-2 py-1 rounded hover:bg-[#00B7C91a] flex items-center gap-1"
@@ -167,24 +282,24 @@ export default function ChartPanel() {
           {/* RightSide */}
           <div className="flex">
 
-            {/* Timezone button + popover */}
-            <div className="relative">
+            {/* Timezone button + popover (styled + outside click close) */}
+            <div className="relative" ref={tzWrapRef}>
               <button
                 onClick={() => setShowTZMenu(s => !s)}
-                className="px-2 py-1 rounded  hover:bg-[#00B7C91a] flex items-center gap-1"
+                className="px-2 py-1 rounded hover:bg-[#00B7C91a] flex items-center gap-1"
                 title="Change chart timezone"
               >
                 <img src={TimezoneIcon} alt="" className="w-[20px] mr-1" />
               </button>
               {showTZMenu && (
-                <div className="absolute right-0 mt-2 w-56 rounded-md  bg-[#04080a] shadow-lg z-20">
-                  <div className="px-2 py-2 opacity-70">Select timezone</div>
+                <div className="absolute right-0 mt-2 w-[320px] max-w-[95vw] bg-backgroundmid rounded shadow-lg p-4 border border-[#00B7C950] z-30">
+                  <div className="font-body mb-2 opacity-90">Select timezone</div>
                   <ul className="max-h-64 overflow-auto">
                     {COMMON_TIMEZONES.map(tz => (
                       <li key={tz}>
                         <button
                           onClick={() => { setTimeZone(tz); setShowTZMenu(false); }}
-                          className={`w-full text-left px-3 py-2 hover:bg-[#00B7C91a] ${tz === timeZone ? 'opacity-100' : 'opacity-80'}`}
+                          className={`w-full text-left px-3 py-2 rounded hover:bg-[#00B7C91a] ${tz === timeZone ? 'opacity-100' : 'opacity-80'}`}
                         >
                           {tz}
                         </button>
@@ -209,6 +324,7 @@ export default function ChartPanel() {
               <img src={ScreenshotIcon} alt="" className="w-[20px] mr-1" />
             </button>
 
+
             {/* Fullscreen */}
             <button
               className="px-2 py-1 rounded  hover:bg-[#00B7C91a] flex items-center gap-1"
@@ -217,8 +333,36 @@ export default function ChartPanel() {
             >
               <img src={FullscreenIcon} alt="" className="w-[20px] mr-1" />
             </button>
-          </div>
 
+            {/* Chart options "..." menu (styled + outside click close) */}
+            <div className="relative" ref={chartMenuWrapRef}>
+              <button
+                className="px-2 py-1 rounded hover:bg-[#00B7C91a] flex items-center justify-center w-8"
+                onClick={() => setShowChartMenu(s => !s)}
+                title="Chart settings"
+                aria-label="More chart settings"
+              >
+                <svg
+                  className="w-[20px] h-[20px] text-liquidmidgray"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="5" r="1.8" />
+                  <circle cx="12" cy="12" r="1.8" />
+                  <circle cx="12" cy="19" r="1.8" />
+                </svg>
+              </button>
+              {showChartMenu && (
+                <div className="absolute right-0 mt-2 w-[320px] max-w-[95vw] bg-backgroundmid rounded shadow-lg p-4 border border-[#00B7C950] z-30">
+                  <div className="font-body mb-2">Chart Settings</div>
+                  <ul className="space-y-1">
+                    {chartSettingsList}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

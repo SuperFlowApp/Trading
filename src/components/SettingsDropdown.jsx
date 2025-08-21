@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useZustandStore } from "../Zustandstore/useStore"; // adjust path if needed
 
 const COLOR_PACKS = [
@@ -28,15 +27,10 @@ const SettingsDropdown = ({
         document.documentElement.style.setProperty("--color-green", pack.green);
     };
 
-    // Handler for chart settings
-    const handleChartSettingChange = (key) => {
-        setChartSettings({ [key]: !chartSettings[key] });
-    };
-
     // Separate styling and chart settings
     const stylingSettings = (
         <div>
-                        <div className=" border-t border-liquiddarkgray text-body text-liquidwhite pt-2 mb-2 mt-2">Style Settings</div>
+            <div className=" border-t border-liquiddarkgray text-body text-liquidwhite pt-2 mb-2 mt-2">Style Settings</div>
             {/* Font size selector */}
             <div className="flex items-center justify-between mb-3">
                 <span className="text-liquidlightergray text-body select-none">Font Size</span>
@@ -86,35 +80,6 @@ const SettingsDropdown = ({
         </div>
     );
 
-    const chartSettingsList = Object.entries(chartSettings)
-        .filter(([key]) => !["red", "green", "fontSize"].includes(key))
-        .map(([key, value]) =>
-            key === 'price_axis_type' ? (
-                <li key={key} className="flex items-center justify-between mb-2">
-                    <span className="text-liquidlightergray text-body select-none">Price Axis</span>
-                    <select
-                        className="bg-backgroundlight border border-[#00B7C950] rounded px-2 py-1 text-body focus:outline-none"
-                        value={chartSettings.price_axis_type}
-                        onChange={e => setChartSettings({ price_axis_type: e.target.value })}
-                    >
-                        <option value="normal">Normal</option>
-                        <option value="log">Log</option>
-                        <option value="percentage">Percentage</option>
-                    </select>
-                </li>
-            ) : (
-                <li key={key} className="flex items-center justify-between mb-2">
-                    <span className="text-liquidlightergray text-body select-none">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                    <input
-                        type="checkbox"
-                        checked={!!chartSettings[key]}
-                        onChange={() => handleChartSettingChange(key)}
-                        className="accent-primary2normal"
-                    />
-                </li>
-            )
-        );
-
     return (
         <div className="relative text-body" ref={settingsRef}>
             <button
@@ -132,16 +97,9 @@ const SettingsDropdown = ({
                 />
             </button>
 
-            
             {settingsOpen && (
                 <div className="absolute right-0 mt-2 w-72 bg-backgroundmid border border-[#23272e] rounded-xl shadow-2xl z-50 p-5 space-y-5">
                     {stylingSettings}
-                    <div>
-                        <div className="border-t border-liquiddarkgray  text-liquidwhite pt-2 mb-2 mt-2">Chart Settings</div>
-                        <ul className="space-y-1">
-                            {chartSettingsList}
-                        </ul>
-                    </div>
                 </div>
             )}
         </div>

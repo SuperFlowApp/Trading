@@ -1,18 +1,15 @@
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
-  collection,
-  addDoc,
-  serverTimestamp,
-  getDocs,
-  query,
-  orderBy,
-  onSnapshot,
-  deleteDoc,
   doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { firebaseConfig } from "../firebase/firebaseConfig";
 
+// Initialize Firebase once
 let app;
 let db;
 export function getDb() {
@@ -23,41 +20,78 @@ export function getDb() {
   return db;
 }
 
-export async function createBotGroup({ groupName, groupSize }) {
-  const users = Array.from({ length: groupSize }, (_, i) => {
-    const username = `${groupName}-${i + 1}`;
-    return { username, password: username };
-  });
+// User profile management
+export async function getUserProfile(username) {
+  if (!username) return null;
+  
+  const dbRef = getDb();
+  const userRef = doc(dbRef, "users", username);
+  const userDoc = await getDoc(userRef);
+  
+  if (userDoc.exists()) {
+    return { id: userDoc.id, ...userDoc.data() };
+  }
+  
+  return null;
+}
+
+export async function createUserProfile(username) {
+  if (!username) return null;
 
   const dbRef = getDb();
-  const docRef = await addDoc(collection(dbRef, "botGroups"), {
-    groupName,
-    groupSize,
-    users,
+  const userRef = doc(dbRef, "users", username);
+
+  const existingUser = await getDoc(userRef);
+  if (existingUser.exists()) {
+    return { id: existingUser.id, ...existingUser.data() };
+  }
+
+  const userData = {
+    username,
     createdAt: serverTimestamp(),
+    settings: {
+      colors: { red: "#F59DEF", green: "#00B7C9" }, // SuperFlow
+      fontSize: "medium",
+    },
+  };
+
+  await setDoc(userRef, userData);
+  return { id: username, ...userData };
+}
+
+export async function saveUserSettings(username, settings) {
+  if (!username) return null;
+
+  const dbRef = getDb();
+  const userRef = doc(dbRef, "users", username);
+
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    const userData = {
+      username,
+      createdAt: serverTimestamp(),
+      settings, // only colors + fontSize
+    };
+    await setDoc(userRef, userData);
+    return { id: username, ...userData };
+  }
+
+  await updateDoc(userRef, {
+    settings,
+    updatedAt: serverTimestamp(),
   });
 
-  return { id: docRef.id, groupName, groupSize, users };
+  return { id: username, ...userDoc.data(), settings };
 }
 
-export async function fetchBotGroups() {
-  const dbRef = getDb();
-  const q = query(collection(dbRef, "botGroups"), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+export async function getUserSettings(username) {
+  const user = await getUserProfile(username);
+  return user?.settings || null;
 }
 
-export function onBotGroups(callback) {
-  const dbRef = getDb();
-  const q = query(collection(dbRef, "botGroups"), orderBy("createdAt", "desc"));
-  const unsub = onSnapshot(q, snap => {
-    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    callback(rows);
-  });
-  return unsub;
-}
-
-export async function deleteBotGroup(id) {
-  const dbRef = getDb();
-  await deleteDoc(doc(dbRef, "botGroups", id));
+// Simple function to check if username exists
+export async function isUsernameTaken(username) {
+  const user = await getUserProfile(username);
+  return user !== null;
 }

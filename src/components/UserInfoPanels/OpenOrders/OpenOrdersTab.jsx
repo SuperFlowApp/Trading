@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuthKey } from "../../../contexts/AuthKeyContext";
 import { formatPrice } from "../../../utils/priceFormater";
-import Modal from "../../CommonUIs/modal/modal"; // <-- Add this import
+import Modal from "../../CommonUIs/modal/modal";
 
 const priceKeys = ["price", "notional", "quantity", "filled", "remaining"];
 

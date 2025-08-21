@@ -23,7 +23,7 @@ const initialSettings = {
 };
 
 function Navbar() {
-  const { authKey, setAuthKey, username } = useAuthKey(); // <-- use context username
+  const { authKey, setAuthKey, username, setUsername } = useAuthKey(); // <-- use context username
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false); // State for signup modal
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -97,6 +97,7 @@ function Navbar() {
 
   const handleDisconnect = () => {
     setAuthKey(null);
+    setUsername(null); // Also clear the username
   };
 
   return (
