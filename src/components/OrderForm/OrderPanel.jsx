@@ -194,16 +194,28 @@ function LimitOrderForm({ onCurrencyChange }) {
   // Update amount when sliderValue changes
   useEffect(() => {
     if (inputSource === 'slider' && sliderValue >= 0) {
+      if (sliderValue === 0) {
+        setAmount("0");
+        setInputSource(null);
+        return;
+      }
+      const bal = parseFloat(balanceFree);
+      if (isNaN(bal)) {
+        setAmount("0");
+        setInputSource(null);
+        return;
+      }
+
       if (selectedCurrency === pairDetails.base) {
         const currentPrice = parseFloat(price) || priceMidpoint;
-        if (currentPrice && !isNaN(currentPrice) && !isNaN(parseFloat(balanceFree))) {
-          const baseEquivalent = parseFloat(balanceFree) / currentPrice;
+        if (currentPrice && !isNaN(currentPrice)) {
+          const baseEquivalent = bal / currentPrice;
           const calculatedAmount = (sliderValue / 100) * baseEquivalent;
-          setAmount(calculatedAmount.toFixed(6));
+          setAmount(calculatedAmount === 0 ? "0" : calculatedAmount.toFixed(6));
         }
       } else {
-        const calculatedAmount = (sliderValue / 100) * parseFloat(balanceFree);
-        setAmount(calculatedAmount.toFixed(2));
+        const calculatedAmount = (sliderValue / 100) * bal;
+        setAmount(calculatedAmount === 0 ? "0" : calculatedAmount.toFixed(2));
       }
       setInputSource(null);
     }
@@ -238,10 +250,14 @@ function LimitOrderForm({ onCurrencyChange }) {
     if (!amount) return;
 
     const currentAmount = parseFloat(amount);
-    // Use price if available (Limit/Scale mode), otherwise use priceMidpoint (Market mode)
     const currentPrice = parseFloat(price) || priceMidpoint;
 
     if (isNaN(currentAmount) || !currentPrice || isNaN(currentPrice)) return;
+
+    if (currentAmount === 0) {
+      setAmount("0");
+      return;
+    }
 
     // When switching from base to quote, convert amount to quote value
     if (selectedCurrency === pairDetails.quote) {

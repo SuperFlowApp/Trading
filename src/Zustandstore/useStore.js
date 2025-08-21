@@ -32,6 +32,10 @@ const useZustandStore = create((set, get) => ({
   currentNotional: initialState.currentNotional || null,
   setNotional: (Notional) => set({ currentNotional: Notional }),
 
+  // Available USDT balance (for NotificationBar and others)
+  availableUsdt: typeof initialState.availableUsdt === "number" ? initialState.availableUsdt : 0,
+  setAvailableUsdt: (value) => set({ availableUsdt: Number(value) || 0 }),
+
   red: initialState.red || "#F59DEF",
   green: initialState.green || "#00B7C9",
   setRed: (value) => set({ red: value }),
