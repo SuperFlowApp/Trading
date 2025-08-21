@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useAuthKey } from "../../contexts/AuthKeyContext";
-import Modal from "../CommonUIs/modal/modal";
+import { useAuthKey } from "../../../contexts/AuthKeyContext";
+import ModifyBalance from "./ModifyBalance";
 
 const Positions = () => {
   const { authKey } = useAuthKey();
   const [rawPositions, setRawPositions] = useState([]);
   const [showMarginModal, setShowMarginModal] = useState(false);
   const [activePosition, setActivePosition] = useState(null);
-  const [marginMode, setMarginMode] = useState("");
-  const [marginAmount, setMarginAmount] = useState("");
 
   // Fetch open positions from server when authKey changes
   useEffect(() => {
@@ -39,14 +37,6 @@ const Positions = () => {
     return () => clearInterval(interval); // Cleanup on unmount or authKey change
   }, [authKey]);
 
-  // Set modal defaults when active position changes
-  useEffect(() => {
-    if (activePosition) {
-      setMarginMode(activePosition.cross === true ? "Cross" : "Isolated");
-      setMarginAmount(fmt(activePosition.isolatedMarginBalance, 4));
-    }
-  }, [activePosition]);
-
   // Helper to format numbers and handle nulls
   const fmt = (v, digits = 4) => {
     if (v === null || v === undefined) return "-";
@@ -62,16 +52,9 @@ const Positions = () => {
     return d.toLocaleString();
   };
 
-  const handleMarginUpdate = () => {
-    // Implement your margin update logic here
-    console.log(`Updating margin for ${activePosition.symbol}:`, {
-      mode: marginMode,
-      amount: marginAmount
-    });
-    
-    // You would typically make an API call here
-    // For now, we'll just close the modal
+  const handleCloseMarginModal = () => {
     setShowMarginModal(false);
+    setActivePosition(null);
   };
 
   return (
@@ -137,7 +120,7 @@ const Positions = () => {
                           </span>
                         </div>
                         <button 
-                          className="mr-2 p-1 bg-primary2darker rounded-md  text-body"
+                          className="mr-2 p-1 bg-liquiddarkgray rounded-md text-body"
                           onClick={(e) => {
                             e.stopPropagation();
                             setActivePosition(pos);
@@ -176,64 +159,12 @@ const Positions = () => {
         </table>
       </div>
 
-      {/* Margin Modal */}
-      <Modal 
+      {/* Use the new ModifyBalance component */}
+      <ModifyBalance
         open={showMarginModal}
-        onClose={() => setShowMarginModal(false)}
-        width={320}
-      >
-        <div className="p-4">
-          <h2 className="text-lg font-bold mb-4">
-            Adjust Margin {activePosition?.symbol}
-          </h2>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Margin Mode</label>
-            <div className="flex space-x-2">
-              <button 
-                className={`px-4 py-2 rounded ${marginMode === 'Cross' ? 'bg-primary2dark' : 'bg-backgrounddark'}`}
-                onClick={() => setMarginMode('Cross')}
-              >
-                Cross
-              </button>
-              <button 
-                className={`px-4 py-2 rounded ${marginMode === 'Isolated' ? 'bg-primary2dark' : 'bg-backgrounddark'}`}
-                onClick={() => setMarginMode('Isolated')}
-              >
-                Isolated
-              </button>
-            </div>
-          </div>
-          
-          {marginMode === 'Isolated' && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Margin Amount</label>
-              <input
-                type="number"
-                value={marginAmount}
-                onChange={e => setMarginAmount(e.target.value)}
-                className="w-full p-2 bg-backgrounddark border border-primary2darker rounded text-white"
-                placeholder="Enter margin amount"
-              />
-            </div>
-          )}
-          
-          <div className="flex justify-end space-x-2 mt-6">
-            <button 
-              className="px-4 py-2 bg-backgrounddark rounded"
-              onClick={() => setShowMarginModal(false)}
-            >
-              Cancel
-            </button>
-            <button 
-              className="px-4 py-2 bg-primary2dark rounded"
-              onClick={handleMarginUpdate}
-            >
-              Update Margin
-            </button>
-          </div>
-        </div>
-      </Modal>
+        onClose={handleCloseMarginModal}
+        position={activePosition}
+      />
     </div>
   );
 };

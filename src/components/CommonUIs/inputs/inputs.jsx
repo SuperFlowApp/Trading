@@ -62,6 +62,25 @@ export const InputWithDropDown = ({
 }) => {
   const [focused, setFocused] = useState(false);
 
+  // Handler for focus: clear if value is "0" or "0.0"
+  const handleFocus = (e) => {
+    setFocused(true);
+    if (value === "0" || value === "0.0") {
+      // Call onChange with empty string to clear
+      onChange({ target: { value: "" } });
+    }
+    if (inputProps.onFocus) inputProps.onFocus(e);
+  };
+
+  // Handler for blur: restore "0" if empty
+  const handleBlur = (e) => {
+    setFocused(false);
+    if (value === "" || value === undefined) {
+      onChange({ target: { value: "0" } });
+    }
+    if (inputProps.onBlur) inputProps.onBlur(e);
+  };
+
   return (
     <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] overflow-hidden">
       {/* fixed prefix (size label) */}
@@ -76,8 +95,8 @@ export const InputWithDropDown = ({
         value={value}
         onChange={onChange}
         placeholder={""}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         className="flex-1 bg-transparent outline-none text-body h-full px-2 text-[var(--color-liquidwhite)]"
         {...inputProps}
       />

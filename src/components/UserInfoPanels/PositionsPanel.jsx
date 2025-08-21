@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Positions from './PositionsTab';
+import Positions from './Positions/PositionsTab';
 import OpenOrdersTab from './OpenOrders/OpenOrdersTab'; // <-- Import the OpenOrdersTab
 import Tab from '../CommonUIs/tab'; // Import the Tab component
 

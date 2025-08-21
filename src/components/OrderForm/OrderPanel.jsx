@@ -32,8 +32,8 @@ function LimitOrderForm({ onCurrencyChange }) {
   const priceMidpoint = useZustandStore(s => s.priceMidpoint);
 
   // Move this check AFTER all hooks
-  const [price, setPrice] = useState("0.0");
-  const [amount, setAmount] = useState("0.0");
+  const [price, setPrice] = useState("0");
+  const [amount, setAmount] = useState("0");
   const [side, setSide] = useState('buy');
   const [market, setMarket] = useState('limit'); // Default to 'limit', only 'market' and 'limit' allowed
   const [loading, setLoading] = useState(false);
@@ -58,8 +58,8 @@ function LimitOrderForm({ onCurrencyChange }) {
 
   // Reset price and amount when selectedPair changes (new pair detected/selected)
   useEffect(() => {
-    setPrice("0.0");
-    setAmount("0.0");
+    setPrice("0");
+    setAmount("0");
   }, [selectedPairBase]);
 
   // Update notional whenever price, amount, or selectedCurrency changes
@@ -148,7 +148,7 @@ function LimitOrderForm({ onCurrencyChange }) {
     if (tab === 'market') {
       setPrice('');
     } else if (tab === 'limit') {
-      setPrice('0.0');
+      setPrice('0');
     }
   };
 
@@ -337,7 +337,7 @@ function LimitOrderForm({ onCurrencyChange }) {
               if (val.length > 1 && val[0] === "0" && !val.startsWith("0.")) {
                 val = val.replace(/^0+/, '');
               }
-              setPrice(val === "" ? "0.0" : val);
+              setPrice(val === "" ? "0" : val);
             }}
             label="Price (USD)"
             buttonLabel="Mid"
@@ -362,10 +362,10 @@ function LimitOrderForm({ onCurrencyChange }) {
               if (val.length > 1 && val[0] === "0" && !val.startsWith("0.")) {
                 val = val.replace(/^0+/, '');
               }
-              setAmount(val === "" ? "0.0" : val);
+              setAmount(val === "" ? "0" : val);
               setInputSource('input');
               // Calculate sliderValue from amount
-              const numericValue = parseFloat(val === "" ? "0.0" : val);
+              const numericValue = parseFloat(val === "" ? "0" : val);
               const numericBalance = parseFloat(balanceFree);
               if (!isNaN(numericValue) && numericBalance > 0) {
                 let percent = (numericValue / numericBalance) * 100;
