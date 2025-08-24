@@ -675,8 +675,8 @@ function KlineChartProPanel({
         ref={chartRef}
         style={{
           width: '100%',
-          minHeight: '400px',    // Minimum height
-          maxHeight: '600px',   // Maximum height
+          minHeight: '400px',
+          maxHeight: '600px',
           background: 'transparent',
         }}
       />

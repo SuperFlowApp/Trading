@@ -25,6 +25,9 @@ export default {
         warningcolor: '#a44b4b',
 
       },
+      screens: {
+        '3xl': '1920px', // Custom breakpoint for 1920px and above
+      },
     },
   },
   plugins: [],

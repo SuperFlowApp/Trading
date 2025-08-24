@@ -103,7 +103,7 @@ function Navbar() {
   return (
     <>
       <nav className=" w-full flex items-center justify-between px-4 py-3 bg-backgroundmid text-white text-body">
-        <div className="flex items-center justify-between self-center max-w-[1900px] mx-auto w-full">
+        <div className="flex items-center justify-between self-center mx-auto w-full">
           {/* Left Side */}
           <div className="flex items-center gap-14">
             <div className="flex items-end gap-2">
