@@ -292,9 +292,9 @@ export default function ChartPanel() {
                 <img src={TimezoneIcon} alt="" className="w-[20px] mr-1" />
               </button>
               {showTZMenu && (
-                <div className="absolute right-0 mt-2 w-[320px] max-w-[95vw] bg-backgroundmid rounded shadow-lg p-4 border border-[#00B7C950] z-30">
+                <div className="absolute right-0 mt-2  bg-backgroundmid rounded shadow-lg p-4 border border-[#00B7C950] z-30">
                   <div className="font-body mb-2 opacity-90">Select timezone</div>
-                  <ul className="max-h-64 overflow-auto">
+                  <ul className=" overflow-auto">
                     {COMMON_TIMEZONES.map(tz => (
                       <li key={tz}>
                         <button
