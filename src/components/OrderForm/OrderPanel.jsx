@@ -11,7 +11,7 @@ import NativeSlider from '../CommonUIs/slider';
 import OrderButton from './Ui/OrderButton.jsx';
 import SideSelectorButton from './Ui/SideSelectorButton.jsx';
 import BalanceFetch from './BalanceFetch';
-import { PriceFieldInput, InputWithDropDown, PercentageInput, DropDown } from '../CommonUIs/inputs/inputs.jsx';
+import { PriceFieldInput, InputWithDropDown, PercentageInput, MinimalDropDown } from '../CommonUIs/inputs/inputs.jsx';
 import DefaultAPILogin from "../Login/defaultAPILogin";
 import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
 
@@ -430,16 +430,18 @@ function LimitOrderForm({ onCurrencyChange }) {
 
       <div className='text-body w-full flex flex-row items-center justify-end gap-4'>
         <span>TIF</span>
-        <DropDown
-          options={[
-            { value: "GTC", label: "GTC" },
-            { value: "IOC", label: "IOC" },
-            { value: "FOK", label: "FOK" }
-          ]}
-          selectedOption={timeInForce}
-          onOptionChange={setTimeInForce}
-        />      </div>
+        <div className='border border-liquiddarkgray'>
 
+          <MinimalDropDown
+            options={[
+              { value: "GTC", label: "GTC" },
+              { value: "IOC", label: "IOC" },
+              { value: "FOK", label: "FOK" }
+            ]}
+            selectedOption={timeInForce}
+            onOptionChange={setTimeInForce}
+          />      </div>
+      </div>
 
       {/* Place Order Button */}
       <OrderButton
