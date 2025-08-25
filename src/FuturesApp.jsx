@@ -3,7 +3,7 @@ import LimitOrderForm from './components/OrderForm/OrderPanel';
 import Infobar from './components/infobar/Infobar';
 import NotificationBar from './components/notificationBar';
 import PositionsPanel from './components/UserInfoPanels/PositionsPanel';
-import AccountInfoPanel from './components/UserInfoPanels/AccountInfoPanel';
+import AccountInfoPanel from './components/OrderForm/AccountInfoPanel';
 import TradesPanel from './components/History/TradesPanel';
 
 function FuturesApp() {
