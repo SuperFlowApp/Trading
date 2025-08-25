@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./inputs.css";
+import { Listbox } from "@headlessui/react";
+import { Fragment } from "react";
 
 // Input with a button on the right (for Price + Mid)
 export const PriceFieldInput = ({
@@ -16,7 +18,7 @@ export const PriceFieldInput = ({
   const [focused, setFocused] = useState(false);
 
   return (
-    <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] overflow-hidden">
+    <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)]">
       {/* fixed label with vertical separator */}
       <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
         {label || placeholder}
@@ -82,7 +84,7 @@ export const InputWithDropDown = ({
   };
 
   return (
-    <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] overflow-hidden">
+    <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] relative">
       {/* fixed prefix (size label) */}
       <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
         {label || placeholder}
@@ -101,29 +103,17 @@ export const InputWithDropDown = ({
         {...inputProps}
       />
 
-      <select
-        value={selectedOption}
-        onChange={e => onOptionChange(e.target.value)}
-        className="h-full bg-transparent text-body px-2 border-l border-[var(--color-liquiddarkgray)] outline-none"
-        {...dropdownProps}
-      >
-        {/* Render only options that are NOT currently selected */}
-        {options
-          .filter(opt => opt.value !== selectedOption)
-          .map(opt => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        {/* Optionally, render the selected option as hidden so the value is always valid */}
-        {options
-          .filter(opt => opt.value === selectedOption)
-          .map(opt => (
-            <option key={opt.value} value={opt.value} hidden>
-              {opt.label}
-            </option>
-          ))}
-      </select>
+      {/* Use MinimalDropDown instead of native select */}
+      <div className="h-full flex items-center border-l border-[var(--color-liquiddarkgray)] bg-transparent px-0 w-[70px]">
+        <MinimalDropDown
+          options={options}
+          selectedOption={selectedOption}
+          onOptionChange={onOptionChange}
+          className="min-w-[80px] bg-transparent"
+          style={{ border: "none", boxShadow: "none", background: "transparent" }}
+          {...dropdownProps}
+        />
+      </div>
     </div>
   );
 };
@@ -234,7 +224,10 @@ export const PercentageInput = ({
   inputProps = {},
 }) => {
   return (
-    <div className="percentage-input-wrapper" style={{ position: "relative", maxWidth: 80 }}>
+    <div
+      className="percentage-input-wrapper"
+      style={{ position: "relative", maxWidth: 80 }}
+    >
       <input
         type="number"
         min={min}
@@ -257,28 +250,87 @@ export const DropDown = ({
   dropdownProps = {},
   className = "",
 }) => (
-
   <select
     value={selectedOption}
-    onChange={e => onOptionChange(e.target.value)}
+    onChange={(e) => onOptionChange(e.target.value)}
     className="h-full bg-transparent text-body border p-1 rounded-md border-[var(--color-liquiddarkgray)] outline-none"
     {...dropdownProps}
   >
     {/* Render only options that are NOT currently selected */}
     {options
-      .filter(opt => opt.value !== selectedOption)
-      .map(opt => (
+      .filter((opt) => opt.value !== selectedOption)
+      .map((opt) => (
         <option key={opt.value} value={opt.value}>
           {opt.label}
         </option>
       ))}
     {/* Optionally, render the selected option as hidden so the value is always valid */}
     {options
-      .filter(opt => opt.value === selectedOption)
-      .map(opt => (
+      .filter((opt) => opt.value === selectedOption)
+      .map((opt) => (
         <option key={opt.value} value={opt.value} hidden>
           {opt.label}
         </option>
       ))}
   </select>
 );
+
+export const MinimalDropDown = ({
+  options = [],
+  selectedOption,
+  onOptionChange,
+  className = "",
+  style = {},
+  ...props
+}) => {
+  const selected = options.find((opt) => opt.value === selectedOption) || options[0];
+
+  return (
+    <div
+      className={`relative inline-block ${className}`}
+      style={{ width: "70px", ...style }}
+    >
+      <Listbox value={selectedOption} onChange={onOptionChange} {...props}>
+        {({ open }) => (
+          <>
+            <Listbox.Button
+              className="bg-transparent text-liquidlightergray hover:text-liquidwhite text-body px-2 py-1 cursor-pointer pr-6 text-left border-none outline-none flex items-center justify-between"
+              style={{ width: "86px" }}
+            >
+              <span className="flex-1 text-left">{selected?.label}</span>
+              <span
+                className="ml-2  flex-shrink-0"
+                style={{ fontSize: 14 }}
+              >
+                {open ? "⬏" : "⬎"}
+              </span>
+            </Listbox.Button>
+            <Listbox.Options
+              className="absolute z-10 bg-[var(--color-backgroundmid)] shadow-lg border border-[var(--color-liquiddarkgray)] ring-1 ring-black ring-opacity-5 focus:outline-none text-body"
+              style={{ width: "70px" }}
+            >
+              {options
+                .filter((opt) => opt.value !== selectedOption)
+                .map((opt) => (
+                  <Listbox.Option key={opt.value} value={opt.value} as={Fragment}>
+                    {({ active }) => (
+                      <li
+                        className={`cursor-pointer select-none px-2 py-[2px] ${
+                          active
+                            ? "bg-[var(--color-primary2darker)] text-white"
+                            : "text-[var(--color-liquidwhite)]"
+                        }`}
+                        style={{ listStyle: "none" }}
+                      >
+                        {opt.label}
+                      </li>
+                    )}
+                  </Listbox.Option>
+                ))}
+            </Listbox.Options>
+          </>
+        )}
+      </Listbox>
+    </div>
+  );
+};

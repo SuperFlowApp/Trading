@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, memo } from 'react';
 import { useZustandStore } from '../../Zustandstore/useStore.js';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore.js'; // <-- import your user input store
 import { formatPrice } from '../../utils/priceFormater.js';
+import { MinimalDropDown } from '../CommonUIs/inputs/inputs.jsx';
 
 // Custom hook for localhost SSE order book
 const useUnifiedOrderBook = (symbol) => {
@@ -111,7 +112,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSi
 
   const textColor = color === 'green' ? 'text-green' : 'text-red';
   const alignClass = textAlign === "right" ? "text-right" : "text-left";
-  const rowClasses = `relative flex justify-between w-full py-[2px] px-1 text-body transition-colors cursor-pointer ${isBlinking
+  const rowClasses = `relative flex justify-between w-full py-[3px] px-1 text-body transition-colors cursor-pointer ${isBlinking
     ? color === 'red'
       ? 'bg-red/40'
       : 'bg-green/40'
@@ -119,7 +120,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSi
     } ${isSelected ? 'border border-[#FFF]' : 'border border-transparent'}`;
 
   return (
-    <li className="relative w-full mb-[3px]" onClick={handleSelect}>
+    <li className="relative w-full my-[1px]" onClick={handleSelect}>
       <div
         className="absolute top-0 left-0 h-full"
         style={{
@@ -157,6 +158,12 @@ const OrderBook = () => {
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
   const setPriceMidpoint = useZustandStore(s => s.setPriceMidpoint);
+
+  // --- synced currency selector (shared with OrderPanel) ---
+  const selectedCurrencyGlobal = useZustandStore(s => s.selectedCurrency);
+  const setSelectedCurrencyGlobal = useZustandStore(s => s.setSelectedCurrency);
+  const baseCurrency = selectedPair || 'BTC';
+  const quoteCurrency = 'USDT';
 
   // Track previous prices for asks and bids
   const prevAskPrices = useRef(new Set());
@@ -361,15 +368,67 @@ const OrderBook = () => {
     setTooltip(t => ({ ...t, visible: false }));
   };
 
+  // For the new numbers dropdown
+  const [selectedNumber, setSelectedNumber] = useState(1);
+  const numberOptions = [
+    { value: 1, label: "1" },
+    { value: 100, label: "100" },
+    { value: 1000, label: "1000" },
+    { value: 10000, label: "10000" },
+  ];
+
+  // Helper to get the display currency for Size/Total columns
+  const displayCurrency = selectedCurrencyGlobal || quoteCurrency;
+
+  // Helper to calculate size/total based on selected currency
+  const getDisplayValues = (row) => {
+    if (displayCurrency === quoteCurrency) {
+      // Size in quote (USDT), Total in quote (USDT)
+      return {
+        size: row.size * row.price, // size in USDT
+        total: row.size * row.price, // total in USDT
+      };
+    } else {
+      // Size in base, Total in base
+      return {
+        size: row.size, // size in base
+        total: row.size, // total in base
+      };
+    }
+  };
+
   return (
     <div ref={containerRef} className="flex flex-col h-full w-full  overflow-x-hidden" style={{ position: 'relative' }}>
-      <div className="flex justify-between text-liquidwhite pb-2 pt-[3px] text-body">
-        <div className="text-left w-1/4">Price</div>
-        <div className="text-right w-1/4">Size</div>
-        <div className="text-right w-1/4">USDT Total</div>
+      {/* Currency selector row with number dropdown on the left and currency on the right */}
+      <div className="w-full flex flex-row items-center justify-between px-[5px] pt-[4px] pb-[6px]">
+        {/* Number dropdown (left) */}
+        <MinimalDropDown
+          options={numberOptions}
+          selectedOption={selectedNumber}
+          onOptionChange={setSelectedNumber}
+        />
+        {/* Currency dropdown (right) */}
+        <MinimalDropDown
+          options={[
+            { value: quoteCurrency, label: quoteCurrency },
+            { value: baseCurrency, label: baseCurrency },
+          ]}
+          selectedOption={selectedCurrencyGlobal || quoteCurrency}
+          onOptionChange={setSelectedCurrencyGlobal}
+        />
       </div>
 
-
+      <div className="flex justify-between text-liquidlightergray pb-2 pt-[3px] px-[5px] text-body">
+        <div className="text-left w-1/4">Price</div>
+        <div className="text-right w-1/4">
+          Size&nbsp;
+          <span className="uppercase">({displayCurrency})</span>
+        </div>
+        <div className="text-right w-1/4">
+          Total&nbsp;
+          <span className="uppercase">({displayCurrency})</span>
+        </div>
+      </div>
 
       {/* Ask Section */}
       <ul
@@ -380,6 +439,7 @@ const OrderBook = () => {
           // Highlight from bottom up to hovered index
           const highlight =
             hoveredAskIndex !== null && i >= hoveredAskIndex;
+          const { size, total } = getDisplayValues(row);
           return (
             <div
               ref={el => askRowRefs.current[i] = el}
@@ -389,11 +449,12 @@ const OrderBook = () => {
               style={{
                 position: 'relative',
                 background: highlight ? 'var(--color-backgroundlight)' : 'transparent',
-                borderRadius: highlight && i === hoveredAskIndex ? '4px 4px 0 0' : undefined,
               }}
             >
               <Row
                 {...row}
+                size={size}
+                total={total}
                 progress={row.progress}
                 color="red"
                 onSelect={handleRowSelect}
@@ -401,14 +462,13 @@ const OrderBook = () => {
                 fontWeightClass="font-normal"
                 textAlign="right"
               />
-
             </div>
           );
         })}
       </ul>
 
       {/* Spread Section */}
-      <div className="text-body flex justify-center gap-[60px] bg-backgroundlight rounded-[4px] items-center py-[1px] my-1">
+      <div className="text-body flex justify-center gap-[60px] bg-backgroundlight items-center py-[3px] my-[3px]">
         <div className="text-body">Spread</div>
         <span className="">
           {spreadValue !== null ? `${spreadValue}$` : '—'}
@@ -427,6 +487,7 @@ const OrderBook = () => {
           // Highlight from top down to hovered index
           const highlight =
             hoveredBidIndex !== null && i <= hoveredBidIndex;
+          const { size, total } = getDisplayValues(row);
           return (
             <div
               ref={el => bidRowRefs.current[i] = el}
@@ -436,11 +497,12 @@ const OrderBook = () => {
               style={{
                 position: 'relative',
                 background: highlight ? 'var(--color-backgroundlight)' : 'transparent',
-                borderRadius: highlight && i === hoveredBidIndex ? '0 0 4px 4px' : undefined,
               }}
             >
               <Row
                 {...row}
+                size={size}
+                total={total}
                 progress={row.progress}
                 color="green"
                 onSelect={handleRowSelect}
@@ -448,7 +510,6 @@ const OrderBook = () => {
                 fontSizeClass="text-body"
                 fontWeightClass="font-[400]"
               />
-
             </div>
           );
         })}
@@ -459,7 +520,7 @@ const OrderBook = () => {
         <div
           // keep left/top in style because they are dynamic viewport coords
           style={{ left: tooltip.left, top: tooltip.top }}
-          className={`fixed text-body pointer-events-none w-[140px] -translate-y-1/2 rounded-lg p-1 shadow-md z-[10000] bg-[var(--color-liquiddarkgray)] text-[var(--color-liquidwhite)] }`}
+          className={`fixed text-body pointer-events-none w-[140px] -translate-y-1/2  p-1 shadow-md z-[10000] bg-[var(--color-liquiddarkgray)] text-[var(--color-liquidwhite)] }`}
           aria-hidden="true"
         >
           <div><span>Avg Price:</span>{" "}{tooltip.content.avgPrice?.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>

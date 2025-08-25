@@ -26,7 +26,8 @@ export default {
 
       },
       screens: {
-        '3xl': '2000px', // Custom breakpoint for 1920px and above
+        '3xl': '2000px',
+        'xl': '1440px',
       },
     },
   },
