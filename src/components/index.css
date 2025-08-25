@@ -107,7 +107,6 @@ input[type="number"] {
 .text-title {
   font-size: var(--text-title-size, 16px);
   font-weight: 400;
-  height: 2rem;
 }
 
 .text-body {

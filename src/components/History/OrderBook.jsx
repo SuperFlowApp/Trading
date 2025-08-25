@@ -112,7 +112,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSi
 
   const textColor = color === 'green' ? 'text-green' : 'text-red';
   const alignClass = textAlign === "right" ? "text-right" : "text-left";
-  const rowClasses = `relative flex justify-between w-full py-[3px] px-1 text-body transition-colors cursor-pointer ${isBlinking
+  const rowClasses = `relative flex justify-between w-full py-[1px] px-1 text-body transition-colors cursor-pointer ${isBlinking
     ? color === 'red'
       ? 'bg-red/40'
       : 'bg-green/40'
@@ -400,7 +400,7 @@ const OrderBook = () => {
   return (
     <div ref={containerRef} className="flex flex-col h-full w-full  overflow-x-hidden" style={{ position: 'relative' }}>
       {/* Currency selector row with number dropdown on the left and currency on the right */}
-      <div className="w-full flex flex-row items-center justify-between px-[5px] pt-[4px] pb-[6px]">
+      <div className="w-full flex flex-row items-center justify-between px-[5px] pb-[6px]">
         {/* Number dropdown (left) */}
         <MinimalDropDown
           options={numberOptions}
@@ -468,7 +468,7 @@ const OrderBook = () => {
       </ul>
 
       {/* Spread Section */}
-      <div className="text-body flex justify-center gap-[60px] bg-backgroundlight items-center py-[3px] my-[3px]">
+      <div className="text-body flex justify-center gap-[60px] bg-backgroundlight items-center py-[2px] my-[3px]">
         <div className="text-body">Spread</div>
         <span className="">
           {spreadValue !== null ? `${spreadValue}$` : '—'}

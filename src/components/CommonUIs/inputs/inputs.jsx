@@ -299,8 +299,7 @@ export const MinimalDropDown = ({
             >
               <span className="flex-1 text-left">{selected?.label}</span>
               <span
-                className="ml-2  flex-shrink-0"
-                style={{ fontSize: 14 }}
+                className="ml-2 flex-shrink-0"
               >
                 {open ? "⬏" : "⬎"}
               </span>
