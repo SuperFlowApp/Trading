@@ -17,7 +17,6 @@ function isTokenValid(token) {
 const BalanceFetch = ({ onBalance }) => {
   const { authKey } = useAuthKey(); // <-- get authKey from context
   const [balance, setBalance] = useState(0.0);
-  const [currentPosition, setCurrentPosition] = useState(0.0);
   const [positionNotFound, setPositionNotFound] = useState(false);
 
   // Zustand store for selected pair
@@ -34,19 +33,17 @@ const BalanceFetch = ({ onBalance }) => {
     if (!authKey) {
       setBalance(0.0);
       setAvailableUsdt(0.0); // <-- add
-      setCurrentPosition(0.0);
       setPositionNotFound(false);
       onBalance && onBalance(0.0);
       return;
     }
 
-    const fetchBalanceAndPosition = () => {
+    const fetchBalance = () => {
       if (positionNotFound) return;
 
       if (!authKey || !isTokenValid(authKey)) {
         setBalance(0.0);
         setAvailableUsdt(0.0); // <-- add
-        setCurrentPosition(0.0);
         onBalance && onBalance(0.0);
         return;
       }
@@ -95,54 +92,20 @@ const BalanceFetch = ({ onBalance }) => {
         });
 
       // Fetch current position
-      const symbol = selectedPair ? `${selectedPair}USDT` : "BTCUSDT";
-      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/current-position?symbol=${encodeURIComponent(symbol)}`, {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          Authorization: `Bearer ${authKey}`,
-        },
-      })
-        .then(async res => {
-          if (res.status === 401) {
-            setCurrentPosition(0.0);
-            return;
-          }
-          if (res.status === 404) {
-            setCurrentPosition(0.0);
-            setPositionNotFound(true);
-            return;
-          }
-          const data = await res.json();
-          if (data && typeof data.positionAmt !== "undefined") {
-            setCurrentPosition(Number(data.positionAmt));
-          } else if (data && data.position && typeof data.position.amount !== "undefined") {
-            setCurrentPosition(Number(data.position.amount));
-          } else {
-            setCurrentPosition(0.0);
-          }
-        })
-        .catch(() => {
-          setCurrentPosition(0.0);
-        });
+
     };
 
-    fetchBalanceAndPosition(); // Initial fetch
-    intervalId = setInterval(fetchBalanceAndPosition, 2000);
+    fetchBalance(); // Initial fetch
+    intervalId = setInterval(fetchBalance, 2000);
 
     return () => clearInterval(intervalId);
   }, [authKey, onBalance, selectedPair, positionNotFound, balance, setAvailableUsdt]); // <-- include setter
 
   return (
     <div>
-      <span className="flex w-full justify-between text-liquidlightergray  ">
+      <span className="flex w-full justify-between text-liquidlightergray">
         Avilable to trade: {<span className="text-white">
           {formatPrice(balance)} USDT
-        </span>}
-      </span>
-      <span className="flex w-full justify-between text-liquidlightergray">
-        Current position: {<span className="text-white">
-          {formatPrice(currentPosition)} {`${selectedPair}`}
         </span>}
       </span>
     </div>

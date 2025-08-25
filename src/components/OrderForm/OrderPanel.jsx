@@ -48,6 +48,21 @@ function LimitOrderForm({ onCurrencyChange }) {
   const setOrderFormStore = orderFormStore(s => s.setOrderFormState);
   const setNotional = useZustandStore(s => s.setNotional);
   const currentNotional = useZustandStore(s => s.currentNotional);
+  const accountInfo = useZustandStore(s => s.accountInfo);
+
+  // Helper to normalize zero (copy from AccountInfoPanel or import)
+  function normalizeZero(val) {
+    if (typeof val === "string" && /^0(\.0*)?E-\d+$/.test(val)) return "0";
+    return val;
+  }
+
+  // Get Unrealized PNL (same logic as AccountInfoPanel)
+  const position = accountInfo?.positions?.[0];
+  const unrealizedPNL = accountInfo?.upnl != null
+    ? normalizeZero(accountInfo.upnl)
+    : (position?.upnl != null
+      ? normalizeZero(position.upnl)
+      : null);
 
   // Update price when OrderBookClickedPrice changes
   useEffect(() => {
@@ -337,10 +352,19 @@ function LimitOrderForm({ onCurrencyChange }) {
         <SideSelectorButton side={side} setSide={setSide} />
       </div>
       {/* Balance Row - replaced with BalanceFetch */}
-      <div className="text-body">
-        <BalanceFetch onBalance={setBalanceFree} />
+      <div>
+        <div className="text-body">
+          <BalanceFetch onBalance={setBalanceFree} />
+        </div>
+        <span className="text-body text-liquidlightergray w-full flex justify-between">
+          Unrealized PNL
+          <span className="text-liquidwhite">
+            {unrealizedPNL !== null && unrealizedPNL !== undefined
+              ? `${Number(unrealizedPNL).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : "--"}
+          </span>
+        </span>
       </div>
-
       {/* Conditionally render the Price field */}
       <div className=" flex flex-col text-body gap-2">
         {market !== 'market' && (
@@ -487,6 +511,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       {/* Order Information */}
       <div >
         <div className="pt-2 border-t border-liquiddarkgray text-body text-liquidlightergray flex flex-col">
+
           <span className="w-full flex justify-between  ">
             Order Value
             <span className="text-liquidwhite">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { formatPrice } from '../../utils/priceFormater';
 import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context
+import { useZustandStore } from '../../Zustandstore/useStore.js';
 
 // Helper to convert "0E-8", "0E-16", etc. to "0"
 function normalizeZero(val) {
@@ -12,6 +13,7 @@ function AccountInfoPanel() {
     const [accountInfoError, setAccountInfoError] = useState('');
     const [accountInfo, setAccountInfo] = useState(null);
     const { authKey, setAuthKey } = useAuthKey();
+    const setAccountInfoGlobal = useZustandStore(s => s.setAccountInfo);
 
     // Listen for authKey changes (multi-tab support)
     useEffect(() => {
@@ -31,6 +33,7 @@ function AccountInfoPanel() {
         if (!authKey) {
             setAccountInfo(null);
             setAccountInfoError('');
+            setAccountInfoGlobal(null); // clear global on logout
             return;
         }
         const fetchAccountInfo = async () => {
@@ -46,11 +49,13 @@ function AccountInfoPanel() {
                 if (res.status === 401) {
                     setAuthKey(null);
                     setAccountInfo(null);
+                    setAccountInfoGlobal(null);
                 } else if (!res.ok) {
                     setAccountInfo(null);
-                    // Do not set error message for server/network errors
+                    setAccountInfoGlobal(null);
                 } else {
                     setAccountInfo(data);
+                    setAccountInfoGlobal(data); // <-- update global Zustand
                 }
             } catch (e) {
                 setAccountInfo(null);
@@ -58,7 +63,7 @@ function AccountInfoPanel() {
             }
         };
         fetchAccountInfo();
-    }, [authKey, setAuthKey]);
+    }, [authKey, setAuthKey, setAccountInfoGlobal]);
 
     // Poll for account info every 10 seconds if authKey is present
     useEffect(() => {
