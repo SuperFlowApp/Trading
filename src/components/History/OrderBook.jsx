@@ -111,7 +111,7 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSi
 
   const textColor = color === 'green' ? 'text-green' : 'text-red';
   const alignClass = textAlign === "right" ? "text-right" : "text-left";
-  const rowClasses = `relative flex justify-between w-full py-[1px] px-1 text-body transition-colors cursor-pointer ${isBlinking
+  const rowClasses = `relative flex justify-between w-full py-[2px] px-1 text-body transition-colors cursor-pointer ${isBlinking
     ? color === 'red'
       ? 'bg-red/40'
       : 'bg-green/40'
