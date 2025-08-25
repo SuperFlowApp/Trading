@@ -23,7 +23,7 @@ function FuturesApp() {
         </div>
         <div className="flex flex-col 
         min-w-[330px]
-        3xl:min-w-[520px]
+        3xl:min-w-[560px]
          gap-1">
           <LimitOrderForm />
           <AccountInfoPanel />

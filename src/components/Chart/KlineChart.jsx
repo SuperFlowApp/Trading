@@ -670,13 +670,12 @@ function KlineChartProPanel({
     chart.setStyles(patch);
   }, [chartSettings]);
   return (
-    <div className="bg-backgroundmid rounded-md ">
+    <div className="bg-backgroundmid rounded-md h-full">
       <div
         ref={chartRef}
         style={{
           width: '100%',
-          minHeight: '300px',
-          maxHeight: '500px',
+          height: '100%',
           background: 'transparent',
         }}
       />

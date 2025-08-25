@@ -9,7 +9,7 @@ export default function TradesPanel() {
   return (
     <div className="px-2 py-1 flex flex-col bg-backgroundmid rounded-md overflow-hidden
                     min-h-[510px] max-h-[710px]
-                    min-w-[330px] 3xl:min-w-[520px]
+                    min-w-[330px] 3xl:min-w-[560px]
                    ">
       {/* Tab Selector */}
       <Tab

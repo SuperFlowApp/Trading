@@ -367,7 +367,7 @@ export default function ChartPanel() {
       </div>
 
       {/* Chart */}
-      <div className="flex-1">
+      <div className="flex-1 min-h-[550px]">
         <KlineChartProPanel
           ref={chartApiRef}
           interval={selectedInterval}
