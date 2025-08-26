@@ -20,7 +20,7 @@ export default function TradesPanel() {
         className=""
       />
       {/* Render Both Components */}
-      <div className=" rounded-b-md py-2">
+      <div className=" rounded-b-md">
         <div className={activeTab === 'OrderBook' ? 'block' : 'hidden'}>
           <OrderBook />
         </div>

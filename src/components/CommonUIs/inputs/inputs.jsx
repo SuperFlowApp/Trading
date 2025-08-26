@@ -297,9 +297,9 @@ export const MinimalDropDown = ({
               className="bg-transparent text-liquidlightergray hover:text-liquidwhite text-body px-2 py-1 cursor-pointer pr-6 text-left border-none outline-none flex items-center justify-between"
               style={{ width: "86px" }}
             >
-              <span className="flex-1 text-left">{selected?.label}</span>
+              <span className="flex-1 text-liquidwhite text-left">{selected?.label}</span>
               <span
-                className="ml-2 flex-shrink-0"
+                className="ml-2 flex-shrink-0 text-title"
               >
                 {open ? "⬏" : "⬎"}
               </span>

@@ -18,7 +18,7 @@ const Tab = ({ tabs, active, onChange, renderLabel, className = "" }) => {
       {tabs.map((tab, i) => (
         <button
           key={tab}
-          className={`w-full pb-1 text-title transition-colors
+          className={`w-full pt-1 pb-2 text-title transition-colors
             ${active === tab
               ? "text-liquidwhite "
               : "text-liquidlightergray   hover:text-liquidwhite"}

@@ -182,19 +182,34 @@ const OrderBook = () => {
       // For asks: top 10 cheapest (last 10 in descending order)
       limitedRows = sortedRows.slice(-10);
     }
-    // Find max size for progress bar
-    const maxSize = Math.max(...limitedRows.map((r) => r.size), 1);
 
-    return limitedRows.map((r) => {
+    // For cumulative totals, we need to process in display order:
+    // - Asks: from top (lowest price) to bottom (highest price)
+    // - Bids: from top (highest price) to bottom (lowest price)
+    const displayRows = reverse ? limitedRows : [...limitedRows].reverse();
+
+    // Find max size for progress bar
+    const maxSize = Math.max(...displayRows.map((r) => r.size), 1);
+
+    let cumulativeBase = 0;
+    let cumulativeQuote = 0;
+
+    const result = displayRows.map((r) => {
+      cumulativeBase += r.size;
+      cumulativeQuote += r.size * r.price;
       const progress = (r.size / maxSize) * 100;
       const isNew = !prevPricesSet.has(r.price);
       return {
         ...r,
-        total: r.price * r.size,
         progress,
         isNew,
+        cumulativeBase,
+        cumulativeQuote,
       };
     });
+
+    // For asks, we reversed for display, so reverse back to match UI order
+    return reverse ? result : result.reverse();
   };
 
   // Update previous prices after each render
@@ -383,16 +398,16 @@ const OrderBook = () => {
   // Helper to calculate size/total based on selected currency
   const getDisplayValues = (row) => {
     if (displayCurrency === quoteCurrency) {
-      // Size in quote (USDT), Total in quote (USDT)
+      // Show cumulative total in quote (USDT)
       return {
         size: row.size * row.price, // size in USDT
-        total: row.size * row.price, // total in USDT
+        total: row.cumulativeQuote, // cumulative in USDT
       };
     } else {
-      // Size in base, Total in base
+      // Show cumulative total in base
       return {
         size: row.size, // size in base
-        total: row.size, // total in base
+        total: row.cumulativeBase, // cumulative in base
       };
     }
   };
@@ -400,7 +415,7 @@ const OrderBook = () => {
   return (
     <div ref={containerRef} className="flex flex-col h-full w-full  overflow-x-hidden" style={{ position: 'relative' }}>
       {/* Currency selector row with number dropdown on the left and currency on the right */}
-      <div className="w-full flex flex-row items-center justify-between px-[5px] pb-[6px]">
+      <div className="w-full flex justify-between">
         {/* Number dropdown (left) */}
         <MinimalDropDown
           options={numberOptions}
@@ -418,7 +433,7 @@ const OrderBook = () => {
         />
       </div>
 
-      <div className="flex justify-between text-liquidlightergray pb-2 pt-[3px] px-[5px] text-body">
+      <div className="flex justify-between text-liquidlightergray pb-2 pt-[3px] px-[5px] text-body border-t-[1px] border-liquiddarkgray">
         <div className="text-left w-1/4">Price</div>
         <div className="text-right w-1/4">
           Size&nbsp;
@@ -520,7 +535,7 @@ const OrderBook = () => {
         <div
           // keep left/top in style because they are dynamic viewport coords
           style={{ left: tooltip.left, top: tooltip.top }}
-          className={`fixed text-body pointer-events-none w-[140px] -translate-y-1/2  p-1 shadow-md z-[10000] bg-[var(--color-liquiddarkgray)] text-[var(--color-liquidwhite)] }`}
+          className={`fixed text-body pointer-events-none w-[140px] -translate-y-1/2  p-1 z-[10000] bg-[var(--color-backgroundlight)] text-[var(--color-liquidwhite)] }`}
           aria-hidden="true"
         >
           <div><span>Avg Price:</span>{" "}{tooltip.content.avgPrice?.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
@@ -539,7 +554,7 @@ const OrderBook = () => {
             {/* centered triangle -> tip at middle (30,32), base from (8,8) to (8,56) */}
             <polygon
               points="30,32 8,8 8,56"
-              fill="var(--color-liquiddarkgray)"
+              fill="var(--color-backgroundlight)"
             />
           </svg>
         </div>
