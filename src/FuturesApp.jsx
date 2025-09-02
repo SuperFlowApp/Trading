@@ -6,7 +6,7 @@ import PositionsPanel from './components/UserInfoPanels/PositionsPanel';
 import AccountInfoPanel from './components/OrderForm/AccountInfoPanel';
 import TradesPanel from './components/History/TradesPanel';
 import OrderBook from './components/History/OrderBook';
-import Navbar from './components/Navbar';
+import Navbar from './components/navbar';
 import Tab from './components/CommonUIs/tab'; // Import your custom Tab
 
 function FuturesApp() {
