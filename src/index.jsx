@@ -2,17 +2,17 @@ import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp';
 import Navbar from './components/navbar';
-import { AuthKeyProvider } from './contexts/AuthKeyContext'; // <-- use provider
-import NotificationBar from './components/notificationBar'; // <-- import here
-import { useZustandStore } from './Zustandstore/useStore'; // <-- import your store
-import Logo from '../public/assets/Logo.svg'; // adjust path if needed
+import { AuthKeyProvider } from './contexts/AuthKeyContext';
+import NotificationBar from './components/notificationBar'; 
+import { useZustandStore } from './Zustandstore/useStore'; 
+import Logo from '../public/assets/Logo.svg'; 
 
 import './components/index.css';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
-// Add a component to sync Zustand colors to CSS variables
+//  sync Zustand colors to CSS variables
 function CssVarSync() {
   const red = useZustandStore((s) => s.red);
   const green = useZustandStore((s) => s.green);
