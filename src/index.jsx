@@ -5,6 +5,7 @@ import Navbar from './components/navbar';
 import { AuthKeyProvider } from './contexts/AuthKeyContext'; // <-- use provider
 import NotificationBar from './components/notificationBar'; // <-- import here
 import { useZustandStore } from './Zustandstore/useStore'; // <-- import your store
+import Logo from '../public/assets/Logo.svg'; // adjust path if needed
 
 import './components/index.css';
 
@@ -36,18 +37,34 @@ function CssVarSync() {
   return null;
 }
 
+function MobileBlocker() {
+  return (
+    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-backgroundmid w-screen h-screen sm:hidden">
+      <img src={Logo} alt="Logo" className="mb-6 w-32 h-auto" />
+      <div className="text-white text-xl font-semibold text-center px-4">
+        Sorry, not available on phone yet
+      </div>
+    </div>
+  );
+}
+
 function RootApp() {
   return (
     <StrictMode>
       <AuthKeyProvider>
         <CssVarSync />
-        <Navbar />
-        {/* NotificationBar right under Navbar, full width */}
-        <div className="w-full">
-          <NotificationBar />
+        <div className="block sm:hidden">
+          <MobileBlocker />
         </div>
-        <div className="flex justify-center items-start">
-          <FuturesApp />
+        {/* Main app hidden on mobile */}
+        <div className="hidden sm:block">
+          <Navbar />
+          <div className="w-full">
+            <NotificationBar />
+          </div>
+          <div className="flex justify-center items-start">
+            <FuturesApp />
+          </div>
         </div>
       </AuthKeyProvider>
     </StrictMode>
