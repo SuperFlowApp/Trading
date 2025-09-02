@@ -30,10 +30,10 @@ function PositionsPanel() {
   };
 
   return (
-    <div className=" flex flex-col w-full bg-backgroundmid rounded-md p-1">
+    <div className=" flex flex-col w-full  bg-backgroundmid rounded-md p-1 overflow-y-auto">
       {/* Tab Headers */}
-      <div className="border-b-[1px] border-primary2darker">
-        <div className=" flex flex-col max-w-[1000px] bg-backgroundmid rounded-md">
+      <div className="border-b-[1px]   border-primary2darker  overflow-y-auto">
+        <div className=" flex flex-col min-w-[800px] max-w-[1000px] bg-backgroundmid rounded-md">
           <Tab
             tabs={tabKeys}
             active={activeTab}

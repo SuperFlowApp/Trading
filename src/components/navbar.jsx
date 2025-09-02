@@ -5,6 +5,8 @@ import DefaultAPISignup from "./Login/defaultAPISignup"; // Import the signup mo
 import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import context
 import Button from "./CommonUIs/Button";
 import SettingsDropdown from "./SettingsDropdown"; // Add this import
+import { Disclosure, Transition } from '@headlessui/react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -101,122 +103,186 @@ function Navbar() {
   };
 
   return (
-    <>
-      <nav className=" w-full flex items-center justify-between px-4 py-3 bg-backgroundmid text-white text-body">
-        <div className="flex items-center justify-between self-center mx-auto w-full">
-          {/* Left Side */}
-          <div className="flex items-center gap-14">
-            <div className="flex items-end gap-2">
+    <Disclosure as="nav" className="bg-backgroundmid text-white text-body w-full">
+      {({ open }) => (
+        <>
+          <div className="mx-auto w-full px-4 py-3 flex items-center justify-between ">
+            {/* Left: Logo and Tabs */}
+            <div className="flex items-center gap-4 flex-1">
               <img src="/assets/Logo.svg" alt="Logo" className="h-[30px] w-auto" />
               <img src="/assets/Bysymmio.svg" alt="Logo" className="h-4 w-auto" />
-
-            </div>
-            <div className="flex items-center gap-14">
-
-              <li
-                className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
-                  }`}
-                onClick={() => handleTabClick("futures")}
-              >
-                <img
-                  src="/assets/chart-candlestick.svg"
-                  alt="Futures"
-                  className={` ${activeTab === "futures"
-                    ? "brightness-200"
-                    : "brightness-100 group-hover:brightness-200"
+              <ul className="hidden sm:flex items-center gap-14 ml-6">
+                <li
+                  className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
                     }`}
-                />
-                Futures Trading
-              </li>
-              <li
-                className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
-                  }`}
-                onClick={() => handleTabClick("options")}
-              >
-                <img
-                  src="/assets/chart-line.svg"
-                  alt="Options"
-                  className={`${activeTab === "options"
-                    ? "brightness-200"
-                    : "brightness-100 group-hover:brightness-200"
+                  onClick={() => handleTabClick("futures")}
+                >
+                  <img
+                    src="/assets/chart-candlestick.svg"
+                    alt="Futures"
+                    className={` ${activeTab === "futures"
+                      ? "brightness-200"
+                      : "brightness-100 group-hover:brightness-200"
+                      }`}
+                  />
+                  Futures Trading
+                </li>
+                <li
+                  className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
                     }`}
-                />
-                Options Trading
-              </li>
+                  onClick={() => handleTabClick("options")}
+                >
+                  <img
+                    src="/assets/chart-line.svg"
+                    alt="Options"
+                    className={`${activeTab === "options"
+                      ? "brightness-200"
+                      : "brightness-100 group-hover:brightness-200"
+                      }`}
+                  />
+                  Options Trading
+                </li>
+              </ul>
             </div>
-          </div>
-
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
-            {/* Login/User Button */}
-            {!authKey ? (
-              <Button
-                type="navdisconnected"
-                onClick={() => setShowLogin(true)}
-              >
-                Login
-              </Button>
-            ) : (
-              <div
-                className="relative"
-                ref={dropdownRef}
-                onMouseEnter={() => setDropdownOpen(true)}
-                onMouseLeave={() => setDropdownOpen(false)}
-              >
-                <Button type="navconnected">
-                  {username} {/* Show username if available */}
-                </Button>
-                {dropdownOpen && (
-                  <div className="absolute right-0 text-liquidwhite rounded z-50 py-2">
-                    <Button
-                      type="navdisconnection"
-                      onClick={handleDisconnect}
-                    >
-                      Logout
-                    </Button>
-                  </div>
+            {/* Desktop Right Side */}
+            <div className="hidden sm:flex items-center gap-4">
+              {!authKey ? (
+                <>
+                  <Button type="navdisconnected" onClick={() => setShowLogin(true)}>
+                    Login
+                  </Button>
+                  <Button type="navsignup" onClick={() => setShowSignup(true)}>
+                    Sign Up
+                  </Button>
+                </>
+              ) : (
+                <div
+                  className="relative"
+                  ref={dropdownRef}
+                  onMouseEnter={() => setDropdownOpen(true)}
+                  onMouseLeave={() => setDropdownOpen(false)}
+                >
+                  <Button type="navconnected">{username}</Button>
+                  {dropdownOpen && (
+                    <div className="absolute right-0 text-liquidwhite rounded z-50 py-2">
+                      <Button type="navdisconnection" onClick={handleDisconnect}>
+                        Logout
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+              <SettingsDropdown
+                settingsOpen={settingsOpen}
+                setSettingsOpen={setSettingsOpen}
+                settings={settings}
+                setSettings={setSettings}
+                handleSettingChange={handleSettingChange}
+                settingsRef={settingsRef}
+              />
+            </div>
+            {/* Mobile Hamburger */}
+            <div className="flex sm:hidden">
+              <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-liquidlightergray hover:text-white hover:bg-backgroundlight focus:outline-none">
+                {open ? (
+                  <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
                 )}
-              </div>
-            )}
-            {/* Signup Button */}
-            {!authKey && (
-              <Button
-                type="navsignup"
-                onClick={() => setShowSignup(true)}
-              >
-                Sign Up
-              </Button>
-            )}
-            <SettingsDropdown
-              settingsOpen={settingsOpen}
-              setSettingsOpen={setSettingsOpen}
-              settings={settings}
-              setSettings={setSettings}
-              handleSettingChange={handleSettingChange}
-              settingsRef={settingsRef}
-            />
+              </Disclosure.Button>
+            </div>
           </div>
-        </div>
-      </nav>
+          {/* Mobile Menu */}
+          <Transition
+            show={open}
+            enter="transition ease-out duration-300"
+            enterFrom="-translate-y-10 opacity-0"
+            enterTo="translate-y-0 opacity-100"
+            leave="transition ease-in duration-200"
+            leaveFrom="translate-y-0 opacity-100"
+            leaveTo="-translate-y-10 opacity-0"
+          >
+            <Disclosure.Panel static className="sm:hidden bg-backgroundmid px-4 pt-2 pb-3 space-y-1 ">
+              <ul className="flex flex-col items-center gap-2 mb-8">
+                <li
+                  className={`flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
+                    }`}
+                  onClick={() => handleTabClick("futures")}
+                >
+                  <img
+                    src="/assets/chart-candlestick.svg"
+                    alt="Futures"
+                    className={` ${activeTab === "futures"
+                      ? "brightness-200"
+                      : "brightness-100"
+                      }`}
+                  />
+                  Futures Trading
+                </li>
+                <li
+                  className={`flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
+                    }`}
+                  onClick={() => handleTabClick("options")}
+                >
+                  <img
+                    src="/assets/chart-line.svg"
+                    alt="Options"
+                    className={`${activeTab === "options"
+                      ? "brightness-200"
+                      : "brightness-100"
+                      }`}
+                  />
+                  Options Trading
+                </li>
+              </ul>
+              <div className="flex flex-col gap-2 mt-2">
+                {!authKey ? (
+                  <>
+                    <Button type="navdisconnected" onClick={() => setShowLogin(true)}>
+                      Login
+                    </Button>
+                    <Button type="navsignup" onClick={() => setShowSignup(true)}>
+                      Sign Up
+                    </Button>
+                  </>
+                ) : (
+                  <Button type="navconnected" onClick={handleDisconnect}>
+                    Logout
+                  </Button>
+                )}
+                <div className="flex w-full justify-end">
+                  <SettingsDropdown
+                    settingsOpen={settingsOpen}
+                    setSettingsOpen={setSettingsOpen}
+                    settings={settings}
+                    setSettings={setSettings}
+                    handleSettingChange={handleSettingChange}
+                    settingsRef={settingsRef}
+                    isMobile
+                  />
+                </div>
+              </div>
+            </Disclosure.Panel>
+          </Transition>
 
-      {/* Login Popup Modal */}
-      {showLogin && (
-        <DefaultAPILogin
-          open={showLogin}
-          onClose={() => setShowLogin(false)}
-          onLoginSuccess={handleLoginSuccess}
-        />
+          {/* Login/Signup Modals */}
+          {showLogin && (
+            <DefaultAPILogin
+              open={showLogin}
+              onClose={() => setShowLogin(false)}
+              onLoginSuccess={handleLoginSuccess}
+            />
+          )}
+          {showSignup && (
+            <DefaultAPISignup
+              open={showSignup}
+              onClose={() => setShowSignup(false)}
+              onSignupSuccess={handleSignupSuccess}
+            />
+          )}
+        </>
       )}
-
-      {/* Signup Popup Modal */}
-      {showSignup && (
-        <DefaultAPISignup
-          open={showSignup}
-          onClose={() => setShowSignup(false)}
-          onSignupSuccess={handleSignupSuccess}
-        />
-      )}
-    </>
+    </Disclosure>
   );
 }
 

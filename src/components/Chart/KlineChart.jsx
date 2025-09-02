@@ -670,16 +670,14 @@ function KlineChartProPanel({
     chart.setStyles(patch);
   }, [chartSettings]);
   return (
-    <div className="bg-backgroundmid rounded-md h-full">
-      <div
-        ref={chartRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          background: 'transparent',
-        }}
-      />
-    </div>
+    <div
+      ref={chartRef}
+      style={{
+        width: '100%',
+        height: window.innerWidth < 640 ? '420px' : '100%', // 640px is Tailwind's sm breakpoint
+        background: 'transparent',
+      }}
+    />
   );
 }
 export default forwardRef(KlineChartProPanel);
