@@ -48,7 +48,7 @@ function Infobar() {
   }, [selectedPair]);
 
   return (
-    <div className="bg-backgroundmid rounded-md overflow-visible">
+    <div className="bg-backgroundmid flex flex-col sm:flex-row rounded-md overflow-visible">
       <div className="flex gap-2 sm:gap-8 items-center px-4 py-2">
         {/* Pair Selector always visible */}
         <PairSelector
@@ -83,7 +83,7 @@ function Infobar() {
         </div>
       </div>
       {/* Expanded values: below main row on mobile, inline on desktop */}
-      <div className={`px-4 pb-2 ${expand ? 'flex flex-col gap-2' : 'hidden'} sm:flex sm:flex-row sm:items-center sm:gap-8 sm:pb-0 sm:px-4 text-xs sm:text-base`}>
+      <div className={`px-4 pb-2 ${expand ? 'flex flex-col gap-2' : 'hidden'} sm:flex sm:flex-row sm:items-center sm:gap-8 sm:pb-0 sm:px-4 text-body `}>
         <div className="flex flex-col">
           <span>24h Change:</span>
           <span
