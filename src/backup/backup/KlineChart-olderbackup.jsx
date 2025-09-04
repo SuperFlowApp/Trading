@@ -151,8 +151,8 @@ export default function KlineChartProPanel({ interval }) {
   const [pair, setPair] = useState(selectedPairBase);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
-  const accentRed = useZustandStore((s) => s.accentRed);
-  const accentGreen = useZustandStore((s) => s.accentGreen);
+  const red = useZustandStore((s) => s.red);
+  const green = useZustandStore((s) => s.green);
 
   // Update pair when Zustand state changes
   useEffect(() => {
@@ -181,8 +181,8 @@ export default function KlineChartProPanel({ interval }) {
         const getCssVar = (name, fallback) =>
           getComputedStyle(document.documentElement).getPropertyValue(name)?.trim() || fallback;
 
-        const upColor = getCssVar('--color-accentGreen', '#00B7C9');   // Bullish
-        const downColor = getCssVar('--color-accentRed', '#F59DEF');       // Bearish
+        const upColor = getCssVar('--color-green', '#00B7C9');   // Bullish
+        const downColor = getCssVar('--color-red', '#F59DEF');       // Bearish
         const noChangeColor = getCssVar('--color-liquidlightergray', '#888888');
 
         const upBorderColor = upColor;
@@ -465,7 +465,7 @@ export default function KlineChartProPanel({ interval }) {
       };
     })();
 
-  }, [interval, pair, accentRed, accentGreen]);
+  }, [interval, pair, red, green]);
 
   return (
     <div className="bg-backgroundmid rounded-md ">

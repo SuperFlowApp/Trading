@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuthKey } from "../../../contexts/AuthKeyContext";
 import ModifyBalance from "./ModifyBalance";
+import Table from "../../CommonUIs/table";
 
 const Positions = () => {
   const { authKey } = useAuthKey();
@@ -57,111 +58,72 @@ const Positions = () => {
     setActivePosition(null);
   };
 
+  const columns = [
+    { key: "symbol", label: "Pair" },
+    {
+      key: "positionSide",
+      label: "Side",
+      render: (v, row) =>
+        v === "BOTH"
+          ? Number(row.positionAmt) >= 0
+            ? "LONG"
+            : "SHORT"
+          : v,
+    },
+    { key: "positionAmt", label: "Size", render: v => fmt(v, 4) },
+    { key: "entryPrice", label: "Entry Price", render: v => fmt(v, 4) },
+    { key: "markPrice", label: "Mark Price", render: v => fmt(v, 4) },
+    { key: "notional", label: "Notional", render: v => fmt(v, 4) },
+    { key: "leverage", label: "Leverage" },
+    {
+      key: "upnl",
+      label: "Unrealized PNL",
+      render: v => fmt(v, 4) + "%",
+    },
+    { key: "realizedPnl", label: "Realized PnL", render: v => fmt(v, 4) },
+    {
+      key: "isolatedMarginBalance",
+      label: "Margin",
+      render: (v, row) => (
+        <div className="flex items-center justify-between pr-8">
+          <div className="flex flex-col">
+            <span>{fmt(v, 4)}</span>
+            <span>
+              {row.marginMode || (row.cross === true ? "Cross" : row.cross === false ? "Isolated" : "-")}
+            </span>
+          </div>
+          <button
+            className="ml-2 p-1 bg-none hover:bg-liquiddarkgray rounded-md"
+            onClick={e => {
+              e.stopPropagation();
+              setActivePosition(row);
+              setShowMarginModal(true);
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
+        </div>
+      ),
+    },
+    { key: "maintenanceMargin", label: "Maint. Margin", render: v => fmt(v, 4) },
+    {
+      key: "liquidationPrice",
+      label: "Liquid. Price",
+      render: v => v === null ? "-" : fmt(v, 4),
+    },
+    { key: "updateTime", label: "Last Updated", render: v => fmtTime(v) },
+  ];
+
   return (
     <div className="w-full">
-      <div className="overflow-x-auto">
-        <table className=" w-full text-body text-liquidwhite">
-          {authKey && (
-            <thead>
-              <tr className="text-left text-liquidmidgray">
-                <th className="px-2 py-1">Pair</th>
-                <th className="px-2 py-1">Side</th>
-                <th className="px-2 py-1">Size</th>
-                <th className="px-2 py-1">Entry Price</th>
-                <th className="px-2 py-1">Mark Price</th>
-                <th className="px-2 py-1">Notional</th>
-                <th className="px-2 py-1">Leverage</th>
-                <th className="px-2 py-1">Unrealized PNL</th>
-                <th className="px-2 py-1">Realized PnL</th>
-                <th className="px-2 py-1">Margin</th>
-                <th className="px-2 py-1">Maint. Margin</th>
-                <th className="px-2 py-1">Liquid. Price</th>
-                <th className="px-2 py-1">Last Updated</th>
-                <th className="px-2 py-1"></th>
-              </tr>
-            </thead>
-          )}
-          <tbody>
-            {authKey ? (
-              rawPositions && rawPositions.length > 0 ? (
-                rawPositions.map((pos, idx) => (
-                  <tr
-                    key={pos.symbol + pos.positionSide + idx}
-                    className={idx % 2 ? "bg-backgroundmid" : "bg-backgroundlight"}
-                  >
-                    <td className="px-2 py-1 font-semibold">{pos.symbol}</td>
-                    <td className="px-2 py-1">
-                      {pos.positionSide === "BOTH"
-                        ? Number(pos.positionAmt) >= 0
-                          ? "LONG"
-                          : "SHORT"
-                        : pos.positionSide}
-                    </td>
-                    <td className="px-2 py-1">{fmt(pos.positionAmt, 4)}</td>
-                    <td className="px-2 py-1">{fmt(pos.entryPrice, 4)}</td>
-                    <td className="px-2 py-1">{fmt(pos.markPrice, 4)}</td>
-                    <td className="px-2 py-1">{fmt(pos.notional, 4)}</td>
-                    <td className="px-2 py-1">{pos.leverage}</td>
-                    <td
-                      className={`px-2 py-1 ${Number(pos.upnl) === 0
-                          ? 'text-liquidmidgray'
-                          : Number(pos.upnl) > 0
-                            ? 'text-green'
-                            : 'text-red'
-                        }`}
-                    >
-                      {fmt(pos.upnl, 4) + "%"}
-                    </td>
-                    <td className="px-2 py-1">{fmt(pos.realizedPnl, 4)}</td>
-                    <td className="pr-2 py-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span>{fmt(pos.isolatedMarginBalance, 4)}</span>
-                          <span className=" text-liquidmidgray">
-                            {pos.marginMode || (pos.cross === true ? "Cross" : pos.cross === false ? "Isolated" : "-")}
-                          </span>
-                        </div>
-                        <button 
-                          className="mr-2 p-1 bg-liquiddarkgray rounded-md"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActivePosition(pos);
-                            setShowMarginModal(true);
-                          }}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-2 py-1">{fmt(pos.maintenanceMargin, 4)}</td>
-                    <td className="px-2 py-1">{pos.liquidationPrice === null ? "-" : fmt(pos.liquidationPrice, 4)}</td>
-                    <td className="px-2 py-1">{fmtTime(pos.updateTime)}</td>
-                    <td className="px-2 py-1">
-                      {/* Remove the button group from here */}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={14} className="text-center py-8 text-liquidmidgray">
-                    No positions.
-                  </td>
-                </tr>
-              )
-            ) : (
-              <tr>
-                <td colSpan={14} className="text-center py-8 text-liquidmidgray">
-                  Please log in to view your positions.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Use the new ModifyBalance component */}
+      <Table
+        columns={columns}
+        data={authKey ? rawPositions : []}
+        rowKey={row => row.symbol + row.positionSide}
+        emptyMessage={authKey ? "No positions." : "Please log in to view your positions."}
+      />
       <ModifyBalance
         open={showMarginModal}
         onClose={handleCloseMarginModal}

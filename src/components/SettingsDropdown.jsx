@@ -41,10 +41,10 @@ const SettingsDropdown = ({
                         onClick={() => setChartSettings({ fontSize: 'small' })}
                         className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
                             ${chartSettings.fontSize === 'small'
-                                ? "border-primary2normal bg-[#00B7C91a] text-primary2light"
+                                ? "border-primary2normal bg-[#00B7C91a] text-liquidwhite"
                                 : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
                     >
-                        <span style={{ fontSize: '11px' }}>Small</span>
+                        <span style={{ fontSize: '12px' }}>Small</span>
                     </button>
 
                     <button
@@ -52,10 +52,10 @@ const SettingsDropdown = ({
                         onClick={() => setChartSettings({ fontSize: 'medium' })}
                         className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
                             ${chartSettings.fontSize === 'medium'
-                                ? "border-primary2normal bg-[#00B7C91a] text-primary2light"
+                                ? "border-primary2normal bg-[#00B7C91a] text-liquidwhite"
                                 : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
                     >
-                        <span style={{ fontSize: '13px' }}>Medium</span>
+                        <span style={{ fontSize: '14px' }}>Medium</span>
                     </button>
 
                     <button
@@ -63,10 +63,10 @@ const SettingsDropdown = ({
                         onClick={() => setChartSettings({ fontSize: 'large' })}
                         className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
                             ${chartSettings.fontSize === 'large'
-                                ? "border-primary2normal bg-[#00B7C91a] text-primary2light"
+                                ? "border-primary2normal bg-[#00B7C91a] text-liquidwhite"
                                 : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
                     >
-                        <span style={{ fontSize: '15px' }}>Large</span>
+                        <span style={{ fontSize: '16px' }}>Large</span>
                     </button>
                 </div>
             </div>
@@ -104,6 +104,7 @@ const SettingsDropdown = ({
                     ))}
                 </div>
             </div>
+
         </div>
     );
 

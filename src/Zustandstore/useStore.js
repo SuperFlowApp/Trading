@@ -49,7 +49,8 @@ const useZustandStore = create((set, get) => ({
     high_price_show: false,
     low_price_show: false,
     indicator_last_value_show: true,
-    fontSize: 'small', // small | medium | large
+    fontSize: 'medium', // small | medium | large
+    watermark_show: true, // ← add this line
   },
   setChartSettings: (settings) => set({ chartSettings: { ...get().chartSettings, ...settings } }),
 

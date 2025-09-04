@@ -142,8 +142,10 @@ function LimitOrderForm({ onCurrencyChange }) {
         throw new Error(errorMessage);
       }
 
+      //  on success
       const data = typeof errorData === 'object' ? errorData : { orderId: 'unknown' };
       setOrderSuccess(`Order placed! Order ID: ${data.orderId}`);
+      setAmount("0.0");
       setBlinkClass && setBlinkClass("blink-success");
       setTimeout(() => setBlinkClass && setBlinkClass(""), 400);
     } catch (err) {
@@ -490,6 +492,7 @@ function LimitOrderForm({ onCurrencyChange }) {
           placeOrder(); // No arguments needed
         }}
         disabled={loading || orderLoading}
+        loading={orderLoading}
       >
         {orderButtonText}
       </OrderButton>
@@ -503,7 +506,7 @@ function LimitOrderForm({ onCurrencyChange }) {
         />
       )}
 
-      <div className='' style={{ minHeight: '16px' }}>
+      <div className='min-h-8' >
         {orderError && <div className="text-red-400 text-body">{orderError}</div>}
         {orderSuccess && <div className="text-green-400 text-body">{orderSuccess}</div>}
       </div>

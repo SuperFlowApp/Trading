@@ -158,7 +158,7 @@ export default function ChartPanel() {
   }, [chartSettings, setChartSettings]);
 
   return (
-    <div className="w-full text-body mb-2 sm:mb-0 h-[432px] sm:h-[568px] bg-backgroundmid rounded-md flex flex-col">
+    <div className="w-full text-body mb-2 sm:mb-0 h-[432px] sm:h-[583px] bg-backgroundmid rounded-md flex flex-col">
       {/* Tools Panel */}
       <div className="flex items-center justify-between px-3 py-2 gap-3">
         <div className="flex w-full items-center gap-3 justify-between">

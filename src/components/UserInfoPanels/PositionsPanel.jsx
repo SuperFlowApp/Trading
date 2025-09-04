@@ -30,10 +30,11 @@ function PositionsPanel() {
   };
 
   return (
-    <div className=" flex flex-col w-full  bg-backgroundmid rounded-md p-1 overflow-y-auto">
+    <div className=" flex flex-col w-full  bg-backgroundmid rounded-md p-1 sm:overflow-visible overflow-y-auto">
       {/* Tab Headers */}
-      <div className="border-b-[1px]   border-primary2darker  overflow-y-auto">
-        <div className=" flex flex-col min-w-[800px] max-w-[1000px] bg-backgroundmid rounded-md">
+
+      <div className="border-b-[1px] min-w-[800px] border-primary2darker  sm:overflow-visible overflow-y-auto">
+        <div className=" flex flex-col max-w-[1200px] bg-backgroundmid rounded-md">
           <Tab
             tabs={tabKeys}
             active={activeTab}
@@ -44,17 +45,37 @@ function PositionsPanel() {
         </div>
       </div>
       {/* Tab Content */}
-      <div className="">
-        {activeTab === 'balances' && <div>Balances will be shown here.</div>}
-        {activeTab === 'positions' &&
+      <div className="text-center text-body text-liquidmidgray">
+        {/* Balances */}
+        <div style={{ display: activeTab === 'balances' ? 'block' : 'none' }}>
+          <div className='py-8'>Balances will be shown here.</div>
+        </div>
+        {/* Positions */}
+        <div style={{ display: activeTab === 'positions' ? 'block' : 'none' }}>
           <section className="text-white">
             <Positions />
-          </section>}
-        {activeTab === 'orders' && <OpenOrdersTab />}
-        {activeTab === 'twap' && <div>TWAP orders will be shown here.</div>}
-        {activeTab === 'tradeHistory' && <div>Trade history will be shown here.</div>}
-        {activeTab === 'fundingHistory' && <div>Funding history will be shown here.</div>}
-        {activeTab === 'orderHistory' && <div>Order history will be shown here.</div>}
+          </section>
+        </div>
+        {/* Open Orders */}
+        <div style={{ display: activeTab === 'orders' ? 'block' : 'none' }}>
+          <OpenOrdersTab />
+        </div>
+        {/* TWAP */}
+        <div style={{ display: activeTab === 'twap' ? 'block' : 'none' }}>
+          <div className='py-8'>TWAP orders will be shown here.</div>
+        </div>
+        {/* Trade History */}
+        <div style={{ display: activeTab === 'tradeHistory' ? 'block' : 'none' }}>
+          <div className='py-8'>Trade history will be shown here.</div>
+        </div>
+        {/* Funding History */}
+        <div style={{ display: activeTab === 'fundingHistory' ? 'block' : 'none' }}>
+          <div className='py-8'>Funding history will be shown here.</div>
+        </div>
+        {/* Order History */}
+        <div style={{ display: activeTab === 'orderHistory' ? 'block' : 'none' }}>
+          <div className='py-8'>Order history will be shown here.</div>
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
-import { StrictMode, useEffect } from 'react';
+import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp';
 import Navbar from './components/navbar';
 import { AuthKeyProvider } from './contexts/AuthKeyContext';
 import NotificationBar from './components/notificationBar'; 
 import { useZustandStore } from './Zustandstore/useStore'; 
+import LoadingScreen from './components/Loading'; // <-- Import your loading screen
 
 import './components/index.css';
 
@@ -37,6 +38,14 @@ function CssVarSync() {
 }
 
 function RootApp() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Show loading screen for at least 2 seconds (matches LoadingScreen)
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <StrictMode>
       <AuthKeyProvider>
@@ -48,6 +57,7 @@ function RootApp() {
         <div className="flex justify-center items-start">
           <FuturesApp />
         </div>
+        {loading && <LoadingScreen />}
       </AuthKeyProvider>
     </StrictMode>
   );

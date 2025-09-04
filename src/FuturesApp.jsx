@@ -51,7 +51,7 @@ function FuturesApp() {
           <Infobar />
         </div>
         {/* Scrollable content with padding for fixed top/bottom bars */}
-        <div className="pt-[52px] h-full flex flex-col ">
+        <div className="pt-4 h-full flex flex-col ">
           {mobileTab === 'markets' && (
             <>
               <ChartPanel />

@@ -50,7 +50,7 @@ export async function createUserProfile(username) {
     username,
     createdAt: serverTimestamp(),
     settings: {
-      colors: { accentRed: "#F59DEF", accentGreen: "#00B7C9" }, // SuperFlow
+      colors: { red: "#F59DEF", green: "#00B7C9" }, // SuperFlow
       fontSize: "medium",
     },
   };

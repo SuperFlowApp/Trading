@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuthKey } from "../../../contexts/AuthKeyContext";
 import { formatPrice } from "../../../utils/priceFormater";
 import Modal from "../../CommonUIs/modal/modal";
+import Table from "../../CommonUIs/table";
 
 const priceKeys = ["price", "notional", "quantity", "filled", "remaining"];
 
@@ -21,13 +22,13 @@ const columns = [
   { key: "side", label: "Side" },
   { key: "type", label: "Type" },
   { key: "status", label: "Status" },
-  { key: "price", label: "Price" },
-  { key: "quantity", label: "Qty" },
-  { key: "filled", label: "Filled" },
-  { key: "remaining", label: "Remaining" },
-  { key: "notional", label: "Notional" },
+  { key: "price", label: "Price", render: v => formatPrice(v) },
+  { key: "quantity", label: "Qty", render: v => formatPrice(v) },
+  { key: "filled", label: "Filled", render: v => formatPrice(v) },
+  { key: "remaining", label: "Remaining", render: v => formatPrice(v) },
+  { key: "notional", label: "Notional", render: v => formatPrice(v) },
   { key: "timeInForce", label: "TIF" },
-  { key: "timestamp", label: "Created" },
+  { key: "timestamp", label: "Created", render: v => formatDate(v) },
 ];
 
 function formatDate(ts) {
@@ -41,6 +42,10 @@ const OpenOrdersTab = () => {
   const [orders, setOrders] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Loading and response state for cancel
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelResponse, setCancelResponse] = useState(null);
 
   // Fetch open orders when authKey changes or every 5s if valid
   useEffect(() => {
@@ -81,117 +86,110 @@ const OpenOrdersTab = () => {
 
   const isUserLoggedIn = authKey && isTokenValid(authKey);
 
+  // Reset loading/response state when modal opens/closes or order changes
+  useEffect(() => {
+    setCancelLoading(false);
+    setCancelResponse(null);
+  }, [modalOpen, selectedOrder]);
+
   return (
     <div className="w-full">
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-body text-liquidwhite">
-          {isUserLoggedIn && (
-            <thead>
-              <tr>
-                {columns.map(col => (
-                  <th key={col.key} className="px-2 py-2 border-b border-gray-700 font-semibold text-left">
-                    {col.label}
-                  </th>
-                ))}
-                <th className="px-2 py-2 border-b border-gray-700"></th>
-              </tr>
-            </thead>
-          )}
-          <tbody>
-            {!isUserLoggedIn ? (
-              <tr>
-                <td colSpan={columns.length + 1} className="text-center py-8 text-liquidmidgray">
-                  Please log in to view open orders.
-                </td>
-              </tr>
-            ) : orders.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length + 1} className="text-center py-8 text-liquidmidgray">
-                  No open orders.
-                </td>
-              </tr>
-            ) : (
-              orders.map(order => (
-                <tr key={order.orderId} className="border-b border-gray-800 hover:bg-gray-800">
-                  {columns.map(col => (
-                    <td key={col.key} className="px-2 py-1">
-                      {col.key === "timestamp"
-                        ? formatDate(order[col.key])
-                        : priceKeys.includes(col.key)
-                          ? formatPrice(order[col.key])
-                          : order[col.key] ?? "-"}
-                    </td>
-                  ))}
-                  <td className=" py-1">
-                    <div className="flex gap-1">
-                      {/*
-                      <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs mr-1">Set TP</button>
-                      <button className="bg-backgrounddark border border-transparent hover:border-liquidwhite text-liquidwhite hover:text-white px-2 py-1 rounded text-xs">Set SL</button>
-                      <button className="border border-primary2normal hover:border-liquidwhite text-white px-2 py-1 rounded text-xs">Edit</button>
-                      */}
-                      <button
-                        className="bg-warningcolor border border-transparent hover:border-liquidwhite text-liquidwhite px-2 py-1 rounded text-body"
-                        onClick={() => {
-                          setSelectedOrder(order);
-                          setModalOpen(true);
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table
+        columns={columns}
+        data={isUserLoggedIn ? orders : []}
+        rowKey={row => row.orderId}
+        emptyMessage={isUserLoggedIn ? "No open orders." : "Please log in to view open orders."}
+        actions={
+          isUserLoggedIn
+            ? (order) => (
+                <button
+                  className="bg-liquidRed border border-transparent hover:border-liquidwhite text-liquidlighgray hover:text-liquidwhite px-2 rounded text-body"
+                  onClick={() => {
+                    setSelectedOrder(order);
+                    setModalOpen(true);
+                  }}
+                >
+                  Cancel
+                </button>
+              )
+            : null
+        }
+      />
       {modalOpen && selectedOrder && (
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <div className="p-4">
-            <h2 className="body mb-2">Cancel Order</h2>
-            <div className="mb-4 text-body">
-              <div><b>Order ID:</b> {selectedOrder.orderId}</div>
-              <div><b>Symbol:</b> {selectedOrder.symbol}</div>
-              <div><b>Side:</b> {selectedOrder.side}</div>
-              <div><b>Type:</b> {selectedOrder.type}</div>
-              <div><b>Price:</b> {formatPrice(selectedOrder.price)}</div>
-              <div><b>Quantity:</b> {formatPrice(selectedOrder.quantity)}</div>
+            <div className="mb-4 text-body text-white">
+              <div>Order ID: {selectedOrder.orderId}</div>
+              <div>Symbol: {selectedOrder.symbol}</div>
+              <div>Side: {selectedOrder.side}</div>
+              <div>Type: {selectedOrder.type}</div>
+              <div>Price: {formatPrice(selectedOrder.price)}</div>
+              <div>Quantity: {formatPrice(selectedOrder.quantity)}</div>
             </div>
-            <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 rounded bg-backgroundmid border border-gray-700 text-liquidwhite hover:bg-backgroundlighthover"
-                onClick={() => setModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 rounded bg-warningcolor text-liquidwhite hover:bg-red-700"
-                onClick={async () => {
-                  try {
-                    const id = selectedOrder.orderId;
-                    const symbol = selectedOrder.symbol;
-                    const res = await fetch(
-                      `https://fastify-serverless-function-rimj.onrender.com/api/cancel-order?id=${id}&symbol=${symbol}`,
-                      {
-                        method: "DELETE",
-                        headers: {
-                          accept: "application/json",
-                          Authorization: `Bearer ${authKey}`,
-                        },
-                      }
-                    );
-                    const data = await res.json();
-                    setOrders(orders => orders.filter(o => o.orderId !== id));
-                    setModalOpen(false);
-                  } catch (err) {
-                    console.error("Cancel order error:", err);
-                    setModalOpen(false);
-                  }
-                }}
-              >
-                Confirm Cancel
-              </button>
+            {cancelResponse && (
+              <div className="mb-4 p-2 rounded bg-backgroundmid border border-primary2normal text-liquidwhite break-all">
+                {cancelResponse.error ? (
+                  <>
+                    Response:
+                    <pre className="whitespace-pre-wrap break-all">{JSON.stringify(cancelResponse, null, 2)}</pre>
+                  </>
+                ) : (
+                  <span>
+                    Your order {cancelResponse.orderId} canceled successfully.
+                  </span>
+                )}
+              </div>
+            )}
+            <div className="flex justify-center gap-2">
+              {!cancelResponse ? (
+                <button
+                  className={`px-4 py-2 rounded bg-liquidRed text-liquidwhite hover:bg-red-700 flex items-center justify-center min-w-[100px]`}
+                  onClick={async () => {
+                    setCancelLoading(true);
+                    try {
+                      const id = selectedOrder.orderId;
+                      const symbol = selectedOrder.symbol;
+                      const res = await fetch(
+                        `https://fastify-serverless-function-rimj.onrender.com/api/cancel-order?id=${id}&symbol=${symbol}`,
+                        {
+                          method: "DELETE",
+                          headers: {
+                            accept: "application/json",
+                            Authorization: `Bearer ${authKey}`,
+                          },
+                        }
+                      );
+                      const data = await res.json();
+                      setCancelResponse(data);
+                      setOrders(orders => orders.filter(o => o.orderId !== id));
+                    } catch (err) {
+                      setCancelResponse({ error: "Cancel order error" });
+                    } finally {
+                      setCancelLoading(false);
+                    }
+                  }}
+                  disabled={cancelLoading}
+                >
+                  {cancelLoading ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin h-5 w-5 text-liquidwhite" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                      Cancelling...
+                    </span>
+                  ) : (
+                    "Confirm Cancel"
+                  )}
+                </button>
+              ) : (
+                <button
+                  className="px-4 py-2 rounded bg-gray-600 text-liquidwhite cursor-pointer min-w-[100px]"
+                  onClick={() => setModalOpen(false)}
+                >
+                  Close
+                </button>
+              )}
             </div>
           </div>
         </Modal>

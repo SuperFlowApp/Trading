@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 export default function OrderButton({
     children,
     type = 'order',
@@ -6,24 +8,33 @@ export default function OrderButton({
     style = {},
     block = false,
     disabled = false,
+    loading = false,
     ...props
 }) {
     // Basic style presets
     const base =
 
-        'transition-colors text-title  py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-primary2normal ';
+        'transition-colors  text-black text-title  py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-primary2normal ';
     const types = {
         primary:
-            'bg-green text-black hover:bg-green-80',
+            'bg-green hover:bg-green-80',
         secondary:
-            'bg-red text-black hover:bg-red-80',
+            'bg-red hover:bg-red-80',
         danger:
-            'bg-red text-white', // add a .hover:bg-red-dark if you want a darker red on hover
+            'bg-red',
         success:
-            'border border-white text-white', // add a .hover:bg-green-dark if you want a darker green on hover
+            'bg-green', 
         orderdisconnect:
-            'bg-gray-700 text-white hover:bg-primary2darker',
+            'text-liquidlightergray bg-gray-700 hover:bg-primary2darker',
     };
+
+    // Dots colors (same as LoadingScreen)
+    const dotColors = useMemo(() => [
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000",
+    ], []);
 
     return (
         <button
@@ -40,10 +51,26 @@ export default function OrderButton({
                 ...style,
             }}
             onClick={onClick}
-            disabled={disabled}
+            disabled={disabled || loading} // Disable while loading
             {...props}
         >
-            {children}
+            {loading ? (
+                <span className="flex gap-1 items-center justify-center py-[6px]">
+                    {dotColors.map((color, i) => (
+                        <span
+                            key={i}
+                            className="block w-2 h-2 rounded-full animate-bounce"
+                            style={{
+                                background: color,
+                                animationDelay: `${i * 0.15}s`,
+                                animationDuration: "1s",
+                            }}
+                        />
+                    ))}
+                </span>
+            ) : (
+                children
+            )}
         </button>
     );
 }

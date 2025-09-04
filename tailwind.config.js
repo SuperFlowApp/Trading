@@ -22,8 +22,9 @@ export default {
         backgroundlighthover: '#1d2c3c',
         backgroundmid: '#181923',
         backgrounddark: '#02001B',
-        warningcolor: '#a44b4b',
-
+        liquidRed: '#a44b4b',
+        red: '#F59DEF',
+        green: '#00B7C9',
       },
       screens: {
         '3xl': '2000px',

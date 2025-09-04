@@ -30,7 +30,10 @@
   --color-backgroundmid: #181923;
   --color-backgroundlight: #1e2d3a;
   --color-backgroundlighter: #1d2c3c;
-  --color-warningcolor: #d83d3d;
+  
+  --color-liquidRed: #ff7373;
+  --color-liquidGreen: #7cff77;
+
   --color-red: #F59DEF;
   --color-green: #00B7C9;
 }
@@ -66,11 +69,11 @@ input[type="number"] {
 
 /* Add to your global CSS file */
 .blink-error {
-  animation: blinkError 0.4s ease-in-out;
+  animation: blinkError 0.1s ease-in-out;
 }
 
 .blink-success {
-  animation: blinkSuccess 0.4s ease-in-out;
+  animation: blinkSuccess 0.1s ease-in-out;
 }
 
 @keyframes blinkError {
@@ -106,11 +109,11 @@ input[type="number"] {
 }
 .text-title {
   font-size: var(--text-title-size, 16px);
-  font-weight: 400;
+  font-weight: 600;
 }
 
 .text-body {
-  font-size: var(--text-body-size, 13px);
+  font-size: var(--text-body-size, 14px);
   font-weight: 400;
 }
 
