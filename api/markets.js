@@ -1,6 +1,8 @@
+import { BASE_URL } from "./server-basic-info";
+
 export default async function handler(req, res) {
   try {
-    const response = await fetch("https://superflow.exchange/dev-demo/markets");
+    const response = await fetch(`${BASE_URL}/markets`);
     const data = await response.json();
     res.status(200).json(data);
   } catch (err) {

@@ -56,7 +56,7 @@ function PairSelector({
     }
 
     fetchPairs();
-    intervalId = setInterval(fetchPairs, 3000);
+    intervalId = setInterval(fetchPairs, 4000);
 
     return () => clearInterval(intervalId);
   }, []);

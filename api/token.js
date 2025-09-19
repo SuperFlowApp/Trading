@@ -1,3 +1,6 @@
+import { BASE_URL } from "./server-basic-info";
+
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
@@ -17,7 +20,7 @@ export default async function handler(req, res) {
   const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
 
   try {
-    const response = await fetch("https://superflow.exchange/token", {
+    const response = await fetch(`${BASE_URL}/trades?/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,

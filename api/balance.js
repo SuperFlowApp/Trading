@@ -1,7 +1,10 @@
+import { BASE_URL } from "./server-basic-info";
+
+
 export default async function handler(req, res) {
   try {
     const authHeader = req.headers.authorization;
-    const response = await fetch("https://superflow.exchange/balance", {
+    const response = await fetch(`${BASE_URL}/balance`, {
       method: "GET",
       headers: {
         accept: "application/json",

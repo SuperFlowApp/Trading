@@ -46,7 +46,7 @@ const Trades = () => {
                             const side = trade.isBuyerMaker ? 'SELL' : 'BUY';
                             return (
                                 <tr
-                                    key={trade.id}
+                                    key={`${trade.id}-${trade.timestamp}`}
                                     className={`rounded-md ${side === 'BUY' ? 'text-green bg-green/20' : 'text-red bg-red/20'}`}
                                 >
                                     {/* Remove Side column */}

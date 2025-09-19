@@ -1,3 +1,5 @@
+import { BASE_URL } from "./server-basic-info";
+
 export default async function handler(req, res) {
   const { symbol, limit } = req.query;
   if (!symbol) {
@@ -5,7 +7,7 @@ export default async function handler(req, res) {
     return;
   }
   try {
-    const url = `https://superflow.exchange/orderbook?symbol=${encodeURIComponent(symbol)}${limit ? `&limit=${encodeURIComponent(limit)}` : ''}`;
+    const url = `${BASE_URL}/orderbook?symbol=${encodeURIComponent(symbol)}${limit ? `&limit=${encodeURIComponent(limit)}` : ''}`;
     const response = await fetch(url);
     const data = await response.json();
     res.status(response.status).json(data);
