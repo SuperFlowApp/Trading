@@ -101,7 +101,7 @@ function AccountInfoPanel() {
 
         fetchAccountInfo(); // initial fetch
 
-        const interval = setInterval(fetchAccountInfo, 2000);
+        const interval = setInterval(fetchAccountInfo, 3000);
 
         return () => {
             isMounted = false;
@@ -112,76 +112,13 @@ function AccountInfoPanel() {
     // Helper: get first position (if any)
     const position = accountInfo?.positions?.[0];
 
-    // Helper: calculate order value (pendingBuyNotional or notional)
-    const orderValue = position
-        ? normalizeZero(position.pendingBuyNotional) !== "0"
-            ? normalizeZero(position.pendingBuyNotional)
-            : normalizeZero(position.notional)
-        : '';
-
-    // Helper: margin required (isolated or cross)
-    const marginRequired = normalizeZero(position?.initialMargin) !== "0"
-        ? normalizeZero(position?.initialMargin)
-        : normalizeZero(accountInfo?.crossInitialMargin);
-
-    // Helper: cross margin ratio (use field or calculate)
-    let crossMarginRatio = normalizeZero(position?.marginRatio);
-    if ((!crossMarginRatio || crossMarginRatio === "0") && accountInfo?.crossMaintenanceMargin && accountInfo?.crossInitialMargin) {
-        const maint = parseFloat(normalizeZero(accountInfo.crossMaintenanceMargin));
-        const init = parseFloat(normalizeZero(accountInfo.crossInitialMargin));
-        if (init > 0) crossMarginRatio = (maint / init).toFixed(4);
-    }
-
-    // Helper: cross account leverage (estimate)
-    let crossLeverage = '';
-    if (position && position.cross && position.notional && accountInfo?.crossInitialMargin) {
-        const notional = parseFloat(normalizeZero(position.notional));
-        const crossInit = parseFloat(normalizeZero(accountInfo.crossInitialMargin));
-        if (crossInit > 0) crossLeverage = (notional / crossInit).toFixed(2);
-    }
+    // Remove helpers that use missing fields
+    // For example, liquidationPrice, pendingBuyNotional, notional, initialMargin, marginRatio, cross, upnl, maintenanceMargin, leverage
 
     return (
         <>
             <div className="flex flex-col bg-backgroundmid rounded-md p-2 w-[100%] overflow-hidden">
-                {/* Do not show error messages */}
-                {/* {accountInfoError && (
-                    <div className="text-red-400 text-xs">{accountInfoError}</div>
-                )} */}
                 <div className="text-xs flex flex-col gap-2">
-                    {/* Top Section */}
-                    <div className="flex justify-between">
-                        <span className="text-liquidwhite">Liquidation Price</span>
-                        <span className="text-white font-semibold">
-                            {position?.liquidationPrice != null
-                                ? formatPrice(normalizeZero(position.liquidationPrice))
-                                : '—'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-liquidwhite">Order Value</span>
-                        <span className="text-white font-semibold">
-                            {orderValue !== ''
-                                ? formatPrice(orderValue)
-                                : '—'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-liquidwhite">Margin Required</span>
-                        <span className="text-white font-semibold">
-                            {marginRequired !== ''
-                                ? formatPrice(marginRequired)
-                                : '—'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-liquidwhite">Fees Paid</span>
-                        <span className="text-white font-semibold">
-                            {accountInfo?.paidFee != null
-                                ? formatPrice(normalizeZero(accountInfo.paidFee))
-                                : '—'}
-                        </span>
-                    </div>
-                    {/* Perps Overview */}
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Account Equity (Perps)</span>
                         <span className="text-white font-semibold">
@@ -203,37 +140,61 @@ function AccountInfoPanel() {
                         <span className="text-white font-semibold">
                             {accountInfo?.upnl != null
                                 ? formatPrice(normalizeZero(accountInfo.upnl))
-                                : (position?.upnl != null
-                                    ? formatPrice(normalizeZero(position.upnl))
-                                    : '—')}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-liquidwhite">Cross Margin Ratio</span>
-                        <span className="text-white font-semibold">
-                            {crossMarginRatio !== undefined && crossMarginRatio !== null && crossMarginRatio !== ''
-                                ? formatPrice(crossMarginRatio)
                                 : '—'}
                         </span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-liquidwhite">Maintenance Margin</span>
+                        <span className="text-liquidwhite">Paid Fee</span>
                         <span className="text-white font-semibold">
-                            {accountInfo?.crossMaintenanceMargin != null
-                                ? formatPrice(normalizeZero(accountInfo.crossMaintenanceMargin))
-                                : (position?.maintenanceMargin != null
-                                    ? formatPrice(normalizeZero(position.maintenanceMargin))
-                                    : '—')}
+                            {accountInfo?.paidFee != null
+                                ? formatPrice(normalizeZero(accountInfo.paidFee))
+                                : '—'}
                         </span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-liquidwhite">Cross Account Leverage</span>
+                        <span className="text-liquidwhite">Available For Order</span>
                         <span className="text-white font-semibold">
-                            {position?.leverage != null
-                                ? formatPrice(normalizeZero(position.leverage))
-                                : (crossLeverage !== ''
-                                    ? formatPrice(crossLeverage)
-                                    : '—')}
+                            {accountInfo?.availableForOrder != null
+                                ? formatPrice(normalizeZero(accountInfo.availableForOrder))
+                                : '—'}
+                        </span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-liquidwhite">Cross Initial Margin</span>
+                        <span className="text-white font-semibold">
+                            {accountInfo?.crossInitialMargin != null
+                                ? formatPrice(normalizeZero(accountInfo.crossInitialMargin))
+                                : '—'}
+                        </span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-liquidwhite">Cross Maintenance Margin</span>
+                        <span className="text-white font-semibold">
+                            {accountInfo?.crossMaintenanceMargin != null
+                                ? formatPrice(normalizeZero(accountInfo.crossMaintenanceMargin))
+                                : '—'}
+                        </span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-liquidwhite">Cross Pending Initial Margin</span>
+                        <span className="text-white font-semibold">
+                            {accountInfo?.crossPendingInitialMargin != null
+                                ? formatPrice(normalizeZero(accountInfo.crossPendingInitialMargin))
+                                : '—'}
+                        </span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-liquidwhite">Position Mode</span>
+                        <span className="text-white font-semibold">
+                            {accountInfo?.positionMode || '—'}
+                        </span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-liquidwhite">Realized PNL</span>
+                        <span className="text-white font-semibold">
+                            {accountInfo?.realizedPnl != null
+                                ? formatPrice(normalizeZero(accountInfo.realizedPnl))
+                                : '—'}
                         </span>
                     </div>
                 </div>

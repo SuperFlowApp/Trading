@@ -1,95 +1,9 @@
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { useZustandStore } from '../../Zustandstore/useStore.js';
-import { selectedPairStore } from '../../Zustandstore/userOrderStore.js'; // <-- import your user input store
+import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
 import { formatPrice } from '../../utils/priceFormater.js';
 import { MinimalDropDown } from '../CommonUIs/inputs/inputs.jsx';
-
-// Custom hook for localhost SSE order book
-const useUnifiedOrderBook = (symbol) => {
-  const [bids, setBids] = useState([]);
-  const [asks, setAsks] = useState([]);
-  const [wsConnected, setWsConnected] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Helper to format orderbook arrays
-  const formatBook = (arr) =>
-    arr.map(([price, size]) => ({
-      price: parseFloat(price),
-      size: parseFloat(size),
-    }));
-
-  // Initial REST fetch with polling
-  useEffect(() => {
-    let active = true;
-    setError(null);
-
-    // Polling interval (e.g., every 1500ms)
-    const fetchOrderBook = () => {
-      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
-        .then(res => res.json())
-        .then(data => {
-          if (!active) return;
-          if (data.bids && data.asks) {
-            setBids(formatBook(data.bids));
-            setAsks(formatBook(data.asks));
-          }
-        })
-    };
-
-    fetchOrderBook(); // Initial fetch
-    const intervalId = setInterval(fetchOrderBook, 1500); // Poll every 1.5s
-
-    return () => {
-      active = false;
-      clearInterval(intervalId);
-    };
-  }, [symbol]);
-
-  // SSE live updates
-  useEffect(() => {
-    let active = true;
-    setError(null);
-
-    const eventSource = new EventSource(`https://websocketserver-am3y.onrender.com/stream/orderbook?symbol=${symbol.toUpperCase()}`);
-
-    eventSource.onopen = () => {
-      if (!active) return;
-      setWsConnected(true);
-    };
-
-    eventSource.onmessage = (event) => {
-      if (!active) return;
-      try {
-        const data = JSON.parse(event.data);
-        if (data.e === 'ORDERBOOK' && data.s === symbol.toUpperCase()) {
-          setBids(formatBook(data.b));
-          setAsks(formatBook(data.a));
-        }
-      } catch { }
-    };
-
-    eventSource.onerror = () => {
-      setWsConnected(false);
-      fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol.toUpperCase()}&limit=10`)
-        .then(res => res.json())
-        .then(data => {
-          if (!active) return;
-          if (data.bids && data.asks) {
-            setBids(formatBook(data.bids));
-            setAsks(formatBook(data.asks));
-          }
-        });
-      eventSource.close();
-    };
-
-    return () => {
-      active = false;
-      eventSource.close();
-    };
-  }, [symbol]);
-
-  return { bids, asks, wsConnected, error };
-};
+import { useMultiWebSocketGlobal } from '../../contexts/MultiWebSocketContext'; // <-- Use global websocket hook
 
 // Memoized Row for per-row update
 const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSizeClass = "text-body", fontWeightClass = "font-medium", textAlign }) => {
@@ -153,7 +67,23 @@ const OrderBook = () => {
   // Compose symbol for API (e.g., BTCUSDT)
   const symbol = selectedPair ? `${selectedPair}USDT` : 'BTCUSDT';
 
-  const { asks, bids, wsConnected, error } = useUnifiedOrderBook(symbol);
+  // Use global websocket hook
+  const { payloads, states } = useMultiWebSocketGlobal();
+  // Get orderbook data for current symbol
+  const orderbookData = payloads.orderbook;
+  const wsConnected = states.orderbook === 'open';
+
+  // Helper to format orderbook arrays
+  const formatBook = (arr) =>
+    arr.map(([price, size]) => ({
+      price: parseFloat(price),
+      size: parseFloat(size),
+    }));
+
+  // Extract bids/asks from websocket payload
+  const bids = orderbookData?.b ? formatBook(orderbookData.b) : [];
+  const asks = orderbookData?.a ? formatBook(orderbookData.a) : [];
+  const error = null; // You can add error handling if needed
 
   const [spreadValue, setSpreadValue] = useState(null);
   const [spreadPercentage, setSpreadPercentage] = useState(null);
@@ -171,7 +101,6 @@ const OrderBook = () => {
 
   // Helper to mark new prices and calculate cumulative totals
   const addTotals = (rows, reverse = false, prevPricesSet = new Set()) => {
-    // Always sort descending (cheapest last)
     const sortedRows = [...rows].sort((a, b) => b.price - a.price);
 
     let limitedRows;
@@ -328,7 +257,6 @@ const OrderBook = () => {
       const top = rowRect.top + rowRect.height / 2;
       const left = rowRect.left - TOOLTIP_WIDTH - 8;
 
-      // compute stats immediately (don't rely on hoveredAskStats state which may not update synchronously)
       const rows = addTotals(asks, false).slice(-10).slice(index);
       if (rows.length) {
         const totalSize = rows.reduce((sum, row) => sum + row.size, 0);

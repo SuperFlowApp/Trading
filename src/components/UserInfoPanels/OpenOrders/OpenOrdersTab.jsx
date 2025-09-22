@@ -79,7 +79,7 @@ const OpenOrdersTab = () => {
     };
 
     fetchOrders(); // Initial fetch
-    intervalId = setInterval(fetchOrders, 2000);
+    intervalId = setInterval(fetchOrders, 10000);
 
     return () => clearInterval(intervalId);
   }, [authKey]);

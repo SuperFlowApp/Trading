@@ -33,7 +33,7 @@ const Positions = () => {
     };
 
     fetchPositions(); // Initial fetch
-    const interval = setInterval(fetchPositions, 2000);
+    const interval = setInterval(fetchPositions, 10000);
 
     return () => clearInterval(interval); // Cleanup on unmount or authKey change
   }, [authKey]);

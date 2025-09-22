@@ -26,18 +26,16 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
 
       const data = await response.json();
 
-      if (data.access_token) {
+      if (data.access_token && data.token_type) {
         message.success("Login successful!");
         setAuthKey(data.access_token);
-        setContextUsername(username); // store username in context
+        setContextUsername(username);
         onLoginSuccess && onLoginSuccess(username, data.access_token);
         onClose();
+      } else if (data.error_code === 1110 && data.msg) {
+        message.error(data.msg);
       } else {
-        if (data.detail && Array.isArray(data.detail) && data.detail[0]?.msg) {
-          message.error(data.detail[0].msg);
-        } else {
-          message.error("Invalid credentials.");
-        }
+        message.error("Invalid credentials.");
       }
     } catch (err) {
       message.error("Login failed: " + err.message);

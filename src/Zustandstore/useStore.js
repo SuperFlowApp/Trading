@@ -41,16 +41,16 @@ const useZustandStore = create((set, get) => ({
   setRed: (value) => set({ red: value }),
   setGreen: (value) => set({ green: value }),
 
-  chartSettings: initialState.chartSettings || {
-    grid_show: true,
-    reverse_coordinate: false,
-    price_axis_type: 'normal',
-    last_price_show: true,
-    high_price_show: false,
-    low_price_show: false,
-    indicator_last_value_show: true,
-    fontSize: 'medium', // small | medium | large
-    watermark_show: true, // ← add this line
+  chartSettings: {
+    grid_show: initialState.chartSettings?.grid_show ?? true,
+    reverse_coordinate: initialState.chartSettings?.reverse_coordinate ?? false,
+    price_axis_type: initialState.chartSettings?.price_axis_type ?? 'normal',
+    last_price_show: initialState.chartSettings?.last_price_show ?? true,
+    high_price_show: initialState.chartSettings?.high_price_show ?? false,
+    low_price_show: initialState.chartSettings?.low_price_show ?? false,
+    indicator_last_value_show: initialState.chartSettings?.indicator_last_value_show ?? true,
+    fontSize: initialState.chartSettings?.fontSize ?? 'medium',
+    watermark_show: initialState.chartSettings?.watermark_show ?? true,
   },
   setChartSettings: (settings) => set({ chartSettings: { ...get().chartSettings, ...settings } }),
 

@@ -6,6 +6,7 @@ import { AuthKeyProvider } from './contexts/AuthKeyContext';
 import NotificationBar from './components/notificationBar'; 
 import { useZustandStore } from './Zustandstore/useStore'; 
 import LoadingScreen from './components/Loading'; // <-- Import your loading screen
+import { MultiWebSocketProvider } from "./contexts/MultiWebSocketContext";
 
 import './components/index.css';
 
@@ -49,15 +50,17 @@ function RootApp() {
   return (
     <StrictMode>
       <AuthKeyProvider>
-        <CssVarSync />
-        <Navbar />
-        <div className="w-full">
-          <NotificationBar />
-        </div>
-        <div className="flex justify-center items-start">
-          <FuturesApp />
-        </div>
-        {loading && <LoadingScreen />}
+        <MultiWebSocketProvider>
+          <CssVarSync />
+          <Navbar />
+          <div className="w-full">
+            <NotificationBar />
+          </div>
+          <div className="flex justify-center items-start">
+            <FuturesApp />
+          </div>
+          {loading && <LoadingScreen />}
+        </MultiWebSocketProvider>
       </AuthKeyProvider>
     </StrictMode>
   );

@@ -96,7 +96,7 @@ const BalanceFetch = ({ onBalance }) => {
     };
 
     fetchBalance(); // Initial fetch
-    intervalId = setInterval(fetchBalance, 2000);
+    intervalId = setInterval(fetchBalance, 10000);
 
     return () => clearInterval(intervalId);
   }, [authKey, onBalance, selectedPair, positionNotFound, balance, setAvailableUsdt]); // <-- include setter

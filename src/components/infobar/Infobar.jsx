@@ -1,51 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
 import PairSelector from './PairSelector';
 import { formatPrice } from '../../utils/priceFormater.js';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { useMultiWebSocketGlobal } from '../../contexts/MultiWebSocketContext';
 
 function Infobar() {
-  const [ticker, setTicker] = useState({});
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [expand, setExpand] = useState(false);
   const selectedPair = selectedPairStore((s) => s.selectedPair);
 
-  useEffect(() => {
-    if (!selectedPair) return;
-    const symbol = `${selectedPair}USDT`.toUpperCase();
-    const url = ``;
-    let ignore = false;
+  // Use mark price and last price from websocket
+  const { payloads } = useMultiWebSocketGlobal();
+  const wsMarkPrice = payloads.markPrice;
+  const wsLastPrice = payloads.lastPrice;
 
-    async function fetchTicker() {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
-        if (!ignore) {
-          setTicker({
-            last: data.lastPrice,
-            change: data.priceChange,
-            percentage: data.priceChangePercent,
-            baseVolume: data.volume,
-            open: data.openPrice,
-            bid: data.bidPrice,
-            ask: data.askPrice,
-            previousClose: data.prevClosePrice,
-          });
-        }
-      } catch {
-        if (!ignore) setTicker({});
+  // Compose symbol for display
+  const symbol = selectedPair ? `${selectedPair}USDT`.toUpperCase() : 'BTCUSDT';
+
+  // Extract ticker info from websocket markPrice payload
+  const ticker = wsMarkPrice && wsMarkPrice.s === symbol
+    ? {
+        last: wsMarkPrice.p, // mark price
+        change: wsMarkPrice.priceChange,
+        percentage: wsMarkPrice.priceChangePercent,
+        baseVolume: wsMarkPrice.volume,
+        open: wsMarkPrice.openPrice,
+        bid: wsMarkPrice.bidPrice,
+        ask: wsMarkPrice.askPrice,
+        previousClose: wsMarkPrice.prevClosePrice,
       }
-    }
+    : {};
 
-    fetchTicker();
-    const interval = setInterval(fetchTicker, 2000);
-
-    return () => {
-      ignore = true;
-      clearInterval(interval);
-    };
-  }, [selectedPair]);
+  // Extract last price info from websocket lastPrice payload
+  const lastPriceInfo = wsLastPrice && wsLastPrice.s === symbol
+    ? {
+        last: wsLastPrice.p,
+        open: wsLastPrice.openPrice,
+      }
+    : {};
 
   return (
     <div className="bg-backgroundmid flex flex-col sm:flex-row rounded-md overflow-visible">
@@ -59,10 +52,18 @@ function Infobar() {
         {/* Current Price always visible */}
         <div className="flex text-body items-center gap-2 sm:gap-8 text-liquidwhite">
           <div className="flex flex-col">
-            <span>Price:</span>
+            <span>Mark Price:</span>
             <span className="text-white">
               {ticker.last !== undefined && ticker.last !== null
                 ? formatPrice(ticker.last)
+                : "--"}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span>Last Price:</span>
+            <span className="text-white">
+              {lastPriceInfo.last !== undefined && lastPriceInfo.last !== null
+                ? formatPrice(lastPriceInfo.last)
                 : "--"}
             </span>
           </div>
@@ -115,6 +116,14 @@ function Infobar() {
           <span className="text-white">
             {ticker.open !== undefined && ticker.open !== null
               ? formatPrice(ticker.open)
+              : "--"}
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span>Last Price Open:</span>
+          <span className="text-white">
+            {lastPriceInfo.open !== undefined && lastPriceInfo.open !== null
+              ? formatPrice(lastPriceInfo.open)
               : "--"}
           </span>
         </div>

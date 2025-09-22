@@ -28,13 +28,13 @@ const Table = ({
         </thead>
       )}
       <tbody>
-        {data.length === 0 ? (
+        {Array.isArray(data) && data.length === 0 ? (
           <tr>
             <td colSpan={columns.length + (actions ? 1 : 0)} className="text-center py-8 text-liquidmidgray">
               {emptyMessage}
             </td>
           </tr>
-        ) : (
+        ) : Array.isArray(data) ? (
           data.map((row, idx) => (
             <tr key={rowKey(row, idx)} className={idx % 2 ? "bg-backgroundmid" : "bg-backgroundlight"}>
               {columns.map(col => (
@@ -47,6 +47,12 @@ const Table = ({
               )}
             </tr>
           ))
+        ) : (
+          <tr>
+            <td colSpan={columns.length + (actions ? 1 : 0)} className="text-center py-8 text-red-400">
+              Error loading data
+            </td>
+          </tr>
         )}
       </tbody>
     </table>

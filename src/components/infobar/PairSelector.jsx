@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { marketsData } from '../../Zustandstore/marketsDataStore';
-import {selectedPairStore} from '../../Zustandstore/userOrderStore.js';
+import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
 import { formatPrice } from '../../utils/priceFormater.js';
 
 function PairSelector({
@@ -8,7 +8,6 @@ function PairSelector({
   setDropdownOpen,
 }) {
   const [markets, setMarkets] = useState([]);
-  const [marketStats, setMarketStats] = useState({}); // New state for stats
   const MARKET_TYPE = 'futures';
   const dropdownRef = useRef(null);
 
@@ -16,10 +15,8 @@ function PairSelector({
   const selectedPair = selectedPairStore(s => s.selectedPair);
   const setSelectedPair = selectedPairStore(s => s.setSelectedPair);
 
-  // Fetch available trading pairs and tickers
+  // Fetch available trading pairs and save to Zustand only once on page load/refresh
   useEffect(() => {
-    let intervalId;
-
     async function fetchPairs() {
       try {
         const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets');
@@ -47,7 +44,7 @@ function PairSelector({
 
         setMarkets(processed);
 
-        // Store all market data in marketsData store
+        // Store all market data in marketsData store (Zustand)
         marketsData.getState().setAllMarketData(processed);
 
       } catch (err) {
@@ -56,55 +53,11 @@ function PairSelector({
     }
 
     fetchPairs();
-    intervalId = setInterval(fetchPairs, 4000);
+  }, []); // <-- runs only once on mount
 
-    return () => clearInterval(intervalId);
-  }, []);
+  // Remove dropdownOpen polling effect
+  // Only fetch once on page load/refresh
 
-  /*/ Fetch stats for each market from Binance every 5 seconds
-  useEffect(() => {
-    if (markets.length === 0) return;
-    let statsInterval;
-
-    async function fetchStats() {
-      const stats = {};
-      await Promise.all(markets.map(async mkt => {
-        try {
-          // Binance Futures API endpoints
-          const symbol = mkt.symbol;
-          // 24h ticker
-          const tickerRes = await fetch(``);
-          const ticker = await tickerRes.json();
-
-          // Funding rate (8hr)
-          const fundingRes = await fetch(``);
-          const funding = await fundingRes.json();
-
-          // Open Interest
-          const oiRes = await fetch(``);
-          const openInterest = await oiRes.json();
-
-          stats[symbol] = {
-            lastPrice: ticker.lastPrice,
-            priceChangePercent: ticker.priceChangePercent,
-            priceChange: ticker.priceChange, // <-- add this line
-            volume: ticker.volume,
-            fundingRate: funding.lastFundingRate,
-            openInterest: openInterest.openInterest,
-          };
-        } catch (err) {
-          stats[mkt.symbol] = null;
-        }
-      }));
-      setMarketStats(stats);
-    }
-
-    fetchStats();
-    statsInterval = setInterval(fetchStats, 5000);
-
-    return () => clearInterval(statsInterval);
-  }, [markets]);
-*/
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
@@ -168,12 +121,10 @@ function PairSelector({
                 <th className="px-2 py-1">8hr Funding</th>
                 <th className="px-2 py-1">Volume</th>
                 <th className="px-2 py-1">Open Interest</th>
-                {/* Removed max leverage column */}
               </tr>
             </thead>
             <tbody>
               {markets.map(mkt => {
-                const stats = marketStats[mkt.symbol] || {};
                 // Get market data from global store
                 const allMarketData = marketsData.getState().allMarketData || [];
                 const marketObj = allMarketData.find(md => md.symbol === mkt.symbol);
@@ -199,24 +150,11 @@ function PairSelector({
                         <span className="ml-1 text-primary2normal">[{maxLeverage}x]</span>
                       )}
                     </td>
-                    <td className="px-2 py-1">{stats.lastPrice ? formatPrice(stats.lastPrice) : "-"}</td>
-                    <td className="px-2 py-1"
-                      style={{
-                        color:
-                          stats.priceChangePercent > 0
-                            ? 'var(--color-green)'
-                            : stats.priceChangePercent < 0
-                            ? 'var(--color-liquidRed)'
-                            : undefined,
-                      }}
-                    >
-                      {stats.priceChangePercent && stats.lastPrice
-                        ? `${formatPrice(stats.priceChange)} / ${formatPrice(stats.priceChangePercent)}%`
-                        : "-"}
-                    </td>
-                    <td className="px-2 py-1">{stats.fundingRate ? `${formatPrice(stats.fundingRate * 100)}%` : "-"}</td>
-                    <td className="px-2 py-1">{stats.volume ? formatPrice(stats.volume) : "-"}</td>
-                    <td className="px-2 py-1">{stats.openInterest ? formatPrice(stats.openInterest) : "-"}</td>
+                    <td className="px-2 py-1">-</td>
+                    <td className="px-2 py-1">-</td>
+                    <td className="px-2 py-1">-</td>
+                    <td className="px-2 py-1">-</td>
+                    <td className="px-2 py-1">-</td>
                   </tr>
                 );
               })}
