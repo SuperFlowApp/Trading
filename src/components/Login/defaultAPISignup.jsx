@@ -21,18 +21,13 @@ const DefaultAPISignup = ({ open, onClose, onSignupSuccess, clickPosition }) => 
     }
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        username,
-        password,
-      }).toString();
-
-      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/create_user?${params}`, {
+      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/create_user`, {
         method: "POST",
         headers: {
           accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        body: "", // mimic curl -d ''
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
