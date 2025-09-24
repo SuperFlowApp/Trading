@@ -123,26 +123,10 @@ function AccountInfoPanel() {
                         </span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-liquidwhite">Unrealized PNL</span>
-                        <span className="text-white font-semibold">
-                            {accountInfo?.upnl != null
-                                ? formatPrice(normalizeZero(accountInfo.upnl))
-                                : '—'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
                         <span className="text-liquidwhite">Paid Fee</span>
                         <span className="text-white font-semibold">
                             {accountInfo?.paidFee != null
                                 ? formatPrice(normalizeZero(accountInfo.paidFee))
-                                : '—'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-liquidwhite">Available For Order</span>
-                        <span className="text-white font-semibold">
-                            {accountInfo?.availableForOrder != null
-                                ? formatPrice(normalizeZero(accountInfo.availableForOrder))
                                 : '—'}
                         </span>
                     </div>

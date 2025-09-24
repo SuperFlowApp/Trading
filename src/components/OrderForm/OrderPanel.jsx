@@ -10,15 +10,13 @@ import Tab from '../CommonUIs/tab';
 import NativeSlider from '../CommonUIs/slider';
 import OrderButton from './Ui/OrderButton.jsx';
 import SideSelectorButton from './Ui/SideSelectorButton.jsx';
-import BalanceFetch from './BalanceFetch';
 import { PriceFieldInput, InputWithDropDown, PercentageInput, MinimalDropDown } from '../CommonUIs/inputs/inputs.jsx';
 import DefaultAPILogin from "../Login/defaultAPILogin";
 import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
 import { API_BASE_URL } from '../../config/api';
+import { formatPrice } from '../../utils/priceFormater';
 
 function LimitOrderForm({ onCurrencyChange }) {
-  // Move this to the top, before any use of balanceFree!
-  const [balanceFree, setBalanceFree] = useState("--");
   const { authKey } = useAuthKey();
 
   const selectedPairBase = selectedPairStore(s => s.selectedPair);
@@ -50,6 +48,10 @@ function LimitOrderForm({ onCurrencyChange }) {
   const setNotional = useZustandStore(s => s.setNotional);
   const currentNotional = useZustandStore(s => s.currentNotional);
   const accountInfo = useZustandStore(s => s.accountInfo);
+
+  // Get available balance directly from account info
+  const availableForOrder = accountInfo?.availableForOrder || "0";
+  const balanceFree = parseFloat(availableForOrder) || 0;
 
   // Helper to normalize zero (copy from AccountInfoPanel or import)
   function normalizeZero(val) {
@@ -373,10 +375,15 @@ function LimitOrderForm({ onCurrencyChange }) {
       <div className="flex gap-4 items-center">
         <SideSelectorButton side={side} setSide={setSide} />
       </div>
-      {/* Balance Row - replaced with BalanceFetch */}
+      
+      {/* Balance Row - show available balance directly */}
       <div>
         <div className="text-body">
-          <BalanceFetch onBalance={setBalanceFree} />
+          <span className="flex w-full justify-between text-liquidlightergray">
+            Available to trade: <span className="text-white">
+              {formatPrice(balanceFree)} USDT
+            </span>
+          </span>
         </div>
         <span className="text-body text-liquidlightergray w-full flex justify-between">
           Unrealized PNL
@@ -387,6 +394,7 @@ function LimitOrderForm({ onCurrencyChange }) {
           </span>
         </span>
       </div>
+      
       {/* Conditionally render the Price field */}
       <div className=" flex flex-col text-body gap-2">
         {market !== 'market' && (

@@ -5,6 +5,7 @@ import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js';
 import { useAuthKey } from '../../../contexts/AuthKeyContext';
 import { API_BASE_URL } from '../../../config/api';
+import { useZustandStore } from '../../../Zustandstore/useStore';
 
 export default function PositionMode() {
   const [open, setOpen] = useState(false);
@@ -16,16 +17,19 @@ export default function PositionMode() {
 
   const selectedPair = selectedPairStore(s => s.selectedPair);
   const { authKey } = useAuthKey();
+  
+  // Get open orders state from Zustand
+  const isOpenOrder = useZustandStore(s => s.isOpenOrder);
 
-  // Modal content style if not connected
-  const modalStyle = !authKey
+  // Modal content style if not connected or has open orders
+  const modalStyle = !authKey || isOpenOrder
     ? { opacity: 0.5, pointerEvents: "none", filter: "grayscale(1)" }
     : {};
 
   // Handle confirm button
   const handleConfirm = async () => {
     setErrorMsg("");
-    if (!authKey) {
+    if (!authKey || isOpenOrder) {
       setOpen(false);
       return;
     }
@@ -83,12 +87,20 @@ export default function PositionMode() {
           <h2 className="text-lg font-bold text-white mb-2">
             Select Position Mode
           </h2>
+          
+          {/* Show notification when there are open orders */}
+          {isOpenOrder && authKey && (
+            <div className="bg-yellow-600/20 border border-yellow-600/40 rounded p-3 text-yellow-200 text-sm">
+              Since you have open orders, you can't change position mode.
+            </div>
+          )}
+          
           <div className="flex gap-3">
             <Button
               type={positionMode === "ONE_WAY_MODE" ? "primary" : "default"}
               className="flex-1"
               onClick={() => setPositionMode("ONE_WAY_MODE")}
-              disabled={!authKey || loading}
+              disabled={!authKey || loading || isOpenOrder}
             >
               One-way
             </Button>
@@ -96,7 +108,7 @@ export default function PositionMode() {
               type={positionMode === "HEDGE_MODE" ? "primary" : "default"}
               className="flex-1"
               onClick={() => setPositionMode("HEDGE_MODE")}
-              disabled={!authKey || loading}
+              disabled={!authKey || loading || isOpenOrder}
             >
               Hedge
             </Button>
@@ -107,9 +119,9 @@ export default function PositionMode() {
               className={`flex-1 py-2 transition-all ${blink === "success" ? "blink-success" : ""} ${blink === "error" ? "blink-error" : ""}`}
               onClick={handleConfirm}
               block
-              disabled={loading}
+              disabled={loading || isOpenOrder}
             >
-              {!authKey ? "Connect" : loading ? "..." : "Confirm"}
+              {!authKey ? "Connect" : isOpenOrder ? "Can't Change" : loading ? "..." : "Confirm"}
             </Button>
             {blink === "error" && errorMsg && (
               <div className="text-xs text-red-400 text-center mt-1">{errorMsg}</div>
