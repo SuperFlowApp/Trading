@@ -41,7 +41,7 @@ function Infobar() {
     : {};
 
   return (
-    <div className="bg-backgroundmid flex flex-col sm:flex-row rounded-md overflow-visible">
+    <div className="bg-backgroundmid border-[1px] border-backgroundlighthover flex flex-col sm:flex-row rounded-md overflow-visible">
       <div className="flex gap-2 sm:gap-8 items-center px-4 py-2">
         {/* Pair Selector always visible */}
         <PairSelector

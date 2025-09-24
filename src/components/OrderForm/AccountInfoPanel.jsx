@@ -96,15 +96,11 @@ function AccountInfoPanel() {
         };
     }, [authKey, setAuthKey]);
 
-    // Helper: get first position (if any)
     const position = accountInfo?.positions?.[0];
-
-    // Remove helpers that use missing fields
-    // For example, liquidationPrice, pendingBuyNotional, notional, initialMargin, marginRatio, cross, upnl, maintenanceMargin, leverage
 
     return (
         <>
-            <div className="flex flex-col bg-backgroundmid rounded-md p-2 w-[100%] overflow-hidden">
+            <div className="flex flex-col bg-backgroundmid rounded-md p-2 w-[100%] overflow-hidden  border-[1px] border-backgroundlighthover">
                 <div className="text-xs flex flex-col gap-2">
                     <div className="flex justify-between">
                         <span className="text-liquidwhite">Account Equity (Perps)</span>

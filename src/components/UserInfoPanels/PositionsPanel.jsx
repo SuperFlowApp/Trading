@@ -30,7 +30,7 @@ function PositionsPanel() {
   };
 
   return (
-    <div className=" flex flex-col w-full  bg-backgroundmid rounded-md p-1 sm:overflow-visible overflow-y-auto">
+    <div className=" flex flex-col w-full  bg-backgroundmid rounded-md p-1 sm:overflow-visible overflow-y-auto  border-[1px] border-backgroundlighthover">
       {/* Tab Headers */}
 
       <div className="border-b-[1px] min-w-[800px] border-primary2darker  sm:overflow-visible overflow-y-auto">

@@ -101,7 +101,7 @@ function Navbar() {
   };
 
   return (
-    <Disclosure as="nav" className="bg-backgroundmid text-white text-body w-full border-b-[1px] border-primary2darker" >
+    <Disclosure as="nav" className="bg-backgroundmid text-white text-body w-full border-b-[1px] border-backgroundlighthover" >
       {({ open }) => (
         <>
           <div className="mx-auto w-full px-4 py-3 flex items-center justify-between ">
@@ -163,7 +163,13 @@ function Navbar() {
                   <Button type="navconnected">{username}</Button>
                   {dropdownOpen && (
                     <div className="absolute right-0 text-liquidwhite rounded z-50 py-2">
-                      <Button type="navdisconnection" onClick={handleDisconnect}>
+                      <Button
+                        type="navdisconnection"
+                        onClick={handleDisconnect}
+                        style={{
+                          border: '1px solid var(--color-primary2darker)'
+                        }}
+                      >
                         Logout
                       </Button>
                     </div>

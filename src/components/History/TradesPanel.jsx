@@ -7,7 +7,7 @@ export default function TradesPanel() {
   const [activeTab, setActiveTab] = useState('OrderBook');
 
   return (
-    <div className="px-2 py-1 flex flex-col bg-backgroundmid rounded-md overflow-hidden
+    <div className="px-2 py-1 flex flex-col bg-backgroundmid rounded-md overflow-hidden border border-backgroundlighthover
                     min-h-[510px] max-h-[710px]
                     min-w-[330px] 3xl:min-w-[560px]
                    ">

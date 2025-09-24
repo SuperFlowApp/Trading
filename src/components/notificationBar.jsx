@@ -9,12 +9,14 @@ export default function NotificationBar() {
   const notification = notificationStore((s) => s.notification);
   const clearNotification = notificationStore((s) => s.clearNotification);
   const { authKey } = useAuthKey(); // <-- get authKey
-  const availableUsdt = useZustandStore((s) => s.availableUsdt); // <-- add
+  const accountInfo = useZustandStore((s) => s.accountInfo); // <-- get accountInfo
 
   const welcomeMessage = "Welcome to SuperFlow Trading app!";
-  const zeroBalanceMessage = "Welcome to Hyperliquid! Deposit Arbitrum USDT to get started.";
+  const zeroBalanceMessage = "Deposit Arbitrum USDT to get started.";
 
-  const showZeroBalance = !!authKey && Number(availableUsdt) === 0; // <-- derive
+  // Use availableForOrder from accountInfo
+  const availableForOrder = Number(accountInfo?.availableForOrder ?? 0);
+  const showZeroBalance = !!authKey && availableForOrder === 0;
   const displayMessage = showZeroBalance ? zeroBalanceMessage : (notification?.message || welcomeMessage);
 
   useEffect(() => {
@@ -25,24 +27,26 @@ export default function NotificationBar() {
     }
   }, [notification, clearNotification, showZeroBalance]);
 
-  // Only render if connected (authKey exists)
-  if (!authKey) return null;
+  // Only render if connected (authKey exists) AND balance is zero
+  if (!authKey || availableForOrder > 0) return null;
 
   return (
-    <div className="text-title border border-[1px] border-primary2dark w-full flex items-center bg-backgroundlight rounded-md my-1">
-      <div className="flex items-center self-center max-w-[1900px] mx-auto w-full p-1">
-        <span className="flex-1">{displayMessage}</span>
-        {/* Hide close when showing zero-balance prompt or the default welcome */}
-        {!showZeroBalance && displayMessage !== welcomeMessage && (
-          <button
-            onClick={clearNotification}
-            className="ml-2 bg-transparent border-none cursor-pointer"
-            style={{ color: "inherit" }}
-            aria-label="Close"
-          >
-            <CloseOutlined />
-          </button>
-        )}
+    <div className="w-full px-1">
+      <div className="text-body border border-[1px] border-primary2darker w-full flex items-center bg-backgroundlight rounded-md mt-1 px-2">
+        <div className="flex items-center self-center max-w-[1900px] mx-auto w-full p-1">
+          <span className="flex-1">{displayMessage}</span>
+          {/* Hide close when showing zero-balance prompt or the default welcome */}
+          {!showZeroBalance && displayMessage !== welcomeMessage && (
+            <button
+              onClick={clearNotification}
+              className="ml-2 bg-transparent border-none cursor-pointer"
+              style={{ color: "inherit" }}
+              aria-label="Close"
+            >
+              <CloseOutlined />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

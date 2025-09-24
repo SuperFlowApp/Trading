@@ -4,7 +4,6 @@ import { formatPrice } from "../../../utils/priceFormater";
 import Modal from "../../CommonUIs/modal/modal";
 import Table from "../../CommonUIs/table";
 import { API_BASE_URL } from "../../../config/api";
-import { useZustandStore } from "../../../Zustandstore/useStore";
 
 const priceKeys = ["price", "notional", "quantity", "filled", "remaining"];
 
@@ -45,32 +44,20 @@ const OpenOrdersTab = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Get Zustand store functions
-  const setIsOpenOrder = useZustandStore(s => s.setIsOpenOrder);
-
   // Loading and response state for cancel
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelResponse, setCancelResponse] = useState(null);
 
-  // Reset isOpenOrder immediately when authKey changes (login/logout)
-  useEffect(() => {
-    // Always reset on login/logout
-    setIsOpenOrder(false);
-    setOrders([]);
-  }, [authKey, setIsOpenOrder]);
-
-  // Fetch open orders when authKey changes or every 10s if valid
+  // Fetch open orders when authKey changes or every 5s if valid
   useEffect(() => {
     if (!authKey || !isTokenValid(authKey)) {
       setOrders([]);
-      setIsOpenOrder(false);
       return;
     }
 
     let intervalId;
 
     const fetchOrders = () => {
-      setIsOpenOrder(false); // Reset before fetch
       fetch(`${API_BASE_URL}/api/open-orders`, {
         method: 'GET',
         headers: {
@@ -81,26 +68,22 @@ const OpenOrdersTab = () => {
         .then(async res => {
           if (res.status === 401) {
             setOrders([]);
-            setIsOpenOrder(false);
             return;
           }
           const data = await res.json();
           setOrders(data);
-          setIsOpenOrder(Array.isArray(data) && data.length > 0);
         })
         .catch(err => {
           setOrders([]);
-          setIsOpenOrder(false);
           console.error("Open orders fetch error:", err);
         });
     };
 
-    // Immediate fetch when authKey is available
-    fetchOrders();
+    fetchOrders(); // Initial fetch
     intervalId = setInterval(fetchOrders, 10000);
 
     return () => clearInterval(intervalId);
-  }, [authKey, setIsOpenOrder]);
+  }, [authKey]);
 
   const isUserLoggedIn = authKey && isTokenValid(authKey);
 
@@ -179,10 +162,7 @@ const OpenOrdersTab = () => {
                       );
                       const data = await res.json();
                       setCancelResponse(data);
-                      const updatedOrders = orders.filter(o => o.orderId !== id);
-                      setOrders(updatedOrders);
-                      // Update the boolean state after cancelling an order
-                      setIsOpenOrder(updatedOrders.length > 0);
+                      setOrders(orders => orders.filter(o => o.orderId !== id));
                     } catch (err) {
                       setCancelResponse({ error: "Cancel order error" });
                     } finally {
