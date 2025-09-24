@@ -155,12 +155,6 @@ function AccountInfoPanel() {
                         </span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-liquidwhite">Position Mode</span>
-                        <span className="text-white font-semibold">
-                            {accountInfo?.positionMode || '—'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
                         <span className="text-liquidwhite">Realized PNL</span>
                         <span className="text-white font-semibold">
                             {accountInfo?.realizedPnl != null

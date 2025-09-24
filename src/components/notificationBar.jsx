@@ -29,7 +29,7 @@ export default function NotificationBar() {
   if (!authKey) return null;
 
   return (
-    <div className="text-title border border-[1px] border-primary2normal w-full flex items-center bg-backgroundlight rounded-md my-1">
+    <div className="text-title border border-[1px] border-primary2dark w-full flex items-center bg-backgroundlight rounded-md my-1">
       <div className="flex items-center self-center max-w-[1900px] mx-auto w-full p-1">
         <span className="flex-1">{displayMessage}</span>
         {/* Hide close when showing zero-balance prompt or the default welcome */}

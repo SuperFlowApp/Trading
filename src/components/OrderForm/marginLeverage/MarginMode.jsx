@@ -77,8 +77,11 @@ export default function MarginMode() {
                 setOpen(false);
             } else {
                 setBlink("error");
-                setErrorMsg(data?.message || "Failed to set margin mode");
-                setTimeout(() => setBlink(""), 400);
+                // Filter out "GRPC Error: Bad Request: " from the error message
+                let msg = data?.msg || data?.message || "Failed to set margin mode";
+                msg = msg.replace(/^GRPC Error: Condition failed: /, "");
+                setErrorMsg(msg);
+                setTimeout(() => setBlink(""), 10000);
             }
         } catch (e) {
             setBlink("error");

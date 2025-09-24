@@ -149,8 +149,11 @@ export default function LeveragePanel() {
         }, 400);
       } else {
         setBlink("error");
-        setErrorMsg(data?.message || "Failed to set leverage");
-        setTimeout(() => setBlink(""), 400);
+        // Filter out "GRPC Error: Bad Request: " from the error message
+        let msg = data?.msg || data?.message || "Failed to set leverage";
+        msg = msg.replace(/^GRPC Error: Bad Request: /, "");
+        setErrorMsg(msg);
+        setTimeout(() => setBlink(""), 10000);
       }
     } catch (e) {
       setBlink("error");

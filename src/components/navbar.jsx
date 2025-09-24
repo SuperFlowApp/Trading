@@ -101,7 +101,7 @@ function Navbar() {
   };
 
   return (
-    <Disclosure as="nav" className="bg-backgroundmid text-white text-body w-full">
+    <Disclosure as="nav" className="bg-backgroundmid text-white text-body w-full border-b-[1px] border-primary2darker" >
       {({ open }) => (
         <>
           <div className="mx-auto w-full px-4 py-3 flex items-center justify-between ">
