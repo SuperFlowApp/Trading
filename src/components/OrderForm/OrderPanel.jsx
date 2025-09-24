@@ -14,6 +14,7 @@ import BalanceFetch from './BalanceFetch';
 import { PriceFieldInput, InputWithDropDown, PercentageInput, MinimalDropDown } from '../CommonUIs/inputs/inputs.jsx';
 import DefaultAPILogin from "../Login/defaultAPILogin";
 import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
+import { API_BASE_URL } from '../../config/api';
 
 function LimitOrderForm({ onCurrencyChange }) {
   // Move this to the top, before any use of balanceFree!
@@ -117,7 +118,7 @@ function LimitOrderForm({ onCurrencyChange }) {
     const requestBody = { ...OrderFormState };
 
     try {
-      const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/order', {
+      const response = await fetch(`${API_BASE_URL}/api/order`, {
         method: 'POST',
         headers: {
           accept: 'application/json',
@@ -330,6 +331,25 @@ function LimitOrderForm({ onCurrencyChange }) {
     // Optionally, you can show a message or trigger a refresh here
   };
 
+  const [priceInvalid, setPriceInvalid] = useState(false);
+  const [amountInvalid, setAmountInvalid] = useState(false);
+  const [showOrderValueWarning, setShowOrderValueWarning] = useState(false);
+  const [showInvalidInputMsg, setShowInvalidInputMsg] = useState(false);
+
+  useEffect(() => {
+    if (
+      currentNotional !== null &&
+      !isNaN(currentNotional) &&
+      parseFloat(currentNotional) > parseFloat(balanceFree)
+    ) {
+      setShowOrderValueWarning(true);
+      const timer = setTimeout(() => setShowOrderValueWarning(false), 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowOrderValueWarning(false);
+    }
+  }, [currentNotional, balanceFree]);
+
   return (
     <div className="px-2 py-1 w-full text-white flex flex-col gap-3 flex flex-col bg-backgroundmid rounded-md min-w-0 overflow-hidden">
 
@@ -375,24 +395,24 @@ function LimitOrderForm({ onCurrencyChange }) {
             value={price === null || price === undefined ? "" : price}
             onChange={e => {
               let val = e.target.value.replace(/[^0-9.]/g, '');
-              // Remove leading zeros (but keep "0" or "0.0" as valid)
               if (val.length > 1 && val[0] === "0" && !val.startsWith("0.")) {
                 val = val.replace(/^0+/, '');
               }
               setPrice(val === "" ? "0" : val);
+              setPriceInvalid(false); // Reset invalid state on change
             }}
             label="Price (USD)"
             buttonLabel="Mid"
             onButtonClick={() => {
               if (priceMidpoint) {
                 setPrice(priceMidpoint);
+                setPriceInvalid(false); // Reset invalid state on button click
               }
             }}
+            invalid={priceInvalid}
           />
         )}
 
-
-        {/* Conditionally render the Amount field */}
 
         {market !== '' && (
           // For amount (size) input
@@ -400,13 +420,12 @@ function LimitOrderForm({ onCurrencyChange }) {
             value={amount === null || amount === undefined ? "" : amount}
             onChange={e => {
               let val = e.target.value.replace(/[^0-9.]/g, '');
-              // Remove leading zeros (but keep "0" or "0.0" as valid)
               if (val.length > 1 && val[0] === "0" && !val.startsWith("0.")) {
                 val = val.replace(/^0+/, '');
               }
               setAmount(val === "" ? "0" : val);
               setInputSource('input');
-              // Calculate sliderValue from amount
+              setAmountInvalid(false); // Reset invalid state on change
               const numericValue = parseFloat(val === "" ? "0" : val);
               const numericBalance = parseFloat(balanceFree);
               if (!isNaN(numericValue) && numericBalance > 0) {
@@ -424,6 +443,7 @@ function LimitOrderForm({ onCurrencyChange }) {
             ]}
             selectedOption={selectedCurrency || ""}
             onOptionChange={setSelectedCurrency}
+            invalid={amountInvalid}
           />
         )}
       </div>
@@ -485,11 +505,31 @@ function LimitOrderForm({ onCurrencyChange }) {
         className={` mt-2  transition-colors border-2 border-transparent ${blinkClass}`}
         block
         onClick={() => {
+          // Validation: prevent order if price or amount is 0 or 0.0
+          let invalid = false;
+          if (market !== 'market' && (price === "0" || price === "0.0" || price === "")) {
+            setPriceInvalid(true);
+            invalid = true;
+          } else {
+            setPriceInvalid(false);
+          }
+          if (amount === "0" || amount === "0.0" || amount === "") {
+            setAmountInvalid(true);
+            invalid = true;
+          } else {
+            setAmountInvalid(false);
+          }
+          if (invalid) {
+            setShowInvalidInputMsg(true);
+            setTimeout(() => setShowInvalidInputMsg(false), 3000);
+            return;
+          }
+
           if (!authKey) {
             setShowLogin(true);
             return;
           }
-          placeOrder(); // No arguments needed
+          placeOrder();
         }}
         disabled={loading || orderLoading}
         loading={orderLoading}
@@ -509,6 +549,16 @@ function LimitOrderForm({ onCurrencyChange }) {
       <div className='min-h-8' >
         {orderError && <div className="text-red-400 text-body">{orderError}</div>}
         {orderSuccess && <div className="text-green-400 text-body">{orderSuccess}</div>}
+        {showInvalidInputMsg && (
+          <div className="text-warning text-body">
+            invalid input
+          </div>
+        )}
+        {showOrderValueWarning && (
+          <div className="text-warning text-body">
+            order value exceeds your balance
+          </div>
+        )}
       </div>
 
       {/* Order Information */}
@@ -517,7 +567,15 @@ function LimitOrderForm({ onCurrencyChange }) {
 
           <span className="w-full flex justify-between  ">
             Order Value
-            <span className="text-liquidwhite">
+            <span
+              className={
+                currentNotional !== null &&
+                !isNaN(currentNotional) &&
+                parseFloat(currentNotional) > parseFloat(balanceFree)
+                  ? "text-warning"
+                  : "text-liquidwhite"
+              }
+            >
               {currentNotional !== null && !isNaN(currentNotional)
                 ? `$${currentNotional.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 : "--"}

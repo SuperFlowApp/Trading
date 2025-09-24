@@ -370,3 +370,7 @@ select option:checked {
   display: flex;
   align-items: center;
 }
+
+.input-invalid {
+  border-color: #ef4444 !important; /* or use var(--color-liquidRed) */
+}

@@ -7,9 +7,9 @@ import { useZustandStore } from "../../Zustandstore/useStore"; // import your st
 // --- REST helper with range support ---
 const REST_URL = (pair, interval, opts = {}) => {
   const { startTime, endTime, limit = 1000 } = opts;
-  const u = new URL('https://api.binance.com/api/v3/klines');
+  const u = new URL('https://fastify-serverless-function-rimj.onrender.com/api/klines');
   u.searchParams.set('symbol', `${pair.toUpperCase()}USDT`);
-  u.searchParams.set('interval', interval);
+  u.searchParams.set('timeframe', interval);
   u.searchParams.set('limit', String(Math.min(Math.max(limit, 1), 1000)));
   if (startTime) u.searchParams.set('startTime', String(startTime));
   if (endTime) u.searchParams.set('endTime', String(endTime));
@@ -17,17 +17,15 @@ const REST_URL = (pair, interval, opts = {}) => {
 };
 
 const WS_URL = (pair, interval) =>
-  `wss://stream.binance.com:9443/ws/${pair.toLowerCase()}usdt@kline_${interval}`;
-
-const INTERVAL_MS = {
-  '1m': 60_000, '5m': 300_000, '15m': 900_000, '30m': 1_800_000,
-  '1h': 3_600_000, '2h': 7_200_000, '4h': 14_400_000, '6h': 21_600_000,
-  '8h': 28_800_000, '12h': 43_200_000, '1d': 86_400_000,
-  '3d': 259_200_000, '1w': 604_800_000, '1M': 2_592_000_000,
-};
+  `wss://superflow.exchange/dev-demo/ws/klines/${pair.toUpperCase()}USDT/${interval}`;
 
 const mapK = d => ({
-  timestamp: d[0], open: +d[1], high: +d[2], low: +d[3], close: +d[4], volume: +d[5],
+  timestamp: d.openTime * 1000, // convert seconds to ms
+  open: +d.open,
+  high: +d.high,
+  low: +d.low,
+  close: +d.close,
+  volume: +d.volume,
 });
 
 class BinanceFeed {
@@ -56,12 +54,11 @@ class BinanceFeed {
 
     let url;
     if (from && to) {
-      const step = INTERVAL_MS[interval] || 60_000;
-      const need = Math.ceil((to - from) / step) + 2;
+      // limit logic
       url = REST_URL(this.pair, interval, {
         startTime: from,
         endTime: to - 1,
-        limit: Math.min(1000, Math.max(need, 100)),
+        limit: 1000,
       });
     } else {
       url = REST_URL(this.pair, interval, { limit: 500 });

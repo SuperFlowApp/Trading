@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { formatPrice } from '../../utils/priceFormater';
-import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context
+import { useAuthKey } from "../../contexts/AuthKeyContext";
 import { useZustandStore } from '../../Zustandstore/useStore.js';
+import { fetchAccountInformation } from '../../hooks/useAccountInformationAPI'; // <-- import API call
 
 // Helper to convert "0E-8", "0E-16", etc. to "0"
 function normalizeZero(val) {
@@ -18,7 +19,6 @@ function AccountInfoPanel() {
     // Listen for authKey changes (multi-tab support)
     useEffect(() => {
         const handler = () => {
-            // No need to manually fetch authKey, context will update
             if (!authKey) {
                 setAccountInfo(null);
                 setAccountInfoError('');
@@ -33,39 +33,32 @@ function AccountInfoPanel() {
         if (!authKey) {
             setAccountInfo(null);
             setAccountInfoError('');
-            setAccountInfoGlobal(null); // clear global on logout
+            setAccountInfoGlobal(null);
             return;
         }
-        const fetchAccountInfo = async () => {
+        const fetchInfo = async () => {
             setAccountInfoError('');
             try {
-                const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
-                    headers: {
-                        'Authorization': `Bearer ${authKey}`,
-                        'accept': 'application/json'
-                    }
-                });
-                const data = await res.json();
-                if (res.status === 401) {
+                const { ok, status, data } = await fetchAccountInformation(authKey);
+                if (status === 401) {
                     setAuthKey(null);
                     setAccountInfo(null);
                     setAccountInfoGlobal(null);
-                } else if (!res.ok) {
+                } else if (!ok) {
                     setAccountInfo(null);
                     setAccountInfoGlobal(null);
                 } else {
                     setAccountInfo(data);
-                    setAccountInfoGlobal(data); // <-- update global Zustand
+                    setAccountInfoGlobal(data);
                 }
             } catch (e) {
                 setAccountInfo(null);
-                // Do not set error message for network errors
             }
         };
-        fetchAccountInfo();
+        fetchInfo();
     }, [authKey, setAuthKey, setAccountInfoGlobal]);
 
-    // Poll for account info every 10 seconds if authKey is present
+    // Poll for account info every 3 seconds if authKey is present
     useEffect(() => {
         if (!authKey) {
             setAccountInfo(null);
@@ -75,21 +68,15 @@ function AccountInfoPanel() {
 
         let isMounted = true;
 
-        const fetchAccountInfo = async () => {
+        const fetchInfo = async () => {
             setAccountInfoError('');
             try {
-                const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
-                    headers: {
-                        'Authorization': `Bearer ${authKey}`,
-                        'accept': 'application/json'
-                    }
-                });
-                const data = await res.json();
+                const { ok, status, data } = await fetchAccountInformation(authKey);
                 if (!isMounted) return;
-                if (res.status === 401) {
+                if (status === 401) {
                     setAuthKey(null);
                     setAccountInfo(null);
-                } else if (!res.ok) {
+                } else if (!ok) {
                     setAccountInfo(null);
                 } else {
                     setAccountInfo(data);
@@ -99,9 +86,9 @@ function AccountInfoPanel() {
             }
         };
 
-        fetchAccountInfo(); // initial fetch
+        fetchInfo(); // initial fetch
 
-        const interval = setInterval(fetchAccountInfo, 3000);
+        const interval = setInterval(fetchInfo, 3000);
 
         return () => {
             isMounted = false;

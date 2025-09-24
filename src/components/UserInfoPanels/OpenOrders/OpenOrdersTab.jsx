@@ -3,6 +3,7 @@ import { useAuthKey } from "../../../contexts/AuthKeyContext";
 import { formatPrice } from "../../../utils/priceFormater";
 import Modal from "../../CommonUIs/modal/modal";
 import Table from "../../CommonUIs/table";
+import { API_BASE_URL } from "../../../config/api";
 
 const priceKeys = ["price", "notional", "quantity", "filled", "remaining"];
 
@@ -57,7 +58,7 @@ const OpenOrdersTab = () => {
     let intervalId;
 
     const fetchOrders = () => {
-      fetch('https://fastify-serverless-function-rimj.onrender.com/api/open-orders', {
+      fetch(`${API_BASE_URL}/api/open-orders`, {
         method: 'GET',
         headers: {
           accept: 'application/json',
@@ -150,7 +151,7 @@ const OpenOrdersTab = () => {
                       const id = selectedOrder.orderId;
                       const symbol = selectedOrder.symbol;
                       const res = await fetch(
-                        `https://fastify-serverless-function-rimj.onrender.com/api/cancel-order?id=${id}&symbol=${symbol}`,
+                        `${API_BASE_URL}/api/cancel-order?id=${id}&symbol=${symbol}`,
                         {
                           method: "DELETE",
                           headers: {

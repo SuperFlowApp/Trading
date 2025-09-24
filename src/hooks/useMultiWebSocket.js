@@ -5,15 +5,24 @@ const streams = [
   { key: "orderbook", path: (s) => `/ws/orderbook/${s}` },
   { key: "markPrice", path: (s) => `/ws/mark-price/${s}` },
   { key: "lastPrice", path: (s) => `/ws/last-price/${s}` },
+  // Add kline stream, default timeframe '1m'
+  { key: "kline", path: (s, tf = "1m") => `/ws/klines/${s}/${tf}` },
 ];
 
 const defaultDomain = "superflow.exchange/dev-demo";
 const defaultSymbol = "BTCUSDT";
 const defaultProto = "wss";
 
-export function useMultiWebSocket({ symbol: initialSymbol = defaultSymbol, proto: initialProto = defaultProto, domain = defaultDomain }) {
+// Add a state for timeframe (default '1m')
+export function useMultiWebSocket({
+  symbol: initialSymbol = defaultSymbol,
+  proto: initialProto = defaultProto,
+  domain = defaultDomain,
+  timeframe: initialTimeframe = "1m", // Add this line
+}) {
   const [symbol, setSymbol] = useState(initialSymbol);
   const [proto, setProto] = useState(initialProto);
+  const [timeframe, setTimeframe] = useState(initialTimeframe); // Add this line
 
   const [states, setStates] = useState({});
   const [counters, setCounters] = useState({});
@@ -28,10 +37,13 @@ export function useMultiWebSocket({ symbol: initialSymbol = defaultSymbol, proto
 
   const socketsRef = useRef({});
 
-  // Helper to build URL
+  // Helper to build URL (support kline timeframe)
   const buildUrl = (streamKey) => {
     let url = `${proto}://${domain.replace(/^wss?:\/\//, "")}`;
     const def = streams.find((x) => x.key === streamKey);
+    if (def.key === "kline") {
+      return url + def.path(symbol, timeframe);
+    }
     return url + def.path(symbol);
   };
 
@@ -101,7 +113,7 @@ export function useMultiWebSocket({ symbol: initialSymbol = defaultSymbol, proto
     };
   };
 
-  // Connect all streams on mount and whenever domain/symbol/proto changes
+  // Connect all streams on mount and whenever domain/symbol/proto/timeframe changes
   useEffect(() => {
     streams.forEach((s) => openSocket(s.key));
     // Cleanup: close sockets on unmount
@@ -112,7 +124,7 @@ export function useMultiWebSocket({ symbol: initialSymbol = defaultSymbol, proto
       socketsRef.current = {};
     };
     // eslint-disable-next-line
-  }, [domain, symbol, proto]);
+  }, [domain, symbol, proto, timeframe]); // Add timeframe
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -145,5 +157,7 @@ export function useMultiWebSocket({ symbol: initialSymbol = defaultSymbol, proto
     setSymbol,
     proto,
     setProto,
+    timeframe,      // Add this
+    setTimeframe,   // Add this
   };
 }

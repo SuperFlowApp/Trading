@@ -4,6 +4,7 @@ import { useAuthKey } from "../../contexts/AuthKeyContext";
 import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
 import Modal from "../CommonUIs/modal/modal";
+import { loginUser } from "../../hooks/useDefaultAPILogin";
 
 const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [username, setUsername] = useState("");
@@ -15,16 +16,7 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://fastify-serverless-function-rimj.onrender.com/api/token", {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({ username, password }).toString(),
-      });
-
-      const data = await response.json();
+      const { ok, status, data } = await loginUser({ username, password });
 
       if (data.access_token && data.token_type) {
         message.success("Login successful!");

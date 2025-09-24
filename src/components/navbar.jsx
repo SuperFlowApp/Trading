@@ -73,12 +73,10 @@ function Navbar() {
   const handleLoginSuccess = (username, token) => {
     setShowLogin(false);
     setDropdownOpen(false);
-    console.log(`User ${username} logged in successfully with token: ${token}`);
   };
 
   const handleSignupSuccess = (username) => {
     setShowSignup(false);
-    console.log(`User ${username} signed up successfully!`);
   };
 
   const handleSettingChange = (key) => {

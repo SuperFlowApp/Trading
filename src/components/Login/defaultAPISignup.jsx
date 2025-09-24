@@ -3,6 +3,7 @@ import { message } from "antd";
 import Modal from "../CommonUIs/modal/modal";
 import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
+import { signupUser } from "../../hooks/useDefaultAPISignup";
 
 const DefaultAPISignup = ({ open, onClose, onSignupSuccess, clickPosition }) => {
   const [username, setUsername] = useState("");
@@ -21,23 +22,25 @@ const DefaultAPISignup = ({ open, onClose, onSignupSuccess, clickPosition }) => 
     }
     setLoading(true);
     try {
-      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/create_user`, {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const { ok, status, data } = await signupUser({ username, password });
 
-      const data = await response.json();
+      if (!ok) {
+        if (status === 400 && data.msg) {
+          message.error(data.msg);
+        } else if (data.detail) {
+          message.error(data.detail);
+        } else if (data.msg) {
+          message.error(data.msg);
+        } else {
+          message.error("Signup failed.");
+        }
+        return;
+      }
 
       if (data.msg && data.user_id) {
         message.success(data.msg);
         onSignupSuccess && onSignupSuccess(username);
         onClose();
-      } else if (data.detail) {
-        message.error(data.detail);
       } else {
         message.error("Signup failed.");
       }

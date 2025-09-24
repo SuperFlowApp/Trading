@@ -14,11 +14,17 @@ export const PriceFieldInput = ({
   inputProps = {},
   buttonProps = {},
   label = "",
+  invalid = false, // <-- add this
 }) => {
   const [focused, setFocused] = useState(false);
 
+  // Add conditional class for invalid state
+  const borderClass = invalid
+    ? "input-invalid"
+    : "border-[var(--color-liquiddarkgray)]";
+
   return (
-    <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)]">
+    <div className={`flex items-center h-8 rounded-md border ${borderClass} bg-transparent text-[var(--color-liquidwhite)]`}>
       {/* fixed label with vertical separator */}
       <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
         {label || placeholder}
@@ -33,13 +39,13 @@ export const PriceFieldInput = ({
         placeholder={""}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className="flex-1 bg-transparent outline-none text-body h-full px-2 text-[var(--color-liquidwhite)]"
+        className={`flex-1 bg-transparent outline-none text-body h-full px-2 text-[var(--color-liquidwhite)] ${invalid ? "input-invalid" : ""}`}
         {...inputProps}
       />
 
       <button
         type="button"
-        className="h-full min-w-[60px] text-body font-semibold border-l border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] hover:bg-[var(--color-backgroundlighter)]"
+        className={`h-full min-w-[60px] text-body font-semibold border-l ${invalid ? "input-invalid" : "border-[var(--color-liquiddarkgray)]"} bg-transparent text-[var(--color-liquidwhite)] hover:bg-[var(--color-backgroundlighter)]`}
         onClick={onButtonClick}
         disabled={disabled}
         {...buttonProps}
@@ -61,6 +67,7 @@ export const InputWithDropDown = ({
   inputProps = {},
   dropdownProps = {},
   label = "",
+  invalid = false,
 }) => {
   const [focused, setFocused] = useState(false);
 
@@ -68,7 +75,6 @@ export const InputWithDropDown = ({
   const handleFocus = (e) => {
     setFocused(true);
     if (value === "0" || value === "0.0") {
-      // Call onChange with empty string to clear
       onChange({ target: { value: "" } });
     }
     if (inputProps.onFocus) inputProps.onFocus(e);
@@ -83,9 +89,12 @@ export const InputWithDropDown = ({
     if (inputProps.onBlur) inputProps.onBlur(e);
   };
 
+  const borderClass = invalid
+    ? "input-invalid"
+    : "border-[var(--color-liquiddarkgray)]";
+
   return (
-    <div className="flex items-center h-8 rounded-md border border-[var(--color-liquiddarkgray)] bg-transparent text-[var(--color-liquidwhite)] relative">
-      {/* fixed prefix (size label) */}
+    <div className={`flex items-center h-8 rounded-md border ${borderClass} bg-transparent text-[var(--color-liquidwhite)] relative`}>
       <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
         {label || placeholder}
       </div>
@@ -99,12 +108,11 @@ export const InputWithDropDown = ({
         placeholder={""}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className="flex-1 bg-transparent outline-none text-body h-full px-2 text-[var(--color-liquidwhite)]"
+        className={`flex-1 bg-transparent outline-none text-body h-full px-2 text-[var(--color-liquidwhite)] ${invalid ? "input-invalid" : ""}`}
         {...inputProps}
       />
 
-      {/* Use MinimalDropDown instead of native select */}
-      <div className="h-full flex items-center border-l border-[var(--color-liquiddarkgray)] bg-transparent px-0 w-[70px]">
+      <div className={`h-full flex items-center border-l ${invalid ? "input-invalid" : "border-[var(--color-liquiddarkgray)]"} bg-transparent px-0 w-[70px]`}>
         <MinimalDropDown
           options={options}
           selectedOption={selectedOption}

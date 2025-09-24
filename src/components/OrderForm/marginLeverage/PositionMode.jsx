@@ -4,6 +4,7 @@ import Button from '../../CommonUIs/Button';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js';
 import { useAuthKey } from '../../../contexts/AuthKeyContext';
+import { API_BASE_URL } from '../../../config/api';
 
 export default function PositionMode() {
   const [open, setOpen] = useState(false);
@@ -33,7 +34,7 @@ export default function PositionMode() {
       const payload = {
         mode: positionMode,
       };
-      const res = await fetch("https://fastify-serverless-function-rimj.onrender.com/api/position-mode", {
+      const res = await fetch(`${API_BASE_URL}/api/position-mode`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

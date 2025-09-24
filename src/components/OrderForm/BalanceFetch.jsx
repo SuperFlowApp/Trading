@@ -3,6 +3,7 @@ import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context
 import { formatPrice } from '../../utils/priceFormater';
 import { selectedPairStore } from "../../Zustandstore/userOrderStore";
 import { useZustandStore } from "../../Zustandstore/useStore"; // <-- add
+import { API_BASE_URL } from '../../config/api';
 
 function isTokenValid(token) {
   if (!token) return false;
@@ -49,7 +50,7 @@ const BalanceFetch = ({ onBalance }) => {
       }
 
       // Fetch balance
-      fetch('https://fastify-serverless-function-rimj.onrender.com/api/balance', {
+      fetch(`${API_BASE_URL}/api/balance`, {
         method: 'GET',
         headers: {
           accept: 'application/json',

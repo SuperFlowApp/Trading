@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuthKey } from "../../../contexts/AuthKeyContext";
 import ModifyBalance from "./ModifyBalance";
 import Table from "../../CommonUIs/table";
+import { API_BASE_URL } from "../../../config/api";
 
 const Positions = () => {
   const { authKey } = useAuthKey();
@@ -16,7 +17,7 @@ const Positions = () => {
       return;
     }
     const fetchPositions = () => {
-      fetch("https://fastify-serverless-function-rimj.onrender.com/api/positions", {
+      fetch(`${API_BASE_URL}/api/positions`, {
         method: "GET",
         headers: {
           accept: "application/json",

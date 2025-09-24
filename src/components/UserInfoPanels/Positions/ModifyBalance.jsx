@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Modal from "../../CommonUIs/modal/modal";
 import { PriceFieldInput } from "../../CommonUIs/inputs/inputs";
 import { useAuthKey } from "../../../contexts/AuthKeyContext";
+import { API_BASE_URL } from "../../../config/api"; // Add this import
 
 const ModifyBalance = ({
   open,
@@ -41,7 +42,7 @@ const ModifyBalance = ({
       // Map our UI action to API action
       const apiAction = action === "add" ? "deposit" : "withdraw";
       
-      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/modify-isolated-balance?action=${apiAction}`, {
+      const response = await fetch(`${API_BASE_URL}/api/modify-isolated-balance?action=${apiAction}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

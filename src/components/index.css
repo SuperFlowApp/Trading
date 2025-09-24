@@ -130,7 +130,35 @@ input[type="number"] {
 .bg-red { background-color: var(--color-red); }
 .bg-green { background-color: var(--color-green); }
 
+.text-warning { color: var(--color-liquidRed); }
+
 
 .hover\:bg-green-80:hover { background-color: color-mix(in srgb, var(--color-green) 80%, transparent); }
 .hover\:bg-red-80:hover { background-color: color-mix(in srgb, var(--color-red) 80%, transparent); }
 .hover\:bg-primary2darker:hover { background-color: var(--color-primary2darker); }
+
+
+
+
+
+
+
+
+/* Add to your main CSS file */
+.ant-message-notice-content {
+  background: #181f2a !important;
+  color: #e6eef7 !important;
+  border-radius: 10px !important;
+  font-size: 15px;
+  box-shadow: 0 2px 8px #0003;
+}
+
+.ant-message-success .ant-message-notice-content {
+  background: #1e2e22 !important;
+  color: #34d399 !important;
+}
+
+.ant-message-error .ant-message-notice-content {
+  background: #2a1818 !important;
+  color: #f87171 !important;
+}

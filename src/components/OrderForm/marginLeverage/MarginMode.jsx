@@ -5,6 +5,7 @@ import Button from '../../CommonUIs/Button.jsx';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js';
 import { useAuthKey } from '../../../contexts/AuthKeyContext'; // <-- use context
+import { API_BASE_URL } from '../../../config/api';
 
 export default function MarginMode() {
     const [open, setOpen] = useState(false);
@@ -60,7 +61,7 @@ export default function MarginMode() {
                 symbol: currentMarket.symbol,
                 marginMode: marginMode.toUpperCase(),
             };
-            const res = await fetch("https://fastify-serverless-function-rimj.onrender.com/api/margin-mode", {
+            const res = await fetch(`${API_BASE_URL}/api/margin-mode`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

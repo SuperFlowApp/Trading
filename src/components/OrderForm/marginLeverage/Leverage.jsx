@@ -4,6 +4,7 @@ import Button from '../../CommonUIs/Button';
 import NativeSlider from '../../CommonUIs/slider';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import '../../../components/CommonUIs/slider.css';
+import { API_BASE_URL } from '../../../config/api';
 
 // Import AuthKey context hook
 import { useAuthKey } from '../../../contexts/AuthKeyContext';
@@ -128,7 +129,7 @@ export default function LeveragePanel() {
         symbol: selectedSymbol,
         leverage: leverage,
       };
-      const res = await fetch("https://fastify-serverless-function-rimj.onrender.com/api/leverage", {
+      const res = await fetch(`${API_BASE_URL}/api/leverage`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { marketsData } from '../../Zustandstore/marketsDataStore';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
-import { formatPrice } from '../../utils/priceFormater.js';
+import { fetchMarkets } from '../../hooks/useMarketsAPI';
 
 function PairSelector({
   dropdownOpen,
@@ -17,10 +17,9 @@ function PairSelector({
 
   // Fetch available trading pairs and save to Zustand only once on page load/refresh
   useEffect(() => {
-    async function fetchPairs() {
+    async function getPairs() {
       try {
-        const res = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/markets');
-        const data = await res.json();
+        const data = await fetchMarkets();
 
         // Filter for active and correct type
         const filtered = data.filter(m => m.active && m.type === MARKET_TYPE);
@@ -48,11 +47,11 @@ function PairSelector({
         marketsData.getState().setAllMarketData(processed);
 
       } catch (err) {
-        console.error('Failed to fetch trading pairs:', err);
+        // Optionally show a UI message here
       }
     }
 
-    fetchPairs();
+    getPairs();
   }, []); // <-- runs only once on mount
 
   // Remove dropdownOpen polling effect

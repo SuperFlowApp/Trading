@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
 import { useMultiWebSocketGlobal } from '../../contexts/MultiWebSocketContext';
+import { API_BASE_URL } from '../../config/api'; // Add this import
 
 const Trades = () => {
     const [trades, setTrades] = useState([]);
@@ -17,7 +18,7 @@ const Trades = () => {
         const fetchTrades = async () => {
             try {
                 const res = await fetch(
-                    `https://fastify-serverless-function-rimj.onrender.com/api/trades?symbol=${symbol}&limit=100`
+                    `${API_BASE_URL}/api/trades?symbol=${symbol}&limit=100`
                 );
                 const data = await res.json();
                 if (active) {

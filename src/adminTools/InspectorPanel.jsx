@@ -1,11 +1,13 @@
-import React from "react";
-import { useMultiWebSocketGlobal } from "../contexts/MultiWebSocketContext"; // Use the context hook
+import React, { useState } from "react";
+import { useMultiWebSocketGlobal } from "../contexts/MultiWebSocketContext";
 
+// Add kline to streams
 const streams = [
   { key: "trades", name: "Trades" },
   { key: "orderbook", name: "Order Book" },
   { key: "markPrice", name: "Mark Price" },
   { key: "lastPrice", name: "Last Price" },
+  { key: "kline", name: "Kline" }, // Add this line
 ];
 
 function statusDot(state) {
@@ -45,7 +47,17 @@ function InspectorPanel() {
     setSymbol,
     proto,
     setProto,
-  } = useMultiWebSocketGlobal(); // Use global context instead of local hook
+    timeframe,      // Add this
+    setTimeframe,   // Add this
+  } = useMultiWebSocketGlobal();
+  const [openPanels, setOpenPanels] = useState({});
+
+  const togglePanel = (key) => {
+    setOpenPanels((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   return (
     <div className="wrap vstack" style={{ maxWidth: 1100, margin: "32px auto", padding: "0 16px" }}>
@@ -59,7 +71,7 @@ function InspectorPanel() {
 
       <div className="panel grid" style={{ background: "#111821", borderRadius: 14, padding: 16 }}>
         <div className="vstack">
-          <div className="grid" style={{ display: "grid", gridTemplateColumns: "1fr 150px", gap: 10 }}>
+          <div className="grid" style={{ display: "grid", gridTemplateColumns: "1fr 150px 150px", gap: 10 }}>
             <div className="vstack">
               <label htmlFor="symbol" style={{ fontWeight: 600, color: "#93a3b8", fontSize: 12 }}>Symbol</label>
               <input id="symbol" value={symbol} onChange={e => setSymbol(e.target.value)} placeholder="BTCUSDT" style={{ borderRadius: 12, border: "1px solid #2a3545", background: "#0f1520", color: "#e6eef7", padding: "10px 12px" }} />
@@ -69,6 +81,18 @@ function InspectorPanel() {
               <select id="proto" value={proto} onChange={e => setProto(e.target.value)} style={{ borderRadius: 12, border: "1px solid #2a3545", background: "#0f1520", color: "#e6eef7", padding: "10px 12px" }}>
                 <option value="ws">ws</option>
                 <option value="wss">wss</option>
+              </select>
+            </div>
+            {/* Add timeframe selector for kline */}
+            <div className="vstack">
+              <label htmlFor="timeframe" style={{ fontWeight: 600, color: "#93a3b8", fontSize: 12 }}>Kline Timeframe</label>
+              <select id="timeframe" value={timeframe} onChange={e => setTimeframe(e.target.value)} style={{ borderRadius: 12, border: "1px solid #2a3545", background: "#0f1520", color: "#e6eef7", padding: "10px 12px" }}>
+                <option value="1m">1m</option>
+                <option value="5m">5m</option>
+                <option value="15m">15m</option>
+                <option value="1h">1h</option>
+                <option value="4h">4h</option>
+                <option value="1d">1d</option>
               </select>
             </div>
           </div>
@@ -95,39 +119,57 @@ function InspectorPanel() {
           </div>
         </div>
       </div>
-      <div className="grid cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14, marginTop: 16 }}>
+      {/* Replace the grid with a vertical stack */}
+      <div className="cards vstack" style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 16 }}>
         {streams.map((def) => (
-          <div className="panel vstack" key={def.key} style={{ background: "#111821", borderRadius: 14, padding: 16 }}>
-            <div className="hstack" style={{ justifyContent: "space-between" }}>
+          <div className="panel vstack" key={def.key} style={{ background: "#111821", borderRadius: 14, padding: 0, overflow: "hidden" }}>
+            <button
+              className="hstack"
+              style={{
+                justifyContent: "space-between",
+                width: "100%",
+                background: "none",
+                border: "none",
+                padding: "16px",
+                cursor: "pointer",
+                alignItems: "center",
+              }}
+              onClick={() => togglePanel(def.key)}
+            >
               <div className="status" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontWeight: 600 }}>
                 {statusDot(states[def.key] || "closed")}
                 {def.name}: <span style={{ fontFamily: "monospace" }}>{states[def.key] || "disconnected"}</span>
               </div>
-            </div>
-            <div className="grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginTop: 8 }}>
-              <div>
-                <span className="sub" style={{ color: "#93a3b8" }}>Messages</span>
-                <b style={{ display: "block", fontSize: 16, marginTop: 4 }}>{counters[def.key]?.total || 0}</b>
+              <span style={{ fontSize: 18, color: "#93a3b8" }}>{openPanels[def.key] ? "▲" : "▼"}</span>
+            </button>
+            {openPanels[def.key] && (
+              <div style={{ padding: "0 16px 16px 16px" }}>
+                <div className="grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginTop: 8 }}>
+                  <div>
+                    <span className="sub" style={{ color: "#93a3b8" }}>Messages</span>
+                    <b style={{ display: "block", fontSize: 16, marginTop: 4 }}>{counters[def.key]?.total || 0}</b>
+                  </div>
+                  <div>
+                    <span className="sub" style={{ color: "#93a3b8" }}>Rate (10s)</span>
+                    <b style={{ display: "block", fontSize: 16, marginTop: 4 }}>{rates[def.key] || 0}</b>
+                  </div>
+                  <div>
+                    <span className="sub" style={{ color: "#93a3b8" }}>Latency</span>
+                    <b style={{ display: "block", fontSize: 16, marginTop: 4 }}>{latencies[def.key] != null ? `${latencies[def.key]} ms` : "–"}</b>
+                  </div>
+                  <div>
+                    <span className="sub" style={{ color: "#93a3b8" }}>Last Event</span>
+                    <b style={{ display: "block", fontSize: 16, marginTop: 4 }}>{ages[def.key] || "–"}</b>
+                  </div>
+                </div>
+                <div className="vstack" style={{ marginTop: 8 }}>
+                  <span className="sub" style={{ color: "#93a3b8" }}>Last Payload</span>
+                  <pre style={{ background: "#0c121a", border: "1px solid #1a2533", borderRadius: 12, padding: 12, overflow: "auto", maxHeight: 180, fontFamily: "monospace" }}>
+                    {logs[def.key] || "(none)"}
+                  </pre>
+                </div>
               </div>
-              <div>
-                <span className="sub" style={{ color: "#93a3b8" }}>Rate (10s)</span>
-                <b style={{ display: "block", fontSize: 16, marginTop: 4 }}>{rates[def.key] || 0}</b>
-              </div>
-              <div>
-                <span className="sub" style={{ color: "#93a3b8" }}>Latency</span>
-                <b style={{ display: "block", fontSize: 16, marginTop: 4 }}>{latencies[def.key] != null ? `${latencies[def.key]} ms` : "–"}</b>
-              </div>
-              <div>
-                <span className="sub" style={{ color: "#93a3b8" }}>Last Event</span>
-                <b style={{ display: "block", fontSize: 16, marginTop: 4 }}>{ages[def.key] || "–"}</b>
-              </div>
-            </div>
-            <div className="vstack" style={{ marginTop: 8 }}>
-              <span className="sub" style={{ color: "#93a3b8" }}>Last Payload</span>
-              <pre style={{ background: "#0c121a", border: "1px solid #1a2533", borderRadius: 12, padding: 12, overflow: "auto", maxHeight: 180, fontFamily: "monospace" }}>
-                {logs[def.key] || "(none)"}
-              </pre>
-            </div>
+            )}
           </div>
         ))}
       </div>
