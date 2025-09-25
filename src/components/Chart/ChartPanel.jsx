@@ -5,8 +5,9 @@ const intervals = [
   "1m", "5m", "15m", "1h", "4h", "1d"
 ];
 
-export default function ChartPanel() {
-  const [interval, setInterval] = useState("1m");
+export default function ChartPanel({ interval: intervalProp }) {
+  const defaultInterval = "1m";
+  const [interval, setInterval] = useState(intervalProp || defaultInterval);
   const candleType = 'candle_solid';
 
   return (
@@ -17,11 +18,10 @@ export default function ChartPanel() {
           <button
             key={i}
             style={{
-              padding: "6px 12px",
+              padding: "2px 8px",
               borderRadius: 6,
-              border: interval === i ? "2px solid #26a69a" : "1px solid #333",
               background: interval === i ? "#26a69a" : "#181923",
-              color: interval === i ? "#fff" : "#d1d4dc",
+              color: interval === i ? "#000000" : "#d1d4dc",
               fontWeight: interval === i ? "bold" : "normal",
               cursor: "pointer",
             }}

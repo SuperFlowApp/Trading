@@ -109,7 +109,7 @@ export default function TradingViewLightChart({ interval: intervalProp }) {
             const res = await fetch(url);
             if (!res.ok) throw new Error("Network response was not ok");
             const raw = await res.json();
-            console.log("API raw response:", raw);
+            // console.log("API raw response:", raw);
             // Defensive: check if raw is array and has expected structure
             if (!Array.isArray(raw) || !raw.length || !raw[0].openTime) throw new Error("Invalid data format");
             const mapped = raw.map(k => ({
@@ -144,6 +144,11 @@ export default function TradingViewLightChart({ interval: intervalProp }) {
             endTime ? endTime : undefined
         );
     };
+
+    useEffect(() => {
+        if (!chartRef.current || !candleSeriesRef.current) return;
+        handleLoad();
+    }, [interval, symbol, limit, startTime, endTime]);
 
     return (
         <div>
