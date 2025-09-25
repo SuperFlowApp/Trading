@@ -13,7 +13,7 @@ const defaultInterval = "1m";
 
 const chartStyle = {
     width: "100%",
-    height: "535px",
+    height: "435px",
 };
 
 const topbarStyle = {
@@ -149,6 +149,39 @@ export default function TradingViewLightChart({ interval: intervalProp }) {
         if (!chartRef.current || !candleSeriesRef.current) return;
         handleLoad();
     }, [interval, symbol, limit, startTime, endTime]);
+
+    useEffect(() => {
+        if (!symbol || !interval) return;
+        const wsUrl = `wss://superflow.exchange/dev-demo/ws/klines/${symbol}/${interval}`;
+        const ws = new WebSocket(wsUrl);
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                // Only update if message type is KLINE
+                if (data.e === "KLINE" && candleSeriesRef.current) {
+                    candleSeriesRef.current.update({
+                        time: data.t,
+                        open: +data.o,
+                        high: +data.h,
+                        low: +data.l,
+                        close: +data.c,
+                    });
+                }
+            } catch (err) {
+                console.error("WebSocket parse error:", err);
+            }
+        };
+
+        ws.onerror = (err) => {
+            // Only log if you want to debug connection issues
+            // console.error("WebSocket error:", err);
+        };
+
+        return () => {
+            ws.close();
+        };
+    }, [symbol, interval]);
 
     return (
         <div>
