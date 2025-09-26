@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { fetchMarkets } from '../../hooks/useMarketsAPI';
 
 import { useZustandStore } from '../../Zustandstore/useStore.js';
 import { selectedPairStore, orderFormStore } from '../../Zustandstore/userOrderStore.js';
+import { marketsData } from '../../Zustandstore/marketsDataStore.js';
 
 import LeveragePanel from './marginLeverage/Leverage.jsx';
 import MarginMode from './marginLeverage/MarginMode.jsx';
@@ -352,6 +354,32 @@ function LimitOrderForm({ onCurrencyChange }) {
     }
   }, [currentNotional, balanceFree]);
 
+  // --- Use Zustand for markets data ---
+  const allMarketData = marketsData(s => s.allMarketData);
+  const [selectedMarket, setSelectedMarket] = useState(null);
+
+  useEffect(() => {
+    if (!selectedPair) {
+      setSelectedMarket(null);
+      return;
+    }
+    const market = allMarketData.find(m => m.symbol === selectedPair);
+    setSelectedMarket(market || null);
+  }, [selectedPair, allMarketData]);
+
+  // Helper to format fee as percentage string
+  function formatFeePercent(fee) {
+    if (!fee) return "--";
+    return `${(parseFloat(fee) * 100).toFixed(4)}%`;
+  }
+
+  // Helper to calculate margin required
+  function calcMarginRequired(orderValue, takerFee) {
+    if (!orderValue || !takerFee) return "--";
+    const margin = parseFloat(orderValue) * parseFloat(takerFee) * 100;
+    return `$${margin.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
   return (
     <div className="px-2 py-1 w-full text-white flex flex-col gap-3 flex flex-col border-[1px] border-backgroundlighthover bg-backgroundmid rounded-md min-w-0 overflow-hidden">
 
@@ -375,7 +403,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       <div className="flex gap-4 items-center">
         <SideSelectorButton side={side} setSide={setSide} />
       </div>
-      
+
       {/* Balance Row - show available balance directly */}
       <div>
         <div className="text-body">
@@ -394,7 +422,7 @@ function LimitOrderForm({ onCurrencyChange }) {
           </span>
         </span>
       </div>
-      
+
       {/* Conditionally render the Price field */}
       <div className=" flex flex-col text-body gap-2">
         {market !== 'market' && (
@@ -570,16 +598,15 @@ function LimitOrderForm({ onCurrencyChange }) {
       </div>
 
       {/* Order Information */}
-      <div >
+      <div>
         <div className="pt-2 border-t border-liquiddarkgray text-body text-liquidlightergray flex flex-col">
-
-          <span className="w-full flex justify-between  ">
+          <span className="w-full flex justify-between">
             Order Value
             <span
               className={
                 currentNotional !== null &&
-                !isNaN(currentNotional) &&
-                parseFloat(currentNotional) > parseFloat(balanceFree)
+                  !isNaN(currentNotional) &&
+                  parseFloat(currentNotional) > parseFloat(balanceFree)
                   ? "text-warning"
                   : "text-liquidwhite"
               }
@@ -589,10 +616,23 @@ function LimitOrderForm({ onCurrencyChange }) {
                 : "--"}
             </span>
           </span>
+
+          <span className="w-full flex justify-between">
+            Margin Required
+            <span className="text-liquidwhite">
+              {selectedMarket && currentNotional
+                ? calcMarginRequired(currentNotional, selectedMarket.takerFee)
+                : "--"}
+            </span>
+          </span>
+
           <span className="w-full flex justify-between">
             Fees
             <span className="text-liquidwhite">
-              0.0700% / 0.0400%</span>
+              {selectedMarket
+                ? `${formatFeePercent(selectedMarket.takerFee)} / ${formatFeePercent(selectedMarket.makerFee)}`
+                : "--"}
+            </span>
           </span>
         </div>
       </div>
