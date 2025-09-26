@@ -2,31 +2,37 @@ import React, { useState } from "react";
 import Modal from "../../CommonUIs/modal/modal";
 import { PriceFieldInput } from "../../CommonUIs/inputs/inputs";
 import { useAuthKey } from "../../../contexts/AuthKeyContext";
-import { API_BASE_URL } from "../../../config/api"; // Add this import
+import { API_BASE_URL } from "../../../config/api";
+import { useZustandStore } from "../../../Zustandstore/useStore";
+import { formatPrice } from "../../../utils/priceFormater"; // <-- Add this import
 
 const ModifyBalance = ({
   open,
   onClose,
-  position
+  position,
+  margin
 }) => {
-  const [action, setAction] = useState("add"); // "add" or "remove"
+  const [action, setAction] = useState("add");
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const { authKey } = useAuthKey();
 
+  // Clear input when switching tabs
+  React.useEffect(() => {
+    setAmount("");
+  }, [action]);
+
+  // Fetch available balance from Zustand store
+  const availableUsdt = useZustandStore(state => state.availableUsdt);
+
   if (!position) return null;
 
   const handleMaxClick = () => {
-    // For add margin - can set to a placeholder max value or leave as is
-    // For remove margin - set to position's isolated margin
     if (action === "remove") {
-      const maxRemovable = position.isolatedMarginBalance || 0;
-      setAmount(maxRemovable.toString());
+      setAmount(removableBalance.toString());
     } else {
-      // For add, you might want to set it to available balance
-      // This would need to be passed as a prop or fetched
-      console.log("Set max amount for adding margin");
+      setAmount(availableUsdt.toString());
     }
   };
 
@@ -37,11 +43,11 @@ const ModifyBalance = ({
 
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
       // Map our UI action to API action
       const apiAction = action === "add" ? "deposit" : "withdraw";
-      
+
       const response = await fetch(`${API_BASE_URL}/api/modify-isolated-balance?action=${apiAction}`, {
         method: 'POST',
         headers: {
@@ -56,20 +62,26 @@ const ModifyBalance = ({
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.detail || data.message || 'Failed to modify margin');
       }
-      
+
       // Success - close modal
       onClose();
     } catch (err) {
-      console.error('Error modifying margin:', err);
       setError(err.message || 'Failed to modify margin');
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Calculate removable balance for "remove" action
+  const removableBalance = action === "remove"
+    ? Math.min(position.isolatedMarginBalance || 0, availableUsdt)
+    : 0;
 
   return (
     <Modal
@@ -98,11 +110,12 @@ const ModifyBalance = ({
           </button>
         </div>
 
-        {/* Amount Input with MAX button */}
+        {/* Pair Symbol */}
         <h2 className="text-body font-semibold text-liquidlightergray">
           {position.symbol}
         </h2>
-        <div className="my-5">
+
+        <div className="my-2">
           <PriceFieldInput
             label="Amount (USDT)"
             value={amount}
@@ -118,9 +131,29 @@ const ModifyBalance = ({
           />
         </div>
 
+        {/* Available/Removable Balance */}
+        <div className="mb-2 text-xs text-liquidlightergray flex justify-between">
+          <span>
+            {action === "remove" ? "Max removable balance:" : "Max addable balance:"}
+          </span>
+          <span className="font-bold text-liquidwhite">
+            {action === "remove"
+              ? formatPrice(removableBalance) + " USDT"
+              : formatPrice(availableUsdt) + " USDT"}
+          </span>
+        </div>
+
+        {/* Current Margin */}
+        <div className="mb-2 text-xs text-liquidlightergray flex justify-between">
+          <span>Currently assigned Margin:</span>
+          <span className="font-bold text-liquidwhite">
+            {formatPrice(margin)} USDT
+          </span>
+        </div>
+
         {/* Error message */}
         {error && (
-          <div className="mb-3 text-red-500 text-sm">
+          <div className="mb-3 text-liquidRed text-sm">
             {error}
           </div>
         )}

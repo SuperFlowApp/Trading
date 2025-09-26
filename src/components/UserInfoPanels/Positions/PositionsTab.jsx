@@ -3,6 +3,7 @@ import { useAuthKey } from "../../../contexts/AuthKeyContext";
 import ModifyBalance from "./ModifyBalance";
 import Table from "../../CommonUIs/table";
 import { API_BASE_URL } from "../../../config/api";
+import { formatPrice } from "../../../utils/priceFormater"; // Add this import
 
 const Positions = () => {
   const { authKey } = useAuthKey();
@@ -11,33 +12,32 @@ const Positions = () => {
   const [activePosition, setActivePosition] = useState(null);
 
   // Fetch open positions from server when authKey changes
-  useEffect(() => {
+  const fetchPositions = React.useCallback(() => {
     if (!authKey) {
       setRawPositions([]);
       return;
     }
-    const fetchPositions = () => {
-      fetch(`${API_BASE_URL}/api/positions`, {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization: `Bearer ${authKey}`,
-        },
+    fetch(`${API_BASE_URL}/api/positions`, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${authKey}`,
+      },
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        setRawPositions(Array.isArray(data) ? data : []);
       })
-        .then(async (res) => {
-          const data = await res.json();
-          setRawPositions(Array.isArray(data) ? data : []);
-        })
-        .catch(() => {
-          setRawPositions([]);
-        });
-    };
+      .catch(() => {
+        setRawPositions([]);
+      });
+  }, [authKey]);
 
+  useEffect(() => {
     fetchPositions(); // Initial fetch
     const interval = setInterval(fetchPositions, 10000);
-
-    return () => clearInterval(interval); // Cleanup on unmount or authKey change
-  }, [authKey]);
+    return () => clearInterval(interval);
+  }, [fetchPositions]);
 
   // Helper to format numbers and handle nulls
   const fmt = (v, digits = 4) => {
@@ -59,17 +59,27 @@ const Positions = () => {
     setActivePosition(null);
   };
 
+  // Helper to safely parse numbers
+  const num = v => Number(v) || 0;
+
+  // Calculate removable balance for the active position
+  const removableBalance = activePosition
+    ? num(activePosition.isolatedMarginBalance)
+      + num(activePosition.upnl)
+      - num(activePosition.initialMargin)
+      - num(activePosition.pendingInitialMargin || 0)
+    : 0;
+
   const columns = [
-    { key: "symbol", label: "Pair" },
+    {
+      key: "symbol",
+      label: "Coin",
+      render: v => v.replace(/USDT$/, ""), // Remove 'USDT' from end of symbol
+    },
     {
       key: "positionSide",
       label: "Side",
-      render: (v, row) =>
-        v === "BOTH"
-          ? Number(row.positionAmt) >= 0
-            ? "LONG"
-            : "SHORT"
-          : v,
+      render: v => v, // Show the value directly from the API response
     },
     { key: "positionAmt", label: "Size", render: v => fmt(v, 4) },
     { key: "entryPrice", label: "Entry Price", render: v => fmt(v, 4) },
@@ -85,28 +95,31 @@ const Positions = () => {
     {
       key: "isolatedMarginBalance",
       label: "Margin",
-      render: (v, row) => (
-        <div className="flex items-center justify-between pr-8">
-          <div className="flex flex-col">
-            <span>{fmt(v, 4)}</span>
-            <span>
-              {row.marginMode || (row.cross === true ? "Cross" : row.cross === false ? "Isolated" : "-")}
-            </span>
+      render: (v, row) => {
+        const positionType = row.isCross ? "Cross" : "Isolated";
+        return (
+          <div className="flex items-center justify-between pr-8">
+            <div className="flex flex-col">
+              <span>{formatPrice(v)} USDT</span>
+              <span>{positionType}</span>
+            </div>
+            {positionType === "Isolated" && (
+              <button
+                className="ml-2 p-1 bg-none hover:bg-liquiddarkgray rounded-md"
+                onClick={e => {
+                  e.stopPropagation();
+                  setActivePosition(row);
+                  setShowMarginModal(true);
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+            )}
           </div>
-          <button
-            className="ml-2 p-1 bg-none hover:bg-liquiddarkgray rounded-md"
-            onClick={e => {
-              e.stopPropagation();
-              setActivePosition(row);
-              setShowMarginModal(true);
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-          </button>
-        </div>
-      ),
+        );
+      },
     },
     { key: "maintenanceMargin", label: "Maint. Margin", render: v => fmt(v, 4) },
     {
@@ -129,6 +142,9 @@ const Positions = () => {
         open={showMarginModal}
         onClose={handleCloseMarginModal}
         position={activePosition}
+        margin={activePosition?.isolatedMarginBalance}
+        removableBalance={removableBalance}
+        onBalanceModified={fetchPositions} // <-- Pass callback
       />
     </div>
   );
