@@ -130,6 +130,11 @@ input[type="number"] {
 .bg-red { background-color: var(--color-red); }
 .bg-green { background-color: var(--color-green); }
 
+
+.text-liquidRed { color: var(--color-liquidRed); }
+.text-liquidGreen { color: var(--color-liquidGreen); }
+
+
 .text-warning { color: var(--color-liquidRed); }
 
 
