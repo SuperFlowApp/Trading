@@ -18,6 +18,7 @@ function isTokenValid(token) {
 }
 
 const columns = [
+  { key: "orderId", label: "Order ID" },
   { key: "symbol", label: "Symbol" },
   { key: "side", label: "Side" },
   { key: "type", label: "Type" },
@@ -25,10 +26,11 @@ const columns = [
   { key: "price", label: "Price", render: v => formatPrice(v) },
   { key: "quantity", label: "Qty", render: v => formatPrice(v) },
   { key: "filled", label: "Filled", render: v => formatPrice(v) },
+  { key: "remaining", label: "Remaining", render: v => formatPrice(v) },
+  { key: "notional", label: "Notional", render: v => formatPrice(v) },
   { key: "timeInForce", label: "TIF" },
   { key: "timestamp", label: "Created", render: v => formatDate(v) },
 ];
-
 
 function formatDate(ts) {
   if (!ts) return "-";
