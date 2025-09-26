@@ -4,12 +4,14 @@ import ModifyBalance from "./ModifyBalance";
 import Table from "../../CommonUIs/table";
 import { API_BASE_URL } from "../../../config/api";
 import { formatPrice } from "../../../utils/priceFormater";
+import { fetchAccountInformation } from "../../../hooks/useAccountInformationAPI";
 
 const Positions = () => {
   const { authKey } = useAuthKey();
   const [rawPositions, setRawPositions] = useState([]);
   const [showMarginModal, setShowMarginModal] = useState(false);
   const [activePosition, setActivePosition] = useState(null);
+  const [availableUsdt, setAvailableUsdt] = useState(0);
 
   // --- fetch ---
   const fetchPositions = React.useCallback(() => {
@@ -36,6 +38,18 @@ const Positions = () => {
     const interval = setInterval(fetchPositions, 10000);
     return () => clearInterval(interval);
   }, [fetchPositions]);
+
+  // Fetch available USDT for trading
+  useEffect(() => {
+    if (!authKey) {
+      setAvailableUsdt(0);
+      return;
+    }
+    fetchAccountInformation(authKey).then((res) => {
+      // Adjust this based on your API response structure
+      setAvailableUsdt(Number(res.data.availableBalance || 0));
+    });
+  }, [authKey]);
 
   // --- helpers ---
   const fmt = (v, digits = 4) => {
@@ -203,12 +217,12 @@ const Positions = () => {
     },
   ];
 
-  // Calculate removable balance for the active position (unchanged)
+  // Calculate removable balance for the active position
   const removableBalance = activePosition
     ? num(activePosition.isolatedMarginBalance) +
-    num(activePosition.upnl) -
-    num(activePosition.initialMargin) -
-    num(activePosition.pendingInitialMargin || 0)
+      num(activePosition.upnl) -
+      num(activePosition.initialMargin) -
+      num(activePosition.pendingInitialMargin || 0)
     : 0;
 
   const handleCloseMarginModal = () => {
@@ -230,6 +244,7 @@ const Positions = () => {
         position={activePosition}
         margin={activePosition?.isolatedMarginBalance}
         removableBalance={removableBalance}
+        availableUsdt={availableUsdt} // <-- Pass available USDT here
         onBalanceModified={fetchPositions}
       />
     </div>
