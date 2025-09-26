@@ -96,7 +96,7 @@ const OpenOrdersTab = () => {
   return (
     <div className="w-full">
       <Table
-        columns={columns}
+        columns={isUserLoggedIn ? columns : []} // Hide header if not logged in
         data={isUserLoggedIn ? orders : []}
         rowKey={row => row.orderId}
         emptyMessage={isUserLoggedIn ? "No open orders." : "Please log in to view open orders."}

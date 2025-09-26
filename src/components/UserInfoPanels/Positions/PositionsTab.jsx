@@ -232,19 +232,29 @@ const Positions = () => {
 
   return (
     <div className="w-full">
-      <Table
-        columns={columns}
-        data={authKey ? rawPositions : []}
-        rowKey={(row) => row.symbol + row.positionSide}
-        emptyMessage={authKey ? "No positions." : "Please log in to view your positions."}
-      />
+      {/* Only show table header if logged in */}
+      {authKey && (
+        <Table
+          columns={columns}
+          data={rawPositions}
+          rowKey={(row) => row.symbol + row.positionSide}
+          emptyMessage="No positions."
+        />
+      )}
+      {!authKey && (
+        <Table
+          columns={[]} // Hide columns/header
+          data={[]}    // No data
+          emptyMessage="Please log in to view your positions."
+        />
+      )}
       <ModifyBalance
         open={showMarginModal}
         onClose={handleCloseMarginModal}
         position={activePosition}
         margin={activePosition?.isolatedMarginBalance}
         removableBalance={removableBalance}
-        availableUsdt={availableUsdt} // <-- Pass available USDT here
+        availableUsdt={availableUsdt}
         onBalanceModified={fetchPositions}
       />
     </div>

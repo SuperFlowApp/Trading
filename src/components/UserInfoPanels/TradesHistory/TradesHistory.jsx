@@ -77,7 +77,7 @@ const TradesHistory = () => {
   return (
     <div className="w-full">
       <Table
-        columns={columns}
+        columns={isUserLoggedIn ? columns : []} // Hide header if not logged in
         data={isUserLoggedIn ? trades : []}
         rowKey={row => row.tradeId}
         emptyMessage={isUserLoggedIn ? "No trades found." : "Please log in to view trade history."}
