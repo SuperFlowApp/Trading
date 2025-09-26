@@ -1,212 +1,174 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import Modal from "../../CommonUIs/modal/modal";
+import { PriceFieldInput } from "../../CommonUIs/inputs/inputs";
 import { useAuthKey } from "../../../contexts/AuthKeyContext";
-import ModifyBalance from "./ModifyBalance";
-import Table from "../../CommonUIs/table";
 import { API_BASE_URL } from "../../../config/api";
-import { formatPrice } from "../../../utils/priceFormater";
+import { useZustandStore } from "../../../Zustandstore/useStore";
+import { formatPrice } from "../../../utils/priceFormater"; // <-- Add this import
 
-const Positions = () => {
+const ModifyBalance = ({
+  open,
+  onClose,
+  position,
+  margin
+}) => {
+  const [action, setAction] = useState("add");
+  const [amount, setAmount] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const { authKey } = useAuthKey();
-  const [rawPositions, setRawPositions] = useState([]);
-  const [showMarginModal, setShowMarginModal] = useState(false);
-  const [activePosition, setActivePosition] = useState(null);
 
-  // Fetch positions
-  const fetchPositions = React.useCallback(() => {
-    if (!authKey) {
-      setRawPositions([]);
+  // Clear input when switching tabs
+  React.useEffect(() => {
+    setAmount("");
+  }, [action]);
+
+  // Fetch available balance from Zustand store
+  const availableUsdt = useZustandStore(state => state.availableUsdt);
+
+  if (!position) return null;
+
+  const handleMaxClick = () => {
+    if (action === "remove") {
+      setAmount(removableBalance.toString());
+    } else {
+      setAmount(availableUsdt.toString());
+    }
+  };
+
+  const handleMarginUpdate = async () => {
+    if (!authKey || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
       return;
     }
-    fetch(`${API_BASE_URL}/api/positions`, {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer ${authKey}`,
-      },
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        setRawPositions(Array.isArray(data) ? data : []);
-      })
-      .catch(() => setRawPositions([]));
-  }, [authKey]);
 
-  useEffect(() => {
-    fetchPositions();
-    const interval = setInterval(fetchPositions, 10000);
-    return () => clearInterval(interval);
-  }, [fetchPositions]);
+    setIsSubmitting(true);
+    setError(null);
 
-  // helpers
-  const fmt = (v, digits = 4) => {
-    if (v === null || v === undefined) return "-";
-    if (typeof v === "string" && v.match(/^0E-/)) return "0";
-    const n = Number(v);
-    return isNaN(n) ? v : n.toFixed(digits);
-  };
-  const num = (v) => (v === null || v === undefined ? 0 : Number(v) || 0);
+    try {
+      // Map our UI action to API action
+      const apiAction = action === "add" ? "deposit" : "withdraw";
 
-  // ROE% = upnl / initialMargin
-  const calcROE = (upnl, initialMargin) => {
-    const im = num(initialMargin);
-    if (im === 0) return "0.0000%";
-    return ((num(upnl) / im) * 100).toFixed(4) + "%";
-  };
+      const response = await fetch(`${API_BASE_URL}/api/modify-isolated-balance?action=${apiAction}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authKey}`
+        },
+        body: JSON.stringify({
+          symbol: position.symbol,
+          positionSide: position.positionSide || "BOTH",
+          amount: parseFloat(amount)
+        })
+      });
 
-  // Notional fallback if API gives null/0
-  const calcNotional = (row) => {
-    const provided = num(row.notional);
-    if (provided > 0) return provided;
-    // fallback: |size| * mark
-    return Math.abs(num(row.positionAmt) * num(row.markPrice));
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || data.message || 'Failed to modify margin');
+      }
+
+      // Success - close modal
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Failed to modify margin');
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleCloseMarginModal = () => {
-    setShowMarginModal(false);
-    setActivePosition(null);
-  };
-
-  const columns = [
-    {
-      key: "symbol",
-      label: "Coin",
-      render: (v) => v.replace(/USDT$/i, ""),
-    },
-    {
-      key: "positionSide",
-      label: "Side",
-      render: (v) => v || "BOTH",
-    },
-    { key: "positionAmt", label: "Size", render: (v) => fmt(v, 4) },
-    { key: "entryPrice", label: "Entry Price", render: (v) => fmt(v, 4) },
-    { key: "markPrice", label: "Mark Price", render: (v) => fmt(v, 4) },
-    {
-      key: "notional",
-      label: "Notional",
-      render: (_v, row) => fmt(calcNotional(row), 4),
-    },
-    { key: "leverage", label: "Leverage", render: (v) => (v ? String(v) : "-") },
-    {
-      key: "upnl",
-      label: "Unrealized PNL",
-      render: (_v, row) => {
-        const upnl = num(row.upnl);
-        const roeValue = row.initialMargin ? (upnl / num(row.initialMargin)) * 100 : 0;
-        const roeTxt = calcROE(upnl, row.initialMargin);
-        const cls =
-          roeValue > 0
-            ? "text-liquidGreen"
-            : roeValue < 0
-            ? "text-liquidRed"
-            : "text-liquidlightergray";
-        return (
-          <span>
-            <span className={cls}>{formatPrice(upnl)} USDT</span>
-            <br />
-            <span className={`text-xs ${cls}`}>{roeTxt}</span>
-          </span>
-        );
-      },
-    },
-    {
-      key: "realizedPnl",
-      label: "Realized PnL",
-      render: (_v, row) => {
-        const r = num(row.realizedPnl);
-        // For color parity with UPNL, we optionally use IM for %; if IM=0, show 0%.
-        const roeValue = row.initialMargin ? (r / num(row.initialMargin)) * 100 : 0;
-        const roeTxt = calcROE(r, row.initialMargin);
-        const cls =
-          roeValue > 0
-            ? "text-liquidGreen"
-            : roeValue < 0
-            ? "text-liquidRed"
-            : "text-liquidlightergray";
-        return (
-          <span>
-            <span className={cls}>{formatPrice(r)} USDT</span>
-            <br />
-            <span className={`text-xs ${cls}`}>{roeTxt}</span>
-          </span>
-        );
-      },
-    },
-    {
-      key: "isolatedMarginBalance",
-      label: "Margin",
-      render: (v, row) => {
-        const positionType = row.isCross ? "Cross" : "Isolated";
-        return (
-          <div className="flex items-center justify-between pr-8">
-            <div className="flex flex-col">
-              <span>{formatPrice(num(v))} USDT</span>
-              <span className="text-liquidlightergray">{positionType}</span>
-            </div>
-            {positionType === "Isolated" && (
-              <button
-                className="ml-2 p-1 bg-none hover:bg-liquiddarkgray rounded-md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActivePosition(row);
-                  setShowMarginModal(true);
-                }}
-                title="Adjust isolated margin"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3 w-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      key: "liquidationPrice",
-      label: "Liquid. Price",
-      render: (v) => (v === null || v === undefined ? "-" : fmt(v, 4)),
-    },
-    // Removed: Maint. Margin, Last Updated (noisy / less useful in main view)
-  ];
-
-  // Removable balance for modal (unchanged)
-  const removableBalance =
-    activePosition
-      ? num(activePosition.isolatedMarginBalance) +
-        num(activePosition.upnl) -
-        num(activePosition.initialMargin) -
-        num(activePosition.pendingInitialMargin || 0)
-      : 0;
+  // Calculate removable balance for "remove" action
+  const removableBalance = action === "remove"
+    ? Math.min(position.isolatedMarginBalance || 0, availableUsdt)
+    : 0;
 
   return (
-    <div className="w-full">
-      <Table
-        columns={columns}
-        data={authKey ? rawPositions : []} // Do NOT filter out empty rows
-        rowKey={(row) => row.symbol + row.positionSide}
-        emptyMessage={authKey ? "No positions." : "Please log in to view your positions."}
-      />
-      <ModifyBalance
-        open={showMarginModal}
-        onClose={handleCloseMarginModal}
-        position={activePosition}
-        margin={activePosition?.isolatedMarginBalance}
-        removableBalance={removableBalance}
-        onBalanceModified={fetchPositions}
-      />
-    </div>
+    <Modal
+      open={open}
+      onClose={onClose}
+      width={320}
+    >
+      <div className="p-4">
+        {/* Tabs */}
+        <div className="flex border-b border-liquiddarkgray mb-4">
+          <button
+            className={`py-2 px-4 ${action === "add"
+              ? "border-b-2 border-primary2normal text-primary2light"
+              : "text-liquidlightergray"}`}
+            onClick={() => setAction("add")}
+          >
+            Add Margin
+          </button>
+          <button
+            className={`py-2 px-4 ${action === "remove"
+              ? "border-b-2 border-primary2normal text-primary2light"
+              : "text-liquidlightergray"}`}
+            onClick={() => setAction("remove")}
+          >
+            Remove Margin
+          </button>
+        </div>
+
+        {/* Pair Symbol */}
+        <h2 className="text-body font-semibold text-liquidlightergray">
+          {position.symbol}
+        </h2>
+
+        <div className="my-2">
+          <PriceFieldInput
+            label="Amount (USDT)"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            buttonLabel="MAX"
+            onButtonClick={handleMaxClick}
+            inputProps={{
+              type: "number",
+              placeholder: "0",
+              min: "0",
+              step: "0.01",
+            }}
+          />
+        </div>
+
+        {/* Available/Removable Balance */}
+        <div className="mb-2 text-xs text-liquidlightergray flex justify-between">
+          <span>
+            {action === "remove" ? "Max removable balance:" : "Max addable balance:"}
+          </span>
+          <span className="font-bold text-liquidwhite">
+            {action === "remove"
+              ? formatPrice(removableBalance) + " USDT"
+              : formatPrice(availableUsdt) + " USDT"}
+          </span>
+        </div>
+
+        {/* Current Margin */}
+        <div className="mb-2 text-xs text-liquidlightergray flex justify-between">
+          <span>Currently assigned Margin:</span>
+          <span className="font-bold text-liquidwhite">
+            {formatPrice(margin)} USDT
+          </span>
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="mb-3 text-liquidRed text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Confirm Button */}
+        <button
+          className="w-full py-2 px-4 bg-primary2normal hover:bg-primary2dark text-backgrounddark font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleMarginUpdate}
+          disabled={isSubmitting || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0}
+        >
+          {isSubmitting ? "Processing..." : "Confirm"}
+        </button>
+      </div>
+    </Modal>
   );
 };
 
-export default Positions;
+export default ModifyBalance;
