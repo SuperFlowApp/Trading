@@ -155,6 +155,22 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
+                    <span className="text-liquidlightergray">Available For Order</span>
+                    <span className="text-white font-semibold">
+                        {accountInfo?.availableForOrder != null
+                            ? formatWithDollar(normalizeZero(accountInfo.availableForOrder))
+                            : '—'}
+                    </span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-liquidlightergray">Margin Balance</span>
+                    <span className="text-white font-semibold">
+                        {accountInfo?.marginBalance != null
+                            ? formatWithDollar(normalizeZero(accountInfo.marginBalance))
+                            : '—'}
+                    </span>
+                </div>
+                <div className="flex justify-between">
                     <span className="text-liquidlightergray">Cross Pending Initial Margin</span>
                     <span className="text-white font-semibold">
                         {accountInfo?.crossPendingInitialMargin != null
@@ -178,22 +194,8 @@ function AccountInfoPanel() {
                             : '—'}
                     </span>
                 </div>
-                <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Margin Balance</span>
-                    <span className="text-white font-semibold">
-                        {accountInfo?.marginBalance != null
-                            ? formatWithDollar(normalizeZero(accountInfo.marginBalance))
-                            : '—'}
-                    </span>
-                </div>
-                <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Available For Order</span>
-                    <span className="text-white font-semibold">
-                        {accountInfo?.availableForOrder != null
-                            ? formatWithDollar(normalizeZero(accountInfo.availableForOrder))
-                            : '—'}
-                    </span>
-                </div>
+
+
                 <div className="flex justify-between">
                     <span className="text-liquidlightergray">Paid Fee</span>
                     <span className="text-white font-semibold">

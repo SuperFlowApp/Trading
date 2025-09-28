@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
-import { selectedPairStore } from '../../Zustandstore/userOrderStore'
+import { selectedPairStore } from '../../../Zustandstore/userOrderStore'
 import { KLineChartPro } from '@klinecharts/pro';
 import './klinecharts-pro.min.css';
-import { useZustandStore } from "../../Zustandstore/useStore"; // import your store
+import { useZustandStore } from "../../../Zustandstore/useStore"; // import your store
 
 // --- REST helper with range support ---
 const REST_URL = (pair, interval, opts = {}) => {
@@ -17,7 +17,7 @@ const REST_URL = (pair, interval, opts = {}) => {
 };
 
 const WS_URL = (pair, interval) =>
-  `wss://superflow.exchange/dev-demo/ws/klines/${pair.toUpperCase()}USDT/${interval}`;
+  `wss://dev.superflow.exchange/ws/klines/${pair.toUpperCase()}USDT/${interval}`;
 
 const mapK = d => ({
   timestamp: d.openTime * 1000, // convert seconds to ms

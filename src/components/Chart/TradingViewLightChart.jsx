@@ -152,7 +152,7 @@ export default function TradingViewLightChart({ interval: intervalProp }) {
 
     useEffect(() => {
         if (!symbol || !interval) return;
-        const wsUrl = `wss://superflow.exchange/dev-demo/ws/klines/${symbol}/${interval}`;
+        const wsUrl = `wss://dev.superflow.exchange/ws/klines/${symbol}/${interval}`;
         const ws = new WebSocket(wsUrl);
 
         ws.onmessage = (event) => {

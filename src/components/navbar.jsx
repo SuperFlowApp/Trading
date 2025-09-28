@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import 'antd/dist/reset.css';
 import DefaultAPILogin from "./Login/defaultAPILogin";
-import DefaultAPISignup from "./Login/defaultAPISignup"; // Import the signup modal
-import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import context
+import { useAuthKey } from "../contexts/AuthKeyContext";
 import Button from "./CommonUIs/Button";
-import SettingsDropdown from "./SettingsDropdown"; // Add this import
+import SettingsDropdown from "./SettingsDropdown";
 import { Disclosure, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import LoginPanel from "./Login/LoginPanel";
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -25,9 +25,8 @@ const initialSettings = {
 };
 
 function Navbar() {
-  const { authKey, setAuthKey, username, setUsername } = useAuthKey(); // <-- use context username
+  const { authKey, setAuthKey, username, setUsername } = useAuthKey();
   const [showLogin, setShowLogin] = useState(false);
-  const [showSignup, setShowSignup] = useState(false); // State for signup modal
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(initialSettings);
@@ -73,10 +72,6 @@ function Navbar() {
   const handleLoginSuccess = (username, token) => {
     setShowLogin(false);
     setDropdownOpen(false);
-  };
-
-  const handleSignupSuccess = (username) => {
-    setShowSignup(false);
   };
 
   const handleSettingChange = (key) => {
@@ -147,10 +142,7 @@ function Navbar() {
               {!authKey ? (
                 <>
                   <Button type="navdisconnected" onClick={() => setShowLogin(true)}>
-                    Login
-                  </Button>
-                  <Button type="navsignup" onClick={() => setShowSignup(true)}>
-                    Sign Up
+                    Connect
                   </Button>
                 </>
               ) : (
@@ -245,9 +237,6 @@ function Navbar() {
                     <Button type="navdisconnected" onClick={() => setShowLogin(true)}>
                       Login
                     </Button>
-                    <Button type="navsignup" onClick={() => setShowSignup(true)}>
-                      Sign Up
-                    </Button>
                   </>
                 ) : (
                   <Button type="navconnected" onClick={handleDisconnect}>
@@ -269,19 +258,12 @@ function Navbar() {
             </Disclosure.Panel>
           </Transition>
 
-          {/* Login/Signup Modals */}
+          {/* Login Modal */}
           {showLogin && (
-            <DefaultAPILogin
+            <LoginPanel
               open={showLogin}
               onClose={() => setShowLogin(false)}
               onLoginSuccess={handleLoginSuccess}
-            />
-          )}
-          {showSignup && (
-            <DefaultAPISignup
-              open={showSignup}
-              onClose={() => setShowSignup(false)}
-              onSignupSuccess={handleSignupSuccess}
             />
           )}
         </>

@@ -9,7 +9,7 @@ const streams = [
   { key: "kline", path: (s, tf = "1m") => `/ws/klines/${s}/${tf}` },
 ];
 
-const defaultDomain = "superflow.exchange/dev-demo";
+const defaultDomain = "dev.superflow.exchange";
 const defaultSymbol = "BTCUSDT";
 const defaultProto = "wss";
 

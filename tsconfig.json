@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    // Target modern browsers (what Vite transpiles from)
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    // Vite/browser module settings
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+
+    // Don’t emit JS from tsc (Vite handles building)
+    "noEmit": true,
+    "sourceMap": true,
+
+    // Strictness & ergonomics
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    // Helpful checks (keep these since you had them)
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Mix JS and TS during migration (optional—enable if you still have .js/.jsx files)
+    "allowJs": true,
+    "checkJs": false,
+
+    // Vite types (env vars, import.meta, etc.)
+    "types": ["vite/client"]
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
+}
