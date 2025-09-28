@@ -213,12 +213,12 @@ export default function TVChart({
           // Custom colors
           overrides: {
             // Main Series (Candles) Colors
-            "mainSeriesProperties.candleStyle.upColor": "#1cd1ed", // Green candle color
-            "mainSeriesProperties.candleStyle.downColor": "#f48ff4", // Red candle color
-            "mainSeriesProperties.candleStyle.wickUpColor": "#1cd1ed", // Green wick color
-            "mainSeriesProperties.candleStyle.wickDownColor": "#f48ff4", // Red wick color
-            "mainSeriesProperties.candleStyle.borderUpColor": "#1cd1ed", // Green candle border
-            "mainSeriesProperties.candleStyle.borderDownColor": "#f48ff4", // Red candle border
+            "mainSeriesProperties.candleStyle.upColor": "#1cd1ed", // Blue candle color
+            "mainSeriesProperties.candleStyle.downColor": "#f48ff4", // Pink candle color
+            "mainSeriesProperties.candleStyle.wickUpColor": "#1cd1ed", // Blue wick color
+            "mainSeriesProperties.candleStyle.wickDownColor": "#f48ff4", // Pink wick color
+            "mainSeriesProperties.candleStyle.borderUpColor": "#1cd1ed", // Blue candle border
+            "mainSeriesProperties.candleStyle.borderDownColor": "#f48ff4", // Pink candle border
             
             // Background
             "paneProperties.background": "#181923", // Chart background
@@ -239,9 +239,29 @@ export default function TVChart({
           },
           // Studies (indicators) colors
           studies_overrides: {
-            "volume.volume.color.0": "rgba(239, 83, 80, 0.3)",  // Decreasing volume color
-            "volume.volume.color.1": "rgba(38, 166, 154, 0.3)",  // Increasing volume color
-            "volume.volume.transparency": 30,  // Volume transparency
+            // Volume colors
+            "volume.volume.color.0": "rgba(244, 143, 244, 0.6)",  // Decreasing volume color (pink)
+            "volume.volume.color.1": "rgba(28, 209, 237, 0.6)",   // Increasing volume color (blue)
+            "volume.volume.transparency": 40,  // Volume transparency
+            
+            // Volume SMA line
+            "volume.volume ma.color": "#ffffff",   // Volume SMA line color (white)
+            "volume.volume ma.linewidth": 2,       // Volume SMA line width
+            "volume.volume ma.transparency": 30,   // Volume SMA transparency
+            
+            // Moving Average colors
+            "Moving Average.color": "#f48ff4",     // MA line color (pink)
+            "Moving Average.linewidth": 2,         // MA line width
+            
+            // MACD colors
+            "MACD.histogram.color": "#1cd1ed",     // MACD histogram color (blue)
+            "MACD.macd.color": "#f48ff4",          // MACD line color (pink)
+            "MACD.signal.color": "#ffffff",        // MACD signal line color (white)
+            
+            // RSI colors
+            "RSI.color": "#1cd1ed",                // RSI line color (blue)
+            "RSI.upper_band.color": "#f48ff4",     // RSI upper band (pink)
+            "RSI.lower_band.color": "#f48ff4"      // RSI lower band (pink)
           },
           loading_screen: {
             backgroundColor: "#181923",
