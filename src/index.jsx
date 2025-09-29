@@ -5,7 +5,8 @@ import Navbar from './components/navbar';
 import { AuthKeyProvider } from './contexts/AuthKeyContext';
 import NotificationBar from './components/notificationBar'; 
 import { useZustandStore } from './Zustandstore/useStore'; 
-import LoadingScreen from './components/Loading'; // <-- Import your loading screen
+import LoadingScreen from './components/Loading';
+import MobileBlocker from './components/MobileBlocker';
 import { MultiWebSocketProvider } from "./contexts/MultiWebSocketContext";
 
 import './components/index.css';
@@ -40,12 +41,33 @@ function CssVarSync() {
 
 function RootApp() {
   const [loading, setLoading] = useState(true);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
+    // Check if the device is mobile based on screen width
+    const checkMobileDevice = () => {
+      setIsMobileDevice(window.innerWidth < 768); // Common breakpoint for mobile
+    };
+    
+    // Check on initial load
+    checkMobileDevice();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobileDevice);
+    
     // Show loading screen for at least 2 seconds (matches LoadingScreen)
     const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkMobileDevice);
+    };
   }, []);
+
+  // If mobile device is detected, show the mobile blocker
+  if (isMobileDevice) {
+    return <MobileBlocker />;
+  }
 
   return (
     <StrictMode>
