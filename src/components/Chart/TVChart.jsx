@@ -1,22 +1,29 @@
 import { useEffect, useRef } from "react";
+import { selectedPairStore } from "../../Zustandstore/userOrderStore"; // Import the store
 
 /**
  * TVChart mounts TradingView's Advanced Charting Library.
  *
  * Props:
- * - symbol: string like "BTCUSDT"
+ * - symbol: string like "BTCUSDT" (optional, will use selectedPairStore if not provided)
  * - interval: string like "1", "5", "60", "240", "1D"
  * - theme: "light" | "dark"
  * - containerId: optional DOM id
  */
 export default function TVChart({
-  symbol = "BTCUSDT",
+  symbol: propSymbol, // Rename to propSymbol to avoid confusion
   interval = "60",
   theme = "dark",
   containerId = "tv-chart-container",
 }) {
   const containerRef = useRef(null);
   const widgetRef = useRef(null);
+  
+  // Get the selected pair from the store
+  const selectedPair = selectedPairStore(state => state.selectedPair);
+  
+  // Derive the actual symbol to use (either from props or from store)
+  const symbol = propSymbol || `${selectedPair}USDT`;
 
   useEffect(() => {
     let disposed = false;
@@ -189,7 +196,7 @@ export default function TVChart({
           library_path: "/static/charting_library/",
           fullscreen: false,
           autosize: true,
-          symbol,
+          symbol, // This now uses either the prop or the store value
           interval,
           container: containerId,
           theme,
@@ -201,6 +208,10 @@ export default function TVChart({
             "use_localstorage_for_settings",
             "popup_hints",
             "volume_force_overlay",       // Prevent volume pane from being an overlay
+            "header_symbol_search",       // Remove the symbol search box
+            "header_compare",             // Remove the "Compare" button
+            "symbol_search_hot_key",      // Disable the symbol search hotkey
+            "header_chart_type",          // Optional: remove chart type selector
           ],
           enabled_features: [
             "move_logo_to_main_pane"
@@ -215,8 +226,13 @@ export default function TVChart({
             "mainSeriesProperties.candleStyle.borderUpColor": "#1cd1ed", // Blue candle border
             "mainSeriesProperties.candleStyle.borderDownColor": "#f48ff4", // Pink candle border
             
-            // Background
+            // Background - Solid color settings
             "paneProperties.background": "#181923", // Chart background
+            "paneProperties.backgroundType": "solid", // Force solid background
+            "paneProperties.backgroundGradientStartColor": "#181923", // Remove gradient start
+            "paneProperties.backgroundGradientEndColor": "#181923", // Remove gradient end
+            
+            // Vertical and horizontal grid lines
             "paneProperties.vertGridProperties.color": "#1e2230", // Vertical grid lines
             "paneProperties.horzGridProperties.color": "#1e2230", // Horizontal grid lines
             
@@ -306,7 +322,7 @@ export default function TVChart({
         widgetRef.current = null;
       }
     };
-  }, [symbol, interval, theme, containerId]);
+  }, [symbol, interval, theme, containerId]); // Make sure symbol is in the dependency array
 
   return (
     <div
