@@ -58,12 +58,10 @@ export default function TVChart({
 
         const customDatafeed = {
           onReady: (callback) => {
-            console.log('[Datafeed] onReady called');
             setTimeout(() => callback(configurationData), 0);
           },
           
           searchSymbols: (userInput, exchange, symbolType, onResult) => {
-            console.log('[Datafeed] searchSymbols called');
             // Return predefined symbol for demo
             onResult([{
               symbol: symbol,
@@ -76,7 +74,6 @@ export default function TVChart({
           },
           
           resolveSymbol: (symbolName, onSymbolResolved, onResolveErrorCallback) => {
-            console.log('[Datafeed] resolveSymbol called for:', symbolName);
             
             const symbolInfo = {
               name: symbolName,
@@ -102,7 +99,6 @@ export default function TVChart({
           
           getBars: (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
             const { from, to, firstDataRequest } = periodParams;
-            console.log(`[Datafeed] getBars called with: ${symbolInfo.name}, ${resolution}, from: ${from}, to: ${to}`);
             
             const bars = [];
             const step = resolution === "1D" ? 86400 : parseInt(resolution) * 60;
@@ -146,7 +142,6 @@ export default function TVChart({
           },
           
           subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
-            console.log('[Datafeed] subscribeBars called with:', symbolInfo.name);
             // Here you would set up a connection to receive realtime updates
             // For demo purposes, we'll just simulate updates every 5 seconds
             const intervalId = setInterval(() => {
@@ -181,7 +176,6 @@ export default function TVChart({
           },
           
           unsubscribeBars: (subscriberUID) => {
-            console.log('[Datafeed] unsubscribeBars called');
             // Clear the interval when unsubscribing
             clearInterval(subscriberUID);
           },
@@ -197,7 +191,7 @@ export default function TVChart({
           autosize: true,
           symbol,
           interval,
-          container_id: containerId,
+          container: containerId,
           theme,
           datafeed: customDatafeed,
           locale: "en",
@@ -205,7 +199,8 @@ export default function TVChart({
           debug: false,
           disabled_features: [
             "use_localstorage_for_settings",
-            "popup_hints"
+            "popup_hints",
+            "volume_force_overlay",       // Prevent volume pane from being an overlay
           ],
           enabled_features: [
             "move_logo_to_main_pane"
@@ -244,28 +239,25 @@ export default function TVChart({
             "volume.volume.color.1": "rgba(28, 209, 237, 0.6)",   // Increasing volume color (blue)
             "volume.volume.transparency": 40,  // Volume transparency
             
-            // Volume SMA line
-            "volume.volume ma.color": "#ffffff",   // Volume SMA line color (white)
-            "volume.volume ma.linewidth": 2,       // Volume SMA line width
-            "volume.volume ma.transparency": 30,   // Volume SMA transparency
+            // Volume SMA line - Settings to hide SMA
+            "volume.show ma": false,              // Hide SMA on Volume indicator
+            "volume.ma length": 0,                // Set MA length to 0
+            "volume.volume ma.color": "rgba(0,0,0,0)",  // Transparent MA color
+            "volume.volume ma.linewidth": 0,      // 0 width makes the line invisible
+            "volume.volume ma.transparency": 100, // Full transparency
             
             // Moving Average colors
-            "Moving Average.color": "#f48ff4",     // MA line color (pink)
-            "Moving Average.linewidth": 2,         // MA line width
+            "MA.plot.color": "#f48ff4",     // MA line color (pink)
+            "MA.plot.linewidth": 2,         // MA line width
             
             // MACD colors
             "MACD.histogram.color": "#1cd1ed",     // MACD histogram color (blue)
             "MACD.macd.color": "#f48ff4",          // MACD line color (pink)
             "MACD.signal.color": "#ffffff",        // MACD signal line color (white)
-            
-            // RSI colors
-            "RSI.color": "#1cd1ed",                // RSI line color (blue)
-            "RSI.upper_band.color": "#f48ff4",     // RSI upper band (pink)
-            "RSI.lower_band.color": "#f48ff4"      // RSI lower band (pink)
           },
           loading_screen: {
             backgroundColor: "#181923",
-            foregroundColor: "#2962FF"
+            foregroundColor: "#1cd1ed"
           },
           client_id: "tradingview.com",
           user_id: "public_user",
@@ -273,7 +265,28 @@ export default function TVChart({
         });
 
         widgetRef.current.onChartReady(() => {
-          console.log("TV widget ready");
+          
+          // Add this: Try to modify the volume indicator directly once chart is ready
+          if (widgetRef.current) {
+            const chart = widgetRef.current.activeChart();
+            
+            // Remove volume indicator if present
+            chart.getAllStudies().forEach(study => {
+              if (study.name === "Volume") {
+                chart.removeEntity(study.id);
+              }
+            });
+            
+            // Create volume indicator without MA
+            chart.createStudy("Volume", false, false, {
+              "showMA": false,
+              "maLength": 0,
+              "maColor": "rgba(0,0,0,0)",
+              "transparency": 40,
+              "color1": "rgba(244, 143, 244, 0.6)",
+              "color2": "rgba(28, 209, 237, 0.6)"
+            });
+          }
         });
       } catch (e) {
         console.error("Failed to init TradingView widget:", e);
