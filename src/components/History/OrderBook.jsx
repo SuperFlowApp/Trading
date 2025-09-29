@@ -3,10 +3,10 @@ import { useZustandStore } from '../../Zustandstore/useStore.js';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
 import { formatPrice } from '../../utils/priceFormater.js';
 import { MinimalDropDown } from '../CommonUIs/inputs/inputs.jsx';
-import { useMultiWebSocketGlobal } from '../../contexts/MultiWebSocketContext'; // <-- Use global websocket hook
+import { useMultiWebSocketGlobal } from '../../contexts/MultiWebSocketContext';
 
 // Memoized Row for per-row update
-const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSizeClass = "text-body", fontWeightClass = "font-medium", textAlign }) => {
+const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSizeClass = "text-body", fontWeightClass = "font-medium", textAlign, displayCurrency }) => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -46,15 +46,15 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSi
       <div className={rowClasses}>
         {/* Price */}
         <div className={`${fontWeightClass} ${fontSizeClass} w-1/4 ${textColor} text-left`}>
-          {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {formatPrice(price)}
         </div>
         {/* Size */}
         <div className={`${fontSizeClass} w-1/4 ${alignClass}`}>
-          {size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
+          {displayCurrency === 'USDT' ? formatPrice(size) : size.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
         </div>
         {/* Total */}
         <div className={`${fontSizeClass} w-1/4 ${alignClass}`}>
-          {total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
+          {displayCurrency === 'USDT' ? formatPrice(total) : total.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 4 })}
         </div>
       </div>
     </li>
@@ -64,14 +64,64 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSi
 const OrderBook = () => {
   // Fetch selectedPair from user input store
   const selectedPair = selectedPairStore(s => s.selectedPair);
-  // Compose symbol for API (e.g., BTCUSDT)
-  const symbol = selectedPair ? `${selectedPair}USDT` : 'BTCUSDT';
-
+  const symbol = `${selectedPair}USDT`;
+  
   // Use global websocket hook
   const { payloads, states } = useMultiWebSocketGlobal();
+  
   // Get orderbook data for current symbol
   const orderbookData = payloads.orderbook;
   const wsConnected = states.orderbook === 'open';
+  
+  // Track if we're fetching from REST API
+  const [isFetchingRest, setIsFetchingRest] = useState(false);
+  // Track orderbook data
+  const [localOrderbookData, setLocalOrderbookData] = useState({ bids: [], asks: [] });
+  
+  // Function to fetch orderbook data from REST API
+  const fetchOrderbookRest = async () => {
+    try {
+      setIsFetchingRest(true);
+      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol}&limit=20`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Process the data to match WebSocket format
+      if (data && data.bids && data.asks) {
+        setLocalOrderbookData({
+          b: data.bids.map(([price, qty]) => [price, qty]),
+          a: data.asks.map(([price, qty]) => [price, qty])
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching orderbook data:", error);
+    } finally {
+      setIsFetchingRest(false);
+    }
+  };
+  
+  // Setup polling for REST API when WebSocket is not connected
+  useEffect(() => {
+    let intervalId = null;
+    
+    if (!wsConnected && !isFetchingRest) {
+      // Initial fetch
+      fetchOrderbookRest();
+      
+      // Setup polling interval
+      intervalId = setInterval(() => {
+        fetchOrderbookRest();
+      }, 3000); // Poll every 3 seconds
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [wsConnected, symbol, isFetchingRest]);
 
   // Helper to format orderbook arrays
   const formatBook = (arr) =>
@@ -80,9 +130,10 @@ const OrderBook = () => {
       size: parseFloat(size),
     }));
 
-  // Extract bids/asks from websocket payload
-  const bids = orderbookData?.b ? formatBook(orderbookData.b) : [];
-  const asks = orderbookData?.a ? formatBook(orderbookData.a) : [];
+  // Extract bids/asks from either websocket payload or REST API data
+  const activeData = wsConnected ? orderbookData : localOrderbookData;
+  const bids = activeData?.b ? formatBook(activeData.b) : [];
+  const asks = activeData?.a ? formatBook(activeData.a) : [];
   const error = null; // You can add error handling if needed
 
   const [spreadValue, setSpreadValue] = useState(null);
@@ -199,7 +250,7 @@ const OrderBook = () => {
 
   // Tooltip state: position is viewport coords (fixed) so it won't be clipped by container
   const [tooltip, setTooltip] = useState({ visible: false, top: 0, left: 0, content: null, color: 'red' });
-  const TOOLTIP_WIDTH = 140; // used to place the box fully outside
+  const TOOLTIP_WIDTH = 130; // adjusted for new tooltip width
 
   // Calculate cumulative sum for hovered asks (from bottom up)
   const hoveredAskSum = hoveredAskIndex !== null
@@ -255,7 +306,7 @@ const OrderBook = () => {
       const rowRect = rowEl.getBoundingClientRect();
       // viewport coordinates so tooltip is fixed and won't be clipped
       const top = rowRect.top + rowRect.height / 2;
-      const left = rowRect.left - TOOLTIP_WIDTH - 8;
+      const left = rowRect.left - TOOLTIP_WIDTH - 20; // adjust left position for new tooltip
 
       const rows = addTotals(asks, false).slice(-10).slice(index);
       if (rows.length) {
@@ -287,7 +338,7 @@ const OrderBook = () => {
     if (rowEl) {
       const rowRect = rowEl.getBoundingClientRect();
       const top = rowRect.top + rowRect.height / 2;
-      const left = rowRect.left - TOOLTIP_WIDTH - 8;
+      const left = rowRect.left - TOOLTIP_WIDTH - 20; // adjust left position for new tooltip
 
       const rows = addTotals(bids, true).slice(0, index + 1);
       if (rows.length) {
@@ -341,15 +392,16 @@ const OrderBook = () => {
   };
 
   return (
-    <div ref={containerRef} className="flex flex-col h-full w-full  overflow-x-hidden" style={{ position: 'relative' }}>
+    <div ref={containerRef} className="flex flex-col h-full w-full overflow-x-hidden" style={{ position: 'relative' }}>
       {/* Currency selector row with number dropdown on the left and currency on the right */}
-      <div className="w-full flex justify-between">
-        {/* Number dropdown (left) */}
+      <div className="w-full flex justify-end">
+        {/* Number dropdown (left) 
         <MinimalDropDown
           options={numberOptions}
           selectedOption={selectedNumber}
           onOptionChange={setSelectedNumber}
         />
+        */}
         {/* Currency dropdown (right) */}
         <MinimalDropDown
           options={[
@@ -404,6 +456,7 @@ const OrderBook = () => {
                 fontSizeClass="font-[400]"
                 fontWeightClass="font-normal"
                 textAlign="right"
+                displayCurrency={displayCurrency}
               />
             </div>
           );
@@ -452,56 +505,92 @@ const OrderBook = () => {
                 textAlign="right"
                 fontSizeClass="text-body"
                 fontWeightClass="font-[400]"
+                displayCurrency={displayCurrency}
               />
             </div>
           );
         })}
       </ul>
 
-      {/* Outside tooltip placed using fixed coords so it's outside the orderbook and won't be clipped */}
+      {/* Replace the existing tooltip with this custom SVG shape tooltip */}
       {tooltip.visible && tooltip.content && (
         <div
-          // keep left/top in style because they are dynamic viewport coords
-          style={{ left: tooltip.left, top: tooltip.top }}
-          className={`fixed text-body pointer-events-none w-[140px] -translate-y-1/2  p-1 z-[10000] bg-[var(--color-backgroundlight)] text-[var(--color-liquidwhite)] }`}
+          style={{ 
+            position: 'fixed',
+            left: tooltip.left - 10, // Adjust left position to account for new shape
+            top: tooltip.top,
+            transform: 'translateY(-50%)',
+            pointerEvents: 'none',
+            zIndex: 10000,
+          }}
           aria-hidden="true"
         >
-          <div><span>Avg Price:</span>{" "}{tooltip.content.avgPrice?.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
-          <div><span>Sum Size:</span>{" "}{tooltip.content.totalSize?.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
-          <div><span>Sum USDT:</span>{" "}{tooltip.content.totalUSDT?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-
-          {/* right-side triangle using SVG (inner polygon scaled 2x) */}
-          <svg
-            aria-hidden="true"
-            className="absolute -right-[25px] top-1/2 -translate-y-1/2 w-12 h-16 pointer-events-none -z-1"
-            viewBox="0 0 48 64"
-            xmlns="http://www.w3.org/2000/svg"
-            role="img"
-            focusable="false"
-          >
-            {/* centered triangle -> tip at middle (30,32), base from (8,8) to (8,56) */}
-            <polygon
-              points="30,32 8,8 8,56"
-              fill="var(--color-backgroundlight)"
-            />
-          </svg>
+          <div className="relative">
+            {/* SVG container with both the shape and the border */}
+            <svg
+              width="160"
+              height="70" 
+              viewBox="0 0 160 70"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute inset-0"
+            >
+              {/* Background fill */}
+              <path 
+                d="M0 4C0 1.79086 1.79086 0 4 0H138C140.209 0 142 1.79086 142 4V25.5L160 35L142 44.5V66C142 68.2091 140.209 70 138 70H4C1.79086 70 0 68.2091 0 66V4Z" 
+                fill="var(--color-backgroundlight)"
+              />
+              {/* Border stroke */}
+              <path 
+                d="M0.5 4C0.5 2.067 2.067 0.5 4 0.5H138C139.933 0.5 141.5 2.067 141.5 4V25.2678L159.019 34.5L141.5 43.7322V66C141.5 67.933 139.933 69.5 138 69.5H4C2.067 69.5 0.5 67.933 0.5 66V4Z" 
+                stroke="var(--color-primary2darker)" 
+                strokeWidth="1"
+              />
+            </svg>
+            
+            {/* Tooltip content */}
+            <div className="relative px-4 py-2 text-body text-[var(--color-liquidwhite)]">
+              <div className="flex justify-start">
+                <span className="min-w-[54px]">Avg Price:</span>
+                <span className="ml-1">{formatPrice(tooltip.content.avgPrice)}</span>
+              </div>
+              <div className="flex justify-start">
+                <span className="min-w-[54px]">Sum Size:</span>
+                <span className="ml-1">{tooltip.content.totalSize?.toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
+              </div>
+              <div className="flex justify-start">
+                <span className="min-w-[54px]">Sum USDT:</span>
+                <span className="ml-1">{formatPrice(tooltip.content.totalUSDT)}</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
       <div className="flex justify-end">
-        {/* WebSocket status LED */}
-        <span
-          style={{
-            display: 'inline-block',
-            width: 10,
-            height: 10,
-            borderRadius: '50%',
-            background: wsConnected ? '#22c55e' : '#6b7280', // green or gray
-            marginRight: 6,
-            border: '1.5px solid #222'
-          }}
-          title={wsConnected ? "Live connection" : "Disconnected"}
-        />
+        {/* WebSocket status LED with additional REST indicator */}
+        <div className="flex items-center">
+          {isFetchingRest && (
+            <span 
+              className="text-xs text-gray-400 mr-2"
+              title="Fetching data from REST API"
+            >
+              REST
+            </span>
+          )}
+          <span
+            style={{
+              display: 'inline-block',
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              background: wsConnected ? '#22c55e' : (isFetchingRest ? '#f59e0b' : '#6b7280'), // green, amber or gray
+              marginRight: 6,
+              border: '1.5px solid #222'
+            }}
+            title={wsConnected ? "Live WebSocket connection" : (isFetchingRest ? "Using REST API" : "Disconnected")}
+          />
+        </div>
       </div>
 
       {/* Optionally show error */}
