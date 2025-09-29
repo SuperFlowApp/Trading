@@ -6,7 +6,7 @@ import { selectedPairStore } from "../../Zustandstore/userOrderStore"; // Import
  *
  * Props:
  * - symbol: string like "BTCUSDT" (optional, will use selectedPairStore if not provided)
- * - interval: string like "1", "5", "60", "240", "1D"
+ * - interval: string like "5S", "1", "5", "15", "60", "240", "1D", "1W", "1M"
  * - theme: "light" | "dark"
  * - containerId: optional DOM id
  */
@@ -54,7 +54,8 @@ export default function TVChart({
         const lastBarsCache = new Map();
         
         const configurationData = {
-          supported_resolutions: ["1", "5", "15", "30", "60", "240", "1D", "1W", "1M"],
+          // Update supported resolutions to include 5S
+          supported_resolutions: ["5S", "1", "5", "15", "30", "60", "240", "1D", "1W", "1M"],
           exchanges: [
             { value: "Crypto", name: "Crypto", desc: "Crypto Exchange" }
           ],
@@ -81,7 +82,6 @@ export default function TVChart({
           },
           
           resolveSymbol: (symbolName, onSymbolResolved, onResolveErrorCallback) => {
-            
             const symbolInfo = {
               name: symbolName,
               full_name: symbolName,
@@ -95,8 +95,10 @@ export default function TVChart({
               minmov: 1,
               pricescale: 100,
               has_intraday: true,
-              intraday_multipliers: ['1', '5', '15', '30', '60', '240'],
-              supported_resolutions: ["1", "5", "15", "30", "60", "240", "1D", "1W", "1M"],
+              // Update supported intraday multipliers to match your timeframes
+              intraday_multipliers: ['5S', '1', '5', '15', '60', '240'],
+              // Update supported resolutions to match your timeframes
+              supported_resolutions: ["5S", "1", "5", "15", "60", "240", "1D", "1W", "1M"],
               volume_precision: 8,
               data_status: 'streaming',
             };
@@ -108,7 +110,14 @@ export default function TVChart({
             const { from, to, firstDataRequest } = periodParams;
             
             const bars = [];
-            const step = resolution === "1D" ? 86400 : parseInt(resolution) * 60;
+            
+            // Handle the custom 5S (5 second) resolution
+            const step = resolution === "1D" ? 86400 : 
+                         resolution === "1W" ? 604800 :
+                         resolution === "1M" ? 2592000 :
+                         resolution === "5S" ? 5 : // 5 seconds
+                         parseInt(resolution) * 60; // minutes
+                         
             let time = from;
             
             // Generate sample data
@@ -150,15 +159,41 @@ export default function TVChart({
           
           subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
             // Here you would set up a connection to receive realtime updates
-            // For demo purposes, we'll just simulate updates every 5 seconds
+            
+            // Update interval based on resolution
+            const updateInterval = resolution === "5S" ? 1000 : 5000; // faster updates for 5S
+            
             const intervalId = setInterval(() => {
               const key = `${symbolInfo.name}:${resolution}`;
               const lastBar = lastBarsCache.get(key);
               
               if (lastBar) {
-                const newTime = lastBar.time + (resolution === "1D" ? 86400 : parseInt(resolution) * 60) * 1000;
+                // Calculate new time based on resolution
+                const timeIncrement = resolution === "1D" ? 86400 : 
+                                     resolution === "1W" ? 604800 :
+                                     resolution === "1M" ? 2592000 :
+                                     resolution === "5S" ? 5 : // 5 seconds
+                                     parseInt(resolution) * 60; // minutes
+                                     
+                // Use current time for more realistic updates
+                // and ensure it's greater than the last bar's time
+                const newTime = Math.max(
+                  lastBar.time + timeIncrement * 1000,
+                  Date.now()
+                );
+                
                 const basePrice = lastBar.close;
-                const volatility = basePrice * 0.01;
+                // Adjust volatility based on timeframe
+                const volatilityFactor = resolution === "5S" ? 0.0005 : 
+                                        resolution === "1" ? 0.001 :
+                                        resolution === "5" ? 0.002 :
+                                        resolution === "15" ? 0.003 :
+                                        resolution === "60" ? 0.005 :
+                                        resolution === "240" ? 0.008 :
+                                        resolution === "1D" ? 0.01 :
+                                        resolution === "1W" ? 0.02 : 0.03; // 1M
+                
+                const volatility = basePrice * volatilityFactor;
                 
                 const open = basePrice;
                 const close = basePrice + (Math.random() - 0.5) * volatility * 2;
@@ -177,7 +212,7 @@ export default function TVChart({
                 lastBarsCache.set(key, bar);
                 onRealtimeCallback(bar);
               }
-            }, 5000);
+            }, updateInterval);
             
             return intervalId; // Return something that can be used to unsubscribe
           },
@@ -211,10 +246,10 @@ export default function TVChart({
             "header_symbol_search",       // Remove the symbol search box
             "header_compare",             // Remove the "Compare" button
             "symbol_search_hot_key",      // Disable the symbol search hotkey
-            "header_chart_type",          // Optional: remove chart type selector
           ],
           enabled_features: [
-            "move_logo_to_main_pane"
+            "move_logo_to_main_pane",
+            "create_volume_indicator_by_default"
           ],
           // Custom colors
           overrides: {
@@ -273,7 +308,8 @@ export default function TVChart({
           },
           loading_screen: {
             backgroundColor: "#181923",
-            foregroundColor: "#1cd1ed"
+            foregroundColor: "#1cd1ed",
+            backgroundType: "solid" // Ensure loading screen also has solid background
           },
           client_id: "tradingview.com",
           user_id: "public_user",
@@ -281,7 +317,6 @@ export default function TVChart({
         });
 
         widgetRef.current.onChartReady(() => {
-          
           // Add this: Try to modify the volume indicator directly once chart is ready
           if (widgetRef.current) {
             const chart = widgetRef.current.activeChart();
@@ -301,6 +336,16 @@ export default function TVChart({
               "transparency": 40,
               "color1": "rgba(244, 143, 244, 0.6)",
               "color2": "rgba(28, 209, 237, 0.6)"
+            });
+          }
+          
+          // Add custom time intervals to the interval selector if needed
+          if (widgetRef.current) {
+            const chart = widgetRef.current.activeChart();
+            
+            // Set your custom timeframes in the interface
+            chart.setResolution(interval, () => {
+              console.log("Resolution set to:", interval);
             });
           }
         });
