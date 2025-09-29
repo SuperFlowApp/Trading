@@ -21,6 +21,7 @@ export default function TVChart({
   const widgetRef = useRef(null);
   const wsRef = useRef(null);
   const lastPriceRef = useRef(null);
+  const reconnectTimeoutRef = useRef(null);
   
   // Get the selected pair from the store
   const selectedPair = selectedPairStore(state => state.selectedPair);
@@ -30,6 +31,106 @@ export default function TVChart({
   
   // State to store the last price for the indicator
   const [lastPrice, setLastPrice] = useState(null);
+  const [wsStatus, setWsStatus] = useState("disconnected");
+
+  // Function to create and manage WebSocket connection
+  function setupWebSocket(symbolName, apiTimeframe) {
+    // Close any existing connection
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    
+    // Clear any pending reconnection attempts
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    
+    try {
+      // Create WebSocket URL with the domain directly embedded
+      const wsUrl = `wss://dev.superflow.exchange/ws/klines/${symbolName}/${apiTimeframe}`;
+      console.log(`Connecting to WebSocket: ${wsUrl}`);
+      
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+      
+      ws.onopen = () => {
+        console.log(`WebSocket connected: ${wsUrl}`);
+        setWsStatus("connected");
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data && data.close) {
+            // Update the last price from websocket data
+            const price = parseFloat(data.close);
+            setLastPrice(price);
+            lastPriceRef.current = price;
+            
+            // Update the last bar if widget is ready
+            if (widgetRef.current && lastPriceRef.current) {
+              // This will update the last price indicator
+              const currentBar = {
+                time: data.openTime || Date.now() / 1000, // Ensure time is in seconds
+                open: parseFloat(data.open),
+                high: parseFloat(data.high),
+                low: parseFloat(data.low),
+                close: price,
+                volume: parseFloat(data.volume || "0")
+              };
+              
+              // If datafeed is initialized, update it
+              if (window.lastBarUpdateCallback) {
+                window.lastBarUpdateCallback(currentBar);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error processing WebSocket message:", error);
+        }
+      };
+      
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        setWsStatus("error");
+        // No automatic reconnect on error - we'll handle it in onclose
+      };
+      
+      ws.onclose = (event) => {
+        console.log(`WebSocket closed with code: ${event.code}, reason: ${event.reason || 'No reason given'}`);
+        setWsStatus("disconnected");
+        
+        // Implement exponential backoff for reconnection
+        if (document.visibilityState !== "hidden") {
+          const backoffDelay = Math.min(30000, 1000 * Math.pow(1.5, ws.retries || 0));
+          console.log(`Reconnecting in ${backoffDelay/1000} seconds...`);
+          
+          reconnectTimeoutRef.current = setTimeout(() => {
+            if (wsRef.current === ws) { // Only reconnect if this is still the current socket
+              if (!ws.retries) ws.retries = 0;
+              ws.retries++;
+              setupWebSocket(symbolName, apiTimeframe);
+            }
+          }, backoffDelay);
+        }
+      };
+      
+      return ws;
+    } catch (error) {
+      console.error("Error creating WebSocket:", error);
+      setWsStatus("error");
+      
+      // Try to reconnect after a delay
+      if (document.visibilityState !== "hidden") {
+        reconnectTimeoutRef.current = setTimeout(() => {
+          setupWebSocket(symbolName, apiTimeframe);
+        }, 5000);
+      }
+      return null;
+    }
+  }
 
   useEffect(() => {
     let disposed = false;
@@ -72,64 +173,6 @@ export default function TVChart({
       if (resolution === "1W") return "1w";
       if (resolution === "1M") return "1M";
       return "1m"; // Default
-    }
-
-    // Setup WebSocket for real-time price updates
-    function setupPriceWebSocket(symbolName) {
-      const apiTimeframe = tvTimeframeToApiFormat(interval);
-      const wsUrl = `wss://dev.superflow.exchange/ws/klines/${symbolName}/${apiTimeframe}`;
-      
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-      
-      wsRef.current = new WebSocket(wsUrl);
-      
-      wsRef.current.onopen = () => {
-        console.log(`WebSocket connected: ${wsUrl}`);
-      };
-      
-      wsRef.current.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data && data.close) {
-            // Update the last price from websocket data
-            const price = parseFloat(data.close);
-            setLastPrice(price);
-            lastPriceRef.current = price;
-            
-            // Update the last bar if widget is ready
-            if (widgetRef.current && lastPriceRef.current) {
-              // This will update the last price indicator
-              const currentBar = {
-                time: data.openTime || Date.now(),
-                open: parseFloat(data.open),
-                high: parseFloat(data.high),
-                low: parseFloat(data.low),
-                close: price,
-                volume: parseFloat(data.volume || "0")
-              };
-              
-              // If datafeed is initialized, update it
-              if (window.lastBarUpdateCallback) {
-                window.lastBarUpdateCallback(currentBar);
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Error processing WebSocket message:", error);
-        }
-      };
-      
-      wsRef.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-      
-      wsRef.current.onclose = () => {
-        console.log("WebSocket connection closed");
-      };
-      
-      return wsRef.current;
     }
 
     async function init() {
@@ -211,31 +254,54 @@ export default function TVChart({
               const estimatedBars = Math.ceil(periodDuration / timeMultiplier);
               const limit = Math.min(Math.max(estimatedBars, 50), 1000); // Between 50 and 1000
               
-              // Use API_BASE_URL from config instead of hardcoding
+              // Ensure timestamps meet API minimum requirements (1400000000)
+              let startTime = from;
+              let endTime = to;
+              
+              // Convert timestamps if they're too small (below May 2014)
+              if (startTime < 1400000000) {
+                // Use current time minus the duration
+                startTime = Math.floor(Date.now() / 1000) - (to - from);
+              }
+              
+              if (endTime < 1400000000) {
+                endTime = Math.floor(Date.now() / 1000);
+              }
+              
+              // Log request parameters for debugging
+              console.log(`Fetching klines - symbol: ${symbolInfo.name}, timeframe: ${apiTimeframe}, limit: ${limit}`);
+              console.log(`Time range: ${startTime} to ${endTime} (${new Date(startTime * 1000)} to ${new Date(endTime * 1000)})`);
+              
               const response = await fetch(
-                `${API_BASE_URL}/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${from * 1000}&end_time=${to * 1000}`
+                `${API_BASE_URL}/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${startTime}&end_time=${endTime}`
               );
               
               if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API error (${response.status}):`, errorText);
                 throw new Error(`API error: ${response.status}`);
               }
               
               const data = await response.json();
               
               if (!Array.isArray(data) || data.length === 0) {
+                console.log(`No data received for ${symbolInfo.name}, timeframe ${apiTimeframe}`);
                 onHistoryCallback([], { noData: true });
                 return;
               }
               
               // Transform the data to the format expected by TradingView
               const bars = data.map(item => ({
-                time: item.openTime,
+                time: parseInt(item.openTime) * 1000, // Try multiplying by 1000 if TradingView expects milliseconds
                 open: parseFloat(item.open),
                 high: parseFloat(item.high),
                 low: parseFloat(item.low),
                 close: parseFloat(item.close),
                 volume: parseFloat(item.volume)
               }));
+              
+              // Log the data received for debugging
+              console.log(`Received ${bars.length} bars for ${symbolInfo.name}`);
               
               // Cache the last bar for updates
               if (bars.length > 0) {
@@ -261,10 +327,10 @@ export default function TVChart({
             // Store the callback so we can call it from the WebSocket handler
             window.lastBarUpdateCallback = onRealtimeCallback;
             
-            // Connect to WebSocket for real-time updates
-            setupPriceWebSocket(symbolInfo.name);
+            // Connect to WebSocket for real-time updates using our direct implementation
+            const apiTimeframe = tvTimeframeToApiFormat(resolution);
+            setupWebSocket(symbolInfo.name, apiTimeframe);
             
-            // Return the subscriberUID for unsubscribing
             return subscriberUID;
           },
           
@@ -275,10 +341,18 @@ export default function TVChart({
             window.lastBarUpdateCallback = null;
             
             // Close the WebSocket if it's open
-            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+            if (wsRef.current) {
               wsRef.current.close();
               wsRef.current = null;
             }
+            
+            // Clear any pending reconnection attempts
+            if (reconnectTimeoutRef.current) {
+              clearTimeout(reconnectTimeoutRef.current);
+              reconnectTimeoutRef.current = null;
+            }
+            
+            setWsStatus("disconnected");
           },
           
           getServerTime: (callback) => {
@@ -429,6 +503,12 @@ export default function TVChart({
     return () => {
       disposed = true;
       
+      // Clear any reconnection attempts
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      
       // Close WebSocket connection
       if (wsRef.current) {
         wsRef.current.close();
@@ -455,6 +535,7 @@ export default function TVChart({
       id={containerId}
       ref={containerRef}
       style={{ width: "100%", height: "100%" }}
+      className={wsStatus === "error" ? "ws-error" : wsStatus === "connected" ? "ws-connected" : ""}
     />
   );
 }
