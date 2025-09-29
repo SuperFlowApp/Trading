@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
-import { selectedPairStore } from "../../Zustandstore/userOrderStore"; // Import the store
+import { useEffect, useRef, useState } from "react";
+import { selectedPairStore } from "../../Zustandstore/userOrderStore";
+import { API_BASE_URL } from "../../config/api"; // Import the API_BASE_URL
 
 /**
- * TVChart mounts TradingView's Advanced Charting Library.
+ * TVChart mounts TradingView's Advanced Charting Library with real data.
  *
  * Props:
  * - symbol: string like "BTCUSDT" (optional, will use selectedPairStore if not provided)
@@ -11,19 +12,24 @@ import { selectedPairStore } from "../../Zustandstore/userOrderStore"; // Import
  * - containerId: optional DOM id
  */
 export default function TVChart({
-  symbol: propSymbol, // Rename to propSymbol to avoid confusion
+  symbol: propSymbol,
   interval = "60",
   theme = "dark",
   containerId = "tv-chart-container",
 }) {
   const containerRef = useRef(null);
   const widgetRef = useRef(null);
+  const wsRef = useRef(null);
+  const lastPriceRef = useRef(null);
   
   // Get the selected pair from the store
   const selectedPair = selectedPairStore(state => state.selectedPair);
   
   // Derive the actual symbol to use (either from props or from store)
   const symbol = propSymbol || `${selectedPair}USDT`;
+  
+  // State to store the last price for the indicator
+  const [lastPrice, setLastPrice] = useState(null);
 
   useEffect(() => {
     let disposed = false;
@@ -40,6 +46,92 @@ export default function TVChart({
       });
     }
 
+    // Function to convert API timeframe format to TradingView format
+    function apiTimeframeToTVFormat(timeframe) {
+      if (timeframe === "1m") return "1";
+      if (timeframe === "5m") return "5";
+      if (timeframe === "15m") return "15";
+      if (timeframe === "30m") return "30";
+      if (timeframe === "1h") return "60";
+      if (timeframe === "4h") return "240";
+      if (timeframe === "1d") return "1D";
+      if (timeframe === "1w") return "1W";
+      if (timeframe === "1M") return "1M";
+      return timeframe;
+    }
+
+    // Function to convert TradingView timeframe format to API format
+    function tvTimeframeToApiFormat(resolution) {
+      if (resolution === "1") return "1m";
+      if (resolution === "5") return "5m";
+      if (resolution === "15") return "15m";
+      if (resolution === "30") return "30m";
+      if (resolution === "60") return "1h";
+      if (resolution === "240") return "4h";
+      if (resolution === "1D") return "1d";
+      if (resolution === "1W") return "1w";
+      if (resolution === "1M") return "1M";
+      return "1m"; // Default
+    }
+
+    // Setup WebSocket for real-time price updates
+    function setupPriceWebSocket(symbolName) {
+      const apiTimeframe = tvTimeframeToApiFormat(interval);
+      const wsUrl = `wss://dev.superflow.exchange/ws/klines/${symbolName}/${apiTimeframe}`;
+      
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      
+      wsRef.current = new WebSocket(wsUrl);
+      
+      wsRef.current.onopen = () => {
+        console.log(`WebSocket connected: ${wsUrl}`);
+      };
+      
+      wsRef.current.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data && data.close) {
+            // Update the last price from websocket data
+            const price = parseFloat(data.close);
+            setLastPrice(price);
+            lastPriceRef.current = price;
+            
+            // Update the last bar if widget is ready
+            if (widgetRef.current && lastPriceRef.current) {
+              // This will update the last price indicator
+              const currentBar = {
+                time: data.openTime || Date.now(),
+                open: parseFloat(data.open),
+                high: parseFloat(data.high),
+                low: parseFloat(data.low),
+                close: price,
+                volume: parseFloat(data.volume || "0")
+              };
+              
+              // If datafeed is initialized, update it
+              if (window.lastBarUpdateCallback) {
+                window.lastBarUpdateCallback(currentBar);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error processing WebSocket message:", error);
+        }
+      };
+      
+      wsRef.current.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+      
+      wsRef.current.onclose = () => {
+        console.log("WebSocket connection closed");
+      };
+      
+      return wsRef.current;
+    }
+
     async function init() {
       try {
         // Load charting library first
@@ -54,8 +146,7 @@ export default function TVChart({
         const lastBarsCache = new Map();
         
         const configurationData = {
-          // Update supported resolutions to include 5S
-          supported_resolutions: ["5S", "1", "5", "15", "30", "60", "240", "1D", "1W", "1M"],
+          supported_resolutions: ["1", "5", "15", "30", "60", "240", "1D", "1W", "1M"],
           exchanges: [
             { value: "Crypto", name: "Crypto", desc: "Crypto Exchange" }
           ],
@@ -70,7 +161,6 @@ export default function TVChart({
           },
           
           searchSymbols: (userInput, exchange, symbolType, onResult) => {
-            // Return predefined symbol for demo
             onResult([{
               symbol: symbol,
               full_name: symbol,
@@ -95,10 +185,8 @@ export default function TVChart({
               minmov: 1,
               pricescale: 100,
               has_intraday: true,
-              // Update supported intraday multipliers to match your timeframes
-              intraday_multipliers: ['5S', '1', '5', '15', '60', '240'],
-              // Update supported resolutions to match your timeframes
-              supported_resolutions: ["5S", "1", "5", "15", "60", "240", "1D", "1W", "1M"],
+              intraday_multipliers: ['1', '5', '15', '30', '60', '240'],
+              supported_resolutions: ["1", "5", "15", "30", "60", "240", "1D", "1W", "1M"],
               volume_precision: 8,
               data_status: 'streaming',
             };
@@ -106,120 +194,91 @@ export default function TVChart({
             setTimeout(() => onSymbolResolved(symbolInfo), 0);
           },
           
-          getBars: (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
+          getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
             const { from, to, firstDataRequest } = periodParams;
             
-            const bars = [];
-            
-            // Handle the custom 5S (5 second) resolution
-            const step = resolution === "1D" ? 86400 : 
-                         resolution === "1W" ? 604800 :
-                         resolution === "1M" ? 2592000 :
-                         resolution === "5S" ? 5 : // 5 seconds
-                         parseInt(resolution) * 60; // minutes
-                         
-            let time = from;
-            
-            // Generate sample data
-            while (time <= to) {
-              const basePrice = 20000 + Math.random() * 5000;
-              const volatility = basePrice * 0.02;
+            try {
+              // Convert TradingView resolution to API timeframe format
+              const apiTimeframe = tvTimeframeToApiFormat(resolution);
               
-              const open = basePrice;
-              const close = basePrice + (Math.random() - 0.5) * volatility * 2;
-              const high = Math.max(open, close) + Math.random() * volatility;
-              const low = Math.min(open, close) - Math.random() * volatility;
+              // Calculate the limit based on the period
+              const timeMultiplier = resolution === "1D" ? 86400 : 
+                                    resolution === "1W" ? 604800 :
+                                    resolution === "1M" ? 2592000 :
+                                    parseInt(resolution) * 60;
               
-              bars.push({
-                time: time * 1000,
-                open,
-                high,
-                low,
-                close,
-                volume: Math.round(Math.random() * 1000)
-              });
+              const periodDuration = to - from;
+              const estimatedBars = Math.ceil(periodDuration / timeMultiplier);
+              const limit = Math.min(Math.max(estimatedBars, 50), 1000); // Between 50 and 1000
               
-              time += step;
+              // Use API_BASE_URL from config instead of hardcoding
+              const response = await fetch(
+                `${API_BASE_URL}/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${from * 1000}&end_time=${to * 1000}`
+              );
+              
+              if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+              }
+              
+              const data = await response.json();
+              
+              if (!Array.isArray(data) || data.length === 0) {
+                onHistoryCallback([], { noData: true });
+                return;
+              }
+              
+              // Transform the data to the format expected by TradingView
+              const bars = data.map(item => ({
+                time: item.openTime,
+                open: parseFloat(item.open),
+                high: parseFloat(item.high),
+                low: parseFloat(item.low),
+                close: parseFloat(item.close),
+                volume: parseFloat(item.volume)
+              }));
+              
+              // Cache the last bar for updates
+              if (bars.length > 0) {
+                const lastBar = bars[bars.length - 1];
+                const key = `${symbolInfo.name}:${resolution}`;
+                lastBarsCache.set(key, lastBar);
+                
+                // Store the last close price
+                lastPriceRef.current = lastBar.close;
+                setLastPrice(lastBar.close);
+              }
+              
+              onHistoryCallback(bars, { noData: bars.length === 0 });
+            } catch (error) {
+              console.error("Error fetching klines:", error);
+              onErrorCallback(`Error fetching klines: ${error.message}`);
             }
-            
-            if (bars.length === 0) {
-              onHistoryCallback([], { noData: true });
-              return;
-            }
-            
-            // Cache the last bar for this resolution
-            if (bars.length > 0) {
-              const lastBar = bars[bars.length - 1];
-              const key = `${symbolInfo.name}:${resolution}`;
-              lastBarsCache.set(key, lastBar);
-            }
-            
-            onHistoryCallback(bars, { noData: false });
           },
           
           subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
-            // Here you would set up a connection to receive realtime updates
+            console.log("Subscribing to bars", symbolInfo.name, resolution);
             
-            // Update interval based on resolution
-            const updateInterval = resolution === "5S" ? 1000 : 5000; // faster updates for 5S
+            // Store the callback so we can call it from the WebSocket handler
+            window.lastBarUpdateCallback = onRealtimeCallback;
             
-            const intervalId = setInterval(() => {
-              const key = `${symbolInfo.name}:${resolution}`;
-              const lastBar = lastBarsCache.get(key);
-              
-              if (lastBar) {
-                // Calculate new time based on resolution
-                const timeIncrement = resolution === "1D" ? 86400 : 
-                                     resolution === "1W" ? 604800 :
-                                     resolution === "1M" ? 2592000 :
-                                     resolution === "5S" ? 5 : // 5 seconds
-                                     parseInt(resolution) * 60; // minutes
-                                     
-                // Use current time for more realistic updates
-                // and ensure it's greater than the last bar's time
-                const newTime = Math.max(
-                  lastBar.time + timeIncrement * 1000,
-                  Date.now()
-                );
-                
-                const basePrice = lastBar.close;
-                // Adjust volatility based on timeframe
-                const volatilityFactor = resolution === "5S" ? 0.0005 : 
-                                        resolution === "1" ? 0.001 :
-                                        resolution === "5" ? 0.002 :
-                                        resolution === "15" ? 0.003 :
-                                        resolution === "60" ? 0.005 :
-                                        resolution === "240" ? 0.008 :
-                                        resolution === "1D" ? 0.01 :
-                                        resolution === "1W" ? 0.02 : 0.03; // 1M
-                
-                const volatility = basePrice * volatilityFactor;
-                
-                const open = basePrice;
-                const close = basePrice + (Math.random() - 0.5) * volatility * 2;
-                const high = Math.max(open, close) + Math.random() * volatility/2;
-                const low = Math.min(open, close) - Math.random() * volatility/2;
-                
-                const bar = {
-                  time: newTime,
-                  open,
-                  high, 
-                  low,
-                  close,
-                  volume: Math.round(Math.random() * 1000)
-                };
-                
-                lastBarsCache.set(key, bar);
-                onRealtimeCallback(bar);
-              }
-            }, updateInterval);
+            // Connect to WebSocket for real-time updates
+            setupPriceWebSocket(symbolInfo.name);
             
-            return intervalId; // Return something that can be used to unsubscribe
+            // Return the subscriberUID for unsubscribing
+            return subscriberUID;
           },
           
           unsubscribeBars: (subscriberUID) => {
-            // Clear the interval when unsubscribing
-            clearInterval(subscriberUID);
+            console.log("Unsubscribing from bars", subscriberUID);
+            
+            // Clean up the stored callback
+            window.lastBarUpdateCallback = null;
+            
+            // Close the WebSocket if it's open
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.close();
+              wsRef.current = null;
+            }
           },
           
           getServerTime: (callback) => {
@@ -231,7 +290,7 @@ export default function TVChart({
           library_path: "/static/charting_library/",
           fullscreen: false,
           autosize: true,
-          symbol, // This now uses either the prop or the store value
+          symbol,
           interval,
           container: containerId,
           theme,
@@ -242,14 +301,28 @@ export default function TVChart({
           disabled_features: [
             "use_localstorage_for_settings",
             "popup_hints",
-            "volume_force_overlay",       // Prevent volume pane from being an overlay
-            "header_symbol_search",       // Remove the symbol search box
-            "header_compare",             // Remove the "Compare" button
-            "symbol_search_hot_key",      // Disable the symbol search hotkey
+            "volume_force_overlay",
+            "header_symbol_search",
+            "header_compare",
+            "symbol_search_hot_key",
           ],
           enabled_features: [
             "move_logo_to_main_pane",
             "create_volume_indicator_by_default"
+          ],
+          // Add custom time frames configuration
+          time_frames: [
+            // These will appear directly in the toolbar
+            { text: "5m", resolution: "5", description: "5 Minutes" },
+            { text: "30m", resolution: "30", description: "30 Minutes" },
+            { text: "1h", resolution: "60", description: "1 Hour" },
+            { text: "1d", resolution: "1D", description: "1 Day" },
+            // These will be in the dropdown
+            { text: "1m", resolution: "1", description: "1 Minute" },
+            { text: "15m", resolution: "15", description: "15 Minutes" },
+            { text: "4h", resolution: "240", description: "4 Hours" },
+            { text: "1w", resolution: "1W", description: "1 Week" },
+            { text: "1M", resolution: "1M", description: "1 Month" },
           ],
           // Custom colors
           overrides: {
@@ -278,7 +351,7 @@ export default function TVChart({
             
             // Crosshair
             "paneProperties.crossHairProperties.color": "#758696", // Crosshair color
-            "paneProperties.crossHairProperties.style": 2, // Crosshair style (0-solid, 1-dotted, 2-dashed)
+            "paneProperties.crossHairProperties.style": 2, // Crosshair style
             
             // Volume
             "volumePaneSize": "medium", // Volume pane size
@@ -286,42 +359,40 @@ export default function TVChart({
           // Studies (indicators) colors
           studies_overrides: {
             // Volume colors
-            "volume.volume.color.0": "rgba(244, 143, 244, 0.6)",  // Decreasing volume color (pink)
-            "volume.volume.color.1": "rgba(28, 209, 237, 0.6)",   // Increasing volume color (blue)
-            "volume.volume.transparency": 40,  // Volume transparency
+            "volume.volume.color.0": "rgba(244, 143, 244, 0.6)",
+            "volume.volume.color.1": "rgba(28, 209, 237, 0.6)",
+            "volume.volume.transparency": 40,
             
             // Volume SMA line - Settings to hide SMA
-            "volume.show ma": false,              // Hide SMA on Volume indicator
-            "volume.ma length": 0,                // Set MA length to 0
-            "volume.volume ma.color": "rgba(0,0,0,0)",  // Transparent MA color
-            "volume.volume ma.linewidth": 0,      // 0 width makes the line invisible
-            "volume.volume ma.transparency": 100, // Full transparency
+            "volume.show ma": false,
+            "volume.ma length": 0,
+            "volume.volume ma.color": "rgba(0,0,0,0)",
+            "volume.volume ma.linewidth": 0,
+            "volume.volume ma.transparency": 100,
             
             // Moving Average colors
-            "MA.plot.color": "#f48ff4",     // MA line color (pink)
-            "MA.plot.linewidth": 2,         // MA line width
+            "MA.plot.color": "#f48ff4",
+            "MA.plot.linewidth": 2,
             
             // MACD colors
-            "MACD.histogram.color": "#1cd1ed",     // MACD histogram color (blue)
-            "MACD.macd.color": "#f48ff4",          // MACD line color (pink)
-            "MACD.signal.color": "#ffffff",        // MACD signal line color (white)
+            "MACD.histogram.color": "#1cd1ed",
+            "MACD.macd.color": "#f48ff4",
+            "MACD.signal.color": "#ffffff",
           },
           loading_screen: {
             backgroundColor: "#181923",
             foregroundColor: "#1cd1ed",
-            backgroundType: "solid" // Ensure loading screen also has solid background
+            backgroundType: "solid"
           },
-          client_id: "tradingview.com",
-          user_id: "public_user",
-          charts_storage_api_version: "1.1"
         });
 
         widgetRef.current.onChartReady(() => {
-          // Add this: Try to modify the volume indicator directly once chart is ready
+          console.log("Chart is ready");
+          
           if (widgetRef.current) {
             const chart = widgetRef.current.activeChart();
             
-            // Remove volume indicator if present
+            // Configure volume indicator
             chart.getAllStudies().forEach(study => {
               if (study.name === "Volume") {
                 chart.removeEntity(study.id);
@@ -337,16 +408,14 @@ export default function TVChart({
               "color1": "rgba(244, 143, 244, 0.6)",
               "color2": "rgba(28, 209, 237, 0.6)"
             });
-          }
-          
-          // Add custom time intervals to the interval selector if needed
-          if (widgetRef.current) {
-            const chart = widgetRef.current.activeChart();
             
-            // Set your custom timeframes in the interface
+            // Set initial resolution
             chart.setResolution(interval, () => {
               console.log("Resolution set to:", interval);
             });
+            
+            // Add last price indicator
+            chart.createStudy("Current Price Label", false, false);
           }
         });
       } catch (e) {
@@ -356,8 +425,20 @@ export default function TVChart({
 
     init();
 
+    // Clean up
     return () => {
       disposed = true;
+      
+      // Close WebSocket connection
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      
+      // Clean up callback reference
+      window.lastBarUpdateCallback = null;
+      
+      // Remove TradingView widget
       if (widgetRef.current) {
         try {
           widgetRef.current.remove();
@@ -367,7 +448,7 @@ export default function TVChart({
         widgetRef.current = null;
       }
     };
-  }, [symbol, interval, theme, containerId]); // Make sure symbol is in the dependency array
+  }, [symbol, interval, theme, containerId]);
 
   return (
     <div
