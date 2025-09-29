@@ -178,7 +178,7 @@ export default function TVChart({
               description: symbolName,
               type: 'crypto',
               session: '24x7',
-              exchange: 'Crypto',
+              exchange: 'SuperFlow',
               listed_exchange: 'Crypto',
               timezone: 'Etc/UTC',
               ticker: symbolName,
