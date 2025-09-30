@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { selectedPairStore } from "../../Zustandstore/userOrderStore";
-import { API_BASE_URL } from "../../config/api"; // Import the API_BASE_URL
+import { DataFeed } from "./DataFeed";
 
 /**
  * TVChart mounts TradingView's Advanced Charting Library with real data.
@@ -19,9 +19,7 @@ export default function TVChart({
 }) {
   const containerRef = useRef(null);
   const widgetRef = useRef(null);
-  const wsRef = useRef(null);
-  const lastPriceRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
+  const dataFeedRef = useRef(null);
   
   // Get the selected pair from the store
   const selectedPair = selectedPairStore(state => state.selectedPair);
@@ -32,105 +30,6 @@ export default function TVChart({
   // State to store the last price for the indicator
   const [lastPrice, setLastPrice] = useState(null);
   const [wsStatus, setWsStatus] = useState("disconnected");
-
-  // Function to create and manage WebSocket connection
-  function setupWebSocket(symbolName, apiTimeframe) {
-    // Close any existing connection
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-    
-    // Clear any pending reconnection attempts
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-    
-    try {
-      // Create WebSocket URL with the domain directly embedded
-      const wsUrl = `wss://dev.superflow.exchange/ws/klines/${symbolName}/${apiTimeframe}`;
-      console.log(`Connecting to WebSocket: ${wsUrl}`);
-      
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
-      
-      ws.onopen = () => {
-        console.log(`WebSocket connected: ${wsUrl}`);
-        setWsStatus("connected");
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data && data.close) {
-            // Update the last price from websocket data
-            const price = parseFloat(data.close);
-            setLastPrice(price);
-            lastPriceRef.current = price;
-            
-            // Update the last bar if widget is ready
-            if (widgetRef.current && lastPriceRef.current) {
-              // This will update the last price indicator
-              const currentBar = {
-                time: data.openTime || Date.now() / 1000, // Ensure time is in seconds
-                open: parseFloat(data.open),
-                high: parseFloat(data.high),
-                low: parseFloat(data.low),
-                close: price,
-                volume: parseFloat(data.volume || "0")
-              };
-              
-              // If datafeed is initialized, update it
-              if (window.lastBarUpdateCallback) {
-                window.lastBarUpdateCallback(currentBar);
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Error processing WebSocket message:", error);
-        }
-      };
-      
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        setWsStatus("error");
-        // No automatic reconnect on error - we'll handle it in onclose
-      };
-      
-      ws.onclose = (event) => {
-        console.log(`WebSocket closed with code: ${event.code}, reason: ${event.reason || 'No reason given'}`);
-        setWsStatus("disconnected");
-        
-        // Implement exponential backoff for reconnection
-        if (document.visibilityState !== "hidden") {
-          const backoffDelay = Math.min(30000, 1000 * Math.pow(1.5, ws.retries || 0));
-          console.log(`Reconnecting in ${backoffDelay/1000} seconds...`);
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            if (wsRef.current === ws) { // Only reconnect if this is still the current socket
-              if (!ws.retries) ws.retries = 0;
-              ws.retries++;
-              setupWebSocket(symbolName, apiTimeframe);
-            }
-          }, backoffDelay);
-        }
-      };
-      
-      return ws;
-    } catch (error) {
-      console.error("Error creating WebSocket:", error);
-      setWsStatus("error");
-      
-      // Try to reconnect after a delay
-      if (document.visibilityState !== "hidden") {
-        reconnectTimeoutRef.current = setTimeout(() => {
-          setupWebSocket(symbolName, apiTimeframe);
-        }, 5000);
-      }
-      return null;
-    }
-  }
 
   useEffect(() => {
     let disposed = false;
@@ -147,34 +46,6 @@ export default function TVChart({
       });
     }
 
-    // Function to convert API timeframe format to TradingView format
-    function apiTimeframeToTVFormat(timeframe) {
-      if (timeframe === "1m") return "1";
-      if (timeframe === "5m") return "5";
-      if (timeframe === "15m") return "15";
-      if (timeframe === "30m") return "30";
-      if (timeframe === "1h") return "60";
-      if (timeframe === "4h") return "240";
-      if (timeframe === "1d") return "1D";
-      if (timeframe === "1w") return "1W";
-      if (timeframe === "1M") return "1M";
-      return timeframe;
-    }
-
-    // Function to convert TradingView timeframe format to API format
-    function tvTimeframeToApiFormat(resolution) {
-      if (resolution === "1") return "1m";
-      if (resolution === "5") return "5m";
-      if (resolution === "15") return "15m";
-      if (resolution === "30") return "30m";
-      if (resolution === "60") return "1h";
-      if (resolution === "240") return "4h";
-      if (resolution === "1D") return "1d";
-      if (resolution === "1W") return "1w";
-      if (resolution === "1M") return "1M";
-      return "1m"; // Default
-    }
-
     async function init() {
       try {
         // Load charting library first
@@ -185,180 +56,15 @@ export default function TVChart({
 
         if (disposed) return;
 
-        // Create a proper custom datafeed
-        const lastBarsCache = new Map();
-        
-        const configurationData = {
-          supported_resolutions: ["1", "5", "15", "30", "60", "240", "1D", "1W", "1M"],
-          exchanges: [
-            { value: "Crypto", name: "Crypto", desc: "Crypto Exchange" }
-          ],
-          symbols_types: [
-            { value: "crypto", name: "Cryptocurrency" }
-          ]
-        };
+        // Create a new DataFeed instance
+        dataFeedRef.current = new DataFeed({
+          symbol,
+          onStatusChange: setWsStatus,
+          onLastPriceChange: setLastPrice,
+        });
 
-        const customDatafeed = {
-          onReady: (callback) => {
-            setTimeout(() => callback(configurationData), 0);
-          },
-          
-          searchSymbols: (userInput, exchange, symbolType, onResult) => {
-            onResult([{
-              symbol: symbol,
-              full_name: symbol,
-              description: symbol,
-              exchange: "Crypto",
-              ticker: symbol,
-              type: "crypto"
-            }]);
-          },
-          
-          resolveSymbol: (symbolName, onSymbolResolved, onResolveErrorCallback) => {
-            const symbolInfo = {
-              name: symbolName,
-              full_name: symbolName,
-              description: symbolName,
-              type: 'crypto',
-              session: '24x7',
-              exchange: 'SuperFlow',
-              listed_exchange: 'Crypto',
-              timezone: 'Etc/UTC',
-              ticker: symbolName,
-              minmov: 1,
-              pricescale: 100,
-              has_intraday: true,
-              intraday_multipliers: ['1', '5', '15', '30', '60', '240'],
-              supported_resolutions: ["1", "5", "15", "30", "60", "240", "1D", "1W", "1M"],
-              volume_precision: 8,
-              data_status: 'streaming',
-            };
-            
-            setTimeout(() => onSymbolResolved(symbolInfo), 0);
-          },
-          
-          getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
-            const { from, to, firstDataRequest } = periodParams;
-            
-            try {
-              // Convert TradingView resolution to API timeframe format
-              const apiTimeframe = tvTimeframeToApiFormat(resolution);
-              
-              // Calculate the limit based on the period
-              const timeMultiplier = resolution === "1D" ? 86400 : 
-                                    resolution === "1W" ? 604800 :
-                                    resolution === "1M" ? 2592000 :
-                                    parseInt(resolution) * 60;
-              
-              const periodDuration = to - from;
-              const estimatedBars = Math.ceil(periodDuration / timeMultiplier);
-              const limit = Math.min(Math.max(estimatedBars, 50), 1000); // Between 50 and 1000
-              
-              // Ensure timestamps meet API minimum requirements (1400000000)
-              let startTime = from;
-              let endTime = to;
-              
-              // Convert timestamps if they're too small (below May 2014)
-              if (startTime < 1400000000) {
-                // Use current time minus the duration
-                startTime = Math.floor(Date.now() / 1000) - (to - from);
-              }
-              
-              if (endTime < 1400000000) {
-                endTime = Math.floor(Date.now() / 1000);
-              }
-              
-              // Log request parameters for debugging
-              console.log(`Fetching klines - symbol: ${symbolInfo.name}, timeframe: ${apiTimeframe}, limit: ${limit}`);
-              console.log(`Time range: ${startTime} to ${endTime} (${new Date(startTime * 1000)} to ${new Date(endTime * 1000)})`);
-              
-              const response = await fetch(
-                `${API_BASE_URL}/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${startTime}&end_time=${endTime}`
-              );
-              
-              if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`API error (${response.status}):`, errorText);
-                throw new Error(`API error: ${response.status}`);
-              }
-              
-              const data = await response.json();
-              
-              if (!Array.isArray(data) || data.length === 0) {
-                console.log(`No data received for ${symbolInfo.name}, timeframe ${apiTimeframe}`);
-                onHistoryCallback([], { noData: true });
-                return;
-              }
-              
-              // Transform the data to the format expected by TradingView
-              const bars = data.map(item => ({
-                time: parseInt(item.openTime) * 1000, // Try multiplying by 1000 if TradingView expects milliseconds
-                open: parseFloat(item.open),
-                high: parseFloat(item.high),
-                low: parseFloat(item.low),
-                close: parseFloat(item.close),
-                volume: parseFloat(item.volume)
-              }));
-              
-              // Log the data received for debugging
-              console.log(`Received ${bars.length} bars for ${symbolInfo.name}`);
-              
-              // Cache the last bar for updates
-              if (bars.length > 0) {
-                const lastBar = bars[bars.length - 1];
-                const key = `${symbolInfo.name}:${resolution}`;
-                lastBarsCache.set(key, lastBar);
-                
-                // Store the last close price
-                lastPriceRef.current = lastBar.close;
-                setLastPrice(lastBar.close);
-              }
-              
-              onHistoryCallback(bars, { noData: bars.length === 0 });
-            } catch (error) {
-              console.error("Error fetching klines:", error);
-              onErrorCallback(`Error fetching klines: ${error.message}`);
-            }
-          },
-          
-          subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
-            console.log("Subscribing to bars", symbolInfo.name, resolution);
-            
-            // Store the callback so we can call it from the WebSocket handler
-            window.lastBarUpdateCallback = onRealtimeCallback;
-            
-            // Connect to WebSocket for real-time updates using our direct implementation
-            const apiTimeframe = tvTimeframeToApiFormat(resolution);
-            setupWebSocket(symbolInfo.name, apiTimeframe);
-            
-            return subscriberUID;
-          },
-          
-          unsubscribeBars: (subscriberUID) => {
-            console.log("Unsubscribing from bars", subscriberUID);
-            
-            // Clean up the stored callback
-            window.lastBarUpdateCallback = null;
-            
-            // Close the WebSocket if it's open
-            if (wsRef.current) {
-              wsRef.current.close();
-              wsRef.current = null;
-            }
-            
-            // Clear any pending reconnection attempts
-            if (reconnectTimeoutRef.current) {
-              clearTimeout(reconnectTimeoutRef.current);
-              reconnectTimeoutRef.current = null;
-            }
-            
-            setWsStatus("disconnected");
-          },
-          
-          getServerTime: (callback) => {
-            callback(Math.floor(Date.now() / 1000));
-          }
-        };
+        // Get the datafeed object interface for TradingView
+        const datafeed = dataFeedRef.current.getDatafeedObject();
 
         widgetRef.current = new window.TradingView.widget({
           library_path: "/static/charting_library/",
@@ -368,7 +74,7 @@ export default function TVChart({
           interval,
           container: containerId,
           theme,
-          datafeed: customDatafeed,
+          datafeed,
           locale: "en",
           timezone: "Etc/UTC",
           debug: false,
@@ -490,6 +196,16 @@ export default function TVChart({
             
             // Add last price indicator
             chart.createStudy("Current Price Label", false, false);
+            
+            // Reset the view to show the latest data properly
+            setTimeout(() => {
+              try {
+                chart.executeActionById("timeScaleReset");
+                console.log("Chart timeScale reset applied");
+              } catch (e) {
+                console.error("Error resetting chart:", e);
+              }
+            }, 500);
           }
         });
       } catch (e) {
@@ -503,20 +219,11 @@ export default function TVChart({
     return () => {
       disposed = true;
       
-      // Clear any reconnection attempts
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
+      // Clean up DataFeed resources
+      if (dataFeedRef.current) {
+        dataFeedRef.current.cleanup();
+        dataFeedRef.current = null;
       }
-      
-      // Close WebSocket connection
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
-      }
-      
-      // Clean up callback reference
-      window.lastBarUpdateCallback = null;
       
       // Remove TradingView widget
       if (widgetRef.current) {
