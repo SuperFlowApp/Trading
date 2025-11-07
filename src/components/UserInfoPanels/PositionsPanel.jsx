@@ -49,13 +49,13 @@ function PositionsPanel() {
       <div className="text-center text-body text-liquidmidgray">
         {/* Positions */}
         <div style={{ display: activeTab === 'positions' ? 'block' : 'none' }}>
-          <section className="text-white">
-            <Positions />
+          <section>
+            <OpenOrdersTab />
           </section>
         </div>
         {/* Open Orders */}
         <div style={{ display: activeTab === 'orders' ? 'block' : 'none' }}>
-          <OpenOrdersTab />
+          <Positions />
         </div>
         {/* Trade History */}
         <div style={{ display: activeTab === 'tradeHistory' ? 'block' : 'none' }}>
