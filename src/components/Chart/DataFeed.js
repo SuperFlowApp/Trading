@@ -236,10 +236,10 @@ export class DataFeed {
       
       // Calculate start time by going back the desired number of bars
       const startTime = currentTime - (barsCount * timeMultiplier);
-      
+      /*
       console.log(`Fetching latest data - symbol: ${symbolInfo.name}, timeframe: ${apiTimeframe}, bars: ${barsCount}`);
       console.log(`Time range: ${startTime} to ${currentTime} (${new Date(startTime * 1000)} to ${new Date(currentTime * 1000)})`);
-      
+      */
       // Update the last fetch time
       this.lastFetchTime = Date.now();
       

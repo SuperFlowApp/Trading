@@ -22,7 +22,7 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
         message.success("Login successful!");
         setAuthKey(data.access_token);
         setContextUsername(username);
-        onLoginSuccess && onLoginSuccess(username, data.access_token);
+        onLoginSuccess && onLoginSuccess();
         onClose();
       } else if (data.error_code === 1110 && data.msg) {
         message.error(data.msg);

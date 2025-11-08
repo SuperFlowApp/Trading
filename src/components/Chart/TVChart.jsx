@@ -195,7 +195,7 @@ export default function TVChart({
             });
             
             // Add last price indicator
-            chart.createStudy("Current Price Label", false, false);
+            // chart.createStudy("Current Price Label", false, false);
             
             // Reset the view to show the latest data properly
             setTimeout(() => {

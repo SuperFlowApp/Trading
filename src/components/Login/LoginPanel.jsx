@@ -3,17 +3,20 @@ import Modal from "../CommonUIs/modal/modal";
 import DefaultAPILogin from "./defaultAPILogin";
 import SiweLogin from "./siweLogin";
 import Button from "../CommonUIs/Button";
-
-function setTokens(t) {
-  localStorage.setItem("access_token", t.access_token);
-  localStorage.setItem("token_type", t.token_type);
-  if (t.refresh_token) localStorage.setItem("refresh_token", t.refresh_token);
-  // TODO: configure your fetch/axios interceptor to send Authorization: `${t.token_type} ${t.access_token}`
-}
+import { MyWalletModal } from "./MyWallet";
 
 const LoginPanel = ({ onClose, open }) => {
   const [showDefaultLogin, setShowDefaultLogin] = useState(false);
   const [showSiweLogin, setShowSiweLogin] = useState(false);
+  const [showWallet, setShowWallet] = useState(false);
+
+  // Handler to close all modals and the login panel
+  const handleLoginSuccess = () => {
+    setShowDefaultLogin(false);
+    setShowSiweLogin(false);
+    setShowWallet(false);
+    onClose && onClose();
+  };
 
   return (
     <>
@@ -41,7 +44,7 @@ const LoginPanel = ({ onClose, open }) => {
           >
             Default method
           </Button>
-
+          {/* 
           <Button
             type="secondary"
             onClick={() => setShowSiweLogin(true)}
@@ -49,17 +52,29 @@ const LoginPanel = ({ onClose, open }) => {
           >
             Wallet
           </Button>
+          */}
+          <Button
+            type="secondary"
+            onClick={() => setShowWallet(true)}
+            style={{ marginTop: 16 }}
+          >
+            My Wallet
+          </Button>
         </div>
       </Modal>
       <DefaultAPILogin
         open={showDefaultLogin}
         onClose={() => setShowDefaultLogin(false)}
-        onLoginSuccess={setTokens}
+        onLoginSuccess={handleLoginSuccess}
       />
       <SiweLogin
         open={showSiweLogin}
         onClose={() => setShowSiweLogin(false)}
-        onLoginSuccess={setTokens}
+      />
+      <MyWalletModal
+        open={showWallet}
+        onClose={() => setShowWallet(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
     </>
   );
