@@ -408,8 +408,8 @@ function LimitOrderForm({ onCurrencyChange }) {
       <div>
         <div className="text-body">
           <span className="flex w-full justify-between text-liquidlightergray">
-            Available to trade: <span className="text-white">
-              {formatPrice(balanceFree)} USDT
+            Available for order: <span className="text-white">
+              {formatPrice(availableForOrder)} USDT
             </span>
           </span>
         </div>
