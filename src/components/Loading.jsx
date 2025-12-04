@@ -31,7 +31,7 @@ export default function LoadingScreen() {
   ];
 
   return (
-    <div className="fixed inset-0 z-[99999] flex flex-col justify-between items-center bg-boxbackground min-h-screen w-full">
+    <div className="fixed inset-0 z-[99999] flex flex-col justify-between items-center bg-backgroundmid min-h-screen w-full">
       {/* Center loading animation */}
       <div className="flex-1 flex items-center justify-center w-full">
         <div className="flex flex-col items-center">
