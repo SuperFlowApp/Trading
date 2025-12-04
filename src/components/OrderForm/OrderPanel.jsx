@@ -381,7 +381,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   }
 
   return (
-    <div className="px-2 py-1 w-full text-white flex flex-col gap-3 flex flex-col border-[1px] border-backgroundlighthover bg-backgroundmid rounded-md min-w-0 overflow-hidden">
+    <div className="px-2 py-1 w-full text-white flex flex-col gap-3 flex flex-col border-[1px] border-borderscolor bg-boxbackground rounded-md min-w-0 overflow-hidden">
 
       {/* Head Tabs */}
       <Tab
@@ -530,13 +530,9 @@ function LimitOrderForm({ onCurrencyChange }) {
         type={
           !authKey
             ? 'orderdisconnect'
-            : orderError
-              ? 'danger'
-              : orderSuccess
-                ? 'success'
-                : side === 'buy'
-                  ? 'primary'
-                  : 'secondary'
+            : side === 'buy'
+              ? 'primary'
+              : 'secondary'
         }
         className={` mt-2  transition-colors border-2 border-transparent ${blinkClass}`}
         block

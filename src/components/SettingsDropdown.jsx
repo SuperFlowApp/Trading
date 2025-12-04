@@ -126,7 +126,7 @@ const SettingsDropdown = ({
             </button>
 
             {settingsOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-backgroundmid border border-[#23272e] rounded-xl shadow-2xl z-50 p-5 space-y-5">
+                <div className="absolute right-0 mt-2 w-72 bg-boxbackground border border-[#23272e] rounded-xl shadow-2xl z-50 p-5 space-y-5">
                     {stylingSettings}
                 </div>
             )}

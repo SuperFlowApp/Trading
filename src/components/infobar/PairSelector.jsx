@@ -110,7 +110,7 @@ function PairSelector({
         <img src="/assets/arrow.svg" alt="icon" className="w-3.5 h-[10px]" />
       </div>
       {dropdownOpen && (
-        <div className="absolute z-50 left-0 top-full mt-2 bg-backgrounddark border border-secondary2 rounded-md shadow-lg w-[900px] max-h-[350px] overflow-auto">
+        <div className="absolute z-50 left-0 top-full mt-2 bg-boxbackground border border-secondary2 rounded-md shadow-lg w-[900px] max-h-[350px] overflow-auto">
           <table className="min-w-full text-xs text-left">
             <thead>
               <tr className="bg-backgroundlight text-white">

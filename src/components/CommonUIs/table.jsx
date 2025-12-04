@@ -36,7 +36,7 @@ const Table = ({
           </tr>
         ) : Array.isArray(data) ? (
           data.map((row, idx) => (
-            <tr key={rowKey(row, idx)} className={idx % 2 ? "bg-backgroundmid" : "bg-backgroundlight"}>
+            <tr key={rowKey(row, idx)} className={idx % 2 ? "bg-boxbackground" : "bg-backgroundlight"}>
               {columns.map(col => (
                 <td key={col.key} className="px-2 py-2 text-liquidwhite">
                   {col.render ? col.render(row[col.key], row, idx) : row[col.key] ?? "-"}

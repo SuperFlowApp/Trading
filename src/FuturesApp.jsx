@@ -47,7 +47,7 @@ function FuturesApp() {
       {/* Mobile layout */}
       <div className="block sm:hidden min-h-screen">
         {/* Fixed Infobar under navbar */}
-        <div className="fixed top-[56px] left-0 w-full z-40 bg-backgroundmid">
+        <div className="fixed top-[56px] left-0 w-full z-40 bg-boxbackground">
           <Infobar />
         </div>
         {/* Scrollable content with padding for fixed top/bottom bars */}
@@ -69,7 +69,7 @@ function FuturesApp() {
           )}
         </div>
         {/* Bottom tab bar - fixed always at the very bottom */}
-        <div className="fixed bottom-0 left-0 w-full bg-backgroundmid border-t border-liquiddarkgray z-50">
+        <div className="fixed bottom-0 left-0 w-full bg-boxbackground border-t border-liquiddarkgray z-50">
           <Tab
             tabs={tabKeys}
             active={mobileTab}

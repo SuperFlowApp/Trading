@@ -128,7 +128,7 @@ const OpenOrdersTab = () => {
               <div>Quantity: {formatPrice(selectedOrder.quantity)}</div>
             </div>
             {cancelResponse && (
-              <div className="mb-4 p-2 rounded bg-backgroundmid border border-primary2normal text-liquidwhite break-all">
+              <div className="mb-4 p-2 rounded bg-boxbackground border border-primary2normal text-liquidwhite break-all">
                 {cancelResponse.error ? (
                   <>
                     Response:

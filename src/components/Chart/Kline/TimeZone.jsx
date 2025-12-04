@@ -54,7 +54,7 @@ export default function ChartPanel() {
   const [showTZMenu, setShowTZMenu] = useState(false);
 
   return (
-    <div className="w-full min-h-[520px] bg-backgroundmid rounded-md flex flex-col">
+    <div className="w-full min-h-[520px] bg-boxbackground rounded-md flex flex-col">
       {/* Tools Panel */}
       <div className="flex items-center justify-between px-3 py-2 gap-3">
         {/* Interval dropdown */}

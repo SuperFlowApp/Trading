@@ -58,7 +58,7 @@ export default function IndicatorSettings({ open, onClose, toggles, onToggle, dr
     return (
       <div
         ref={boxRef}
-        className="w-[320px] max-w-[95vw] bg-backgroundmid rounded shadow-lg p-4 border border-[#00B7C950]"
+        className="w-[320px] max-w-[95vw] bg-boxbackground rounded shadow-lg p-4 border border-[#00B7C950]"
       >
         <div className="flex items-center justify-between mb-2">
           <div className="font-body">Indicators</div>
@@ -110,7 +110,7 @@ export default function IndicatorSettings({ open, onClose, toggles, onToggle, dr
         ref={boxRef}
         role="dialog"
         aria-modal="true"
-        className="absolute w-[520px] max-w-[95%] bg-backgroundmid rounded shadow-lg p-4"
+        className="absolute w-[520px] max-w-[95%] bg-boxbackground rounded shadow-lg p-4"
         style={{ top: 0, left: 0, transform: `translate(80px, 80px)` }}
       >
         <div className="flex items-center justify-between cursor-move select-none">

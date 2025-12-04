@@ -96,7 +96,7 @@ function Navbar() {
   };
 
   return (
-    <Disclosure as="nav" className="bg-backgroundmid text-white text-body w-full border-b-[1px] border-backgroundlighthover" >
+    <Disclosure as="nav" className="bg-boxbackground text-white text-body w-full border-b-[1px] border-borderscolor" >
       {({ open }) => (
         <>
           <div className="mx-auto w-full px-4 py-3 flex items-center justify-between ">
@@ -211,7 +211,7 @@ function Navbar() {
             leaveFrom="translate-y-0 opacity-100"
             leaveTo="-translate-y-10 opacity-0"
           >
-            <Disclosure.Panel static className="sm:hidden bg-backgroundmid px-4 pt-2 pb-3 space-y-1 ">
+            <Disclosure.Panel static className="sm:hidden bg-boxbackground px-4 pt-2 pb-3 space-y-1 ">
               <ul className="flex flex-col items-center gap-2 mb-8">
                 <li
                   className={`flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"

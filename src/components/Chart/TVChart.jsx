@@ -115,14 +115,14 @@ export default function TVChart({
             "mainSeriesProperties.candleStyle.borderDownColor": "#f48ff4", // Pink candle border
             
             // Background - Solid color settings
-            "paneProperties.background": "#181923", // Chart background
+            "paneProperties.background": "#1E222D", // Chart background
             "paneProperties.backgroundType": "solid", // Force solid background
             "paneProperties.backgroundGradientStartColor": "#181923", // Remove gradient start
             "paneProperties.backgroundGradientEndColor": "#181923", // Remove gradient end
             
             // Vertical and horizontal grid lines
-            "paneProperties.vertGridProperties.color": "#1e2230", // Vertical grid lines
-            "paneProperties.horzGridProperties.color": "#1e2230", // Horizontal grid lines
+            "paneProperties.vertGridProperties.color": "#2A2E39", // Vertical grid lines
+            "paneProperties.horzGridProperties.color": "#2A2E39", // Horizontal grid lines
             
             // Scales and axis
             "scalesProperties.backgroundColor": "#181923", // Scale background
@@ -160,7 +160,7 @@ export default function TVChart({
             "MACD.signal.color": "#ffffff",
           },
           loading_screen: {
-            backgroundColor: "#181923",
+            backgroundColor: "#1f1f1f",
             foregroundColor: "#1cd1ed",
             backgroundType: "solid"
           },

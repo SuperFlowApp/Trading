@@ -655,7 +655,7 @@ function KlineChartProPanel({
     chart.setStyles(patch);
   }, [chartSettings]);
   return (
-    <div className="bg-backgroundmid rounded-md ">
+    <div className="bg-boxbackground rounded-md ">
       <div
         ref={chartRef}
         style={{

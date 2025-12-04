@@ -1860,7 +1860,7 @@ export interface ChartPropertiesOverrides extends StudyOverrides {
 	/**
 	 * Scales (axis) text color.
 	 *
-	 * @default '#131722'
+	 * @default '#1E222D'
 	 */
 	"scalesProperties.textColor": string;
 	/**
@@ -1944,7 +1944,7 @@ export interface ChartPropertiesOverrides extends StudyOverrides {
 	/**
 	 * Crosshair label light theme background color.
 	 *
-	 * @default '#131722'
+	 * @default '#1E222D'
 	 */
 	"scalesProperties.crosshairLabelBgColorLight": string;
 	/**
@@ -11321,7 +11321,7 @@ export interface OrderLineToolOverrides {
 	"linetoolorder.lineActiveBuyColor": string;
 	/** Default value: `#e75656` */
 	"linetoolorder.lineActiveSellColor": string;
-	/** Default value: `#FF0000` */
+	/** Default value: `#1E222D` */
 	"linetoolorder.lineColor": string;
 	/** Default value: `rgba(64, 148, 232, 0.5)` */
 	"linetoolorder.lineInactiveBuyColor": string;

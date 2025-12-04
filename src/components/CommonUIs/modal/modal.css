@@ -10,7 +10,7 @@
 }
 
 .custom-modal {
-  background: var(--color-backgroundmid);
+  background: var(--color-boxbackground);
   border-radius: 4px;
   padding: 0;
   min-height: 200px;

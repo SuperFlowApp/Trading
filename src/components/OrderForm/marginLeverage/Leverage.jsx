@@ -177,7 +177,7 @@ export default function LeveragePanel() {
         <div
           className="flex flex-col items-center gap-4"
           style={{
-            background: 'var(--color-backgroundmid)',
+            background: 'var(--color-boxbackground)',
             borderRadius: '4',
             padding: '1.5rem',
             minWidth: 320,

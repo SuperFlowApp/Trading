@@ -31,7 +31,7 @@ export default function ChartSettings({ open, candleType, setCandleType, onClose
   const content = (
     <div
       ref={boxRef}
-      className="w-72 rounded-md border border-primary2darker bg-backgroundmid shadow-lg z-20 p-3 space-y-2"
+      className="w-72 rounded-md border border-primary2darker bg-boxbackground shadow-lg z-20 p-3 space-y-2"
     >
       {/* Candle Type as vertical icon list */}
       <div>

@@ -77,7 +77,7 @@ export default function PositionMode() {
       >
         <div
           style={{
-            background: 'var(--color-backgroundmid)',
+            background: 'var(--color-boxbackground)',
             borderRadius: '4',
             padding: '1.5rem',
             minWidth: 260,

@@ -313,7 +313,7 @@ export const MinimalDropDown = ({
               </span>
             </Listbox.Button>
             <Listbox.Options
-              className="absolute z-10 bg-[var(--color-backgroundmid)] shadow-lg border border-[var(--color-liquiddarkgray)] ring-1 ring-black ring-opacity-5 focus:outline-none text-body"
+              className="absolute z-10 bg-[var(--color-boxbackground)] shadow-lg border border-[var(--color-liquiddarkgray)] ring-1 ring-black ring-opacity-5 focus:outline-none text-body"
               style={{ width: "70px" }}
             >
               {options

@@ -160,7 +160,7 @@ const ModifyBalance = ({
 
         {/* Confirm Button */}
         <button
-          className="w-full py-2 px-4 bg-primary2normal hover:bg-primary2dark text-backgrounddark font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-2 px-4 bg-primary2normal hover:bg-primary2dark text-boxbackground font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleMarginUpdate}
           disabled={isSubmitting || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0}
         >

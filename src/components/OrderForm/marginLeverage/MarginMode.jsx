@@ -109,7 +109,7 @@ export default function MarginMode() {
             >
                 <div
                     style={{
-                        background: 'var(--color-backgroundmid)',
+                        background: 'var(--color-boxbackground)',
                         borderRadius: '4',
                         padding: '1.5rem',
                         minWidth: 260,
@@ -134,7 +134,7 @@ export default function MarginMode() {
                                 className="check-box"
                                 style={{
                                     backgroundImage: "none",
-                                    backgroundColor: marginMode === mode ? undefined : "var(--color-backgroundmid)"
+                                    backgroundColor: marginMode === mode ? undefined : "var(--color-boxbackground)"
                                 }}
                                 disabled={!authKey}
                             />

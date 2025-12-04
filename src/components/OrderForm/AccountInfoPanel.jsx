@@ -113,7 +113,7 @@ function AccountInfoPanel() {
     }, [authKey, setAuthKey]);
 
     return (
-        <div className="flex flex-col bg-backgroundmid rounded-md p-2 w-[100%] overflow-hidden border-[1px] border-backgroundlighthover">
+        <div className="flex flex-col bg-boxbackground rounded-md p-2 w-[100%] overflow-hidden border-[1px] border-borderscolor">
             {/* Buttons */}
             <div className="flex flex-col gap-2 mb-2">
                 <Button type="secondary" block>Deposit</Button>

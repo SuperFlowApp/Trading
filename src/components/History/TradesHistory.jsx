@@ -44,7 +44,7 @@ const Trades = () => {
             <div className="overflow-y-auto max-h-[570px]">
                 <table className="w-full">
                     <thead>
-                        <tr className="bg-backgroundmid text-body text-liquidwhite">
+                        <tr className="bg-boxbackground text-body text-liquidwhite">
                             <th className="pb-2 pl-2 font-normal text-left">Price</th>
                             <th className="pb-2 pr-2 font-normal">Size</th>
                             <th className="pb-2 pr-2 font-normal">Time</th>

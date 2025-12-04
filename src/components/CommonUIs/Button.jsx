@@ -16,7 +16,7 @@ export default function Button({
         danger: "text-title bg-red-500 text-white hover:bg-red-700",
         success: "text-title bg-green-500 text-white hover:bg-green-700",
         nav: "text-title bg-[var(--color-backgroundlight,#00B7C9)] text-black hover:bg-[var(--color-primary2darker,#00B7C9)]",
-        navconnected: "text-title bg-backgroundmid border border-white text-white hover:bg-backgroundlight",
+        navconnected: "text-title bg-boxbackground border border-white text-white hover:bg-backgroundlight",
         navdisconnected: "text-title text-[var(--color-liquidblack)]  bg-[var(--color-primary2normal)]  hover:bg-[var(--color-primary2light)] ",
         navdisconnection: "text-title bg-[var(--color-backgroundlight,#00B7C9)] text-white hover:bg-[var(--color-primary2darker,#00B7C9)] hover:text-white",
         navsignup: "text-title bg-[var(--color-liquiddarkgray)] hover:bg-[var(--color-primary2normal)] text-white  hover:text-black",
