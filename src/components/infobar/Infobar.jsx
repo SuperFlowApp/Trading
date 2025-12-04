@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
 import PairSelector from './PairSelector';
 import { formatPrice } from '../../utils/priceFormater.js';
@@ -39,6 +39,14 @@ function Infobar() {
         open: wsLastPrice.openPrice,
       }
     : {};
+
+  useEffect(() => {
+    if (ticker.last !== undefined && ticker.last !== null) {
+      document.title = `${formatPrice(ticker.last)} | ${symbol}`;
+    } else {
+      document.title = symbol;
+    }
+  }, [ticker.last, symbol]);
 
   return (
     <div className="bg-boxbackground border-[1px] border-borderscolor flex flex-col sm:flex-row rounded-md overflow-visible">
