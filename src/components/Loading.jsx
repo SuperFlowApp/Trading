@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Logo from "../../public/assets/Logo.svg"; // Adjust path if needed
+import Logo from "../../public/assets/favIcon.svg"; // Adjust path if needed
 
 // Helper to interpolate between two hex colors
 function interpolateColor(color1, color2, factor) {
@@ -31,7 +31,7 @@ export default function LoadingScreen() {
   ];
 
   return (
-    <div className="fixed inset-0 z-[99999] flex flex-col justify-between items-center bg-backgroundmid min-h-screen w-full">
+    <div className="fixed inset-0 z-[99999] flex flex-col justify-between items-center bg-boxbackground min-h-screen w-full">
       {/* Center loading animation */}
       <div className="flex-1 flex items-center justify-center w-full">
         <div className="flex flex-col items-center">
