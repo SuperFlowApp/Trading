@@ -407,13 +407,13 @@ function LimitOrderForm({ onCurrencyChange }) {
       {/* Balance Row - show available balance directly */}
       <div>
         <div className="text-body">
-          <span className="flex w-full justify-between text-liquidlightergray">
+          <span className="flex w-full justify-between text-color_lighter_gray">
             Available for order: <span className="text-white">
               {formatPrice(availableForOrder)} USDT
             </span>
           </span>
         </div>
-        <span className="text-body text-liquidlightergray w-full flex justify-between">
+        <span className="text-body text-color_lighter_gray w-full flex justify-between">
           Unrealized PNL
           <span className="text-liquidwhite">
             {unrealizedPNL !== null && unrealizedPNL !== undefined
@@ -595,7 +595,7 @@ function LimitOrderForm({ onCurrencyChange }) {
 
       {/* Order Information */}
       <div>
-        <div className="pt-2 border-t border-liquiddarkgray text-body text-liquidlightergray flex flex-col">
+        <div className="pt-2 border-t border-liquiddarkgray text-body text-color_lighter_gray flex flex-col">
           <span className="w-full flex justify-between">
             Order Value
             <span

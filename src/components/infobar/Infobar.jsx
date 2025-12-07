@@ -79,7 +79,7 @@ function Infobar() {
         {/* Dropdown for extra info on mobile */}
         <div className="ml-auto flex sm:hidden">
           <button
-            className="flex items-center px-2 py-1 rounded text-liquidlightergray hover:text-liquidwhite"
+            className="flex items-center px-2 py-1 rounded text-color_lighter_gray hover:text-liquidwhite"
             onClick={() => setExpand((v) => !v)}
             aria-label="Show more"
           >

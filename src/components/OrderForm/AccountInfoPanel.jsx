@@ -131,7 +131,7 @@ function AccountInfoPanel() {
                     <span></span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Wallet Balance</span>
+                    <span className="text-color_lighter_gray">Wallet Balance</span>
                     <span className="text-white font-semibold">
                         {accountInfo?.walletBalance != null
                             ? formatWithDollar(normalizeZero(accountInfo.walletBalance))
@@ -139,7 +139,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Realized PNL</span>
+                    <span className="text-color_lighter_gray">Realized PNL</span>
                     <span className={`font-semibold ${getPnlClass(normalizeZero(accountInfo?.realizedPnl))}`}>
                         {accountInfo?.realizedPnl != null
                             ? formatWithDollar(normalizeZero(accountInfo.realizedPnl))
@@ -147,7 +147,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Unrealized PNL</span>
+                    <span className="text-color_lighter_gray">Unrealized PNL</span>
                     <span className={`font-semibold ${getPnlClass(normalizeZero(accountInfo?.upnl))}`}>
                         {accountInfo?.upnl != null
                             ? formatWithDollar(normalizeZero(accountInfo.upnl))
@@ -155,7 +155,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Available For Order</span>
+                    <span className="text-color_lighter_gray">Available For Order</span>
                     <span className="text-white font-semibold">
                         {accountInfo?.availableForOrder != null
                             ? formatWithDollar(normalizeZero(accountInfo.availableForOrder))
@@ -163,7 +163,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Margin Balance</span>
+                    <span className="text-color_lighter_gray">Margin Balance</span>
                     <span className="text-white font-semibold">
                         {accountInfo?.marginBalance != null
                             ? formatWithDollar(normalizeZero(accountInfo.marginBalance))
@@ -171,7 +171,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Cross Pending Initial Margin</span>
+                    <span className="text-color_lighter_gray">Cross Pending Initial Margin</span>
                     <span className="text-white font-semibold">
                         {accountInfo?.crossPendingInitialMargin != null
                             ? formatWithDollar(normalizeZero(accountInfo.crossPendingInitialMargin))
@@ -179,7 +179,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Cross Maintenance Margin</span>
+                    <span className="text-color_lighter_gray">Cross Maintenance Margin</span>
                     <span className="text-white font-semibold">
                         {accountInfo?.crossMaintenanceMargin != null
                             ? formatWithDollar(normalizeZero(accountInfo.crossMaintenanceMargin))
@@ -187,7 +187,7 @@ function AccountInfoPanel() {
                     </span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Cross Initial Margin</span>
+                    <span className="text-color_lighter_gray">Cross Initial Margin</span>
                     <span className="text-white font-semibold">
                         {accountInfo?.crossInitialMargin != null
                             ? formatWithDollar(normalizeZero(accountInfo.crossInitialMargin))
@@ -197,7 +197,7 @@ function AccountInfoPanel() {
 
 
                 <div className="flex justify-between">
-                    <span className="text-liquidlightergray">Paid Fee</span>
+                    <span className="text-color_lighter_gray">Paid Fee</span>
                     <span className="text-white font-semibold">
                         {accountInfo?.paidFee != null
                             ? formatWithDollar(normalizeZero(accountInfo.paidFee))

@@ -21,7 +21,7 @@ const Tab = ({ tabs, active, onChange, renderLabel, className = "" }) => {
           className={`w-full pt-1 pb-2 text-title transition-colors
             ${active === tab
               ? "text-liquidwhite "
-              : "text-liquidlightergray   hover:text-liquidwhite"}
+              : "text-color_lighter_gray   hover:text-liquidwhite"}
           `}
           onClick={() => onChange(tab)}
           type="button"

@@ -114,7 +114,7 @@ function Navbar() {
 
               <ul className="hidden sm:flex items-center gap-14 ml-6">
                 <li
-                  className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
+                  className={`group flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-color_lighter_gray hover:text-liquidwhite"
                     }`}
                   onClick={() => handleTabClick("futures")}
                 >
@@ -129,7 +129,7 @@ function Navbar() {
                   Futures Trading
                 </li>
                 <li
-                  className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
+                  className={`group flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-liquidwhite" : "text-color_lighter_gray hover:text-liquidwhite"
                     }`}
                   onClick={() => handleTabClick("options")}
                 >
@@ -192,7 +192,7 @@ function Navbar() {
             </div>
             {/* Mobile Hamburger */}
             <div className="flex sm:hidden">
-              <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-liquidlightergray hover:text-white hover:bg-backgroundlight focus:outline-none">
+              <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-color_lighter_gray hover:text-white hover:bg-backgroundlight focus:outline-none">
                 {open ? (
                   <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
                 ) : (
@@ -214,7 +214,7 @@ function Navbar() {
             <Disclosure.Panel static className="sm:hidden bg-boxbackground px-4 pt-2 pb-3 space-y-1 ">
               <ul className="flex flex-col items-center gap-2 mb-8">
                 <li
-                  className={`flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
+                  className={`flex items-center gap-2 cursor-pointer ${activeTab === "futures" ? "text-liquidwhite" : "text-color_lighter_gray hover:text-liquidwhite"
                     }`}
                   onClick={() => handleTabClick("futures")}
                 >
@@ -229,7 +229,7 @@ function Navbar() {
                   Futures Trading
                 </li>
                 <li
-                  className={`flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-liquidwhite" : "text-liquidlightergray hover:text-liquidwhite"
+                  className={`flex items-center gap-2 cursor-pointer ${activeTab === "options" ? "text-liquidwhite" : "text-color_lighter_gray hover:text-liquidwhite"
                     }`}
                   onClick={() => handleTabClick("options")}
                 >

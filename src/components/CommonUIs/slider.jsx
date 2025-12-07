@@ -9,7 +9,7 @@ export default function NativeSlider({
   onChange,
   style = {},
   className = '',
-  filledColor = 'var(--color-liquidlightergray)',
+  filledColor = 'var(--color-color_lighter_gray)',
   unfilledColor = 'var(--color-primary2darker)',
   ...props
 }) {
@@ -26,7 +26,7 @@ export default function NativeSlider({
 
   // Dynamic colors based on state
   const filled = 'var(--color-primary2normal)';
-  const unfilled = 'var(--color-liquidlightergray)';
+  const unfilled = 'var(--color-color_lighter_gray)';
 
   return (
     <input

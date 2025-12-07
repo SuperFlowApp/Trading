@@ -46,7 +46,7 @@ function PositionsPanel() {
         </div>
       </div>
       {/* Tab Content */}
-      <div className="text-center text-body text-liquidmidgray">
+      <div className="text-center text-body text-color_lighter_gray">
         {/* Positions */}
         <div style={{ display: activeTab === 'positions' ? 'block' : 'none' }}>
           <section className="text-white">

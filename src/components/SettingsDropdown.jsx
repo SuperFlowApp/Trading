@@ -3,8 +3,6 @@ import { useZustandStore } from "../Zustandstore/useStore"; // adjust path if ne
 const COLOR_PACKS = [
     { name: "SuperFlow", red: "#F59DEF", green: "#00B7C9" },
     { name: "Classic", red: "#F6465D", green: "#0ECB81" },
-    { name: "SuperFlow Dark", red: "#b1509aff", green: "#0b9dbaff" },
-    { name: "Classic Dark", red: "#9f7070ff", green: "#74987bff" },
 ];
 
 const SettingsDropdown = ({
@@ -30,11 +28,9 @@ const SettingsDropdown = ({
     // Separate styling and chart settings
     const stylingSettings = (
         <div>
-            {/*<div className="border-t border-liquiddarkgray text-body text-liquidwhite pt-2 mb-2 mt-2">Style Settings</div> 
-            */}
             {/* Font size selector - replaced dropdown with visual radio buttons */}
             <div className="mb-3">
-                <span className="text-liquidlightergray text-body block mb-2 select-none">Font Size</span>
+                <span className="text-color_lighter_gray text-body block mb-2 select-none">Font Size</span>
                 <div className="flex gap-2">
                     <button
                         type="button"
@@ -42,7 +38,7 @@ const SettingsDropdown = ({
                         className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
                             ${chartSettings.fontSize === 'small'
                                 ? "border-primary2normal bg-[#00B7C91a] text-liquidwhite"
-                                : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
+                                : "border-[#23272e] text-color_lighter_gray hover:border-[#00B7C950]"}`}
                     >
                         <span style={{ fontSize: '12px' }}>Small</span>
                     </button>
@@ -53,7 +49,7 @@ const SettingsDropdown = ({
                         className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
                             ${chartSettings.fontSize === 'medium'
                                 ? "border-primary2normal bg-[#00B7C91a] text-liquidwhite"
-                                : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
+                                : "border-[#23272e] text-color_lighter_gray hover:border-[#00B7C950]"}`}
                     >
                         <span style={{ fontSize: '14px' }}>Medium</span>
                     </button>
@@ -64,16 +60,17 @@ const SettingsDropdown = ({
                         className={`flex items-center justify-center py-1 px-3 rounded border transition-colors duration-100 flex-1
                             ${chartSettings.fontSize === 'large'
                                 ? "border-primary2normal bg-[#00B7C91a] text-liquidwhite"
-                                : "border-[#23272e] text-liquidmidgray hover:border-[#00B7C950]"}`}
+                                : "border-[#23272e] text-color_lighter_gray hover:border-[#00B7C950]"}`}
                     >
                         <span style={{ fontSize: '16px' }}>Large</span>
                     </button>
                 </div>
             </div>
+            <div className="border-t border-liquiddarkgray text-body text-liquidwhite pt-2 mb-2 mt-2">Style Settings</div> 
 
             {/* Color pack picker */}
             <div>
-                <span className="text-liquidlightergray text-body block mb-1 select-none">
+                <span className="text-color_lighter_gray text-body block mb-1 select-none">
                     Color Pack
                 </span>
                 <div className="flex flex-col gap-2">

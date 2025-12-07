@@ -25,7 +25,7 @@ export default function OrderButton({
         success:
             'bg-green', 
         orderdisconnect:
-            'text-liquidlightergray bg-gray-700 hover:bg-primary2darker',
+            'text-color_lighter_gray bg-gray-700 hover:bg-primary2darker',
     };
 
     // Dots colors (same as LoadingScreen)

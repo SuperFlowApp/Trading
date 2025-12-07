@@ -413,7 +413,7 @@ const OrderBook = () => {
         />
       </div>
 
-      <div className="flex justify-between text-liquidlightergray pb-2 pt-[3px] px-[5px] text-body border-t-[1px] border-liquiddarkgray">
+      <div className="flex justify-between text-color_lighter_gray pb-2 pt-[3px] px-[5px] text-body border-t-[1px] border-liquiddarkgray">
         <div className="text-left w-1/4">Price</div>
         <div className="text-right w-1/4">
           Size&nbsp;

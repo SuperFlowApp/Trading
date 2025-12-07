@@ -18,19 +18,19 @@ const Table = ({
             {columns.map(col => (
               <th
                 key={col.key || col.label}
-                className={`px-2 py-1 border-b border-liquidmidgray text-liquidmidgray ${headerClassName}`}
+                className={`px-2 py-1 border-b border-color_lighter_gray text-color_lighter_gray ${headerClassName}`}
               >
                 {col.label}
               </th>
             ))}
-            {actions && <th className={`px-2 py-1 border-b border-liquidmidgray text-liquidmidgray uppercase ${headerClassName}`}></th>}
+            {actions && <th className={`px-2 py-1 border-b border-color_lighter_gray text-color_lighter_gray uppercase ${headerClassName}`}></th>}
           </tr>
         </thead>
       )}
       <tbody>
         {Array.isArray(data) && data.length === 0 ? (
           <tr>
-            <td colSpan={columns.length + (actions ? 1 : 0)} className="text-center py-8 text-liquidmidgray">
+            <td colSpan={columns.length + (actions ? 1 : 0)} className="text-center py-8 text-color_lighter_gray">
               {emptyMessage}
             </td>
           </tr>

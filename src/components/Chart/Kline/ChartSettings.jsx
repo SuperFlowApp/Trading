@@ -48,7 +48,7 @@ export default function ChartSettings({ open, candleType, setCandleType, onClose
                 }`}
             >
               <img src={opt.icon} alt={opt.label} className="w-6 h-6 mr-3" />
-              <span className="text-body" style={{ color: candleType === opt.value ? "var(--color-primary2liquidwhite)" : "var(--color-liquidmidgray)" }}>
+              <span className="text-body" style={{ color: candleType === opt.value ? "var(--color-primary2liquidwhite)" : "var(--color-color_lighter_gray)" }}>
                 {opt.label}
               </span>
             </button>

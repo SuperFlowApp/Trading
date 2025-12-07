@@ -118,14 +118,14 @@ const Positions = () => {
         const im = num(row.initialMargin);
         const roeValue = im === 0 ? 0 : (num(row.upnl) / im) * 100;
         const roeRaw = im === 0 ? "0.0000%" : roeValue.toFixed(4) + "%";
-        let roeColor = "text-liquidlightergray";
+        let roeColor = "text-color_lighter_gray";
         if (!isNaN(roeValue)) {
           roeColor =
             roeValue > 0
               ? "text-liquidGreen"
               : roeValue < 0
                 ? "text-liquidRed"
-                : "text-liquidlightergray";
+                : "text-color_lighter_gray";
         }
         return (
           <span>
@@ -145,14 +145,14 @@ const Positions = () => {
         const im = num(row.initialMargin);
         const roeValue = im === 0 ? 0 : (num(row.realizedPnl) / im) * 100;
         const roeRaw = im === 0 ? "0.0000%" : roeValue.toFixed(4) + "%";
-        let roeColor = "text-liquidlightergray";
+        let roeColor = "text-color_lighter_gray";
         if (!isNaN(roeValue)) {
           roeColor =
             roeValue > 0
               ? "text-liquidGreen"
               : roeValue < 0
                 ? "text-liquidRed"
-                : "text-liquidlightergray";
+                : "text-color_lighter_gray";
         }
         return (
           <span>
@@ -174,7 +174,7 @@ const Positions = () => {
           <div className="flex items-center pr-8">
             <div className="flex flex-col">
               <span>{formatPrice(v)} USDT</span>
-              <span className="text-liquidlightergray">{positionType}</span>
+              <span className="text-color_lighter_gray">{positionType}</span>
             </div>
             {positionType === "Isolated" && (
               <button

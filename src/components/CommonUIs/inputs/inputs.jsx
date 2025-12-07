@@ -26,7 +26,7 @@ export const PriceFieldInput = ({
   return (
     <div className={`flex items-center h-8 rounded-md border ${borderClass} bg-transparent text-[var(--color-liquidwhite)]`}>
       {/* fixed label with vertical separator */}
-      <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
+      <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-color_lighter_gray)] bg-transparent">
         {label || placeholder}
       </div>
 
@@ -95,7 +95,7 @@ export const InputWithDropDown = ({
 
   return (
     <div className={`flex items-center h-8 rounded-md border ${borderClass} bg-transparent text-[var(--color-liquidwhite)] relative`}>
-      <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-liquidlightergray)] bg-transparent">
+      <div className="flex items-center justify-center w-[80px] text-body text-[var(--color-color_lighter_gray)] bg-transparent">
         {label || placeholder}
       </div>
 
@@ -302,7 +302,7 @@ export const MinimalDropDown = ({
         {({ open }) => (
           <>
             <Listbox.Button
-              className="bg-transparent text-liquidlightergray hover:text-liquidwhite text-body px-2 py-1 cursor-pointer pr-6 text-left border-none outline-none flex items-center justify-between"
+              className="bg-transparent text-color_lighter_gray hover:text-liquidwhite text-body px-2 py-1 cursor-pointer pr-6 text-left border-none outline-none flex items-center justify-between"
               style={{ width: "86px" }}
             >
               <span className="flex-1 text-liquidwhite text-left">{selected?.label}</span>

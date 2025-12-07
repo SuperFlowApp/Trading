@@ -95,7 +95,7 @@ const ModifyBalance = ({
           <button
             className={`py-2 px-4 ${action === "add"
               ? "border-b-2 border-primary2normal text-primary2light"
-              : "text-liquidlightergray"}`}
+              : "text-color_lighter_gray"}`}
             onClick={() => setAction("add")}
           >
             Add Margin
@@ -103,7 +103,7 @@ const ModifyBalance = ({
           <button
             className={`py-2 px-4 ${action === "remove"
               ? "border-b-2 border-primary2normal text-primary2light"
-              : "text-liquidlightergray"}`}
+              : "text-color_lighter_gray"}`}
             onClick={() => setAction("remove")}
           >
             Remove Margin
@@ -111,7 +111,7 @@ const ModifyBalance = ({
         </div>
 
         {/* Pair Symbol */}
-        <h2 className="text-body font-semibold text-liquidlightergray">
+        <h2 className="text-body font-semibold text-color_lighter_gray">
           {position.symbol}
         </h2>
 
@@ -132,7 +132,7 @@ const ModifyBalance = ({
         </div>
 
         {/* Available/Removable Balance */}
-        <div className="mb-2 text-xs text-liquidlightergray flex justify-between">
+        <div className="mb-2 text-xs text-color_lighter_gray flex justify-between">
           <span>
             {action === "remove" ? "Max removable balance:" : "Max addable balance:"}
           </span>
@@ -144,7 +144,7 @@ const ModifyBalance = ({
         </div>
 
         {/* Current Margin */}
-        <div className="mb-2 text-xs text-liquidlightergray flex justify-between">
+        <div className="mb-2 text-xs text-color_lighter_gray flex justify-between">
           <span>Currently assigned Margin:</span>
           <span className="font-bold text-liquidwhite">
             {formatPrice(margin)} USDT
