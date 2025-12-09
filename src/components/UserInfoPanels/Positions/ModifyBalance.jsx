@@ -1,10 +1,10 @@
 import React, { useState } from "react";
+import Cookies from "js-cookie";
 import Modal from "../../CommonUIs/modal/modal";
 import { PriceFieldInput } from "../../CommonUIs/inputs/inputs";
-import { useAuthKey } from "../../../contexts/AuthKeyContext";
 import { API_BASE_URL } from "../../../config/api";
 import { useZustandStore } from "../../../Zustandstore/useStore";
-import { formatPrice } from "../../../utils/priceFormater"; // <-- Add this import
+import { formatPrice } from "../../../utils/priceFormater";
 
 const ModifyBalance = ({
   open,
@@ -16,7 +16,7 @@ const ModifyBalance = ({
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const { authKey } = useAuthKey();
+  const authKey = Cookies.get("authKey");
 
   // Clear input when switching tabs
   React.useEffect(() => {

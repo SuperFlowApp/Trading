@@ -4,13 +4,15 @@ import { loginUser } from "../../hooks/useDefaultAPILogin";
 import { signupUser } from "../../hooks/useDefaultAPISignup";
 import Modal from "../CommonUIs/modal/modal";
 import Button from "../CommonUIs/Button";
-import { useAuthKey } from "../../contexts/AuthKeyContext";
+import Cookies from "js-cookie"; // <-- Add this
 
 /**
  * Remove wallet address from localStorage on signout.
  */
 export function clearWalletAddress() {
   localStorage.removeItem("wallet_address");
+  Cookies.remove("authKey"); // <-- Remove cookie on signout
+  Cookies.remove("username");
 }
 
 /**
@@ -148,12 +150,11 @@ export const MyWalletModal = ({
   const [errorStep, setErrorStep] = useState(null);
   const [notSignedUp, setNotSignedUp] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const { setAuthKey, setUsername: setContextUsername } = useAuthKey();
 
   // Sign out and clear keys
   const signOut = () => {
-    setAuthKey(null);
-    setContextUsername(null);
+    Cookies.remove("authKey");
+    Cookies.remove("username");
     clearWalletAddress();
   };
 
@@ -192,7 +193,7 @@ export const MyWalletModal = ({
       window.ethereum.removeListener("connect", checkAccounts);
       clearInterval(interval);
     };
-  }, [setAuthKey, setContextUsername]);
+  }, []);
 
   const handleWalletFlow = async () => {
     setWalletSteps(SIGNIN_STEPS);
@@ -212,8 +213,8 @@ export const MyWalletModal = ({
         setErrorStep(currentStep);
         setErrorMsg(result.error);
       } else if (result.loginResult && result.loginResult.access_token) {
-        setAuthKey(result.loginResult.access_token);
-        setContextUsername(result.address.slice(16));
+        Cookies.set("authKey", result.loginResult.access_token, { expires: 7, secure: true, sameSite: 'Strict' });
+        Cookies.set("username", result.address.slice(16), { expires: 7, secure: true, sameSite: 'Strict' });
         onLoginSuccess && onLoginSuccess();
       } else {
         setErrorMsg("Unknown error.");

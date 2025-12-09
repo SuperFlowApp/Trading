@@ -6,8 +6,7 @@ import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import '../../../components/CommonUIs/slider.css';
 import { API_BASE_URL } from '../../../config/api';
 
-// Import AuthKey context hook
-import { useAuthKey } from '../../../contexts/AuthKeyContext';
+import Cookies from 'js-cookie'; // Add this
 
 // Import Zustand stores
 import { useZustandStore } from '../../../Zustandstore/useStore';
@@ -92,8 +91,8 @@ export default function LeveragePanel() {
     setConfirmedLeverage(1);
   }, [selectedSymbol]);
 
-  // Use authKey from context
-  const { authKey } = useAuthKey();
+  // Use authKey from cookie
+  const authKey = Cookies.get("authKey");
 
   // Clear leverage store if logged out
   useEffect(() => {

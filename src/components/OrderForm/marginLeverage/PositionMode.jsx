@@ -1,8 +1,8 @@
 import { useState } from 'react';
+import Cookies from "js-cookie";
 import Modal from '../../CommonUIs/modal/modal';
 import Button from '../../CommonUIs/Button';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
-import { useAuthKey } from '../../../contexts/AuthKeyContext';
 import { API_BASE_URL } from '../../../config/api';
 import { useZustandStore } from '../../../Zustandstore/useStore';
 
@@ -12,7 +12,7 @@ export default function PositionMode() {
   const [errorMsg, setErrorMsg] = useState("");
   const [positionMode, setPositionMode] = useState("ONE_WAY_MODE");
 
-  const { authKey } = useAuthKey();
+  const authKey = Cookies.get("authKey");
 
   const accountInfo = useZustandStore(s => s.accountInfo);
 

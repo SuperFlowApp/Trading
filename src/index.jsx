@@ -2,12 +2,13 @@ import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import FuturesApp from './FuturesApp';
 import Navbar from './components/navbar';
-import { AuthKeyProvider } from './contexts/AuthKeyContext';
 import NotificationBar from './components/notificationBar'; 
 import { useZustandStore } from './Zustandstore/useStore'; 
 import LoadingScreen from './components/Loading';
 import MobileBlocker from './components/MobileBlocker';
 import { MultiWebSocketProvider } from "./contexts/MultiWebSocketContext";
+import TermsModal from './components/TermsModal';
+import Cookies from 'js-cookie';
 
 import './components/index.css';
 
@@ -42,22 +43,23 @@ function CssVarSync() {
 function RootApp() {
   const [loading, setLoading] = useState(true);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   useEffect(() => {
-    // Check if the device is mobile based on screen width
     const checkMobileDevice = () => {
-      setIsMobileDevice(window.innerWidth < 768); // Common breakpoint for mobile
+      setIsMobileDevice(window.innerWidth < 768);
     };
-    
-    // Check on initial load
     checkMobileDevice();
-    
-    // Add event listener for window resize
     window.addEventListener('resize', checkMobileDevice);
-    
-    // Show loading screen for at least 2 seconds (matches LoadingScreen)
-    const timer = setTimeout(() => setLoading(false), 2000);
-    
+
+    const timer = setTimeout(() => {
+      setLoading(false);
+      // Only show terms modal if not accepted
+      if (Cookies.get('termsAccepted') !== 'true') {
+        setShowTerms(true);
+      }
+    }, 2000);
+
     return () => {
       clearTimeout(timer);
       window.removeEventListener('resize', checkMobileDevice);
@@ -69,21 +71,26 @@ function RootApp() {
     return <MobileBlocker />;
   }
 
+  // Blur the app when terms modal is open
   return (
     <StrictMode>
-      <AuthKeyProvider>
         <MultiWebSocketProvider>
           <CssVarSync />
           <Navbar />
           <div className="w-full">
             <NotificationBar />
           </div>
-          <div className="flex justify-center items-start">
+          <div className={`flex justify-center items-start ${showTerms ? 'blur-sm pointer-events-none select-none' : ''}`}>
             <FuturesApp />
           </div>
           {loading && <LoadingScreen />}
+          {showTerms && (
+            <TermsModal
+              onAccept={() => setShowTerms(false)}
+              onDecline={() => setShowTerms(false)}
+            />
+          )}
         </MultiWebSocketProvider>
-      </AuthKeyProvider>
     </StrictMode>
   );
 }

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
+import Cookies from "js-cookie";
 import { marketsData } from '../../../Zustandstore/marketsDataStore.js';
 import Modal from '../../CommonUIs/modal/modal.jsx';
 import Button from '../../CommonUIs/Button.jsx';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js';
-import { useAuthKey } from '../../../contexts/AuthKeyContext'; // <-- use context
 import { API_BASE_URL } from '../../../config/api';
 
 export default function MarginMode() {
@@ -16,7 +16,7 @@ export default function MarginMode() {
     // Fetch all market data and selected pair from their respective stores
     const allMarketData = marketsData(s => s.allMarketData);
     const selectedPair = selectedPairStore(s => s.selectedPair);
-    const { authKey } = useAuthKey(); // <-- get authKey from context
+    const authKey = Cookies.get("authKey"); // <-- get authKey from cookie
 
     // Find the current market object for the selected pair
     const currentMarket = allMarketData.find(

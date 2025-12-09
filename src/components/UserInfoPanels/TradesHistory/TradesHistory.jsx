@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuthKey } from "../../../contexts/AuthKeyContext";
+import Cookies from "js-cookie";
 import Table from "../../CommonUIs/table";
 import Modal from "../../CommonUIs/modal/modal";
 import { API_BASE_URL } from "../../../config/api";
@@ -31,7 +31,7 @@ function isTokenValid(token) {
 }
 
 const TradesHistory = () => {
-  const { authKey } = useAuthKey();
+  const authKey = Cookies.get("authKey");
   const [trades, setTrades] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState(null);

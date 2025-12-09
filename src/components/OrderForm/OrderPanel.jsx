@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Cookies from "js-cookie";
 import { fetchMarkets } from '../../hooks/useMarketsAPI';
 
 import { useZustandStore } from '../../Zustandstore/useStore.js';
@@ -14,12 +15,11 @@ import OrderButton from './Ui/OrderButton.jsx';
 import SideSelectorButton from './Ui/SideSelectorButton.jsx';
 import { PriceFieldInput, InputWithDropDown, PercentageInput, MinimalDropDown } from '../CommonUIs/inputs/inputs.jsx';
 import DefaultAPILogin from "../Login/defaultAPILogin";
-import { useAuthKey } from "../../contexts/AuthKeyContext"; // <-- use context instead of storage
 import { API_BASE_URL } from '../../config/api';
 import { formatPrice } from '../../utils/priceFormater';
 
 function LimitOrderForm({ onCurrencyChange }) {
-  const { authKey } = useAuthKey();
+  const authKey = Cookies.get("authKey");
 
   const selectedPairBase = selectedPairStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
@@ -49,7 +49,24 @@ function LimitOrderForm({ onCurrencyChange }) {
   const setOrderFormStore = orderFormStore(s => s.setOrderFormState);
   const setNotional = useZustandStore(s => s.setNotional);
   const currentNotional = useZustandStore(s => s.currentNotional);
-  const accountInfo = useZustandStore(s => s.accountInfo);
+  const [accountInfo, setAccountInfo] = useState(() => {
+    try {
+      return JSON.parse(Cookies.get("accountInfo") || "null");
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        setAccountInfo(JSON.parse(Cookies.get("accountInfo") || "null"));
+      } catch {
+        setAccountInfo(null);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Get available balance directly from account info
   const availableForOrder = accountInfo?.availableForOrder || "0";
@@ -68,6 +85,15 @@ function LimitOrderForm({ onCurrencyChange }) {
     : (position?.upnl != null
       ? normalizeZero(position.upnl)
       : null);
+
+  // Helper to get color class for PNL values
+  function getPnlClass(val) {
+    const num = Number(val);
+    if (isNaN(num)) return "text-liquidGray";
+    if (num > 0) return "text-liquidGreen";
+    if (num < 0) return "text-liquidRed";
+    return "text-liquidGray";
+  }
 
   // Update price when OrderBookClickedPrice changes
   useEffect(() => {
@@ -415,7 +441,7 @@ function LimitOrderForm({ onCurrencyChange }) {
         </div>
         <span className="text-body text-color_lighter_gray w-full flex justify-between">
           Unrealized PNL
-          <span className="text-liquidwhite">
+          <span className={`font-semibold ${getPnlClass(unrealizedPNL)}`}>
             {unrealizedPNL !== null && unrealizedPNL !== undefined
               ? `${Number(unrealizedPNL).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
               : "--"}

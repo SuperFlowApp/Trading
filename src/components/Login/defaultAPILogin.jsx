@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { message } from "antd";
-import { useAuthKey } from "../../contexts/AuthKeyContext";
+import Cookies from "js-cookie";
 import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
 import Modal from "../CommonUIs/modal/modal";
@@ -11,8 +11,6 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { setAuthKey, setUsername: setContextUsername } = useAuthKey();
-
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -20,8 +18,10 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
 
       if (data.access_token && data.token_type) {
         message.success("Login successful!");
-        setAuthKey(data.access_token);
-        setContextUsername(username);
+        Cookies.set("authKey", data.access_token, { expires: 7, secure: true, sameSite: 'Strict' });
+        Cookies.set("username", username, { expires: 7, secure: true, sameSite: 'Strict' });
+        // Trigger event for auth change
+        window.dispatchEvent(new Event("authKeyChanged"));
         onLoginSuccess && onLoginSuccess();
         onClose();
       } else if (data.error_code === 1110 && data.msg) {

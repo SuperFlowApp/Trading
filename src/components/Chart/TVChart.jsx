@@ -191,7 +191,7 @@ export default function TVChart({
             
             // Set initial resolution
             chart.setResolution(interval, () => {
-              console.log("Resolution set to:", interval);
+              //console.log("Resolution set to:", interval);
             });
             
             // Add last price indicator
@@ -201,7 +201,7 @@ export default function TVChart({
             setTimeout(() => {
               try {
                 chart.executeActionById("timeScaleReset");
-                console.log("Chart timeScale reset applied");
+                //console.log("Chart timeScale reset applied");
               } catch (e) {
                 console.error("Error resetting chart:", e);
               }

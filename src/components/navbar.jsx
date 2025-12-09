@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import 'antd/dist/reset.css';
 import DefaultAPILogin from "./Login/defaultAPILogin";
-import { useAuthKey } from "../contexts/AuthKeyContext";
 import Button from "./CommonUIs/Button";
 import SettingsDropdown from "./SettingsDropdown";
 import { Disclosure, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import LoginPanel from "./Login/LoginPanel";
+import TermsModal from "./TermsModal";
+import Cookies from "js-cookie";
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -25,7 +26,6 @@ const initialSettings = {
 };
 
 function Navbar() {
-  const { authKey, setAuthKey, username, setUsername } = useAuthKey();
   const [showLogin, setShowLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -34,6 +34,7 @@ function Navbar() {
     if (window.location.pathname.includes("options-trading")) return "options";
     return "futures";
   });
+  const [showTerms, setShowTerms] = useState(false);
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
 
@@ -69,9 +70,36 @@ function Navbar() {
     };
   }, [settingsOpen]);
 
+  // Always get authKey and username from cookies
+  const authKey = Cookies.get("authKey");
+  const username = Cookies.get("username");
+
+  // Show TermsModal if not accepted when Connect/Login is pressed
+  const handleConnectClick = () => {
+    if (Cookies.get('termsAccepted') !== 'true') {
+      setShowTerms(true);
+    } else {
+      setShowLogin(true);
+    }
+  };
+
+  // When terms accepted, show login panel
+  const handleTermsAccept = () => {
+    setShowTerms(false);
+    setShowLogin(true);
+  };
+
+  // When terms declined, just close modal, do not show login
+  const handleTermsDecline = () => {
+    setShowTerms(false);
+  };
+
   const handleLoginSuccess = (username, token) => {
+    Cookies.set("authKey", token, { expires: 7, secure: true, sameSite: 'Strict' });
+    Cookies.set("username", username, { expires: 7, secure: true, sameSite: 'Strict' });
     setShowLogin(false);
     setDropdownOpen(false);
+    // No need to update state for authKey/username
   };
 
   const handleSettingChange = (key) => {
@@ -91,8 +119,9 @@ function Navbar() {
   };
 
   const handleDisconnect = () => {
-    setAuthKey(null);
-    setUsername(null); // Also clear the username
+    Cookies.remove("authKey");
+    Cookies.remove("username");
+    window.dispatchEvent(new Event("authKeyChanged")); // Notify panels to update
   };
 
   return (
@@ -149,7 +178,7 @@ function Navbar() {
             <div className="hidden sm:flex items-center gap-4">
               {!authKey ? (
                 <>
-                  <Button type="navdisconnected" onClick={() => setShowLogin(true)}>
+                  <Button type="navdisconnected" onClick={handleConnectClick}>
                     Connect
                   </Button>
                 </>
@@ -270,6 +299,14 @@ function Navbar() {
               </div>
             </Disclosure.Panel>
           </Transition>
+
+          {/* Terms Modal */}
+          {showTerms && (
+            <TermsModal
+              onAccept={handleTermsAccept}
+              onDecline={handleTermsDecline}
+            />
+          )}
 
           {/* Login Modal */}
           {showLogin && (

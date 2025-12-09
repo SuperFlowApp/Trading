@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { formatPrice } from '../../utils/priceFormater';
-import { useAuthKey } from "../../contexts/AuthKeyContext";
-import { useZustandStore } from '../../Zustandstore/useStore.js';
+import Cookies from 'js-cookie';
 import { fetchAccountInformation } from '../../hooks/useAccountInformationAPI';
 import Button from '../CommonUIs/Button.jsx';
 
@@ -27,90 +26,64 @@ function formatWithDollar(val) {
 }
 
 function AccountInfoPanel() {
-    const [accountInfoError, setAccountInfoError] = useState('');
-    const [accountInfo, setAccountInfo] = useState(null);
-    const { authKey, setAuthKey } = useAuthKey();
-    const setAccountInfoGlobal = useZustandStore(s => s.setAccountInfo);
+    const [accountInfo, setAccountInfo] = useState(() => {
+        try {
+            return JSON.parse(Cookies.get("accountInfo") || "null");
+        } catch {
+            return null;
+        }
+    });
+    const [authKey, setAuthKey] = useState(Cookies.get("authKey"));
 
-    // Listen for authKey changes (multi-tab support)
+    // Listen for authKey changes (login/logout)
     useEffect(() => {
-        const handler = () => {
-            if (!authKey) {
-                setAccountInfo(null);
-                setAccountInfoError('');
-            }
-        };
+        const handler = () => setAuthKey(Cookies.get("authKey"));
         window.addEventListener("authKeyChanged", handler);
         return () => window.removeEventListener("authKeyChanged", handler);
-    }, [authKey]);
+    }, []);
 
-    // Fetch account info when authKey changes and authKey is present
+    // Fetch and store account info in cookie and state every 5 seconds
     useEffect(() => {
         if (!authKey) {
+            Cookies.remove("accountInfo");
             setAccountInfo(null);
-            setAccountInfoError('');
-            setAccountInfoGlobal(null);
-            return;
-        }
-        const fetchInfo = async () => {
-            setAccountInfoError('');
-            try {
-                const { ok, status, data } = await fetchAccountInformation(authKey);
-                if (status === 401) {
-                    setAuthKey(null);
-                    setAccountInfo(null);
-                    setAccountInfoGlobal(null);
-                } else if (!ok) {
-                    setAccountInfo(null);
-                    setAccountInfoGlobal(null);
-                } else {
-                    setAccountInfo(data);
-                    setAccountInfoGlobal(data);
-                }
-            } catch (e) {
-                setAccountInfo(null);
-            }
-        };
-        fetchInfo();
-    }, [authKey, setAuthKey, setAccountInfoGlobal]);
-
-    // Poll for account info every 3 seconds if authKey is present
-    useEffect(() => {
-        if (!authKey) {
-            setAccountInfo(null);
-            setAccountInfoError('');
             return;
         }
 
         let isMounted = true;
 
-        const fetchInfo = async () => {
-            setAccountInfoError('');
+        const fetchAndUpdate = async () => {
             try {
                 const { ok, status, data } = await fetchAccountInformation(authKey);
-                if (!isMounted) return;
                 if (status === 401) {
-                    setAuthKey(null);
+                    Cookies.remove("authKey");
+                    Cookies.remove("username");
+                    Cookies.remove("accountInfo");
                     setAccountInfo(null);
+                    window.location.reload();
+                    return;
                 } else if (!ok) {
+                    Cookies.remove("accountInfo");
                     setAccountInfo(null);
                 } else {
-                    setAccountInfo(data);
+                    Cookies.set("accountInfo", JSON.stringify(data), { expires: 1 });
+                    if (isMounted) setAccountInfo(data);
                 }
             } catch (e) {
+                Cookies.remove("accountInfo");
                 if (isMounted) setAccountInfo(null);
             }
         };
 
-        fetchInfo(); // initial fetch
+        fetchAndUpdate(); // initial fetch
 
-        const interval = setInterval(fetchInfo, 3000);
+        const interval = setInterval(fetchAndUpdate, 5000);
 
         return () => {
             isMounted = false;
             clearInterval(interval);
         };
-    }, [authKey, setAuthKey]);
+    }, [authKey]);
 
     return (
         <div className="flex flex-col bg-boxbackground rounded-md p-2 w-[100%] overflow-hidden border-[1px] border-borderscolor">
@@ -120,10 +93,7 @@ function AccountInfoPanel() {
                 <Button type="primary" block>Withdraw</Button>
             </div>
 
-            <div className="pt-2 border-t border-liquiddarkgray ...">
-
-
-            </div>
+            <div className="pt-2 border-t border-liquiddarkgray ..."></div>
             {/* Account Info */}
             <div className="text-xs flex flex-col gap-2">
                 <div className="flex justify-between">
@@ -194,8 +164,6 @@ function AccountInfoPanel() {
                             : '—'}
                     </span>
                 </div>
-
-
                 <div className="flex justify-between">
                     <span className="text-color_lighter_gray">Paid Fee</span>
                     <span className="text-white font-semibold">

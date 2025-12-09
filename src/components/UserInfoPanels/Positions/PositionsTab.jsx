@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuthKey } from "../../../contexts/AuthKeyContext";
+import Cookies from "js-cookie";
 import ModifyBalance from "./ModifyBalance";
 import Table from "../../CommonUIs/table";
 import { API_BASE_URL } from "../../../config/api";
@@ -7,7 +7,7 @@ import { formatPrice } from "../../../utils/priceFormater";
 import { fetchAccountInformation } from "../../../hooks/useAccountInformationAPI";
 
 const Positions = () => {
-  const { authKey } = useAuthKey();
+  const authKey = Cookies.get("authKey");
   const [rawPositions, setRawPositions] = useState([]);
   const [showMarginModal, setShowMarginModal] = useState(false);
   const [activePosition, setActivePosition] = useState(null);

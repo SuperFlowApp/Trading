@@ -236,10 +236,6 @@ export class DataFeed {
       
       // Calculate start time by going back the desired number of bars
       const startTime = currentTime - (barsCount * timeMultiplier);
-      /*
-      console.log(`Fetching latest data - symbol: ${symbolInfo.name}, timeframe: ${apiTimeframe}, bars: ${barsCount}`);
-      console.log(`Time range: ${startTime} to ${currentTime} (${new Date(startTime * 1000)} to ${new Date(currentTime * 1000)})`);
-      */
       // Update the last fetch time
       this.lastFetchTime = Date.now();
       
@@ -256,7 +252,6 @@ export class DataFeed {
       const data = await response.json();
       
       if (!Array.isArray(data) || data.length === 0) {
-        console.log(`No data received for ${symbolInfo.name}, timeframe ${apiTimeframe}`);
         if (callback) callback([]);
         return [];
       }
@@ -283,7 +278,6 @@ export class DataFeed {
       const MAX_BARS = this._getDefaultBarsCount(resolution);
       const trimmed = this._trimWindow(bars, MAX_BARS);
       
-      console.log(`Received ${data.length} bars from API, transformed to ${trimmed.length} continuous bars for ${symbolInfo.name}`);
       
       // If we have bars, update the last price
       if (trimmed.length > 0) {
@@ -327,7 +321,6 @@ export class DataFeed {
     try {
       // Create WebSocket URL with the domain directly embedded
       const wsUrl = `wss://dev.superflow.exchange/ws/klines/${symbolName}/${apiTimeframe}`;
-      console.log(`Connecting to WebSocket: ${wsUrl}`);
       
       const ws = new WebSocket(wsUrl);
       this.wsConnection = ws;
@@ -349,7 +342,6 @@ export class DataFeed {
       }, 30000); // Send heartbeat every 30 seconds
       
       ws.onopen = () => {
-        console.log(`WebSocket connected: ${wsUrl}`);
         this._setWsStatus("connected");
         ws.isAlive = true;
         ws.retries = 0; // Reset retry counter on successful connection
@@ -400,7 +392,6 @@ export class DataFeed {
       };
       
       ws.onclose = (event) => {
-        console.log(`WebSocket closed with code: ${event.code}, reason: ${event.reason || 'No reason given'}`);
         this._setWsStatus("disconnected");
         ws.isAlive = false;
         
@@ -413,7 +404,6 @@ export class DataFeed {
           const permanentCloseCodes = [1008, 1011];
           if (!permanentCloseCodes.includes(event.code)) {
             const backoffDelay = Math.min(30000, 1000 * Math.pow(1.5, ws.retries || 0));
-            console.log(`Reconnecting in ${backoffDelay/1000} seconds...`);
             
             this.reconnectTimeout = setTimeout(() => {
               if (this.wsConnection === ws) { // Only reconnect if this is still the current socket
@@ -552,10 +542,6 @@ export class DataFeed {
         endTime = Math.floor(Date.now() / 1000);
       }
       
-      // Log request parameters for debugging
-      console.log(`Fetching historical klines - symbol: ${symbolInfo.name}, timeframe: ${apiTimeframe}, limit: ${limit}`);
-      console.log(`Time range: ${startTime} to ${endTime} (${new Date(startTime * 1000)} to ${new Date(endTime * 1000)})`);
-      
       const response = await fetch(
         `${API_BASE_URL}/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${startTime}&end_time=${endTime}`
       );
@@ -569,7 +555,6 @@ export class DataFeed {
       const data = await response.json();
       
       if (!Array.isArray(data) || data.length === 0) {
-        console.log(`No data received for ${symbolInfo.name}, timeframe ${apiTimeframe}`);
         onHistoryCallback([], { noData: true });
         return;
       }
@@ -606,7 +591,6 @@ export class DataFeed {
         this.onLastPriceChange(lastBar.close);
       }
       
-      console.log(`Received ${data.length} historical bars, transformed to ${trimmed.length} continuous bars for ${symbolInfo.name}`);
       onHistoryCallback(trimmed, { noData: trimmed.length === 0 });
     } catch (error) {
       console.error("Error fetching klines:", error);
@@ -618,7 +602,6 @@ export class DataFeed {
    * TradingView Datafeed method: subscribeBars
    */
   _subscribeBars(symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) {
-    console.log("Subscribing to bars", symbolInfo.name, resolution);
     
     // Store the callback so we can call it from the WebSocket handler
     window.lastBarUpdateCallback = onRealtimeCallback;
@@ -660,7 +643,6 @@ export class DataFeed {
    * TradingView Datafeed method: unsubscribeBars
    */
   _unsubscribeBars(subscriberUID) {
-    console.log("Unsubscribing from bars", subscriberUID);
     
     // Clean up the stored callback
     window.lastBarUpdateCallback = null;

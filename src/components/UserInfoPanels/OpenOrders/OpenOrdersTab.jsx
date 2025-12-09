@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuthKey } from "../../../contexts/AuthKeyContext";
+import Cookies from "js-cookie";
 import { formatPrice } from "../../../utils/priceFormater";
 import Modal from "../../CommonUIs/modal/modal";
 import Table from "../../CommonUIs/table";
@@ -39,7 +39,7 @@ function formatDate(ts) {
 }
 
 const OpenOrdersTab = () => {
-  const { authKey } = useAuthKey();
+  const authKey = Cookies.get("authKey");
   const [orders, setOrders] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);

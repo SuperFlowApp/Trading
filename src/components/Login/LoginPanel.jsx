@@ -26,21 +26,17 @@ const LoginPanel = ({ onClose, open }) => {
         width={420}
       >
         <div style={{
-          minHeight: 200,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 4,
-          padding: 0
-        }}>
-          <span style={{ color: "#fff", marginBottom: 24 }}>
-            Login
-          </span>
+          padding: 50
+          }}>
           <Button
             type="secondary"
             onClick={() => setShowDefaultLogin(true)}
-            style={{ marginTop: 16 }}
+            style={{ marginTop: 16,minWidth: 220 }}
           >
             Default method
           </Button>
@@ -56,7 +52,7 @@ const LoginPanel = ({ onClose, open }) => {
           <Button
             type="secondary"
             onClick={() => setShowWallet(true)}
-            style={{ marginTop: 16 }}
+            style={{ marginTop: 16,minWidth: 220 }}
           >
             My Wallet
           </Button>

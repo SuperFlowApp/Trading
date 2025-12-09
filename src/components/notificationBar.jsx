@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import { CloseOutlined } from "@ant-design/icons";
 import notificationStore from "../Zustandstore/notificationStore.js";
-import { useAuthKey } from "../contexts/AuthKeyContext"; // <-- import
+import Cookies from "js-cookie"; // <-- Add this
 import { useZustandStore } from "../Zustandstore/useStore"; // <-- add
 
 
 export default function NotificationBar() {
   const notification = notificationStore((s) => s.notification);
   const clearNotification = notificationStore((s) => s.clearNotification);
-  const { authKey } = useAuthKey(); // <-- get authKey
+  const authKey = Cookies.get("authKey"); // <-- get authKey from cookie
   const accountInfo = useZustandStore((s) => s.accountInfo); // <-- get accountInfo
 
   const welcomeMessage = "Welcome to SuperFlow Trading app!";
