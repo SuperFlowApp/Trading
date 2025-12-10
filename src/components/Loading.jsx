@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Logo from "../../public/assets/Logo.svg"; // Adjust path if needed
+import Logo from "/assets/favIcon.svg"; // Adjust path if needed
 
 // Helper to interpolate between two hex colors
 function interpolateColor(color1, color2, factor) {
