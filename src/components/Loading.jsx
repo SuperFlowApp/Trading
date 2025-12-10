@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Logo from "/assets/favIcon.svg"; // Adjust path if needed
 
 // Helper to interpolate between two hex colors
 function interpolateColor(color1, color2, factor) {
@@ -54,7 +53,7 @@ export default function LoadingScreen() {
       {/* Logo at the bottom */}
       <div className="mb-8 flex justify-center w-full">
         <img
-          src={Logo}
+          src="/assets/favIcon.svg"
           alt="Logo"
           className="h-10 w-auto opacity-90"
           style={{ maxWidth: 180 }}
