@@ -1,22 +1,30 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CloseOutlined } from "@ant-design/icons";
 import notificationStore from "../Zustandstore/notificationStore.js";
-import Cookies from "js-cookie"; // <-- Add this
-import { useZustandStore } from "../Zustandstore/useStore"; // <-- add
+import { useAccountInfoStore } from "../hooks/ZustAccountInfo";
 
 
 export default function NotificationBar() {
   const notification = notificationStore((s) => s.notification);
   const clearNotification = notificationStore((s) => s.clearNotification);
-  const authKey = Cookies.get("authKey"); // <-- get authKey from cookie
-  const accountInfo = useZustandStore((s) => s.accountInfo); // <-- get accountInfo
+  const accountInfo = useAccountInfoStore((s) => s.accountInfo);
+
+  // Track login state using window event
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+
+    const handler = (e) => setIsLoggedIn(e.detail === true);
+    window.addEventListener("userLoginStateChanged", handler);
+    return () => window.removeEventListener("userLoginStateChanged", handler);
+  }, []);
 
   const welcomeMessage = "Welcome to SuperFlow Trading app!";
   const zeroBalanceMessage = "Deposit Arbitrum USDT to get started.";
 
   // Use availableForOrder from accountInfo
   const availableForOrder = Number(accountInfo?.availableForOrder ?? 0);
-  const showZeroBalance = !!authKey && availableForOrder === 0;
+  const showZeroBalance = isLoggedIn && availableForOrder === 0;
   const displayMessage = showZeroBalance ? zeroBalanceMessage : (notification?.message || welcomeMessage);
 
   useEffect(() => {
@@ -27,8 +35,8 @@ export default function NotificationBar() {
     }
   }, [notification, clearNotification, showZeroBalance]);
 
-  // Only render if connected (authKey exists) AND balance is zero
-  if (!authKey || availableForOrder > 0) return null;
+  // Only render if logged in AND balance is zero
+  if (!isLoggedIn || availableForOrder > 0) return null;
 
   return (
     <div className="w-full px-1">

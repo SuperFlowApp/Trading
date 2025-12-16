@@ -20,17 +20,20 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
         message.success("Login successful!");
         Cookies.set("authKey", data.access_token, { expires: 7, secure: true, sameSite: 'Strict' });
         Cookies.set("username", username, { expires: 7, secure: true, sameSite: 'Strict' });
-        // Trigger event for auth change
-        window.dispatchEvent(new Event("authKeyChanged"));
+        // Only trigger login state event
+        window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: true }));
         onLoginSuccess && onLoginSuccess();
         onClose();
       } else if (data.error_code === 1110 && data.msg) {
         message.error(data.msg);
+        window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false }));
       } else {
         message.error("Invalid credentials.");
+        window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false }));
       }
     } catch (err) {
       message.error("Login failed: " + err.message);
+      window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false }));
     } finally {
       setLoading(false);
     }

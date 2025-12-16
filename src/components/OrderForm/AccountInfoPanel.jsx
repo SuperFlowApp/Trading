@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useAccountInfoStore } from '../../hooks/ZustAccountInfo';
 import { formatPrice } from '../../utils/priceFormater';
-import Cookies from 'js-cookie';
-import { fetchAccountInformation } from '../../hooks/useAccountInformationAPI';
 import Button from '../CommonUIs/Button.jsx';
 
 // Helper to convert "0E-8", "0E-16", etc. to "0"
@@ -26,64 +25,29 @@ function formatWithDollar(val) {
 }
 
 function AccountInfoPanel() {
-    const [accountInfo, setAccountInfo] = useState(() => {
-        try {
-            return JSON.parse(Cookies.get("accountInfo") || "null");
-        } catch {
-            return null;
-        }
-    });
-    const [authKey, setAuthKey] = useState(Cookies.get("authKey"));
+    const accountInfo = useAccountInfoStore(s => s.accountInfo);
+    const updateAccountInfo = useAccountInfoStore(s => s.updateAccountInfo);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // Listen for authKey changes (login/logout)
     useEffect(() => {
-        const handler = () => setAuthKey(Cookies.get("authKey"));
-        window.addEventListener("authKeyChanged", handler);
-        return () => window.removeEventListener("authKeyChanged", handler);
+        // Listen for login state changes
+        const handler = (e) => setIsLoggedIn(e.detail === true);
+        window.addEventListener("userLoginStateChanged", handler);
+        // Set initial state
+        setIsLoggedIn(!!window?.Cookies?.get?.("authKey"));
+        return () => window.removeEventListener("userLoginStateChanged", handler);
     }, []);
 
-    // Fetch and store account info in cookie and state every 5 seconds
     useEffect(() => {
-        if (!authKey) {
-            Cookies.remove("accountInfo");
-            setAccountInfo(null);
-            return;
+        let intervalId;
+        if (isLoggedIn) {
+            updateAccountInfo(); // Fetch immediately on login
+            intervalId = setInterval(updateAccountInfo, 5000); // Fetch every 5 seconds
         }
-
-        let isMounted = true;
-
-        const fetchAndUpdate = async () => {
-            try {
-                const { ok, status, data } = await fetchAccountInformation(authKey);
-                if (status === 401) {
-                    Cookies.remove("authKey");
-                    Cookies.remove("username");
-                    Cookies.remove("accountInfo");
-                    setAccountInfo(null);
-                    window.location.reload();
-                    return;
-                } else if (!ok) {
-                    Cookies.remove("accountInfo");
-                    setAccountInfo(null);
-                } else {
-                    Cookies.set("accountInfo", JSON.stringify(data), { expires: 1 });
-                    if (isMounted) setAccountInfo(data);
-                }
-            } catch (e) {
-                Cookies.remove("accountInfo");
-                if (isMounted) setAccountInfo(null);
-            }
-        };
-
-        fetchAndUpdate(); // initial fetch
-
-        const interval = setInterval(fetchAndUpdate, 5000);
-
         return () => {
-            isMounted = false;
-            clearInterval(interval);
+            if (intervalId) clearInterval(intervalId);
         };
-    }, [authKey]);
+    }, [isLoggedIn, updateAccountInfo]);
 
     return (
         <div className="flex flex-col bg-boxbackground rounded-md p-2 w-[100%] overflow-hidden border-[1px] border-borderscolor">
@@ -92,7 +56,6 @@ function AccountInfoPanel() {
                 <Button type="secondary" block>Deposit</Button>
                 <Button type="primary" block>Withdraw</Button>
             </div>
-
             <div className="pt-2 border-t border-liquiddarkgray ..."></div>
             {/* Account Info */}
             <div className="text-xs flex flex-col gap-2">

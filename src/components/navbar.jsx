@@ -35,6 +35,7 @@ function Navbar() {
     return "futures";
   });
   const [showTerms, setShowTerms] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!Cookies.get("authKey"));
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
 
@@ -94,12 +95,14 @@ function Navbar() {
     setShowTerms(false);
   };
 
+  // When logging in, update both local state and fire event
   const handleLoginSuccess = (username, token) => {
     Cookies.set("authKey", token, { expires: 7, secure: true, sameSite: 'Strict' });
     Cookies.set("username", username, { expires: 7, secure: true, sameSite: 'Strict' });
     setShowLogin(false);
     setDropdownOpen(false);
-    // No need to update state for authKey/username
+    setIsLoggedIn(true);
+    window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: true })); // <--- fire event
   };
 
   const handleSettingChange = (key) => {
@@ -118,11 +121,19 @@ function Navbar() {
     }
   };
 
+  // When logging out, update both local state and fire event
   const handleDisconnect = () => {
     Cookies.remove("authKey");
     Cookies.remove("username");
-    window.dispatchEvent(new Event("authKeyChanged")); // Notify panels to update
+    setIsLoggedIn(false);
+    window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false })); // <--- fire event
   };
+
+  useEffect(() => {
+    const handler = (e) => setIsLoggedIn(e.detail === true);
+    window.addEventListener("userLoginStateChanged", handler);
+    return () => window.removeEventListener("userLoginStateChanged", handler);
+  }, []);
 
   return (
     <Disclosure as="nav" className="bg-boxbackground text-white text-body w-full border-b-[1px] border-borderscolor" >
@@ -176,7 +187,7 @@ function Navbar() {
             </div>
             {/* Desktop Right Side */}
             <div className="hidden sm:flex items-center gap-4">
-              {!authKey ? (
+              {!isLoggedIn ? (
                 <>
                   <Button type="navdisconnected" onClick={handleConnectClick}>
                     Connect
@@ -274,7 +285,7 @@ function Navbar() {
                 </li>
               </ul>
               <div className="flex flex-col gap-2 mt-2">
-                {!authKey ? (
+                {!isLoggedIn ? (
                   <>
                     <Button type="navdisconnected" onClick={() => setShowLogin(true)}>
                       Login

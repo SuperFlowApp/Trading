@@ -18,8 +18,34 @@ import DefaultAPILogin from "../Login/defaultAPILogin";
 import { API_BASE_URL } from '../../config/api';
 import { formatPrice } from '../../utils/priceFormater';
 
+// --- ADD THIS IMPORT ---
+import { useAccountInfoStore } from '../../hooks/ZustAccountInfo';
+
 function LimitOrderForm({ onCurrencyChange }) {
-  const authKey = Cookies.get("authKey");
+  const [authKey, setAuthKey] = useState(() => Cookies.get("authKey"));
+
+  useEffect(() => {
+    // Listen for userLoginStateChanged instead of authKeyChanged
+    const handler = (e) => {
+      if (e.detail === true) {
+        setAuthKey(Cookies.get("authKey"));
+      } else {
+        setAuthKey(null);
+      }
+    };
+    window.addEventListener("userLoginStateChanged", handler);
+    return () => window.removeEventListener("userLoginStateChanged", handler);
+  }, []);
+
+  // --- USE ZUSTAND ACCOUNT INFO ---
+  const accountInfo = useAccountInfoStore(s => s.accountInfo);
+  const startPolling = useAccountInfoStore(s => s.startPolling);
+  const stopPolling = useAccountInfoStore(s => s.stopPolling);
+
+  useEffect(() => {
+    startPolling();
+    return () => stopPolling();
+  }, [startPolling, stopPolling]);
 
   const selectedPairBase = selectedPairStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
@@ -49,26 +75,8 @@ function LimitOrderForm({ onCurrencyChange }) {
   const setOrderFormStore = orderFormStore(s => s.setOrderFormState);
   const setNotional = useZustandStore(s => s.setNotional);
   const currentNotional = useZustandStore(s => s.currentNotional);
-  const [accountInfo, setAccountInfo] = useState(() => {
-    try {
-      return JSON.parse(Cookies.get("accountInfo") || "null");
-    } catch {
-      return null;
-    }
-  });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      try {
-        setAccountInfo(JSON.parse(Cookies.get("accountInfo") || "null"));
-      } catch {
-        setAccountInfo(null);
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Get available balance directly from account info
+  // Get available balance directly from Zustand account info
   const availableForOrder = accountInfo?.availableForOrder || "0";
   const balanceFree = parseFloat(availableForOrder) || 0;
 

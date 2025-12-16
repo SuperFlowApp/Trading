@@ -4,18 +4,28 @@ import ModifyBalance from "./ModifyBalance";
 import Table from "../../CommonUIs/table";
 import { API_BASE_URL } from "../../../config/api";
 import { formatPrice } from "../../../utils/priceFormater";
-import { fetchAccountInformation } from "../../../hooks/useAccountInformationAPI";
+import { fetchAccountInformation } from "../../../hooks/ZustAccountInfo";
 
 const Positions = () => {
-  const authKey = Cookies.get("authKey");
   const [rawPositions, setRawPositions] = useState([]);
   const [showMarginModal, setShowMarginModal] = useState(false);
   const [activePosition, setActivePosition] = useState(null);
   const [availableUsdt, setAvailableUsdt] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Listen for login state changes
+  useEffect(() => {
+    const handler = (e) => setIsLoggedIn(e.detail === true);
+    window.addEventListener("userLoginStateChanged", handler);
+    // Optionally, set initial state based on cookies (for first load)
+    setIsLoggedIn(!!Cookies.get("authKey"));
+    return () => window.removeEventListener("userLoginStateChanged", handler);
+  }, []);
 
   // --- fetch ---
   const fetchPositions = React.useCallback(() => {
-    if (!authKey) {
+    const authKey = Cookies.get("authKey");
+    if (!isLoggedIn || !authKey) {
       setRawPositions([]);
       return;
     }
@@ -31,7 +41,7 @@ const Positions = () => {
         setRawPositions(Array.isArray(data) ? data : []);
       })
       .catch(() => setRawPositions([]));
-  }, [authKey]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     fetchPositions();
@@ -41,15 +51,15 @@ const Positions = () => {
 
   // Fetch available USDT for trading
   useEffect(() => {
-    if (!authKey) {
+    const authKey = Cookies.get("authKey");
+    if (!isLoggedIn || !authKey) {
       setAvailableUsdt(0);
       return;
     }
     fetchAccountInformation(authKey).then((res) => {
-      // Adjust this based on your API response structure
-      setAvailableUsdt(Number(res.data.availableBalance || 0));
+      setAvailableUsdt(Number(res.availableForOrder || 0));
     });
-  }, [authKey]);
+  }, [isLoggedIn]);
 
   // --- helpers ---
   const fmt = (v, digits = 4) => {
@@ -233,7 +243,7 @@ const Positions = () => {
   return (
     <div className="w-full">
       {/* Only show table header if logged in */}
-      {authKey && (
+      {isLoggedIn && (
         <Table
           columns={columns}
           data={rawPositions}
@@ -241,7 +251,7 @@ const Positions = () => {
           emptyMessage="No positions."
         />
       )}
-      {!authKey && (
+      {!isLoggedIn && (
         <Table
           columns={[]} // Hide columns/header
           data={[]}    // No data

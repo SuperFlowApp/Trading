@@ -52,10 +52,28 @@ const useZustandStore = create((set, get) => ({
     fontSize: initialState.chartSettings?.fontSize ?? 'medium',
     watermark_show: initialState.chartSettings?.watermark_show ?? true,
   },
+
+
+
+  
   setChartSettings: (settings) => set({ chartSettings: { ...get().chartSettings, ...settings } }),
+
+
+
+
+
+
+
 
   accountInfo: initialState.accountInfo || null,
   setAccountInfo: (info) => set({ accountInfo: info }),
+
+
+
+
+
+
+
 }));
 
 // --- Sync Zustand stores with localStorage across tabs ---
