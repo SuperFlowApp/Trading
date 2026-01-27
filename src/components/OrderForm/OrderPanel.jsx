@@ -2,10 +2,6 @@ import { useEffect, useState } from 'react';
 import Cookies from "js-cookie";
 import { fetchMarkets } from '../../hooks/useMarketsAPI';
 
-import { useZustandStore } from '../../Zustandstore/useStore.js';
-import { selectedPairStore, orderFormStore } from '../../Zustandstore/userOrderStore.js';
-import { marketsData } from '../../Zustandstore/marketsDataStore.js';
-
 import LeveragePanel from './marginLeverage/Leverage.jsx';
 import MarginMode from './marginLeverage/MarginMode.jsx';
 import PositionMode from './marginLeverage/PositionMode';
@@ -17,9 +13,11 @@ import { PriceFieldInput, InputWithDropDown, PercentageInput, MinimalDropDown } 
 import DefaultAPILogin from "../Login/defaultAPILogin";
 import { API_BASE_URL } from '../../config/api';
 import { formatPrice } from '../../utils/priceFormater';
+import { fetchAccountInformation } from "../../hooks/FetchAccountInfo"; // <-- import directly
 
-// --- ADD THIS IMPORT ---
-import { useAccountInfoStore } from '../../hooks/ZustAccountInfo';
+import { useZustandStore } from '../../Zustandstore/useStore.js';
+import { selectedPairStore, orderFormStore } from '../../Zustandstore/userOrderStore.js';
+import { marketsData } from '../../Zustandstore/marketsDataStore.js';
 
 function LimitOrderForm({ onCurrencyChange }) {
   const [authKey, setAuthKey] = useState(() => Cookies.get("authKey"));
@@ -37,15 +35,27 @@ function LimitOrderForm({ onCurrencyChange }) {
     return () => window.removeEventListener("userLoginStateChanged", handler);
   }, []);
 
-  // --- USE ZUSTAND ACCOUNT INFO ---
-  const accountInfo = useAccountInfoStore(s => s.accountInfo);
-  const startPolling = useAccountInfoStore(s => s.startPolling);
-  const stopPolling = useAccountInfoStore(s => s.stopPolling);
+  // Remove Zustand account info usage
+  // const accountInfo = useAccountInfoStore(s => s.accountInfo);
 
+  // Add local state for account info
+  const [accountInfo, setAccountInfo] = useState(null);
+
+  // Fetch account info directly using fetchAccountInformation
   useEffect(() => {
-    startPolling();
-    return () => stopPolling();
-  }, [startPolling, stopPolling]);
+    let active = true;
+    async function getInfo() {
+      const info = await fetchAccountInformation();
+      if (active) setAccountInfo(info);
+    }
+    getInfo();
+    // Optionally, refresh on interval or on authKey change
+    const interval = setInterval(getInfo, 10000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [authKey]);
 
   const selectedPairBase = selectedPairStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;
@@ -76,14 +86,16 @@ function LimitOrderForm({ onCurrencyChange }) {
   const setNotional = useZustandStore(s => s.setNotional);
   const currentNotional = useZustandStore(s => s.currentNotional);
 
-  // Get available balance directly from Zustand account info
-  const availableForOrder = accountInfo?.availableForOrder || "0";
-  const balanceFree = parseFloat(availableForOrder) || 0;
-
   // Helper to normalize zero (copy from AccountInfoPanel or import)
   function normalizeZero(val) {
     if (typeof val === "string" && /^0(\.0*)?E-\d+$/.test(val)) return "0";
     return val;
+  }
+
+  // Helper to format with dollar sign
+  function formatWithDollar(val) {
+    if (val == null || val === "" || isNaN(val)) return "—";
+    return `$${Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   // Get Unrealized PNL (same logic as AccountInfoPanel)
@@ -237,7 +249,7 @@ function LimitOrderForm({ onCurrencyChange }) {
     setInputSource('input');
     // Calculate sliderValue from amount
     const numericValue = parseFloat(value);
-    const numericBalance = parseFloat(balanceFree);
+    const numericBalance = parseFloat(accountInfo?.availableForOrder || "0");
     if (!isNaN(numericValue) && numericBalance > 0) {
       let percent = (numericValue / numericBalance) * 100;
       percent = Math.max(0, Math.min(100, percent));
@@ -255,7 +267,7 @@ function LimitOrderForm({ onCurrencyChange }) {
         setInputSource(null);
         return;
       }
-      const bal = parseFloat(balanceFree);
+      const bal = parseFloat(accountInfo?.availableForOrder || "0");
       if (isNaN(bal)) {
         setAmount("0");
         setInputSource(null);
@@ -275,7 +287,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       }
       setInputSource(null);
     }
-  }, [sliderValue, balanceFree, selectedCurrency, price, priceMidpoint, inputSource]);
+  }, [sliderValue, accountInfo?.availableForOrder, selectedCurrency, price, priceMidpoint, inputSource]);
 
   // Auto-hide error and success messages after 3 seconds
   useEffect(() => {
@@ -378,7 +390,7 @@ function LimitOrderForm({ onCurrencyChange }) {
     if (
       currentNotional !== null &&
       !isNaN(currentNotional) &&
-      parseFloat(currentNotional) > parseFloat(balanceFree)
+      parseFloat(currentNotional) > parseFloat(accountInfo?.availableForOrder || "0")
     ) {
       setShowOrderValueWarning(true);
       const timer = setTimeout(() => setShowOrderValueWarning(false), 3000);
@@ -386,7 +398,7 @@ function LimitOrderForm({ onCurrencyChange }) {
     } else {
       setShowOrderValueWarning(false);
     }
-  }, [currentNotional, balanceFree]);
+  }, [currentNotional, accountInfo?.availableForOrder]);
 
   // --- Use Zustand for markets data ---
   const allMarketData = marketsData(s => s.allMarketData);
@@ -443,7 +455,9 @@ function LimitOrderForm({ onCurrencyChange }) {
         <div className="text-body">
           <span className="flex w-full justify-between text-color_lighter_gray">
             Available for order: <span className="text-white">
-              {formatPrice(availableForOrder)} USDT
+              {accountInfo?.availableForOrder != null
+                ? formatWithDollar(normalizeZero(accountInfo.availableForOrder))
+                : '—'}
             </span>
           </span>
         </div>
@@ -497,7 +511,7 @@ function LimitOrderForm({ onCurrencyChange }) {
               setInputSource('input');
               setAmountInvalid(false); // Reset invalid state on change
               const numericValue = parseFloat(val === "" ? "0" : val);
-              const numericBalance = parseFloat(balanceFree);
+              const numericBalance = parseFloat(accountInfo?.availableForOrder || "0");
               if (!isNaN(numericValue) && numericBalance > 0) {
                 let percent = (numericValue / numericBalance) * 100;
                 percent = Math.max(0, Math.min(100, percent));
@@ -636,7 +650,7 @@ function LimitOrderForm({ onCurrencyChange }) {
               className={
                 currentNotional !== null &&
                   !isNaN(currentNotional) &&
-                  parseFloat(currentNotional) > parseFloat(balanceFree)
+                  parseFloat(currentNotional) > parseFloat(accountInfo?.availableForOrder || "0")
                   ? "text-warning"
                   : "text-liquidwhite"
               }

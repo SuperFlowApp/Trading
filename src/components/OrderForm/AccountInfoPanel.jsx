@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useAccountInfoStore } from '../../hooks/ZustAccountInfo';
+import { fetchAccountInformation } from '../../hooks/FetchAccountInfo.js';
 import { formatPrice } from '../../utils/priceFormater';
 import Button from '../CommonUIs/Button.jsx';
-import Cookies from "js-cookie"; // Make sure this is at the top
+import Cookies from "js-cookie";
 
 // Helper to convert "0E-8", "0E-16", etc. to "0"
 function normalizeZero(val) {
@@ -26,29 +26,53 @@ function formatWithDollar(val) {
 }
 
 function AccountInfoPanel() {
-    const accountInfo = useAccountInfoStore(s => s.accountInfo);
-    const updateAccountInfo = useAccountInfoStore(s => s.updateAccountInfo);
+    const [accountInfo, setAccountInfo] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+    // Listen for login state changes
     useEffect(() => {
-        // Listen for login state changes
         const handler = (e) => setIsLoggedIn(e.detail === true);
         window.addEventListener("userLoginStateChanged", handler);
-        // Set initial state
         setIsLoggedIn(!!Cookies.get("authKey"));
         return () => window.removeEventListener("userLoginStateChanged", handler);
     }, []);
 
+    // Fetch account info every 5 seconds if logged in
     useEffect(() => {
         let intervalId;
+        async function fetchAndSet() {
+            const authKey = Cookies.get("authKey");
+            if (!authKey) {
+                setAccountInfo(null);
+                return;
+            }
+            try {
+                const result = await fetchAccountInformation(authKey);
+                if (result.status === 401) {
+                    Cookies.remove('authKey');
+                    Cookies.remove('username');
+                    setAccountInfo(null);
+                    window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false }));
+                } else if (!result.ok) {
+                    setAccountInfo(null);
+                } else {
+                    setAccountInfo(result);
+                }
+            } catch {
+                setAccountInfo(null);
+            }
+        }
+
         if (isLoggedIn) {
-            updateAccountInfo(); // Fetch immediately on login
-            intervalId = setInterval(updateAccountInfo, 5000); // Fetch every 5 seconds
+            fetchAndSet(); // Fetch immediately
+            intervalId = setInterval(fetchAndSet, 5000);
+        } else {
+            setAccountInfo(null);
         }
         return () => {
             if (intervalId) clearInterval(intervalId);
         };
-    }, [isLoggedIn, updateAccountInfo]);
+    }, [isLoggedIn]);
 
     return (
         <div className="flex flex-col bg-boxbackground rounded-md p-2 w-[100%] overflow-hidden border-[1px] border-borderscolor">

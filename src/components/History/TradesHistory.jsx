@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { selectedPairStore } from '../../Zustandstore/userOrderStore.js';
-import { useMultiWebSocketGlobal } from '../../contexts/MultiWebSocketContext';
-import { API_BASE_URL } from '../../config/api'; // Add this import
+import { useMultiWebSocketGlobal } from '../../contexts/MultiWebSocketContext.jsx';
+import { API_BASE_URL } from '../../config/api.js'; // Add this import
 
 const Trades = () => {
     const [trades, setTrades] = useState([]);
@@ -22,7 +22,11 @@ const Trades = () => {
                 );
                 const data = await res.json();
                 if (active) {
-                    setTrades(data.sort((a, b) => b.timestamp - a.timestamp));
+                    setTrades(
+                        Array.isArray(data)
+                            ? data.sort((a, b) => (b.timestamp || b.T) - (a.timestamp || a.T))
+                            : []
+                    );
                 }
             } catch (err) {
                 console.error('Failed to fetch trades:', err);

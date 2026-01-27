@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Positions from './Positions/PositionsTab';
 import OpenOrdersTab from './OpenOrders/OpenOrdersTab'; // <-- Import the OpenOrdersTab
 import Tab from '../CommonUIs/tab'; // Import the Tab component
-import TradesHistory from './TradesHistory/TradesHistory';
+import TradesHistory from './TradesHistory/MyTradesHistory.jsx';
 
 function PositionsPanel() {
   const [activeTab, setActiveTab] = useState('positions');
@@ -12,7 +12,7 @@ function PositionsPanel() {
     'positions',
     'orders',
     // 'twap', // Removed TWAP
-    'tradeHistory',
+    'mytradeHistory',
     'fundingHistory',
     'orderHistory'
   ];
@@ -23,7 +23,7 @@ function PositionsPanel() {
       case 'positions': return 'Positions';
       case 'orders': return 'Open Orders';
       // case 'twap': return 'TWAP'; // Removed TWAP
-      case 'tradeHistory': return 'Trade History';
+      case 'mytradeHistory': return 'My Trades';
       case 'fundingHistory': return 'Funding History';
       case 'orderHistory': return 'Order History';
       default: return key;
@@ -58,7 +58,7 @@ function PositionsPanel() {
           <OpenOrdersTab />
         </div>
         {/* Trade History */}
-        <div style={{ display: activeTab === 'tradeHistory' ? 'block' : 'none' }}>
+        <div style={{ display: activeTab === 'mytradeHistory' ? 'block' : 'none' }}>
           <TradesHistory />
         </div>
         {/* Funding History */}

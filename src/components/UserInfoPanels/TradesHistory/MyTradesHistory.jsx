@@ -4,16 +4,6 @@ import Table from "../../CommonUIs/table";
 import Modal from "../../CommonUIs/modal/modal";
 import { API_BASE_URL } from "../../../config/api";
 
-const columns = [
-  { key: "tradeId", label: "Trade ID" },
-  { key: "symbol", label: "Symbol" },
-  { key: "side", label: "Side" },
-  { key: "price", label: "Price" },
-  { key: "quantity", label: "Qty" },
-  { key: "notional", label: "Notional" },
-  { key: "timestamp", label: "Time", render: v => formatDate(v) },
-];
-
 function formatDate(ts) {
   if (!ts) return "-";
   const d = new Date(ts);
@@ -30,6 +20,40 @@ function isTokenValid(token) {
   }
 }
 
+// Custom Symbol cell with info icon and hover tooltip
+const SymbolWithInfo = ({ symbol, id }) => (
+  <div className="flex items-center gap-1 relative group">
+    <span>{symbol}</span>
+    <span
+      className="w-5 h-5 flex items-center justify-center rounded-full border border-gray-400 text-xs cursor-pointer bg-gray-700 text-white font-bold"
+      tabIndex={0}
+    >
+      i
+      {/* Tooltip always rendered, but only visible on hover/focus */}
+      <div
+        className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200
+        absolute left-16 top-1/2 -translate-y-1/2 ml-2 z-10 bg-black text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap"
+      >
+        Trade ID: {id}
+      </div>
+    </span>
+  </div>
+);
+
+const columns = [
+  {
+    key: "symbol",
+    label: "Symbol",
+    render: (v, row) => <SymbolWithInfo symbol={v} id={row.id} />,
+  },
+  { key: "side", label: "Side" },
+  { key: "price", label: "Price" },
+  { key: "quantity", label: "Qty" },
+  { key: "notional", label: "Notional" },
+  { key: "timestamp", label: "Time", render: v => formatDate(v) },
+  // id is hidden from the table
+];
+
 const TradesHistory = () => {
   const authKey = Cookies.get("authKey");
   const [trades, setTrades] = useState([]);
@@ -44,13 +68,15 @@ const TradesHistory = () => {
 
     let intervalId;
 
-    const fetchTrades = () => {
-      fetch(`https://fastify-serverless-function-ymut.onrender.com/api/trades`, {
-        method: 'GET',
+    const fetchMyTrades = () => {
+      fetch(`https://fastify-serverless-function-ymut.onrender.com/api/my-trades`, {
+        method: 'POST',
         headers: {
           accept: 'application/json',
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${authKey}`,
         },
+        body: JSON.stringify({}),
       })
         .then(async res => {
           if (res.status === 401) {
@@ -58,16 +84,16 @@ const TradesHistory = () => {
             return;
           }
           const data = await res.json();
-          setTrades(data);
+          setTrades(Array.isArray(data.user_trades) ? data.user_trades : []);
         })
         .catch(err => {
           setTrades([]);
-          console.error("Trades fetch error:", err);
+          console.error("My trades fetch error:", err);
         });
     };
 
-    fetchTrades(); // Initial fetch
-    intervalId = setInterval(fetchTrades, 10000);
+    fetchMyTrades(); // Initial fetch
+    intervalId = setInterval(fetchMyTrades, 10000);
 
     return () => clearInterval(intervalId);
   }, [authKey]);
@@ -77,9 +103,9 @@ const TradesHistory = () => {
   return (
     <div className="w-full">
       <Table
-        columns={isUserLoggedIn ? columns : []} // Hide header if not logged in
+        columns={isUserLoggedIn ? columns : []}
         data={isUserLoggedIn ? trades : []}
-        rowKey={row => row.tradeId}
+        rowKey={row => row.id}
         emptyMessage={isUserLoggedIn ? "No trades found." : "Please log in to view trade history."}
         actions={
           isUserLoggedIn
@@ -101,12 +127,17 @@ const TradesHistory = () => {
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <div className="p-4">
             <div className="mb-4 text-body text-white">
-              <div>Trade ID: {selectedTrade.tradeId}</div>
+              <div>Trade ID: {selectedTrade.id}</div>
+              <div>Order ID: {selectedTrade.orderId}</div>
               <div>Symbol: {selectedTrade.symbol}</div>
               <div>Side: {selectedTrade.side}</div>
+              <div>Position Side: {selectedTrade.positionSide}</div>
               <div>Price: {selectedTrade.price}</div>
               <div>Quantity: {selectedTrade.quantity}</div>
               <div>Notional: {selectedTrade.notional}</div>
+              <div>Maker: {selectedTrade.maker ? "Yes" : "No"}</div>
+              <div>Fee: {selectedTrade.fee?.cost} {selectedTrade.fee?.currency}</div>
+              <div>Fee Rate: {selectedTrade.fee?.rate}</div>
               <div>Time: {formatDate(selectedTrade.timestamp)}</div>
             </div>
             <div className="flex justify-center gap-2">

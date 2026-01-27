@@ -4,7 +4,7 @@ import ModifyBalance from "./ModifyBalance";
 import Table from "../../CommonUIs/table";
 import { API_BASE_URL } from "../../../config/api";
 import { formatPrice } from "../../../utils/priceFormater";
-import { fetchAccountInformation } from "../../../hooks/ZustAccountInfo";
+import { fetchAccountInformation } from "../../../hooks/FetchAccountInfo.js";
 
 const Positions = () => {
   const [rawPositions, setRawPositions] = useState([]);
