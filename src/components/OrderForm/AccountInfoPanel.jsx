@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAccountInfoStore } from '../../hooks/ZustAccountInfo';
 import { formatPrice } from '../../utils/priceFormater';
 import Button from '../CommonUIs/Button.jsx';
+import Cookies from "js-cookie"; // Make sure this is at the top
 
 // Helper to convert "0E-8", "0E-16", etc. to "0"
 function normalizeZero(val) {
@@ -34,7 +35,7 @@ function AccountInfoPanel() {
         const handler = (e) => setIsLoggedIn(e.detail === true);
         window.addEventListener("userLoginStateChanged", handler);
         // Set initial state
-        setIsLoggedIn(!!window?.Cookies?.get?.("authKey"));
+        setIsLoggedIn(!!Cookies.get("authKey"));
         return () => window.removeEventListener("userLoginStateChanged", handler);
     }, []);
 

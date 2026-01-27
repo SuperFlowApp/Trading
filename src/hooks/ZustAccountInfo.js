@@ -51,12 +51,14 @@ export const useAccountInfoStore = create((set, get) => ({
   // Fetch and update account info ONCE
   updateAccountInfo: async () => {
     const authKey = Cookies.get('authKey');
+    console.log("[Zustand] updateAccountInfo called. authKey:", authKey); // Debug log
     if (!authKey) {
       set({ accountInfo: null, status: null });
       return;
     }
     try {
       const result = await fetchAccountInformation(authKey);
+      console.log("[Zustand] fetchAccountInformation result:", result); // Debug log
       if (result.status === 401) {
         Cookies.remove('authKey');
         Cookies.remove('username');
@@ -67,7 +69,8 @@ export const useAccountInfoStore = create((set, get) => ({
       } else {
         set({ accountInfo: result, status: result.status });
       }
-    } catch {
+    } catch (err) {
+      console.error("[Zustand] updateAccountInfo error:", err); // Debug log
       set({ accountInfo: null, status: null });
     }
   },

@@ -5,7 +5,6 @@ import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
 import Modal from "../CommonUIs/modal/modal";
 import { loginUser } from "../../hooks/useDefaultAPILogin";
-import { useAccountInfoStore } from "../../hooks/ZustAccountInfo"; // Optional: if you want to reset on logout
 
 const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [username, setUsername] = useState("");
