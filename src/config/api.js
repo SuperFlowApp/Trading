@@ -1,1 +1,1 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://fastify-serverless-function-rimj.onrender.com";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://fastify-serverless-function-ymut.onrender.com";

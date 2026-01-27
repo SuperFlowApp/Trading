@@ -3,7 +3,7 @@ import { getAddress } from "ethers";
 import { API_BASE_URL } from "../../config/api";
 
 const DOMAIN = "fastify-serverless-function-rimj.onrender.com";
-const ORIGIN = "https://fastify-serverless-function-rimj.onrender.com";
+const ORIGIN = "https://fastify-serverless-function-ymut.onrender.com";
 const EXPECTED_CHAIN_ID = 1;
 
 export async function getFreshNonce(addr) {

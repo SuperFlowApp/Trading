@@ -102,7 +102,7 @@ export default function TradingViewLightChart({ interval: intervalProp }) {
 
     // Load Binance data
     const loadBinance = async (sym, intv, lim, start, end) => {
-        let url = `https://fastify-serverless-function-rimj.onrender.com/api/klines?symbol=${sym}&timeframe=${intv}&limit=${lim}`;
+        let url = `https://fastify-serverless-function-ymut.onrender.com/api/klines?symbol=${sym}&timeframe=${intv}&limit=${lim}`;
         if (start) url += `&start_time=${start}`;
         if (end) url += `&end_time=${end}`;
         try {

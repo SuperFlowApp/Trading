@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 
 // Async fetch function
 export async function fetchAccountInformation(authKey) {
-  const response = await fetch('https://fastify-serverless-function-rimj.onrender.com/api/account-information', {
+  const response = await fetch('https://fastify-serverless-function-ymut.onrender.com/api/account-information', {
     headers: {
       'Authorization': `Bearer ${authKey}`,
       'accept': 'application/json'

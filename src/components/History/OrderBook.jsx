@@ -82,7 +82,7 @@ const OrderBook = () => {
   const fetchOrderbookRest = async () => {
     try {
       setIsFetchingRest(true);
-      const response = await fetch(`https://fastify-serverless-function-rimj.onrender.com/api/orderbooks?symbol=${symbol}&limit=20`);
+      const response = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/orderbooks?symbol=${symbol}&limit=20`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
