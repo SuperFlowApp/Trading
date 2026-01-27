@@ -2,7 +2,7 @@ import { API_BASE_URL } from '../config/api';
 
 export async function signupUser({ username, password }) {
   const response = await fetch(
-    `${API_BASE_URL}/api/create_user`,
+    `https://fastify-serverless-function-ymut.onrender.com/api/create_user`,
     {
       method: "POST",
       headers: {

@@ -36,7 +36,7 @@ export default function PositionMode() {
       const payload = {
         mode: positionMode,
       };
-      const res = await fetch(`${API_BASE_URL}/api/position-mode`, {
+      const res = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/position-mode`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

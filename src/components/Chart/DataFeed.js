@@ -240,7 +240,7 @@ export class DataFeed {
       this.lastFetchTime = Date.now();
       
       const response = await fetch(
-        `${API_BASE_URL}/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${barsCount}&start_time=${startTime}&end_time=${currentTime}`
+        `https://fastify-serverless-function-ymut.onrender.com/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${barsCount}&start_time=${startTime}&end_time=${currentTime}`
       );
       
       if (!response.ok) {
@@ -543,7 +543,7 @@ export class DataFeed {
       }
       
       const response = await fetch(
-        `${API_BASE_URL}/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${startTime}&end_time=${endTime}`
+        `https://fastify-serverless-function-ymut.onrender.com/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${startTime}&end_time=${endTime}`
       );
       
       if (!response.ok) {

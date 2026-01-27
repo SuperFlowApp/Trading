@@ -61,7 +61,7 @@ export default function MarginMode() {
                 symbol: currentMarket.symbol,
                 marginMode: marginMode.toUpperCase(),
             };
-            const res = await fetch(`${API_BASE_URL}/api/margin-mode`, {
+            const res = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/margin-mode`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

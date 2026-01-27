@@ -45,7 +45,7 @@ const TradesHistory = () => {
     let intervalId;
 
     const fetchTrades = () => {
-      fetch(`${API_BASE_URL}/api/trades`, {
+      fetch(`https://fastify-serverless-function-ymut.onrender.com/api/trades`, {
         method: 'GET',
         headers: {
           accept: 'application/json',

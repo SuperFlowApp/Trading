@@ -18,7 +18,7 @@ const Trades = () => {
         const fetchTrades = async () => {
             try {
                 const res = await fetch(
-                    `${API_BASE_URL}/api/trades?symbol=${symbol}&limit=100`
+                    `https://fastify-serverless-function-ymut.onrender.com/api/trades?symbol=${symbol}&limit=100`
                 );
                 const data = await res.json();
                 if (active) {

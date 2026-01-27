@@ -29,7 +29,7 @@ const Positions = () => {
       setRawPositions([]);
       return;
     }
-    fetch(`${API_BASE_URL}/api/positions`, {
+    fetch(`https://fastify-serverless-function-ymut.onrender.com/api/positions`, {
       method: "GET",
       headers: {
         accept: "application/json",

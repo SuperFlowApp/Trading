@@ -128,7 +128,7 @@ export default function LeveragePanel() {
         symbol: selectedSymbol,
         leverage: leverage,
       };
-      const res = await fetch(`${API_BASE_URL}/api/leverage`, {
+      const res = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/leverage`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

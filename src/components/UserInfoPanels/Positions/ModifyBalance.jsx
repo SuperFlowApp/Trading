@@ -48,7 +48,7 @@ const ModifyBalance = ({
       // Map our UI action to API action
       const apiAction = action === "add" ? "deposit" : "withdraw";
 
-      const response = await fetch(`${API_BASE_URL}/api/modify-isolated-balance?action=${apiAction}`, {
+      const response = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/modify-isolated-balance?action=${apiAction}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -7,7 +7,7 @@ import { useZustandStore } from "../../../Zustandstore/useStore"; // import your
 // --- REST helper with range support ---
 const REST_URL = (pair, interval, opts = {}) => {
   const { startTime, endTime, limit = 1000 } = opts;
-  const u = new URL('https://fastify-serverless-function-ymut.onrender.com//api/klines');
+  const u = new URL('https://fastify-serverless-function-ymut.onrender.com/api/klines');
   u.searchParams.set('symbol', `${pair.toUpperCase()}USDT`);
   u.searchParams.set('timeframe', interval);
   u.searchParams.set('limit', String(Math.min(Math.max(limit, 1), 1000)));

@@ -156,7 +156,7 @@ function LimitOrderForm({ onCurrencyChange }) {
     const requestBody = { ...OrderFormState };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/order`, {
+      const response = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/order`, {
         method: 'POST',
         headers: {
           accept: 'application/json',

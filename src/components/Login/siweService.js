@@ -7,7 +7,7 @@ const ORIGIN = "https://fastify-serverless-function-ymut.onrender.com";
 const EXPECTED_CHAIN_ID = 1;
 
 export async function getFreshNonce(addr) {
-  const r = await fetch(`${API_BASE_URL}/api/siwe/nonce/${addr}`);
+  const r = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/siwe/nonce/${addr}`);
   if (!r.ok) throw new Error(await r.text());
   return (await r.json()).nonce;
 }
@@ -38,7 +38,7 @@ export async function personalSign(message, address) {
 }
 
 export async function postJSON(path, payload) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
+  const res = await fetch(`https://fastify-serverless-function-ymut.onrender.com${path}`, {
     method: "POST",
     headers: { accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify(payload),

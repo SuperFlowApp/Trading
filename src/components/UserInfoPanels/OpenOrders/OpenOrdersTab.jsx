@@ -58,7 +58,7 @@ const OpenOrdersTab = () => {
     let intervalId;
 
     const fetchOrders = () => {
-      fetch(`${API_BASE_URL}/api/open-orders`, {
+      fetch(`https://fastify-serverless-function-ymut.onrender.com/api/open-orders`, {
         method: 'GET',
         headers: {
           accept: 'application/json',
@@ -151,7 +151,7 @@ const OpenOrdersTab = () => {
                       const id = selectedOrder.orderId;
                       const symbol = selectedOrder.symbol;
                       const res = await fetch(
-                        `${API_BASE_URL}/api/cancel-order?id=${id}&symbol=${symbol}`,
+                        `https://fastify-serverless-function-ymut.onrender.com/api/cancel-order?id=${id}&symbol=${symbol}`,
                         {
                           method: "DELETE",
                           headers: {

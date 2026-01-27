@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '../config/api';
 
 export async function loginUser({ username, password }) {
-  const response = await fetch(`${API_BASE_URL}/api/token`, {
+  const response = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/token`, {
     method: "POST",
     headers: {
       accept: "application/json",
