@@ -193,12 +193,15 @@ export class DataFeed {
   _updateWorkingBarFromWs(processedData, resolution) {
     const timeMultiplier = this._getTimeMultiplier(resolution);
     const slot = this._snapToSlot((processedData.openTime || processedData.t), timeMultiplier);
-    const price = parseFloat(processedData.close);
+    const price = parseFloat(processedData.close); // WebSocket close price
     const vol = parseFloat(processedData.volume || "0");
 
-    // ensure working bar is on this slot
+    // Update `this.lastPrice` with the WebSocket's last price
+    this.lastPrice = price;
+    this.onLastPriceChange(price);
+
+    // Ensure working bar is on this slot
     if (!this.workingBar || this.workingBar.slotSec !== slot) {
-      // start bar seeded from lastPrice (or price if lastPrice empty)
       const seed = (this.lastPrice != null) ? this.lastPrice : price;
       this.workingBar = { slotSec: slot, open: seed, high: seed, low: seed, close: seed, volume: 0 };
     }
@@ -209,9 +212,7 @@ export class DataFeed {
     b.low = Math.min(b.low, price);
     b.volume += isFinite(vol) ? vol : 0;
 
-    this.lastPrice = price;
-    this.onLastPriceChange(price);
-
+    // Emit the updated working bar to the chart
     if (window.lastBarUpdateCallback) {
       window.lastBarUpdateCallback({
         time: b.slotSec * 1000,
@@ -541,7 +542,8 @@ export class DataFeed {
       if (endTime < 1400000000) {
         endTime = Math.floor(Date.now() / 1000);
       }
-      
+      console.log("Fetching klines with URL:", `https://fastify-serverless-function-ymut.onrender.com/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${startTime}&end_time=${endTime}`);
+
       const response = await fetch(
         `https://fastify-serverless-function-ymut.onrender.com/api/klines?symbol=${symbolInfo.name}&timeframe=${apiTimeframe}&limit=${limit}&start_time=${startTime}&end_time=${endTime}`
       );
@@ -602,40 +604,35 @@ export class DataFeed {
    * TradingView Datafeed method: subscribeBars
    */
   _subscribeBars(symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) {
-    
     // Store the callback so we can call it from the WebSocket handler
     window.lastBarUpdateCallback = onRealtimeCallback;
-    
-    // Connect to WebSocket for real-time updates using our direct implementation
+
+    // Connect to WebSocket for real-time updates
     const apiTimeframe = this._tvTimeframeToApiFormat(resolution);
     this._setupWebSocket(symbolInfo.name, apiTimeframe, resolution);
-    
-    // Set up clocked bar emitter for continuous real-time updates
-    this._startRealtimeClock(resolution);
-    
-    // Set up periodic data refresh (every 30 seconds for intraday, longer for daily+)
+
+    // Set up periodic data refresh (every 1 minute)
     if (this.dataUpdateInterval) {
       clearInterval(this.dataUpdateInterval);
     }
-    
-    // Determine refresh interval based on timeframe
-    const refreshInterval = ["1D", "1W", "1M"].includes(resolution) ? 300000 : 30000; // 5 min or 30 sec
-    
+
+    const refreshInterval = 5000; // 5 seconds
     this.dataUpdateInterval = setInterval(() => {
-      // Only fetch if the last fetch was more than refreshInterval ms ago
-      if (Date.now() - this.lastFetchTime > refreshInterval) {
-        this._fetchLatestData(symbolInfo, resolution, apiTimeframe, (bars) => {
-          if (bars.length > 0) {
-            // For refresh data, we'll let the clock handle updates
-            // We don't call onRealtimeCallback here to avoid conflicts with clock-based updates
-            const lastBar = bars[bars.length - 1];
-            this.lastPrice = lastBar.close;
-            this.onLastPriceChange(lastBar.close);
+      // Fetch historical data every 1 minute
+      this._fetchLatestData(symbolInfo, resolution, apiTimeframe, (bars) => {
+        if (bars.length > 0) {
+          const lastBar = bars[bars.length - 1];
+          this.lastPrice = lastBar.close; // Update last price from GET data
+          this.onLastPriceChange(lastBar.close);
+
+          // Emit the latest bar to the chart
+          if (window.lastBarUpdateCallback) {
+            window.lastBarUpdateCallback(lastBar);
           }
-        });
-      }
+        }
+      });
     }, refreshInterval);
-    
+
     return subscriberUID;
   }
 
