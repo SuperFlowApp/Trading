@@ -1,50 +1,26 @@
 import { useEffect, useState } from "react";
 import { CloseOutlined } from "@ant-design/icons";
 import notificationStore from "../Zustandstore/notificationStore.js";
-import { fetchAccountInformation } from "../hooks/FetchAccountInfo";
-import Cookies from "js-cookie";
+import useAuthStore from "../store/authStore"; // Import Zustand store
+import useAccountStore from "../hooks/FetchAccountInfo"; // Import Zustand account store
 
 export default function NotificationBar() {
   const notification = notificationStore((s) => s.notification);
   const clearNotification = notificationStore((s) => s.clearNotification);
 
+  const accountInfo = useAccountStore((state) => state.accountInfo); // Subscribe to Zustand account store
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn); // Zustand store subscription for login state
+
   const [availableForOrder, setAvailableForOrder] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Listen for login state changes
+  // Update availableForOrder whenever accountInfo changes
   useEffect(() => {
-    const handler = (e) => setIsLoggedIn(e.detail === true);
-    window.addEventListener("userLoginStateChanged", handler);
-    setIsLoggedIn(!!Cookies.get("authKey"));
-    return () => window.removeEventListener("userLoginStateChanged", handler);
-  }, []);
-
-  // Poll account info every 5 seconds if logged in
-  useEffect(() => {
-    let intervalId;
-    async function fetchAndSet() {
-      try {
-        const result = await fetchAccountInformation();
-        if (!result.ok) {
-          setAvailableForOrder(0);
-        } else {
-          setAvailableForOrder(Number(result.availableForOrder ?? 0));
-        }
-      } catch {
-        setAvailableForOrder(0);
-      }
-    }
-
-    if (isLoggedIn) {
-      fetchAndSet();
-      intervalId = setInterval(fetchAndSet, 5000);
+    if (accountInfo && accountInfo.availableForOrder !== undefined) {
+      setAvailableForOrder(Number(accountInfo.availableForOrder));
     } else {
       setAvailableForOrder(0);
     }
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [isLoggedIn]);
+  }, [accountInfo]);
 
   const welcomeMessage = "Welcome to SuperFlow Trading app!";
   const zeroBalanceMessage = "Deposit Arbitrum USDT to get started.";

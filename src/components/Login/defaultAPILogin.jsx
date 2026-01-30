@@ -5,11 +5,13 @@ import { UsernameInput, PasswordInput } from "../CommonUIs/inputs/inputs";
 import Button from "../CommonUIs/Button";
 import Modal from "../CommonUIs/modal/modal";
 import { loginUser } from "../../hooks/useDefaultAPILogin";
+import useAuthStore from "../../store/authStore";
 
 const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const setLoginState = useAuthStore((state) => state.setLoginState);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -20,20 +22,19 @@ const DefaultAPILogin = ({ open, onClose, onLoginSuccess, clickPosition }) => {
         message.success("Login successful!");
         Cookies.set("authKey", data.access_token, { expires: 7, secure: true, sameSite: 'Strict' });
         Cookies.set("username", username, { expires: 7, secure: true, sameSite: 'Strict' });
-        // Only trigger login state event
-        window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: true }));
+        setLoginState(true); // Update Zustand store
         onLoginSuccess && onLoginSuccess();
         onClose();
       } else if (data.error_code === 1110 && data.msg) {
         message.error(data.msg);
-        window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false }));
+        setLoginState(false); // Update Zustand store
       } else {
         message.error("Invalid credentials.");
-        window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false }));
+        setLoginState(false); // Update Zustand store
       }
     } catch (err) {
       message.error("Login failed: " + err.message);
-      window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false }));
+      setLoginState(false); // Update Zustand store
     } finally {
       setLoading(false);
     }

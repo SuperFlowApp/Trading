@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
-import { fetchAccountInformation } from '../../hooks/FetchAccountInfo.js';
+import { useEffect } from 'react';
+import useAccountStore from '../../hooks/FetchAccountInfo';
 import { formatPrice } from '../../utils/priceFormater';
 import Button from '../CommonUIs/Button.jsx';
-import Cookies from "js-cookie";
 
 // Helper to convert "0E-8", "0E-16", etc. to "0"
 function normalizeZero(val) {
@@ -26,53 +25,7 @@ function formatWithDollar(val) {
 }
 
 function AccountInfoPanel() {
-    const [accountInfo, setAccountInfo] = useState(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    // Listen for login state changes
-    useEffect(() => {
-        const handler = (e) => setIsLoggedIn(e.detail === true);
-        window.addEventListener("userLoginStateChanged", handler);
-        setIsLoggedIn(!!Cookies.get("authKey"));
-        return () => window.removeEventListener("userLoginStateChanged", handler);
-    }, []);
-
-    // Fetch account info every 5 seconds if logged in
-    useEffect(() => {
-        let intervalId;
-        async function fetchAndSet() {
-            const authKey = Cookies.get("authKey");
-            if (!authKey) {
-                setAccountInfo(null);
-                return;
-            }
-            try {
-                const result = await fetchAccountInformation(authKey);
-                if (result.status === 401) {
-                    Cookies.remove('authKey');
-                    Cookies.remove('username');
-                    setAccountInfo(null);
-                    window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false }));
-                } else if (!result.ok) {
-                    setAccountInfo(null);
-                } else {
-                    setAccountInfo(result);
-                }
-            } catch {
-                setAccountInfo(null);
-            }
-        }
-
-        if (isLoggedIn) {
-            fetchAndSet(); // Fetch immediately
-            intervalId = setInterval(fetchAndSet, 5000);
-        } else {
-            setAccountInfo(null);
-        }
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-        };
-    }, [isLoggedIn]);
+    const accountInfo = useAccountStore((state) => state.accountInfo); // Access Zustand store
 
     return (
         <div className="flex flex-col bg-boxbackground rounded-md p-2 w-[100%] overflow-hidden border-[1px] border-borderscolor">

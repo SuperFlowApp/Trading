@@ -8,6 +8,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import LoginPanel from "./Login/LoginPanel";
 import TermsModal from "./TermsModal";
 import Cookies from "js-cookie";
+import useAuthStore from "../store/authStore"; // Import Zustand store
 
 const initialSettings = {
   skipOpenOrderConfirmation: false,
@@ -35,9 +36,11 @@ function Navbar() {
     return "futures";
   });
   const [showTerms, setShowTerms] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(!!Cookies.get("authKey"));
   const dropdownRef = useRef(null);
   const settingsRef = useRef(null);
+
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn); // Subscribe to Zustand store
+  const setLoginState = useAuthStore((state) => state.setLoginState); // Zustand action
 
   // Listen for clicks outside dropdown to close it
   useEffect(() => {
@@ -95,14 +98,13 @@ function Navbar() {
     setShowTerms(false);
   };
 
-  // When logging in, update both local state and fire event
+  // When logging in, update Zustand store
   const handleLoginSuccess = (username, token) => {
     Cookies.set("authKey", token, { expires: 7, secure: true, sameSite: 'Strict' });
     Cookies.set("username", username, { expires: 7, secure: true, sameSite: 'Strict' });
     setShowLogin(false);
     setDropdownOpen(false);
-    setIsLoggedIn(true);
-    window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: true })); // <--- fire event
+    setLoginState(true); // Update Zustand store
   };
 
   const handleSettingChange = (key) => {
@@ -121,19 +123,12 @@ function Navbar() {
     }
   };
 
-  // When logging out, update both local state and fire event
+  // When logging out, update Zustand store
   const handleDisconnect = () => {
     Cookies.remove("authKey");
     Cookies.remove("username");
-    setIsLoggedIn(false);
-    window.dispatchEvent(new CustomEvent("userLoginStateChanged", { detail: false })); // <--- fire event
+    setLoginState(false); // Update Zustand store
   };
-
-  useEffect(() => {
-    const handler = (e) => setIsLoggedIn(e.detail === true);
-    window.addEventListener("userLoginStateChanged", handler);
-    return () => window.removeEventListener("userLoginStateChanged", handler);
-  }, []);
 
   return (
     <Disclosure as="nav" className="bg-boxbackground text-white text-body w-full border-b-[1px] border-borderscolor" >

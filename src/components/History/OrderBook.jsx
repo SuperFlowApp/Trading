@@ -63,65 +63,53 @@ const Row = memo(({ size, price, total, progress, color, onSelect, isNew, fontSi
 
 const OrderBook = () => {
   // Fetch selectedPair from user input store
-  const selectedPair = selectedPairStore(s => s.selectedPair);
+  const selectedPair = selectedPairStore((s) => s.selectedPair);
   const symbol = `${selectedPair}USDT`;
-  
+
   // Use global websocket hook
-  const { payloads, states } = useMultiWebSocketGlobal();
-  
+  const { payloads } = useMultiWebSocketGlobal(); // Removed `states` as it's unused
+
   // Get orderbook data for current symbol
   const orderbookData = payloads.orderbook;
-  const wsConnected = states.orderbook === 'open';
-  
-  // Track if we're fetching from REST API
-  const [isFetchingRest, setIsFetchingRest] = useState(false);
+
   // Track orderbook data
   const [localOrderbookData, setLocalOrderbookData] = useState({ bids: [], asks: [] });
-  
+
   // Function to fetch orderbook data from REST API
   const fetchOrderbookRest = async () => {
     try {
-      setIsFetchingRest(true);
-      const response = await fetch(`https://fastify-serverless-function-ymut.onrender.com/api/orderbooks?symbol=${symbol}&limit=20`);
-      
+      const response = await fetch(
+        `https://fastify-serverless-function-ymut.onrender.com/api/orderbooks?symbol=${symbol}&limit=20`
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      
       const data = await response.json();
-      
-      // Process the data to match WebSocket format
       if (data && data.bids && data.asks) {
         setLocalOrderbookData({
           b: data.bids.map(([price, qty]) => [price, qty]),
-          a: data.asks.map(([price, qty]) => [price, qty])
+          a: data.asks.map(([price, qty]) => [price, qty]),
         });
       }
     } catch (error) {
       console.error("Error fetching orderbook data:", error);
-    } finally {
-      setIsFetchingRest(false);
     }
   };
-  
-  // Setup polling for REST API when WebSocket is not connected
+
+  // Setup polling for REST API
   useEffect(() => {
-    let intervalId = null;
-    
-    if (!wsConnected && !isFetchingRest) {
-      // Initial fetch
+    // Initial fetch
+    fetchOrderbookRest();
+
+    // Setup polling interval
+    const intervalId = setInterval(() => {
       fetchOrderbookRest();
-      
-      // Setup polling interval
-      intervalId = setInterval(() => {
-        fetchOrderbookRest();
-      }, 3000); // Poll every 3 seconds
-    }
-    
+    }, 3000); // Poll every 3 seconds
+
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      clearInterval(intervalId);
     };
-  }, [wsConnected, symbol, isFetchingRest]);
+  }, [symbol]);
 
   // Helper to format orderbook arrays
   const formatBook = (arr) =>
@@ -130,8 +118,8 @@ const OrderBook = () => {
       size: parseFloat(size),
     }));
 
-  // Extract bids/asks from either websocket payload or REST API data
-  const activeData = wsConnected ? orderbookData : localOrderbookData;
+  // Extract bids/asks from REST API data
+  const activeData = localOrderbookData;
   const bids = activeData?.b ? formatBook(activeData.b) : [];
   const asks = activeData?.a ? formatBook(activeData.a) : [];
   const error = null; // You can add error handling if needed
@@ -515,7 +503,7 @@ const OrderBook = () => {
       {/* Replace the existing tooltip with this custom SVG shape tooltip */}
       {tooltip.visible && tooltip.content && (
         <div
-          style={{ 
+          style={{
             position: 'fixed',
             left: tooltip.left - 10, // Adjust left position to account for new shape
             top: tooltip.top,
@@ -529,25 +517,25 @@ const OrderBook = () => {
             {/* SVG container with both the shape and the border */}
             <svg
               width="160"
-              height="70" 
+              height="70"
               viewBox="0 0 160 70"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               className="absolute inset-0"
             >
               {/* Background fill */}
-              <path 
-                d="M0 4C0 1.79086 1.79086 0 4 0H138C140.209 0 142 1.79086 142 4V25.5L160 35L142 44.5V66C142 68.2091 140.209 70 138 70H4C1.79086 70 0 68.2091 0 66V4Z" 
+              <path
+                d="M0 4C0 1.79086 1.79086 0 4 0H138C140.209 0 142 1.79086 142 4V25.5L160 35L142 44.5V66C142 68.2091 140.209 70 138 70H4C1.79086 70 0 68.2091 0 66V4Z"
                 fill="var(--color-backgroundlight)"
               />
               {/* Border stroke */}
-              <path 
-                d="M0.5 4C0.5 2.067 2.067 0.5 4 0.5H138C139.933 0.5 141.5 2.067 141.5 4V25.2678L159.019 34.5L141.5 43.7322V66C141.5 67.933 139.933 69.5 138 69.5H4C2.067 69.5 0.5 67.933 0.5 66V4Z" 
-                stroke="var(--color-primary2darker)" 
+              <path
+                d="M0.5 4C0.5 2.067 2.067 0.5 4 0.5H138C139.933 0.5 141.5 2.067 141.5 4V25.2678L159.019 34.5L141.5 43.7322V66C141.5 67.933 139.933 69.5 138 69.5H4C2.067 69.5 0.5 67.933 0.5 66V4Z"
+                stroke="var(--color-primary2darker)"
                 strokeWidth="1"
               />
             </svg>
-            
+
             {/* Tooltip content */}
             <div className="relative px-4 py-2 text-body text-[var(--color-liquidwhite)]">
               <div className="flex justify-start">
@@ -566,32 +554,6 @@ const OrderBook = () => {
           </div>
         </div>
       )}
-
-      <div className="flex justify-end">
-        {/* WebSocket status LED with additional REST indicator */}
-        <div className="flex items-center">
-          {isFetchingRest && (
-            <span 
-              className="text-xs text-gray-400 mr-2"
-              title="Fetching data from REST API"
-            >
-              REST
-            </span>
-          )}
-          <span
-            style={{
-              display: 'inline-block',
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              background: wsConnected ? '#22c55e' : (isFetchingRest ? '#f59e0b' : '#6b7280'), // green, amber or gray
-              marginRight: 6,
-              border: '1.5px solid #222'
-            }}
-            title={wsConnected ? "Live WebSocket connection" : (isFetchingRest ? "Using REST API" : "Disconnected")}
-          />
-        </div>
-      </div>
 
       {/* Optionally show error */}
       {error && <div className="text-red-500">{error}</div>}

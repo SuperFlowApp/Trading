@@ -11,9 +11,9 @@ import OrderButton from './Ui/OrderButton.jsx';
 import SideSelectorButton from './Ui/SideSelectorButton.jsx';
 import { PriceFieldInput, InputWithDropDown, PercentageInput, MinimalDropDown } from '../CommonUIs/inputs/inputs.jsx';
 import DefaultAPILogin from "../Login/defaultAPILogin";
-import { API_BASE_URL } from '../../config/api';
 import { formatPrice } from '../../utils/priceFormater';
-import { fetchAccountInformation } from "../../hooks/FetchAccountInfo"; // <-- import directly
+import useAccountStore from "../../hooks/FetchAccountInfo"; // Import Zustand store
+import useAuthStore from "../../store/authStore"; // Import Zustand auth store
 
 import { useZustandStore } from '../../Zustandstore/useStore.js';
 import { selectedPairStore, orderFormStore } from '../../Zustandstore/userOrderStore.js';
@@ -22,40 +22,30 @@ import { marketsData } from '../../Zustandstore/marketsDataStore.js';
 function LimitOrderForm({ onCurrencyChange }) {
   const [authKey, setAuthKey] = useState(() => Cookies.get("authKey"));
 
+  // Zustand store subscription for login state
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const setLoginState = useAuthStore((state) => state.setLoginState);
+
+  // Update Zustand login state based on authKey
   useEffect(() => {
-    // Listen for userLoginStateChanged instead of authKeyChanged
-    const handler = (e) => {
-      if (e.detail === true) {
-        setAuthKey(Cookies.get("authKey"));
-      } else {
-        setAuthKey(null);
-      }
-    };
-    window.addEventListener("userLoginStateChanged", handler);
-    return () => window.removeEventListener("userLoginStateChanged", handler);
-  }, []);
-
-  // Remove Zustand account info usage
-  // const accountInfo = useAccountInfoStore(s => s.accountInfo);
-
-  // Add local state for account info
-  const [accountInfo, setAccountInfo] = useState(null);
-
-  // Fetch account info directly using fetchAccountInformation
-  useEffect(() => {
-    let active = true;
-    async function getInfo() {
-      const info = await fetchAccountInformation();
-      if (active) setAccountInfo(info);
+    if (authKey) {
+      setLoginState(true);
+    } else {
+      setLoginState(false);
     }
-    getInfo();
-    // Optionally, refresh on interval or on authKey change
-    const interval = setInterval(getInfo, 10000);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [authKey]);
+  }, [authKey, setLoginState]);
+
+  // Update authKey when login state changes
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setAuthKey(null);
+    } else {
+      setAuthKey(Cookies.get("authKey"));
+    }
+  }, [isLoggedIn]);
+
+  // Use Zustand store for account info
+  const accountInfo = useAccountStore((state) => state.accountInfo); // Access Zustand store directly
 
   const selectedPairBase = selectedPairStore(s => s.selectedPair);
   const selectedPair = selectedPairBase ? `${selectedPairBase}USDT` : null;

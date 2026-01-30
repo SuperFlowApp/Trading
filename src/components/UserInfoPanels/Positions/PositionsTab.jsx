@@ -2,27 +2,18 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import ModifyBalance from "./ModifyBalance";
 import Table from "../../CommonUIs/table";
-import { API_BASE_URL } from "../../../config/api";
-import { formatPrice } from "../../../utils/priceFormater";
 import { fetchAccountInformation } from "../../../hooks/FetchAccountInfo.js";
+import useAuthStore from "../../../store/authStore"; // Import Zustand store
 
 const Positions = () => {
   const [rawPositions, setRawPositions] = useState([]);
   const [showMarginModal, setShowMarginModal] = useState(false);
   const [activePosition, setActivePosition] = useState(null);
   const [availableUsdt, setAvailableUsdt] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Listen for login state changes
-  useEffect(() => {
-    const handler = (e) => setIsLoggedIn(e.detail === true);
-    window.addEventListener("userLoginStateChanged", handler);
-    // Optionally, set initial state based on cookies (for first load)
-    setIsLoggedIn(!!Cookies.get("authKey"));
-    return () => window.removeEventListener("userLoginStateChanged", handler);
-  }, []);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn); // Subscribe to Zustand store
 
-  // --- fetch ---
+  // Fetch positions
   const fetchPositions = React.useCallback(() => {
     const authKey = Cookies.get("authKey");
     if (!isLoggedIn || !authKey) {
@@ -81,8 +72,6 @@ const Positions = () => {
     return ((num(upnl) / im) * 100).toFixed(2) + "%";
   };
 
-  // Simple health ratio for Isolated only:
-  // health% ~= maintMargin / max(isoMarginBalance + upnl, 0.0000001)
   const calcIsolatedHealthPct = (row) => {
     if (!row || row.isCross) return null;
     const mm = num(row.maintenanceMargin);
@@ -105,8 +94,6 @@ const Positions = () => {
     { key: "positionAmt", label: "Size", render: (v) => fmt(v, 4) },
     { key: "entryPrice", label: "Entry Price", render: (v) => fmt(v, 4) },
     { key: "markPrice", label: "Mark Price", render: (v) => fmt(v, 4) },
-
-    // Notional with safe fallback if API sends 0/blank
     {
       key: "notional",
       label: "Notional",
@@ -117,10 +104,7 @@ const Positions = () => {
         return fmt(value, 4);
       },
     },
-
     { key: "leverage", label: "Leverage" },
-
-    // UPNL as $ and % (ROE vs initialMargin)
     {
       key: "upnl",
       label: "Unrealized PNL",
@@ -134,20 +118,18 @@ const Positions = () => {
             roeValue > 0
               ? "text-liquidGreen"
               : roeValue < 0
-                ? "text-liquidRed"
-                : "text-color_lighter_gray";
+              ? "text-liquidRed"
+              : "text-color_lighter_gray";
         }
         return (
           <span>
-            <span className={roeColor}>{formatPrice(row.upnl)} USDT</span>
+            <span className={roeColor}>{row.upnl} USDT</span>
             <br />
             <span className={`text-xs ${roeColor}`}>{roeRaw}</span>
           </span>
         );
       },
     },
-
-    // Realized PnL stays (nice-to-have)
     {
       key: "realizedPnl",
       label: "Realized PnL",
@@ -161,73 +143,20 @@ const Positions = () => {
             roeValue > 0
               ? "text-liquidGreen"
               : roeValue < 0
-                ? "text-liquidRed"
-                : "text-color_lighter_gray";
+              ? "text-liquidRed"
+              : "text-color_lighter_gray";
         }
         return (
           <span>
-            <span className={roeColor}>{formatPrice(row.realizedPnl)} USDT</span>
+            <span className={roeColor}>{row.realizedPnl} USDT</span>
             <br />
             <span className={`text-xs ${roeColor}`}>{roeRaw}</span>
           </span>
         );
       },
     },
-
-    // Merge mode + margin + tiny health% (isolated only)
-    {
-      key: "isolatedMarginBalance",
-      label: "Margin",
-      render: (v, row) => {
-        const positionType = row.isCross ? "Cross" : "Isolated";
-        return (
-          <div className="flex items-center pr-8">
-            <div className="flex flex-col">
-              <span>{formatPrice(v)} USDT</span>
-              <span className="text-color_lighter_gray">{positionType}</span>
-            </div>
-            {positionType === "Isolated" && (
-              <button
-                className="ml-2 p-1 bg-none hover:bg-liquiddarkgray rounded-md self-start"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActivePosition(row);
-                  setShowMarginModal(true);
-                }}
-                aria-label="Modify isolated margin"
-                title="Modify isolated margin"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3 w-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-        );
-      },
-    },
-
-
-    // Keep Liq. Price column; show "-" if not provided
-    {
-      key: "liquidationPrice",
-      label: "Liquid. Price",
-      render: (v) => (v === null || v === undefined ? "-" : fmt(v, 4)),
-    },
   ];
 
-  // Calculate removable balance for the active position
   const removableBalance = activePosition
     ? num(activePosition.isolatedMarginBalance) +
       num(activePosition.upnl) -
@@ -242,7 +171,6 @@ const Positions = () => {
 
   return (
     <div className="w-full">
-      {/* Only show table header if logged in */}
       {isLoggedIn && (
         <Table
           columns={columns}
@@ -254,7 +182,7 @@ const Positions = () => {
       {!isLoggedIn && (
         <Table
           columns={[]} // Hide columns/header
-          data={[]}    // No data
+          data={[]} // No data
           emptyMessage="Please log in to view your positions."
         />
       )}
