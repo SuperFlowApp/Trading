@@ -214,7 +214,6 @@ function LimitOrderForm({ onCurrencyChange }) {
   useEffect(() => {
     if (OrderBookClickedPrice) {
       setMarket('limit');
-      setPrice(OrderBookClickedPrice);
     }
   }, [OrderBookClickedPrice]);
 
