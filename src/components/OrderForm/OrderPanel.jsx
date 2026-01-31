@@ -20,29 +20,10 @@ import { selectedPairStore, orderFormStore } from '../../Zustandstore/userOrderS
 import { marketsData } from '../../Zustandstore/marketsDataStore.js';
 
 function LimitOrderForm({ onCurrencyChange }) {
-  const [authKey, setAuthKey] = useState(() => Cookies.get("authKey"));
 
   // Zustand store subscription for login state
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
-  const setLoginState = useAuthStore((state) => state.setLoginState);
 
-  // Update Zustand login state based on authKey
-  useEffect(() => {
-    if (authKey) {
-      setLoginState(true);
-    } else {
-      setLoginState(false);
-    }
-  }, [authKey, setLoginState]);
-
-  // Update authKey when login state changes
-  useEffect(() => {
-    if (!isLoggedIn) {
-      setAuthKey(null);
-    } else {
-      setAuthKey(Cookies.get("authKey"));
-    }
-  }, [isLoggedIn]);
 
   // Use Zustand store for account info
   const accountInfo = useAccountStore((state) => state.accountInfo); // Access Zustand store directly
@@ -163,7 +144,7 @@ function LimitOrderForm({ onCurrencyChange }) {
         headers: {
           accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${authKey}`,
+          Authorization: `Bearer ${Cookies.get("authKey")}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -357,7 +338,7 @@ function LimitOrderForm({ onCurrencyChange }) {
   }, [selectedPair, market, side, amount, price, timeInForce, setOrderFormStore, selectedCurrency, priceMidpoint]);
 
 
-  const orderButtonText = !authKey
+  const orderButtonText = !isLoggedIn
     ? 'Login'
     : side === 'buy'
       ? 'Place buy order'
@@ -565,7 +546,7 @@ function LimitOrderForm({ onCurrencyChange }) {
       {/* Place Order Button */}
       <OrderButton
         type={
-          !authKey
+          !isLoggedIn
             ? 'orderdisconnect'
             : side === 'buy'
               ? 'primary'
@@ -591,11 +572,6 @@ function LimitOrderForm({ onCurrencyChange }) {
           if (invalid) {
             setShowInvalidInputMsg(true);
             setTimeout(() => setShowInvalidInputMsg(false), 3000);
-            return;
-          }
-
-          if (!authKey) {
-            setShowLogin(true);
             return;
           }
           placeOrder();
