@@ -2,21 +2,20 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import ModifyBalance from "./ModifyBalance";
 import Table from "../../CommonUIs/table";
-import { fetchAccountInformation } from "../../../hooks/FetchAccountInfo.js";
 import useAuthStore from "../../../store/authStore"; // Import Zustand store
+import useAccountStore from "../../../hooks/FetchAccountInfo.js"; // <-- Import the Zustand account store
 
 const Positions = () => {
   const [rawPositions, setRawPositions] = useState([]);
   const [showMarginModal, setShowMarginModal] = useState(false);
   const [activePosition, setActivePosition] = useState(null);
-  const [availableUsdt, setAvailableUsdt] = useState(0);
+  
 
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn); // Subscribe to Zustand store
 
   // Fetch positions
   const fetchPositions = React.useCallback(() => {
-    const authKey = Cookies.get("authKey");
-    if (!isLoggedIn || !authKey) {
+    if (!isLoggedIn ) {
       setRawPositions([]);
       return;
     }
@@ -24,7 +23,7 @@ const Positions = () => {
       method: "GET",
       headers: {
         accept: "application/json",
-        Authorization: `Bearer ${authKey}`,
+        Authorization: `Bearer ${Cookies.get("authKey")}`,
       },
     })
       .then(async (res) => {
@@ -40,17 +39,8 @@ const Positions = () => {
     return () => clearInterval(interval);
   }, [fetchPositions]);
 
-  // Fetch available USDT for trading
-  useEffect(() => {
-    const authKey = Cookies.get("authKey");
-    if (!isLoggedIn || !authKey) {
-      setAvailableUsdt(0);
-      return;
-    }
-    fetchAccountInformation(authKey).then((res) => {
-      setAvailableUsdt(Number(res.availableForOrder || 0));
-    });
-  }, [isLoggedIn]);
+  // Get available USDT from Zustand account store
+  const availableUsdt = useAccountStore(state => Number(state.accountInfo?.availableForOrder || 0));
 
   // --- helpers ---
   const fmt = (v, digits = 4) => {

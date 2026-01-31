@@ -5,6 +5,7 @@ import { PriceFieldInput } from "../../CommonUIs/inputs/inputs";
 import { API_BASE_URL } from "../../../config/api";
 import { useZustandStore } from "../../../Zustandstore/useStore";
 import { formatPrice } from "../../../utils/priceFormater";
+import useAuthStore from "../../../store/authStore";
 
 const ModifyBalance = ({
   open,
@@ -16,7 +17,8 @@ const ModifyBalance = ({
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const authKey = Cookies.get("authKey");
+  
+  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
 
   // Clear input when switching tabs
   React.useEffect(() => {
@@ -37,7 +39,7 @@ const ModifyBalance = ({
   };
 
   const handleMarginUpdate = async () => {
-    if (!authKey || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+    if (!isLoggedIn || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
       return;
     }
 
@@ -52,7 +54,7 @@ const ModifyBalance = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authKey}`
+          'Authorization': `Bearer ${Cookies.get("authKey")}`
         },
         body: JSON.stringify({
           symbol: position.symbol,

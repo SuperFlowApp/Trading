@@ -100,8 +100,6 @@ function Navbar() {
 
   // When logging in, update Zustand store
   const handleLoginSuccess = (username, token) => {
-    Cookies.set("authKey", token, { expires: 7, secure: true, sameSite: 'Strict' });
-    Cookies.set("username", username, { expires: 7, secure: true, sameSite: 'Strict' });
     setShowLogin(false);
     setDropdownOpen(false);
     setLoginState(true); // Update Zustand store

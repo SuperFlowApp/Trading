@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import useAuthStore from "../../../store/authStore";
 import { formatPrice } from "../../../utils/priceFormater";
 import Modal from "../../CommonUIs/modal/modal";
 import Table from "../../CommonUIs/table";
@@ -39,7 +40,7 @@ function formatDate(ts) {
 }
 
 const OpenOrdersTab = () => {
-  const authKey = Cookies.get("authKey");
+  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
   const [orders, setOrders] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -48,9 +49,9 @@ const OpenOrdersTab = () => {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelResponse, setCancelResponse] = useState(null);
 
-  // Fetch open orders when authKey changes or every 5s if valid
+  // Fetch open orders when login state changes or every 10s if valid
   useEffect(() => {
-    if (!authKey || !isTokenValid(authKey)) {
+    if (!isLoggedIn) {
       setOrders([]);
       return;
     }
@@ -62,7 +63,7 @@ const OpenOrdersTab = () => {
         method: 'GET',
         headers: {
           accept: 'application/json',
-          Authorization: `Bearer ${authKey}`,
+          Authorization: `Bearer ${Cookies.get("authKey")}`,
         },
       })
         .then(async res => {
@@ -83,9 +84,8 @@ const OpenOrdersTab = () => {
     intervalId = setInterval(fetchOrders, 10000);
 
     return () => clearInterval(intervalId);
-  }, [authKey]);
+  }, [isLoggedIn]);
 
-  const isUserLoggedIn = authKey && isTokenValid(authKey);
 
   // Reset loading/response state when modal opens/closes or order changes
   useEffect(() => {
@@ -96,12 +96,12 @@ const OpenOrdersTab = () => {
   return (
     <div className="w-full">
       <Table
-        columns={isUserLoggedIn ? columns : []} // Hide header if not logged in
-        data={isUserLoggedIn ? orders : []}
+        columns={isLoggedIn ? columns : []} // Hide header if not logged in
+        data={isLoggedIn ? orders : []}
         rowKey={row => row.orderId}
-        emptyMessage={isUserLoggedIn ? "No open orders." : "Please log in to view open orders."}
+        emptyMessage={isLoggedIn ? "No open orders." : "Please log in to view open orders."}
         actions={
-          isUserLoggedIn
+          isLoggedIn
             ? (order) => (
                 <button
                   className="bg-liquidRed border border-transparent hover:border-liquidwhite text-liquidlighgray hover:text-liquidwhite px-2 rounded text-body"
@@ -156,7 +156,7 @@ const OpenOrdersTab = () => {
                           method: "DELETE",
                           headers: {
                             accept: "application/json",
-                            Authorization: `Bearer ${authKey}`,
+                            Authorization: `Bearer ${Cookies.get("authKey")}`,
                           },
                         }
                       );

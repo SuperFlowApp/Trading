@@ -5,6 +5,7 @@ import Button from '../../CommonUIs/Button';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import { API_BASE_URL } from '../../../config/api';
 import { useZustandStore } from '../../../Zustandstore/useStore';
+import useAuthStore from '../../../store/authStore';
 
 export default function PositionMode() {
   const [open, setOpen] = useState(false);
@@ -12,7 +13,7 @@ export default function PositionMode() {
   const [errorMsg, setErrorMsg] = useState("");
   const [positionMode, setPositionMode] = useState("ONE_WAY_MODE");
 
-  const authKey = Cookies.get("authKey");
+  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
 
   const accountInfo = useZustandStore(s => s.accountInfo);
 
@@ -20,14 +21,14 @@ export default function PositionMode() {
   const confirmedPositionMode = accountInfo?.positionMode || "ONE_WAY_MODE";
 
   // Modal content style if not connected
-  const modalStyle = !authKey
+  const modalStyle = !isLoggedIn
     ? { opacity: 0.5, pointerEvents: "none", filter: "grayscale(1)" }
     : {};
 
   // Handle confirm button
   const handleConfirm = async () => {
     setErrorMsg("");
-    if (!authKey) {
+    if (!isLoggedIn) {
       setOpen(false);
       return;
     }
@@ -40,7 +41,7 @@ export default function PositionMode() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${authKey}`,
+          "Authorization": `Bearer ${Cookies.get("authKey")}`,
         },
         body: JSON.stringify(payload),
       });
@@ -95,7 +96,7 @@ export default function PositionMode() {
               className="flex-1"
               style={getButtonStyle("ONE_WAY_MODE")}
               onClick={() => setPositionMode("ONE_WAY_MODE")}
-              disabled={!authKey || loading}
+              disabled={!isLoggedIn || loading}
             >
               One-way
             </Button>
@@ -104,7 +105,7 @@ export default function PositionMode() {
               className="flex-1"
               style={getButtonStyle("HEDGE_MODE")}
               onClick={() => setPositionMode("HEDGE_MODE")}
-              disabled={!authKey || loading}
+              disabled={!isLoggedIn || loading}
             >
               Hedge
             </Button>
@@ -117,7 +118,7 @@ export default function PositionMode() {
               block
               disabled={loading}
             >
-              {!authKey ? "Connect" : loading ? "..." : "Confirm"}
+              {!isLoggedIn ? "Connect" : loading ? "..." : "Confirm"}
             </Button>
             {errorMsg && (
               <div className="text-xs text-red-400 text-center mt-1">{errorMsg}</div>

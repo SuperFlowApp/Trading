@@ -6,6 +6,7 @@ import Button from '../../CommonUIs/Button.jsx';
 import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import { selectedPairStore } from '../../../Zustandstore/userOrderStore.js';
 import { API_BASE_URL } from '../../../config/api';
+import useAuthStore from '../../../store/authStore';
 
 export default function MarginMode() {
     const [open, setOpen] = useState(false);
@@ -16,7 +17,7 @@ export default function MarginMode() {
     // Fetch all market data and selected pair from their respective stores
     const allMarketData = marketsData(s => s.allMarketData);
     const selectedPair = selectedPairStore(s => s.selectedPair);
-    const authKey = Cookies.get("authKey"); // <-- get authKey from cookie
+    const isLoggedIn = useAuthStore(state => state.isLoggedIn);
 
     // Find the current market object for the selected pair
     const currentMarket = allMarketData.find(
@@ -51,7 +52,7 @@ export default function MarginMode() {
     // Handle confirm/connect button
     const handleConfirm = async () => {
         setErrorMsg("");
-        if (!authKey) {
+        if (!isLoggedIn) {
             setOpen(false);
             return;
         }
@@ -65,7 +66,7 @@ export default function MarginMode() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${authKey}`,
+                    "Authorization": `Bearer ${Cookies.get("authKey")}`,
                 },
                 body: JSON.stringify(payload),
             });
@@ -93,7 +94,7 @@ export default function MarginMode() {
     };
 
     // Modal content style if not connected
-    const modalStyle = !authKey
+    const modalStyle = !isLoggedIn
         ? { opacity: 0.5, pointerEvents: "none", filter: "grayscale(1)" }
         : {};
 
@@ -136,7 +137,7 @@ export default function MarginMode() {
                                     backgroundImage: "none",
                                     backgroundColor: marginMode === mode ? undefined : "var(--color-boxbackground)"
                                 }}
-                                disabled={!authKey}
+                                disabled={!isLoggedIn}
                             />
                             <span className="text-white">{mode}</span>
                         </label>
@@ -149,7 +150,7 @@ export default function MarginMode() {
                             block
                             disabled={loading}
                         >
-                            {!authKey ? "Connect" : loading ? "..." : "Confirm"}
+                            {!isLoggedIn ? "Connect" : loading ? "..." : "Confirm"}
                         </Button>
                         {blink === "error" && errorMsg && (
                             <div className="text-xs text-red-400 text-center mt-1">{errorMsg}</div>

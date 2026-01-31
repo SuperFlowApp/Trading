@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
 import Table from "../../CommonUIs/table";
 import Modal from "../../CommonUIs/modal/modal";
+import useAuthStore from "../../../store/authStore";
 import { API_BASE_URL } from "../../../config/api";
 
 function formatDate(ts) {
@@ -55,18 +56,21 @@ const columns = [
 ];
 
 const TradesHistory = () => {
-  const authKey = Cookies.get("authKey");
+  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
   const [trades, setTrades] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState(null);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (!authKey || !isTokenValid(authKey)) {
+    if (!isLoggedIn) {
       setTrades([]);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       return;
     }
-
-    let intervalId;
 
     const fetchMyTrades = () => {
       fetch(`https://fastify-serverless-function-ymut.onrender.com/api/my-trades`, {
@@ -74,7 +78,7 @@ const TradesHistory = () => {
         headers: {
           accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${authKey}`,
+          Authorization: `Bearer ${Cookies.get("authKey")}`,
         },
         body: JSON.stringify({}),
       })
@@ -93,12 +97,17 @@ const TradesHistory = () => {
     };
 
     fetchMyTrades(); // Initial fetch
-    intervalId = setInterval(fetchMyTrades, 10000);
+    intervalRef.current = setInterval(fetchMyTrades, 5000);
 
-    return () => clearInterval(intervalId);
-  }, [authKey]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [isLoggedIn]);
 
-  const isUserLoggedIn = authKey && isTokenValid(authKey);
+  const isUserLoggedIn = isLoggedIn;
 
   return (
     <div className="w-full">

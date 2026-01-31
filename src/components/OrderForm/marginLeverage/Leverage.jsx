@@ -6,7 +6,8 @@ import ModalModButton from '../../CommonUIs/modalmodbutton.jsx';
 import '../../../components/CommonUIs/slider.css';
 import { API_BASE_URL } from '../../../config/api';
 
-import Cookies from 'js-cookie'; // Add this
+import Cookies from 'js-cookie';
+import useAuthStore from '../../../store/authStore';
 
 // Import Zustand stores
 import { useZustandStore } from '../../../Zustandstore/useStore';
@@ -91,17 +92,19 @@ export default function LeveragePanel() {
     setConfirmedLeverage(1);
   }, [selectedSymbol]);
 
-  // Use authKey from cookie
-  const authKey = Cookies.get("authKey");
+
+  // Use auth store for login state
+  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
+ 
 
   // Clear leverage store if logged out
   useEffect(() => {
-    if (!authKey) {
+    if (!isLoggedIn) {
       clearStoredLeverage();
       setLeverage(1);
       setConfirmedLeverage(1);
     }
-  }, [authKey]);
+  }, [isLoggedIn]);
 
   // On selectedSymbol change, load stored leverage or default to 1
   useEffect(() => {
@@ -111,14 +114,14 @@ export default function LeveragePanel() {
   }, [selectedSymbol]);
 
   // Modal content style if not connected
-  const modalStyle = !authKey
+  const modalStyle = !isLoggedIn
     ? { opacity: 0.5, pointerEvents: "none", filter: "grayscale(1)" }
     : {};
 
   // When user confirms leverage, store it for the symbol
   const handleConfirm = async () => {
     setErrorMsg("");
-    if (!authKey) {
+    if (!isLoggedIn) {
       setOpen(false);
       return;
     }
@@ -132,7 +135,7 @@ export default function LeveragePanel() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${authKey}`,
+          "Authorization": `Bearer ${Cookies.get("authKey")}`,
         },
         body: JSON.stringify(payload),
       });
@@ -192,7 +195,7 @@ export default function LeveragePanel() {
             step={1}
             value={leverage}
             onChange={e => setLeverage(Number(e.target.value))}
-            disabled={!authKey}
+            disabled={!isLoggedIn}
           />
           <div className="text-2xl font-bold text-primary2normal">{leverage}X</div>
           <Button
@@ -202,7 +205,7 @@ export default function LeveragePanel() {
             block
             disabled={loading}
           >
-            {!authKey ? "Connect" : loading ? "..." : "Confirm"}
+            {!isLoggedIn ? "Connect" : loading ? "..." : "Confirm"}
           </Button>
           {blink === "error" && errorMsg && (
             <div className="text-xs text-red-400 text-center mt-1">{errorMsg}</div>
